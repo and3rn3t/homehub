@@ -53,8 +53,13 @@
 - **Purpose**: Comprehensive home security monitoring and camera management
 - **Success Criteria**: Live feeds load within 3 seconds, motion alerts appear within 30 seconds of detection
 
+### Visual Flow Designer
+- **Functionality**: Drag-and-drop automation workflow builder with node-based interface
+- **Purpose**: Create complex automations visually without technical knowledge
+- **Success Criteria**: Users can create multi-step automations in under 5 minutes
+
 ### Automation Engine
-- **Functionality**: Time-based, sensor-triggered, and geofence-based automation
+- **Functionality**: Time-based, sensor-triggered, geofence-based, and visual flow-based automation
 - **Purpose**: Reduces manual device management through intelligence
 - **Success Criteria**: Automations work 99.5% of the time without user intervention
 

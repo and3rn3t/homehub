@@ -13,12 +13,14 @@ import {
   Play,
   Pause,
   Pencil,
-  Gear
+  Gear,
+  FlowArrow
 } from "@phosphor-icons/react"
 import { motion } from "framer-motion"
 import { toast } from "sonner"
 import { ScheduleBuilder } from './ScheduleBuilder'
 import { GeofenceBuilder } from './GeofenceBuilder'
+import { FlowDesigner } from './FlowDesigner'
 
 interface Automation {
   id: string
@@ -108,10 +110,14 @@ export function Automations() {
             </div>
           </div>
 
-          <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <Gear size={16} />
               Overview
+            </TabsTrigger>
+            <TabsTrigger value="flows" className="flex items-center gap-2">
+              <FlowArrow size={16} />
+              Flows
             </TabsTrigger>
             <TabsTrigger value="schedules" className="flex items-center gap-2">
               <Clock size={16} />
@@ -169,6 +175,9 @@ export function Automations() {
                       Create smart rules to automate your home devices
                     </p>
                     <div className="flex gap-2 justify-center">
+                      <Button variant="outline" size="sm" onClick={() => setCurrentTab("flows")}>
+                        Create Flow
+                      </Button>
                       <Button variant="outline" size="sm" onClick={() => setCurrentTab("schedules")}>
                         Create Schedule
                       </Button>
@@ -262,6 +271,10 @@ export function Automations() {
                 </div>
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="flows" className="h-full m-0">
+            <FlowDesigner />
           </TabsContent>
 
           <TabsContent value="schedules" className="h-full m-0">
