@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { House, SquaresFour, Gear, Lightning, ChartBar, ShieldCheck, Sliders } from "@phosphor-icons/react"
+import { House, SquaresFour, Gear, Lightning, ChartBar, ShieldCheck, Sliders, Activity } from "@phosphor-icons/react"
 import { Toaster } from "@/components/ui/sonner"
 import { Dashboard } from './components/Dashboard'
 import { Rooms } from './components/Rooms'
@@ -10,6 +10,7 @@ import { Scenes } from './components/Scenes'
 import { Energy } from './components/Energy'
 import { Security } from './components/Security'
 import { DeviceSettings } from './components/DeviceSettings'
+import { DeviceMonitor } from './components/DeviceMonitor'
 
 function App() {
   const [currentTab, setCurrentTab] = useKV("current-tab", "dashboard")
@@ -38,6 +39,10 @@ function App() {
             <Energy />
           </TabsContent>
           
+          <TabsContent value="monitor" className="h-full m-0 p-0">
+            <DeviceMonitor />
+          </TabsContent>
+          
           <TabsContent value="security" className="h-full m-0 p-0">
             <Security />
           </TabsContent>
@@ -47,7 +52,7 @@ function App() {
           </TabsContent>
         </div>
 
-        <TabsList className="grid w-full grid-cols-7 h-20 bg-card/80 backdrop-blur-xl border-t border-border rounded-none p-2">
+        <TabsList className="grid w-full grid-cols-8 h-20 bg-card/80 backdrop-blur-xl border-t border-border rounded-none p-2">
           <TabsTrigger 
             value="dashboard" 
             className="flex flex-col gap-1 p-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
@@ -86,6 +91,14 @@ function App() {
           >
             <ChartBar size={24} weight="regular" />
             <span className="text-xs font-medium">Energy</span>
+          </TabsTrigger>
+          
+          <TabsTrigger 
+            value="monitor" 
+            className="flex flex-col gap-1 p-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+          >
+            <Activity size={24} weight="regular" />
+            <span className="text-xs font-medium">Monitor</span>
           </TabsTrigger>
           
           <TabsTrigger 

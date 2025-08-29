@@ -1,18 +1,22 @@
+import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { 
   Settings, 
   Bell, 
   Shield, 
   Wifi, 
   Plus,
-  Check
+  Check,
+  Activity
 } from "@phosphor-icons/react"
 import { motion } from "framer-motion"
 import { toast } from "sonner"
+import { MonitoringSettings } from './MonitoringSettings'
 
 interface Integration {
   id: string
@@ -46,6 +50,7 @@ const categoryIcons = {
 }
 
 export function DeviceSettings() {
+  const [currentTab, setCurrentTab] = useState("integrations")
   const [integrations, setIntegrations] = useKV<Integration[]>("integrations", [
     {
       id: "homekit",
@@ -128,135 +133,148 @@ export function DeviceSettings() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-6">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Quick Settings</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Bell size={20} className="text-muted-foreground" />
-                <div>
-                  <p className="font-medium text-sm">Push Notifications</p>
-                  <p className="text-xs text-muted-foreground">Device alerts and updates</p>
-                </div>
-              </div>
-              <Switch
-                checked={notifications}
-                onCheckedChange={setNotifications}
-              />
-            </div>
+      <div className="flex-1 overflow-hidden">
+        <Tabs value={currentTab} onValueChange={setCurrentTab} className="h-full flex flex-col">
+          <div className="px-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="integrations">Integrations</TabsTrigger>
+              <TabsTrigger value="system">System</TabsTrigger>
+              <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
+            </TabsList>
+          </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Wifi size={20} className="text-muted-foreground" />
-                <div>
-                  <p className="font-medium text-sm">Automatic Updates</p>
-                  <p className="text-xs text-muted-foreground">Keep devices up to date</p>
-                </div>
-              </div>
-              <Switch
-                checked={autoUpdates}
-                onCheckedChange={setAutoUpdates}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Wifi size={20} className="text-muted-foreground" />
-                <div>
-                  <p className="font-medium text-sm">Geofencing</p>
-                  <p className="text-xs text-muted-foreground">Location-based automation</p>
-                </div>
-              </div>
-              <Switch
-                checked={geofencing}
-                onCheckedChange={setGeofencing}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Integrations</CardTitle>
-              <Button variant="outline" size="sm">
-                <Plus size={16} className="mr-2" />
-                Add
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {integrations.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="w-12 h-12 rounded-full bg-muted mx-auto mb-3 flex items-center justify-center">
-                  <Wifi size={24} className="text-muted-foreground" />
-                </div>
-                <p className="text-muted-foreground mb-2">No integrations</p>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Connect with HomeKit, Alexa, Google Home, and more
-                </p>
-                <Button variant="outline" size="sm">
-                  Add Integration
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {integrations.map((integration) => {
-                  const IconComponent = integrationIcons[integration.type]
-                  
-                  return (
-                    <motion.div
-                      key={integration.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    >
-                      <div className="flex items-center justify-between p-3 rounded-lg border">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                            <IconComponent 
-                              size={20} 
-                              className={integration.enabled ? "text-primary" : "text-muted-foreground"} 
-                            />
-                          </div>
-                          <div>
-                            <h3 className="font-medium text-sm">{integration.name}</h3>
-                            <div className="flex items-center gap-2">
-                              <Badge 
-                                variant={integration.status === 'connected' ? 'default' : 'secondary'}
-                                className="h-4 text-xs"
-                              >
-                                {integration.status}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {integration.devices} devices
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <Switch
-                          checked={integration.enabled}
-                          onCheckedChange={() => toggleIntegration(integration.id)}
-                          disabled={integration.status === 'error'}
-                        />
+          <TabsContent value="integrations" className="flex-1 overflow-y-auto px-6 pb-6 mt-6">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Quick Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Bell size={20} className="text-muted-foreground" />
+                      <div>
+                        <p className="font-medium text-sm">Push Notifications</p>
+                        <p className="text-xs text-muted-foreground">Device alerts and updates</p>
                       </div>
-                    </motion.div>
-                  )
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                    </div>
+                    <Switch
+                      checked={notifications}
+                      onCheckedChange={setNotifications}
+                    />
+                  </div>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">System Settings</CardTitle>
-          </CardHeader>
-          <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Wifi size={20} className="text-muted-foreground" />
+                      <div>
+                        <p className="font-medium text-sm">Automatic Updates</p>
+                        <p className="text-xs text-muted-foreground">Keep devices up to date</p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={autoUpdates}
+                      onCheckedChange={setAutoUpdates}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Wifi size={20} className="text-muted-foreground" />
+                      <div>
+                        <p className="font-medium text-sm">Geofencing</p>
+                        <p className="text-xs text-muted-foreground">Location-based automation</p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={geofencing}
+                      onCheckedChange={setGeofencing}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg">Platform Integrations</CardTitle>
+                    <Button variant="outline" size="sm">
+                      <Plus size={16} className="mr-2" />
+                      Add
+                    </Button>
+                  </div>
+                </CardHeader>
+                  {integrations.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="w-12 h-12 rounded-full bg-muted mx-auto mb-3 flex items-center justify-center">
+                        <Wifi size={24} className="text-muted-foreground" />
+                      </div>
+                      <p className="text-muted-foreground mb-2">No integrations</p>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Connect with HomeKit, Alexa, Google Home, and more
+                      </p>
+                      <Button variant="outline" size="sm">
+                        Add Integration
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {integrations.map((integration) => {
+                        const IconComponent = integrationIcons[integration.type]
+                        
+                        return (
+                          <motion.div
+                            key={integration.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                          >
+                            <div className="flex items-center justify-between p-3 rounded-lg border">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+                                  <IconComponent 
+                                    size={20} 
+                                    className={integration.enabled ? "text-primary" : "text-muted-foreground"} 
+                                  />
+                                </div>
+                                <div>
+                                  <h3 className="font-medium text-sm">{integration.name}</h3>
+                                  <div className="flex items-center gap-2">
+                                    <Badge 
+                                      variant={integration.status === 'connected' ? 'default' : 'secondary'}
+                                      className="h-4 text-xs"
+                                    >
+                                      {integration.status}
+                                    </Badge>
+                                    <span className="text-xs text-muted-foreground">
+                                      {integration.devices} devices
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <Switch
+                                checked={integration.enabled}
+                                onCheckedChange={() => toggleIntegration(integration.id)}
+                                disabled={integration.status === 'error'}
+                              />
+                            </div>
+                          </motion.div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="system" className="flex-1 overflow-y-auto px-6 pb-6 mt-6">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">System Settings</CardTitle>
+              </CardHeader>
+              <CardContent>
             {systemSettings.length === 0 ? (
               <div className="text-center py-8">
                 <div className="w-12 h-12 rounded-full bg-muted mx-auto mb-3 flex items-center justify-center">
@@ -344,7 +362,13 @@ export function DeviceSettings() {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </div>
-  )
+      </TabsContent>
+
+      <TabsContent value="monitoring" className="flex-1 overflow-hidden m-0 p-0">
+        <MonitoringSettings />
+      </TabsContent>
+    </Tabs>
+  </div>
+</div>
+)
 }

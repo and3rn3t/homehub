@@ -1,0 +1,546 @@
+import { useState, useEffect } from 'react'
+import { useKV } from '@github/spark/hooks'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Switch } from "@/components/ui/switch"
+import { 
+  Activity,
+  Bell,
+  BellOff,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Wifi,
+  WifiOff,
+  Battery,
+  BatteryLow,
+  Signal,
+  SignalSlash,
+  Clock,
+  Lightbulb,
+  Thermometer,
+  Shield,
+  Camera,
+  SpeakerHigh
+} from "@phosphor-icons/react"
+import { motion, AnimatePresence } from "framer-motion"
+import { toast } from "sonner"
+
+interface DeviceStatus {
+  id: string
+  name: string
+  type: 'light' | 'thermostat' | 'security' | 'sensor' | 'camera' | 'speaker'
+  room: string
+  status: 'online' | 'offline' | 'warning' | 'error'
+  lastSeen: Date
+  batteryLevel?: number
+  signalStrength?: number
+  enabled: boolean
+  value?: number
+  unit?: string
+  alerts: DeviceAlert[]
+}
+
+interface DeviceAlert {
+  id: string
+  type: 'offline' | 'low-battery' | 'weak-signal' | 'error' | 'maintenance'
+  message: string
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  timestamp: Date
+  acknowledged: boolean
+}
+
+interface MonitoringSettings {
+  alertsEnabled: boolean
+  offlineThreshold: number // minutes
+  batteryThreshold: number // percentage
+  signalThreshold: number // percentage
+  soundAlerts: boolean
+  pushNotifications: boolean
+}
+
+const deviceIcons = {
+  light: Lightbulb,
+  thermostat: Thermometer,
+  security: Shield,
+  sensor: Wifi,
+  camera: Camera,
+  speaker: SpeakerHigh
+}
+
+const statusColors = {
+  online: 'text-green-500',
+  offline: 'text-red-500',
+  warning: 'text-yellow-500',
+  error: 'text-red-600'
+}
+
+const statusBgColors = {
+  online: 'bg-green-50 border-green-200',
+  offline: 'bg-red-50 border-red-200',
+  warning: 'bg-yellow-50 border-yellow-200',
+  error: 'bg-red-50 border-red-300'
+}
+
+const alertSeverityColors = {
+  low: 'text-blue-600 bg-blue-50 border-blue-200',
+  medium: 'text-yellow-600 bg-yellow-50 border-yellow-200',
+  high: 'text-orange-600 bg-orange-50 border-orange-200',
+  critical: 'text-red-600 bg-red-50 border-red-200'
+}
+
+export function DeviceMonitor() {
+  const [devices, setDevices] = useKV<DeviceStatus[]>("device-status", [
+    {
+      id: "living-room-light",
+      name: "Living Room Light",
+      type: "light",
+      room: "Living Room",
+      status: "online",
+      lastSeen: new Date(),
+      enabled: true,
+      signalStrength: 95,
+      alerts: []
+    },
+    {
+      id: "thermostat-main",
+      name: "Main Thermostat",
+      type: "thermostat",
+      room: "Living Room",
+      status: "online",
+      lastSeen: new Date(),
+      enabled: true,
+      value: 72,
+      unit: "°F",
+      batteryLevel: 85,
+      signalStrength: 88,
+      alerts: []
+    },
+    {
+      id: "front-door-lock",
+      name: "Front Door Lock",
+      type: "security",
+      room: "Entryway",
+      status: "warning",
+      lastSeen: new Date(Date.now() - 300000), // 5 minutes ago
+      enabled: true,
+      batteryLevel: 15,
+      signalStrength: 92,
+      alerts: [
+        {
+          id: "battery-low-1",
+          type: "low-battery",
+          message: "Battery level is critically low (15%)",
+          severity: "high",
+          timestamp: new Date(Date.now() - 120000),
+          acknowledged: false
+        }
+      ]
+    },
+    {
+      id: "motion-sensor",
+      name: "Motion Sensor",
+      type: "sensor",
+      room: "Living Room",
+      status: "offline",
+      lastSeen: new Date(Date.now() - 900000), // 15 minutes ago
+      enabled: true,
+      batteryLevel: 45,
+      signalStrength: 0,
+      alerts: [
+        {
+          id: "offline-1",
+          type: "offline",
+          message: "Device has been offline for 15 minutes",
+          severity: "critical",
+          timestamp: new Date(Date.now() - 900000),
+          acknowledged: false
+        }
+      ]
+    },
+    {
+      id: "security-camera",
+      name: "Security Camera",
+      type: "camera",
+      room: "Front Yard",
+      status: "online",
+      lastSeen: new Date(),
+      enabled: true,
+      signalStrength: 76,
+      alerts: []
+    }
+  ])
+
+  const [settings, setSettings] = useKV<MonitoringSettings>("monitoring-settings", {
+    alertsEnabled: true,
+    offlineThreshold: 10,
+    batteryThreshold: 20,
+    signalThreshold: 50,
+    soundAlerts: true,
+    pushNotifications: true
+  })
+
+  const [activeAlerts, setActiveAlerts] = useState<DeviceAlert[]>([])
+  const [filter, setFilter] = useState<'all' | 'online' | 'offline' | 'warning' | 'error'>('all')
+
+  // Simulate real-time updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDevices(currentDevices => 
+        currentDevices.map(device => {
+          // Simulate random status changes for demo
+          const randomChange = Math.random()
+          let newStatus = device.status
+          
+          if (randomChange < 0.02) { // 2% chance of status change
+            const statuses: DeviceStatus['status'][] = ['online', 'warning', 'error']
+            newStatus = statuses[Math.floor(Math.random() * statuses.length)]
+          }
+
+          // Update battery levels
+          let newBatteryLevel = device.batteryLevel
+          if (device.batteryLevel !== undefined && randomChange < 0.1) {
+            newBatteryLevel = Math.max(0, device.batteryLevel - Math.random() * 2)
+          }
+
+          // Update signal strength
+          let newSignalStrength = device.signalStrength
+          if (device.signalStrength !== undefined && randomChange < 0.05) {
+            newSignalStrength = Math.max(0, Math.min(100, device.signalStrength + (Math.random() - 0.5) * 10))
+          }
+
+          return {
+            ...device,
+            status: newStatus,
+            lastSeen: newStatus === 'online' ? new Date() : device.lastSeen,
+            batteryLevel: newBatteryLevel,
+            signalStrength: newSignalStrength
+          }
+        })
+      )
+    }, 5000) // Update every 5 seconds
+
+    return () => clearInterval(interval)
+  }, [setDevices])
+
+  // Monitor for new alerts
+  useEffect(() => {
+    const newAlerts: DeviceAlert[] = []
+    
+    devices.forEach(device => {
+      // Check for offline devices
+      if (device.status === 'offline' && settings.alertsEnabled) {
+        const offlineMinutes = Math.floor((Date.now() - device.lastSeen.getTime()) / 60000)
+        if (offlineMinutes >= settings.offlineThreshold) {
+          const existingAlert = device.alerts.find(alert => alert.type === 'offline' && !alert.acknowledged)
+          if (!existingAlert) {
+            newAlerts.push({
+              id: `offline-${device.id}-${Date.now()}`,
+              type: 'offline',
+              message: `${device.name} has been offline for ${offlineMinutes} minutes`,
+              severity: offlineMinutes > 30 ? 'critical' : 'high',
+              timestamp: new Date(),
+              acknowledged: false
+            })
+          }
+        }
+      }
+
+      // Check for low battery
+      if (device.batteryLevel !== undefined && device.batteryLevel <= settings.batteryThreshold && settings.alertsEnabled) {
+        const existingAlert = device.alerts.find(alert => alert.type === 'low-battery' && !alert.acknowledged)
+        if (!existingAlert) {
+          newAlerts.push({
+            id: `battery-${device.id}-${Date.now()}`,
+            type: 'low-battery',
+            message: `${device.name} battery is low (${device.batteryLevel}%)`,
+            severity: device.batteryLevel <= 10 ? 'critical' : 'high',
+            timestamp: new Date(),
+            acknowledged: false
+          })
+        }
+      }
+
+      // Check for weak signal
+      if (device.signalStrength !== undefined && device.signalStrength <= settings.signalThreshold && settings.alertsEnabled) {
+        const existingAlert = device.alerts.find(alert => alert.type === 'weak-signal' && !alert.acknowledged)
+        if (!existingAlert) {
+          newAlerts.push({
+            id: `signal-${device.id}-${Date.now()}`,
+            type: 'weak-signal',
+            message: `${device.name} has weak signal (${device.signalStrength}%)`,
+            severity: device.signalStrength <= 25 ? 'high' : 'medium',
+            timestamp: new Date(),
+            acknowledged: false
+          })
+        }
+      }
+    })
+
+    if (newAlerts.length > 0) {
+      setDevices(currentDevices =>
+        currentDevices.map(device => {
+          const deviceAlerts = newAlerts.filter(alert => alert.message.includes(device.name))
+          if (deviceAlerts.length > 0) {
+            return {
+              ...device,
+              alerts: [...device.alerts, ...deviceAlerts]
+            }
+          }
+          return device
+        })
+      )
+
+      // Show toast notifications
+      newAlerts.forEach(alert => {
+        if (settings.soundAlerts) {
+          toast.error(alert.message, {
+            duration: 5000,
+          })
+        }
+      })
+    }
+
+    // Update active alerts
+    const allAlerts = devices.flatMap(device => device.alerts.filter(alert => !alert.acknowledged))
+    setActiveAlerts(allAlerts)
+  }, [devices, settings, setDevices])
+
+  const acknowledgeAlert = (deviceId: string, alertId: string) => {
+    setDevices(currentDevices =>
+      currentDevices.map(device =>
+        device.id === deviceId
+          ? {
+              ...device,
+              alerts: device.alerts.map(alert =>
+                alert.id === alertId ? { ...alert, acknowledged: true } : alert
+              )
+            }
+          : device
+      )
+    )
+    toast.success("Alert acknowledged")
+  }
+
+  const toggleAlertsEnabled = (enabled: boolean) => {
+    setSettings(currentSettings => ({
+      ...currentSettings,
+      alertsEnabled: enabled
+    }))
+    toast.success(enabled ? "Alerts enabled" : "Alerts disabled")
+  }
+
+  const filteredDevices = devices.filter(device => {
+    if (filter === 'all') return true
+    return device.status === filter
+  })
+
+  const getTimeAgo = (date: Date) => {
+    const minutes = Math.floor((Date.now() - date.getTime()) / 60000)
+    if (minutes < 1) return 'Just now'
+    if (minutes < 60) return `${minutes}m ago`
+    const hours = Math.floor(minutes / 60)
+    if (hours < 24) return `${hours}h ago`
+    const days = Math.floor(hours / 24)
+    return `${days}d ago`
+  }
+
+  const criticalAlerts = activeAlerts.filter(alert => alert.severity === 'critical').length
+  const highAlerts = activeAlerts.filter(alert => alert.severity === 'high').length
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="p-6 pb-4">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Device Monitor</h1>
+            <p className="text-muted-foreground">Real-time device status and alerts</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Switch
+              checked={settings.alertsEnabled}
+              onCheckedChange={toggleAlertsEnabled}
+            />
+            {settings.alertsEnabled ? (
+              <Bell size={20} className="text-primary" />
+            ) : (
+              <BellOff size={20} className="text-muted-foreground" />
+            )}
+          </div>
+        </div>
+
+        {/* Alert Summary */}
+        {activeAlerts.length > 0 && (
+          <Alert className={`mb-6 ${criticalAlerts > 0 ? 'border-red-200 bg-red-50' : 'border-yellow-200 bg-yellow-50'}`}>
+            <AlertTriangle size={16} className={criticalAlerts > 0 ? 'text-red-600' : 'text-yellow-600'} />
+            <AlertDescription className={criticalAlerts > 0 ? 'text-red-700' : 'text-yellow-700'}>
+              {criticalAlerts > 0 ? (
+                <>You have {criticalAlerts} critical alert{criticalAlerts > 1 ? 's' : ''} requiring immediate attention</>
+              ) : (
+                <>You have {highAlerts} high priority alert{highAlerts > 1 ? 's' : ''}</>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Filter Buttons */}
+        <div className="flex gap-2 mb-6 overflow-x-auto">
+          {(['all', 'online', 'offline', 'warning', 'error'] as const).map((status) => (
+            <Button
+              key={status}
+              variant={filter === status ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFilter(status)}
+              className="capitalize whitespace-nowrap"
+            >
+              {status === 'all' ? 'All Devices' : status}
+              {status !== 'all' && (
+                <Badge variant="secondary" className="ml-2">
+                  {devices.filter(d => d.status === status).length}
+                </Badge>
+              )}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-6 pb-6">
+        <div className="space-y-4">
+          <AnimatePresence>
+            {filteredDevices.map((device) => {
+              const IconComponent = deviceIcons[device.type]
+              const unacknowledgedAlerts = device.alerts.filter(alert => !alert.acknowledged)
+              
+              return (
+                <motion.div
+                  key={device.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                >
+                  <Card className={`hover:bg-accent/5 transition-colors ${statusBgColors[device.status]}`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-background flex items-center justify-center relative">
+                            <IconComponent 
+                              size={24} 
+                              className={statusColors[device.status]} 
+                            />
+                            {device.status === 'online' && (
+                              <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-foreground">{device.name}</h3>
+                            <p className="text-sm text-muted-foreground">{device.room}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge 
+                                variant={device.status === 'online' ? 'default' : 'secondary'}
+                                className={`h-5 text-xs ${statusColors[device.status]}`}
+                              >
+                                {device.status}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Clock size={12} />
+                                {getTimeAgo(device.lastSeen)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          {device.value !== undefined && (
+                            <div className="text-lg font-semibold text-foreground">
+                              {device.value}{device.unit}
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2 mt-1">
+                            {device.batteryLevel !== undefined && (
+                              <div className="flex items-center gap-1 text-xs">
+                                {device.batteryLevel <= 20 ? (
+                                  <BatteryLow size={14} className="text-red-500" />
+                                ) : (
+                                  <Battery size={14} className="text-green-500" />
+                                )}
+                                <span className={device.batteryLevel <= 20 ? 'text-red-600' : 'text-muted-foreground'}>
+                                  {device.batteryLevel}%
+                                </span>
+                              </div>
+                            )}
+                            {device.signalStrength !== undefined && (
+                              <div className="flex items-center gap-1 text-xs">
+                                {device.signalStrength > 0 ? (
+                                  <Signal size={14} className={device.signalStrength > 50 ? 'text-green-500' : 'text-yellow-500'} />
+                                ) : (
+                                  <SignalSlash size={14} className="text-red-500" />
+                                )}
+                                <span className={device.signalStrength <= 25 ? 'text-red-600' : 'text-muted-foreground'}>
+                                  {device.signalStrength}%
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Device Alerts */}
+                      {unacknowledgedAlerts.length > 0 && (
+                        <div className="space-y-2">
+                          {unacknowledgedAlerts.map((alert) => (
+                            <motion.div
+                              key={alert.id}
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              className={`p-3 rounded-lg border ${alertSeverityColors[alert.severity]}`}
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium">{alert.message}</p>
+                                  <p className="text-xs opacity-75 mt-1">
+                                    {getTimeAgo(alert.timestamp)}
+                                  </p>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => acknowledgeAlert(device.id, alert.id)}
+                                  className="h-6 px-2 text-xs"
+                                >
+                                  Acknowledge
+                                </Button>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )
+            })}
+          </AnimatePresence>
+
+          {filteredDevices.length === 0 && (
+            <Card className="border-dashed border-2 border-border/30">
+              <CardContent className="p-8 text-center">
+                <div className="w-12 h-12 rounded-full bg-muted mx-auto mb-3 flex items-center justify-center">
+                  <Activity size={24} className="text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground mb-2">No devices found</p>
+                <p className="text-sm text-muted-foreground">
+                  {filter === 'all' ? 'No devices are currently registered' : `No devices with status "${filter}"`}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

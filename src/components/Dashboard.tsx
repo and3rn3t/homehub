@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { 
   Lightbulb, 
   Thermometer, 
@@ -11,20 +12,36 @@ import {
   Plus,
   Sun,
   Moon,
-  Home as HomeIcon
+  Home as HomeIcon,
+  AlertTriangle,
+  Activity,
+  CheckCircle
 } from "@phosphor-icons/react"
 import { motion } from "framer-motion"
 import { toast } from "sonner"
+import { NotificationBell } from './NotificationCenter'
 
 interface Device {
   id: string
   name: string
   type: 'light' | 'thermostat' | 'security' | 'sensor'
   room: string
-  status: 'online' | 'offline'
+  status: 'online' | 'offline' | 'warning' | 'error'
   enabled: boolean
   value?: number
   unit?: string
+  lastSeen?: Date
+  batteryLevel?: number
+  signalStrength?: number
+}
+
+interface DeviceAlert {
+  id: string
+  type: 'offline' | 'low-battery' | 'weak-signal' | 'error' | 'maintenance'
+  message: string
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  timestamp: Date
+  acknowledged: boolean
 }
 
 const deviceIcons = {
@@ -42,7 +59,9 @@ export function Dashboard() {
       type: "light",
       room: "Living Room",
       status: "online",
-      enabled: true
+      enabled: true,
+      lastSeen: new Date(),
+      signalStrength: 95
     },
     {
       id: "thermostat-main", 
@@ -52,25 +71,36 @@ export function Dashboard() {
       status: "online",
       enabled: true,
       value: 72,
-      unit: "°F"
+      unit: "°F",
+      lastSeen: new Date(),
+      batteryLevel: 85,
+      signalStrength: 88
     },
     {
       id: "front-door-lock",
       name: "Front Door Lock",
       type: "security", 
       room: "Entryway",
-      status: "online", 
-      enabled: true
+      status: "warning", 
+      enabled: true,
+      lastSeen: new Date(Date.now() - 300000),
+      batteryLevel: 15,
+      signalStrength: 92
     },
     {
       id: "motion-sensor",
       name: "Motion Sensor",
       type: "sensor",
       room: "Living Room",
-      status: "online",
-      enabled: true
+      status: "offline",
+      enabled: true,
+      lastSeen: new Date(Date.now() - 900000),
+      batteryLevel: 45,
+      signalStrength: 0
     }
   ])
+  
+  const [deviceAlerts] = useKV<DeviceAlert[]>("device-alerts", [])
   const [favoriteDevices, setFavoriteDevices] = useKV<string[]>("favorite-devices", ["living-room-light", "thermostat-main"])
   
   const quickScenesData = [
@@ -103,6 +133,12 @@ export function Dashboard() {
   }
 
   const favoriteDeviceList = devices.filter(device => favoriteDevices.includes(device.id))
+  
+  // Get alert summary
+  const activeAlerts = deviceAlerts.filter(alert => !alert.acknowledged)
+  const criticalAlerts = activeAlerts.filter(alert => alert.severity === 'critical')
+  const offlineDevices = devices.filter(device => device.status === 'offline')
+  const lowBatteryDevices = devices.filter(device => device.batteryLevel !== undefined && device.batteryLevel <= 20)
 
   return (
     <div className="flex flex-col h-full">
@@ -112,9 +148,68 @@ export function Dashboard() {
             <h1 className="text-2xl font-bold text-foreground">Good Morning</h1>
             <p className="text-muted-foreground">Welcome home</p>
           </div>
-          <Button variant="outline" size="icon" className="rounded-full">
-            <Plus size={20} />
-          </Button>
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+            <Button variant="outline" size="icon" className="rounded-full">
+              <Plus size={20} />
+            </Button>
+          </div>
+        </div>
+
+        {/* Alert Summary */}
+        {(criticalAlerts.length > 0 || offlineDevices.length > 0 || lowBatteryDevices.length > 0) && (
+          <Alert className="mb-6 border-red-200 bg-red-50">
+            <AlertTriangle size={16} className="text-red-600" />
+            <AlertDescription className="text-red-700">
+              <div className="flex items-center justify-between">
+                <div>
+                  {criticalAlerts.length > 0 && (
+                    <span>{criticalAlerts.length} critical alert{criticalAlerts.length > 1 ? 's' : ''}</span>
+                  )}
+                  {offlineDevices.length > 0 && (
+                    <span className="ml-2">{offlineDevices.length} device{offlineDevices.length > 1 ? 's' : ''} offline</span>
+                  )}
+                  {lowBatteryDevices.length > 0 && (
+                    <span className="ml-2">{lowBatteryDevices.length} low batter{lowBatteryDevices.length > 1 ? 'ies' : 'y'}</span>
+                  )}
+                </div>
+                <Button variant="ghost" size="sm" className="text-red-700 h-6">
+                  View Details
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* System Status */}
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <Card className="border-green-200 bg-green-50">
+            <CardContent className="p-3 text-center">
+              <CheckCircle size={20} className="text-green-600 mx-auto mb-1" />
+              <div className="text-lg font-semibold text-green-800">
+                {devices.filter(d => d.status === 'online').length}
+              </div>
+              <div className="text-xs text-green-700">Online</div>
+            </CardContent>
+          </Card>
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="p-3 text-center">
+              <AlertTriangle size={20} className="text-red-600 mx-auto mb-1" />
+              <div className="text-lg font-semibold text-red-800">
+                {offlineDevices.length}
+              </div>
+              <div className="text-xs text-red-700">Offline</div>
+            </CardContent>
+          </Card>
+          <Card className="border-blue-200 bg-blue-50">
+            <CardContent className="p-3 text-center">
+              <Activity size={20} className="text-blue-600 mx-auto mb-1" />
+              <div className="text-lg font-semibold text-blue-800">
+                {activeAlerts.length}
+              </div>
+              <div className="text-xs text-blue-700">Alerts</div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-6">
@@ -190,11 +285,16 @@ export function Dashboard() {
                               <div className="flex items-center gap-2">
                                 <p className="text-xs text-muted-foreground">{device.room}</p>
                                 <Badge 
-                                  variant={device.status === 'online' ? 'default' : 'secondary'}
+                                  variant={device.status === 'online' ? 'default' : device.status === 'warning' ? 'secondary' : 'destructive'}
                                   className="h-4 text-xs"
                                 >
                                   {device.status}
                                 </Badge>
+                                {device.batteryLevel !== undefined && device.batteryLevel <= 20 && (
+                                  <Badge variant="destructive" className="h-4 text-xs">
+                                    Low Battery
+                                  </Badge>
+                                )}
                               </div>
                             </div>
                           </div>
