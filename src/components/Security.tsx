@@ -34,7 +34,7 @@ interface Camera {
   nightVision: boolean
   motionDetection: boolean
   recordingEnabled: boolean
-  lastMotion?: Date
+  lastMotion?: string
   batteryLevel?: number
 }
 
@@ -42,7 +42,7 @@ interface SecurityEvent {
   id: string
   type: 'motion' | 'door' | 'window' | 'alarm' | 'camera_offline'
   location: string
-  timestamp: Date
+  timestamp: string
   severity: 'low' | 'medium' | 'high'
   message: string
   cameraId?: string
@@ -61,7 +61,7 @@ export function Security() {
       nightVision: true,
       motionDetection: true,
       recordingEnabled: true,
-      lastMotion: new Date(Date.now() - 15 * 60 * 1000),
+      lastMotion: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
       batteryLevel: 85
     },
     {
@@ -73,7 +73,7 @@ export function Security() {
       nightVision: false,
       motionDetection: true,
       recordingEnabled: true,
-      lastMotion: new Date(Date.now() - 2 * 60 * 1000)
+      lastMotion: new Date(Date.now() - 2 * 60 * 1000).toISOString()
     },
     {
       id: "garage-cam",
@@ -103,7 +103,7 @@ export function Security() {
       id: "evt-1",
       type: "motion",
       location: "Front Door",
-      timestamp: new Date(Date.now() - 15 * 60 * 1000),
+      timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
       severity: "medium",
       message: "Motion detected at front entrance",
       cameraId: "front-door-cam"
@@ -112,7 +112,7 @@ export function Security() {
       id: "evt-2", 
       type: "motion",
       location: "Backyard",
-      timestamp: new Date(Date.now() - 2 * 60 * 1000),
+      timestamp: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
       severity: "low",
       message: "Motion detected in garden area",
       cameraId: "backyard-cam"
@@ -121,7 +121,7 @@ export function Security() {
       id: "evt-3",
       type: "camera_offline",
       location: "Garage",
-      timestamp: new Date(Date.now() - 45 * 60 * 1000),
+      timestamp: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
       severity: "high",
       message: "Camera lost connection - low battery",
       cameraId: "garage-cam"
@@ -130,7 +130,7 @@ export function Security() {
       id: "evt-4",
       type: "door",
       location: "Front Door",
-      timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
+      timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
       severity: "low",
       message: "Door unlocked using keypad",
     }
@@ -161,16 +161,23 @@ export function Security() {
     toast.success("Camera feature updated")
   }
 
-  const formatRelativeTime = (date: Date) => {
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / (1000 * 60))
-    const diffHours = Math.floor(diffMins / 60)
-    
-    if (diffMins < 1) return "Just now"
-    if (diffMins < 60) return `${diffMins}m ago`
-    if (diffHours < 24) return `${diffHours}h ago`
-    return date.toLocaleDateString()
+  const formatRelativeTime = (dateString: string) => {
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) return 'Invalid date'
+      
+      const now = new Date()
+      const diffMs = now.getTime() - date.getTime()
+      const diffMins = Math.floor(diffMs / (1000 * 60))
+      const diffHours = Math.floor(diffMins / 60)
+      
+      if (diffMins < 1) return "Just now"
+      if (diffMins < 60) return `${diffMins}m ago`
+      if (diffHours < 24) return `${diffHours}h ago`
+      return date.toLocaleDateString()
+    } catch (error) {
+      return 'Invalid date'
+    }
   }
 
   const getStatusColor = (status: Camera['status']) => {

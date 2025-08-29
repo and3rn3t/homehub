@@ -37,8 +37,8 @@ interface Automation {
     action: string
     value?: any
   }>
-  lastRun?: Date
-  nextRun?: Date
+  lastRun?: string
+  nextRun?: string
 }
 
 const automationIcons = {
@@ -57,7 +57,7 @@ export function Automations() {
       enabled: true,
       triggers: [{ type: "time", value: "07:00" }],
       actions: [{ action: "Turn on Living Room Light", value: true }],
-      nextRun: new Date("2024-01-01T07:00:00")
+      nextRun: new Date("2024-01-01T07:00:00").toISOString()
     },
     {
       id: "away-mode",
@@ -90,13 +90,19 @@ export function Automations() {
     }
   }
 
-  const formatTime = (date?: Date) => {
-    if (!date) return ''
-    return new Intl.DateTimeFormat('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    }).format(date)
+  const formatTime = (dateString?: string) => {
+    if (!dateString) return ''
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) return 'Invalid date'
+      return new Intl.DateTimeFormat('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      }).format(date)
+    } catch (error) {
+      return 'Invalid date'
+    }
   }
 
   return (

@@ -18,7 +18,7 @@ interface Flow {
   description?: string
   nodes: FlowNode[]
   enabled: boolean
-  created: Date
+  created: string
 }
 
 interface ExecutionContext {
@@ -26,7 +26,7 @@ interface ExecutionContext {
   executionId: string
   variables: Record<string, any>
   currentNodeId: string
-  timestamp: Date
+  timestamp: string
 }
 
 export class FlowExecutor {
@@ -57,7 +57,7 @@ export class FlowExecutor {
       executionId,
       variables: triggerData || {},
       currentNodeId: '',
-      timestamp: new Date()
+      timestamp: new Date().toISOString()
     }
 
     this.activeExecutions.set(executionId, context)

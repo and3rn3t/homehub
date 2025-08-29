@@ -43,7 +43,7 @@ interface Flow {
   description?: string
   nodes: FlowNode[]
   enabled: boolean
-  created: Date
+  created: string
 }
 
 const nodeTypes = {
@@ -86,7 +86,7 @@ export function FlowDesigner() {
       description: 'New automation flow',
       nodes: [],
       enabled: false,
-      created: new Date()
+      created: new Date().toISOString()
     }
     
     setFlows(currentFlows => [...currentFlows, newFlow])
@@ -331,7 +331,7 @@ export function FlowDesigner() {
                         {new Intl.DateTimeFormat('en-US', { 
                           month: 'short', 
                           day: 'numeric' 
-                        }).format(flow.created)}
+                        }).format(new Date(flow.created))}
                       </span>
                     </div>
                   </CardContent>

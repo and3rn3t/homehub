@@ -56,8 +56,8 @@ interface GeofenceRule {
     daysOfWeek?: string[]
     userIds?: string[] // specific family members
   }
-  createdAt: Date
-  lastTriggered?: Date
+  createdAt: string
+  lastTriggered?: string
   triggerCount: number
 }
 
@@ -227,7 +227,7 @@ export function GeofenceBuilder() {
         daysOfWeek: ruleForm.selectedDays.length > 0 ? ruleForm.selectedDays : undefined,
         userIds: ruleForm.selectedUsers.length > 0 ? ruleForm.selectedUsers : undefined
       },
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
       triggerCount: 0
     }
 
@@ -271,7 +271,7 @@ export function GeofenceBuilder() {
       setGeofenceRules(current => 
         current.map(r => 
           r.id === ruleId 
-            ? { ...r, lastTriggered: new Date(), triggerCount: r.triggerCount + 1 }
+            ? { ...r, lastTriggered: new Date().toISOString(), triggerCount: r.triggerCount + 1 }
             : r
         )
       )
@@ -780,7 +780,13 @@ export function GeofenceBuilder() {
                                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                   <span>Triggered {rule.triggerCount} times</span>
                                   {rule.lastTriggered && (
-                                    <span>Last: {rule.lastTriggered.toLocaleTimeString()}</span>
+                                    <span>Last: {(() => {
+                                      try {
+                                        return new Date(rule.lastTriggered).toLocaleTimeString()
+                                      } catch {
+                                        return 'Invalid date'
+                                      }
+                                    })()}</span>
                                   )}
                                 </div>
                               </div>

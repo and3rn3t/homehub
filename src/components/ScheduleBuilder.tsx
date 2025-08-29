@@ -50,9 +50,9 @@ interface ScheduleRule {
     onlyWhenAway?: boolean
     weatherCondition?: string
   }
-  createdAt: Date
-  lastTriggered?: Date
-  nextTrigger?: Date
+  createdAt: string
+  lastTriggered?: string
+  nextTrigger?: string
 }
 
 const DAYS_OF_WEEK = [
@@ -157,7 +157,7 @@ export function ScheduleBuilder() {
         onlyWhenHome: formData.onlyWhenHome,
         onlyWhenAway: formData.onlyWhenAway
       },
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
       nextTrigger: calculateNextTrigger(newTrigger)
     }
 
@@ -167,7 +167,7 @@ export function ScheduleBuilder() {
     toast.success("Schedule created successfully")
   }
 
-  const calculateNextTrigger = (trigger: ScheduleTrigger): Date => {
+  const calculateNextTrigger = (trigger: ScheduleTrigger): string => {
     const now = new Date()
     const tomorrow = new Date(now)
     tomorrow.setDate(tomorrow.getDate() + 1)
@@ -181,10 +181,10 @@ export function ScheduleBuilder() {
         nextRun.setDate(nextRun.getDate() + 1)
       }
       
-      return nextRun
+      return nextRun.toISOString()
     }
     
-    return tomorrow
+    return tomorrow.toISOString()
   }
 
   const toggleSchedule = (scheduleId: string) => {
@@ -209,7 +209,7 @@ export function ScheduleBuilder() {
       setSchedules(current => 
         current.map(s => 
           s.id === scheduleId 
-            ? { ...s, lastTriggered: new Date() }
+            ? { ...s, lastTriggered: new Date().toISOString() }
             : s
         )
       )
@@ -217,17 +217,25 @@ export function ScheduleBuilder() {
     }
   }
 
-  const formatNextTrigger = (date?: Date) => {
-    if (!date) return 'Not scheduled'
-    const now = new Date()
-    const diff = date.getTime() - now.getTime()
-    const hours = Math.floor(diff / (1000 * 60 * 60))
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+  const formatNextTrigger = (dateString?: string) => {
+    if (!dateString) return 'Not scheduled'
     
-    if (hours < 24) {
-      return `${hours}h ${minutes}m`
-    } else {
-      return date.toLocaleDateString()
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) return 'Invalid date'
+      
+      const now = new Date()
+      const diff = date.getTime() - now.getTime()
+      const hours = Math.floor(diff / (1000 * 60 * 60))
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+      
+      if (hours < 24) {
+        return `${hours}h ${minutes}m`
+      } else {
+        return date.toLocaleDateString()
+      }
+    } catch (error) {
+      return 'Invalid date'
     }
   }
 
@@ -440,7 +448,15 @@ export function ScheduleBuilder() {
           <Card className="bg-primary/10 border-primary/20">
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-primary mb-1">
-                {schedules.filter(s => s.nextTrigger && s.nextTrigger > new Date()).length}
+                {schedules.filter(s => {
+                  if (!s.nextTrigger) return false
+                  try {
+                    const nextTrigger = new Date(s.nextTrigger)
+                    return !isNaN(nextTrigger.getTime()) && nextTrigger > new Date()
+                  } catch {
+                    return false
+                  }
+                }).length}
               </div>
               <div className="text-xs text-muted-foreground">Pending</div>
             </CardContent>
@@ -516,7 +532,13 @@ export function ScheduleBuilder() {
                           <div className="flex items-center gap-3 text-xs text-muted-foreground">
                             <span>Next: {formatNextTrigger(schedule.nextTrigger)}</span>
                             {schedule.lastTriggered && (
-                              <span>Last: {schedule.lastTriggered.toLocaleTimeString()}</span>
+                              <span>Last: {(() => {
+                                try {
+                                  return new Date(schedule.lastTriggered).toLocaleTimeString()
+                                } catch {
+                                  return 'Invalid date'
+                                }
+                              })()}</span>
                             )}
                           </div>
                         </div>
