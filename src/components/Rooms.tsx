@@ -40,11 +40,32 @@ const deviceIcons = {
 }
 
 export function Rooms() {
-  const [rooms, setRooms] = useKV<Room[]>("rooms", [])
+  const [rooms, setRooms] = useKV<Room[]>("rooms", [
+    {
+      id: "living-room",
+      name: "Living Room", 
+      devices: []
+    },
+    {
+      id: "bedroom", 
+      name: "Bedroom",
+      devices: []
+    },
+    {
+      id: "kitchen",
+      name: "Kitchen", 
+      devices: []
+    },
+    {
+      id: "entryway",
+      name: "Entryway",
+      devices: []
+    }
+  ])
   const [devices] = useKV<Device[]>("devices", [])
 
-  const getRoomDevices = (roomId: string) => {
-    return devices.filter(device => device.room === roomId)
+  const getRoomDevices = (roomName: string) => {
+    return devices.filter(device => device.room === roomName)
   }
 
   const getActiveDevicesCount = (roomDevices: Device[]) => {
@@ -84,7 +105,7 @@ export function Rooms() {
         ) : (
           <div className="grid gap-4">
             {rooms.map((room) => {
-              const roomDevices = getRoomDevices(room.id)
+              const roomDevices = getRoomDevices(room.name)
               const activeDevices = getActiveDevicesCount(roomDevices)
               
               return (

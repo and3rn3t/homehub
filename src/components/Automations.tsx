@@ -41,7 +41,25 @@ const automationIcons = {
 }
 
 export function Automations() {
-  const [automations, setAutomations] = useKV<Automation[]>("automations", [])
+  const [automations, setAutomations] = useKV<Automation[]>("automations", [
+    {
+      id: "morning-routine",
+      name: "Good Morning", 
+      type: "schedule",
+      enabled: true,
+      triggers: [{ type: "time", value: "07:00" }],
+      actions: [{ action: "Turn on Living Room Light", value: true }],
+      nextRun: new Date("2024-01-01T07:00:00")
+    },
+    {
+      id: "away-mode",
+      name: "Away from Home",
+      type: "geofence", 
+      enabled: true,
+      triggers: [{ type: "location", value: "exit_home" }],
+      actions: [{ action: "Turn off all lights", value: false }]
+    }
+  ])
 
   const toggleAutomation = (automationId: string) => {
     setAutomations(currentAutomations => 

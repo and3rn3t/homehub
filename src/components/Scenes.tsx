@@ -67,7 +67,37 @@ const sceneConfigs = {
 }
 
 export function Scenes() {
-  const [scenes, setScenes] = useKV<Scene[]>("scenes", [])
+  const [scenes, setScenes] = useKV<Scene[]>("scenes", [
+    {
+      id: "good-morning",
+      name: "Good Morning",
+      isActive: false,
+      devices: ["living-room-light", "thermostat-main"],
+      actions: [
+        { deviceId: "living-room-light", action: "turn_on", value: 100 },
+        { deviceId: "thermostat-main", action: "set_temperature", value: 72 }
+      ]
+    },
+    {
+      id: "good-night", 
+      name: "Good Night",
+      isActive: false,
+      devices: ["living-room-light", "front-door-lock"],
+      actions: [
+        { deviceId: "living-room-light", action: "turn_off", value: 0 },
+        { deviceId: "front-door-lock", action: "lock", value: true }
+      ]
+    },
+    {
+      id: "movie-time",
+      name: "Movie Time", 
+      isActive: false,
+      devices: ["living-room-light"],
+      actions: [
+        { deviceId: "living-room-light", action: "dim", value: 20 }
+      ]
+    }
+  ])
   const [activeScene, setActiveScene] = useKV<string | null>("active-scene", null)
 
   const activateScene = (sceneId: string) => {

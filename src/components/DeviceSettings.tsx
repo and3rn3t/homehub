@@ -49,8 +49,46 @@ const categoryIcons = {
 }
 
 export function DeviceSettings() {
-  const [integrations, setIntegrations] = useKV<Integration[]>("integrations", [])
-  const [systemSettings, setSystemSettings] = useKV<SystemSetting[]>("system-settings", [])
+  const [integrations, setIntegrations] = useKV<Integration[]>("integrations", [
+    {
+      id: "homekit",
+      name: "Apple HomeKit", 
+      type: "homekit",
+      status: "connected",
+      enabled: true,
+      devices: 4
+    },
+    {
+      id: "alexa",
+      name: "Amazon Alexa",
+      type: "alexa", 
+      status: "disconnected",
+      enabled: false,
+      devices: 0
+    },
+    {
+      id: "google",
+      name: "Google Assistant",
+      type: "google",
+      status: "connected", 
+      enabled: true,
+      devices: 3
+    }
+  ])
+  const [systemSettings, setSystemSettings] = useKV<SystemSetting[]>("system-settings", [
+    {
+      id: "auto-discovery",
+      name: "Auto Device Discovery",
+      description: "Automatically detect new devices on your network",
+      enabled: true
+    },
+    {
+      id: "offline-mode", 
+      name: "Offline Mode",
+      description: "Continue operating without internet connection",
+      enabled: false
+    }
+  ])
   const [notifications, setNotifications] = useKV("notifications-enabled", true)
   const [autoUpdates, setAutoUpdates] = useKV("auto-updates", true)
   const [geofencing, setGeofencing] = useKV("geofencing-enabled", false)

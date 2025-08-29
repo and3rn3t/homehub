@@ -35,8 +35,43 @@ const deviceIcons = {
 }
 
 export function Dashboard() {
-  const [devices, setDevices] = useKV<Device[]>("devices", [])
-  const [favoriteDevices, setFavoriteDevices] = useKV<string[]>("favorite-devices", [])
+  const [devices, setDevices] = useKV<Device[]>("devices", [
+    {
+      id: "living-room-light",
+      name: "Living Room Light",
+      type: "light",
+      room: "Living Room",
+      status: "online",
+      enabled: true
+    },
+    {
+      id: "thermostat-main", 
+      name: "Main Thermostat",
+      type: "thermostat",
+      room: "Living Room", 
+      status: "online",
+      enabled: true,
+      value: 72,
+      unit: "°F"
+    },
+    {
+      id: "front-door-lock",
+      name: "Front Door Lock",
+      type: "security", 
+      room: "Entryway",
+      status: "online", 
+      enabled: true
+    },
+    {
+      id: "motion-sensor",
+      name: "Motion Sensor",
+      type: "sensor",
+      room: "Living Room",
+      status: "online",
+      enabled: true
+    }
+  ])
+  const [favoriteDevices, setFavoriteDevices] = useKV<string[]>("favorite-devices", ["living-room-light", "thermostat-main"])
   const [quickScenes] = useKV("quick-scenes", [
     { id: "good-morning", name: "Good Morning", icon: Sun },
     { id: "good-night", name: "Good Night", icon: Moon },
