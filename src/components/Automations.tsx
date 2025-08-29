@@ -18,15 +18,15 @@ import { toast } from "sonner"
 interface Automation {
   id: string
   name: string
-  description: string
+  description?: string
   type: 'schedule' | 'geofence' | 'condition'
   enabled: boolean
-  trigger: {
+  triggers: Array<{
     type: string
     value: string
-  }
+  }>
   actions: Array<{
-    deviceId: string
+    deviceId?: string
     action: string
     value?: any
   }>
@@ -45,6 +45,7 @@ export function Automations() {
     {
       id: "morning-routine",
       name: "Good Morning", 
+      description: "Turn on lights and adjust temperature when you wake up",
       type: "schedule",
       enabled: true,
       triggers: [{ type: "time", value: "07:00" }],
@@ -54,6 +55,7 @@ export function Automations() {
     {
       id: "away-mode",
       name: "Away from Home",
+      description: "Secure your home and save energy when you leave",
       type: "geofence", 
       enabled: true,
       triggers: [{ type: "location", value: "exit_home" }],

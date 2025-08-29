@@ -17,10 +17,15 @@ import { toast } from "sonner"
 interface Scene {
   id: string
   name: string
-  description: string
-  icon: any
-  color: string
+  description?: string
+  icon?: string
+  color?: string
   devices: Array<{
+    deviceId: string
+    action: string
+    value?: any
+  }>
+  actions: Array<{
     deviceId: string
     action: string
     value?: any
@@ -30,40 +35,50 @@ interface Scene {
 
 const sceneConfigs = {
   'good-morning': {
-    icon: Sun,
+    icon: 'sun',
     color: 'bg-gradient-to-br from-orange-400 to-yellow-400',
     description: 'Turn on lights, adjust temperature'
   },
   'good-night': {
-    icon: Moon,
+    icon: 'moon',
     color: 'bg-gradient-to-br from-purple-500 to-blue-600',
     description: 'Dim lights, lock doors, set alarm'
   },
   'home': {
-    icon: HomeIcon,
+    icon: 'home',
     color: 'bg-gradient-to-br from-green-400 to-blue-500',
     description: 'Welcome home setup'
   },
   'away': {
-    icon: Shield,
+    icon: 'shield',
     color: 'bg-gradient-to-br from-red-400 to-pink-500',
     description: 'Security mode, lights off'
   },
   'movie-time': {
-    icon: Play,
+    icon: 'play',
     color: 'bg-gradient-to-br from-indigo-500 to-purple-600',
     description: 'Dim lights, close blinds'
   },
   'morning-coffee': {
-    icon: Coffee,
+    icon: 'coffee',
     color: 'bg-gradient-to-br from-amber-500 to-orange-600',
     description: 'Kitchen lights, coffee maker'
   },
   'bedtime': {
-    icon: Bed,
+    icon: 'bed',
     color: 'bg-gradient-to-br from-slate-500 to-gray-600',
     description: 'Night lights, temperature down'
   }
+}
+
+const sceneIcons = {
+  sun: Sun,
+  moon: Moon,
+  home: HomeIcon,
+  shield: Shield,
+  play: Play,
+  coffee: Coffee,
+  bed: Bed
 }
 
 export function Scenes() {
@@ -159,7 +174,7 @@ export function Scenes() {
               <h3 className="text-lg font-semibold mb-4">Popular Scenes</h3>
               <div className="grid grid-cols-2 gap-3">
                 {Object.entries(sceneConfigs).map(([id, config]) => {
-                  const IconComponent = config.icon
+                  const IconComponent = sceneIcons[config.icon as keyof typeof sceneIcons]
                   return (
                     <motion.div
                       key={id}
@@ -196,7 +211,8 @@ export function Scenes() {
           <div className="grid grid-cols-2 gap-4">
             {scenes.map((scene) => {
               const config = sceneConfigs[scene.id as keyof typeof sceneConfigs]
-              const IconComponent = scene.icon || (config?.icon || Sun)
+              const iconName = scene.icon || config?.icon || 'sun'
+              const IconComponent = sceneIcons[iconName as keyof typeof sceneIcons]
               const bgColor = config?.color || 'bg-gradient-to-br from-blue-400 to-purple-500'
               
               return (

@@ -72,12 +72,20 @@ export function Dashboard() {
     }
   ])
   const [favoriteDevices, setFavoriteDevices] = useKV<string[]>("favorite-devices", ["living-room-light", "thermostat-main"])
-  const [quickScenes] = useKV("quick-scenes", [
-    { id: "good-morning", name: "Good Morning", icon: Sun },
-    { id: "good-night", name: "Good Night", icon: Moon },
-    { id: "home", name: "I'm Home", icon: HomeIcon },
-    { id: "away", name: "Away", icon: Shield }
-  ])
+  
+  const quickScenesData = [
+    { id: "good-morning", name: "Good Morning", icon: "sun" },
+    { id: "good-night", name: "Good Night", icon: "moon" },
+    { id: "home", name: "I'm Home", icon: "home" },
+    { id: "away", name: "Away", icon: "shield" }
+  ]
+
+  const sceneIcons = {
+    sun: Sun,
+    moon: Moon,
+    home: HomeIcon,
+    shield: Shield
+  }
 
   const toggleDevice = (deviceId: string) => {
     setDevices(currentDevices => 
@@ -110,8 +118,8 @@ export function Dashboard() {
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-6">
-          {quickScenes.map((scene: any) => {
-            const IconComponent = scene.icon
+          {quickScenesData.map((scene) => {
+            const IconComponent = sceneIcons[scene.icon as keyof typeof sceneIcons]
             return (
               <motion.div
                 key={scene.id}
