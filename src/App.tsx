@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { House, SquaresFour, Gear, Lightning, ChartBar, ShieldCheck, Sliders, Activity } from "@phosphor-icons/react"
+import { House, SquaresFour, Gear, Lightning, ChartBar, ShieldCheck, Sliders, Activity, Users, ChartLine, HardDrives } from "@phosphor-icons/react"
 import { Toaster } from "@/components/ui/sonner"
 import { Dashboard } from './components/Dashboard'
 import { Rooms } from './components/Rooms'
@@ -11,6 +11,9 @@ import { Energy } from './components/Energy'
 import { Security } from './components/Security'
 import { DeviceSettings } from './components/DeviceSettings'
 import { DeviceMonitor } from './components/DeviceMonitor'
+import { UserManagement } from './components/UserManagement'
+import { InsightsDashboard } from './components/InsightsDashboard'
+import { BackupRecovery } from './components/BackupRecovery'
 
 function App() {
   const [currentTab, setCurrentTab] = useKV("current-tab", "dashboard")
@@ -47,17 +50,29 @@ function App() {
             <Security />
           </TabsContent>
           
+          <TabsContent value="users" className="h-full m-0 p-0">
+            <UserManagement />
+          </TabsContent>
+          
+          <TabsContent value="insights" className="h-full m-0 p-0">
+            <InsightsDashboard />
+          </TabsContent>
+          
+          <TabsContent value="backup" className="h-full m-0 p-0">
+            <BackupRecovery />
+          </TabsContent>
+          
           <TabsContent value="settings" className="h-full m-0 p-0">
             <DeviceSettings />
           </TabsContent>
         </div>
 
-        <TabsList className="grid w-full grid-cols-8 h-20 bg-card/80 backdrop-blur-xl border-t border-border rounded-none p-2">
+        <TabsList className="grid w-full grid-cols-11 h-20 bg-card/80 backdrop-blur-xl border-t border-border rounded-none p-2">
           <TabsTrigger 
             value="dashboard" 
             className="flex flex-col gap-1 p-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
           >
-            <House size={24} weight="regular" />
+            <House size={20} weight="regular" />
             <span className="text-xs font-medium">Home</span>
           </TabsTrigger>
           
@@ -65,7 +80,7 @@ function App() {
             value="rooms" 
             className="flex flex-col gap-1 p-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
           >
-            <SquaresFour size={24} weight="regular" />
+            <SquaresFour size={20} weight="regular" />
             <span className="text-xs font-medium">Rooms</span>
           </TabsTrigger>
           
@@ -73,7 +88,7 @@ function App() {
             value="automations" 
             className="flex flex-col gap-1 p-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
           >
-            <Gear size={24} weight="regular" />
+            <Gear size={20} weight="regular" />
             <span className="text-xs font-medium">Auto</span>
           </TabsTrigger>
           
@@ -81,7 +96,7 @@ function App() {
             value="scenes" 
             className="flex flex-col gap-1 p-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
           >
-            <Lightning size={24} weight="regular" />
+            <Lightning size={20} weight="regular" />
             <span className="text-xs font-medium">Scenes</span>
           </TabsTrigger>
           
@@ -89,7 +104,7 @@ function App() {
             value="energy" 
             className="flex flex-col gap-1 p-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
           >
-            <ChartBar size={24} weight="regular" />
+            <ChartBar size={20} weight="regular" />
             <span className="text-xs font-medium">Energy</span>
           </TabsTrigger>
           
@@ -97,7 +112,7 @@ function App() {
             value="monitor" 
             className="flex flex-col gap-1 p-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
           >
-            <Activity size={24} weight="regular" />
+            <Activity size={20} weight="regular" />
             <span className="text-xs font-medium">Monitor</span>
           </TabsTrigger>
           
@@ -105,15 +120,39 @@ function App() {
             value="security" 
             className="flex flex-col gap-1 p-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
           >
-            <ShieldCheck size={24} weight="regular" />
+            <ShieldCheck size={20} weight="regular" />
             <span className="text-xs font-medium">Security</span>
+          </TabsTrigger>
+          
+          <TabsTrigger 
+            value="users" 
+            className="flex flex-col gap-1 p-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+          >
+            <Users size={20} weight="regular" />
+            <span className="text-xs font-medium">Users</span>
+          </TabsTrigger>
+          
+          <TabsTrigger 
+            value="insights" 
+            className="flex flex-col gap-1 p-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+          >
+            <ChartLine size={20} weight="regular" />
+            <span className="text-xs font-medium">Insights</span>
+          </TabsTrigger>
+          
+          <TabsTrigger 
+            value="backup" 
+            className="flex flex-col gap-1 p-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+          >
+            <HardDrives size={20} weight="regular" />
+            <span className="text-xs font-medium">Backup</span>
           </TabsTrigger>
           
           <TabsTrigger 
             value="settings" 
             className="flex flex-col gap-1 p-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
           >
-            <Sliders size={24} weight="regular" />
+            <Sliders size={20} weight="regular" />
             <span className="text-xs font-medium">Settings</span>
           </TabsTrigger>
         </TabsList>
