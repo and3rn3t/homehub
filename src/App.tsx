@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { House, Grid, Gear, Lightning, ChartBar, ShieldCheck, Sliders } from "@phosphor-icons/react"
+import { House, SquaresFour, Gear, Lightning, ChartBar, ShieldCheck, Sliders } from "@phosphor-icons/react"
 import { Toaster } from "@/components/ui/sonner"
 import { Dashboard } from './components/Dashboard'
 import { Rooms } from './components/Rooms'
@@ -60,7 +60,7 @@ function App() {
             value="rooms" 
             className="flex flex-col gap-1 p-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
           >
-            <Grid size={24} weight="regular" />
+            <SquaresFour size={24} weight="regular" />
             <span className="text-xs font-medium">Rooms</span>
           </TabsTrigger>
           
