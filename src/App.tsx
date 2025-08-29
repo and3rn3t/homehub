@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Home, Settings, Zap, Calendar, BarChart3 } from "@phosphor-icons/react"
+import { Home, Settings, Zap, Calendar, BarChart3, Shield } from "@phosphor-icons/react"
 import { Toaster } from "@/components/ui/sonner"
 import { Dashboard } from './components/Dashboard'
 import { Rooms } from './components/Rooms'
 import { Automations } from './components/Automations'
 import { Scenes } from './components/Scenes'
 import { Energy } from './components/Energy'
+import { Security } from './components/Security'
 import { DeviceSettings } from './components/DeviceSettings'
 
 function App() {
@@ -37,12 +38,16 @@ function App() {
             <Energy />
           </TabsContent>
           
+          <TabsContent value="security" className="h-full m-0 p-0">
+            <Security />
+          </TabsContent>
+          
           <TabsContent value="settings" className="h-full m-0 p-0">
             <DeviceSettings />
           </TabsContent>
         </div>
 
-        <TabsList className="grid w-full grid-cols-6 h-20 bg-card/80 backdrop-blur-xl border-t border-border rounded-none p-2">
+        <TabsList className="grid w-full grid-cols-7 h-20 bg-card/80 backdrop-blur-xl border-t border-border rounded-none p-2">
           <TabsTrigger 
             value="dashboard" 
             className="flex flex-col gap-1 p-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
@@ -86,6 +91,14 @@ function App() {
           >
             <BarChart3 size={24} weight="regular" />
             <span className="text-xs font-medium">Energy</span>
+          </TabsTrigger>
+          
+          <TabsTrigger 
+            value="security" 
+            className="flex flex-col gap-1 p-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+          >
+            <Shield size={24} weight="regular" />
+            <span className="text-xs font-medium">Security</span>
           </TabsTrigger>
           
           <TabsTrigger 

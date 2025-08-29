@@ -48,6 +48,11 @@
 - **Purpose**: Instant mood/activity changes (Good Morning, Movie Time, etc.)
 - **Success Criteria**: Scenes execute in under 2 seconds
 
+### Security & Camera Monitoring
+- **Functionality**: Live camera feeds, motion detection alerts, security event logging
+- **Purpose**: Comprehensive home security monitoring and camera management
+- **Success Criteria**: Live feeds load within 3 seconds, motion alerts appear within 30 seconds of detection
+
 ### Automation Engine
 - **Functionality**: Time-based, sensor-triggered, and geofence-based automation
 - **Purpose**: Reduces manual device management through intelligence
