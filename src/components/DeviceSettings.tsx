@@ -204,6 +204,7 @@ export function DeviceSettings() {
                     </Button>
                   </div>
                 </CardHeader>
+                <CardContent>
                   {integrations.length === 0 ? (
                     <div className="text-center py-8">
                       <div className="w-12 h-12 rounded-full bg-muted mx-auto mb-3 flex items-center justify-center">
