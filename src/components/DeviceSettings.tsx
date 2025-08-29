@@ -4,15 +4,12 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { 
-  Gear, 
+  Settings, 
   Bell, 
   Shield, 
   Wifi, 
-  CloudCheck,
-  DeviceMobile,
   Plus,
-  CheckCircle,
-  Warning
+  Check
 } from "@phosphor-icons/react"
 import { motion } from "framer-motion"
 import { toast } from "sonner"
@@ -35,17 +32,17 @@ interface SystemSetting {
 }
 
 const integrationIcons = {
-  homekit: CloudCheck,
-  alexa: DeviceMobile,
+  homekit: Wifi,
+  alexa: Bell,
   google: Wifi,
-  matter: CheckCircle
+  matter: Check
 }
 
 const categoryIcons = {
   security: Shield,
   notifications: Bell,
-  automation: Gear,
-  system: Gear
+  automation: Settings,
+  system: Settings
 }
 
 export function DeviceSettings() {
@@ -80,13 +77,15 @@ export function DeviceSettings() {
       id: "auto-discovery",
       name: "Auto Device Discovery",
       description: "Automatically detect new devices on your network",
-      enabled: true
+      enabled: true,
+      category: "system"
     },
     {
       id: "offline-mode", 
       name: "Offline Mode",
       description: "Continue operating without internet connection",
-      enabled: false
+      enabled: false,
+      category: "system"
     }
   ])
   const [notifications, setNotifications] = useKV("notifications-enabled", true)
@@ -124,7 +123,7 @@ export function DeviceSettings() {
             <p className="text-muted-foreground">Manage your home automation</p>
           </div>
           <Button variant="outline" size="icon" className="rounded-full">
-            <Gear size={20} />
+            <Settings size={20} />
           </Button>
         </div>
       </div>
@@ -151,7 +150,7 @@ export function DeviceSettings() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <CloudCheck size={20} className="text-muted-foreground" />
+                <Wifi size={20} className="text-muted-foreground" />
                 <div>
                   <p className="font-medium text-sm">Automatic Updates</p>
                   <p className="text-xs text-muted-foreground">Keep devices up to date</p>
@@ -165,7 +164,7 @@ export function DeviceSettings() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <DeviceMobile size={20} className="text-muted-foreground" />
+                <Wifi size={20} className="text-muted-foreground" />
                 <div>
                   <p className="font-medium text-sm">Geofencing</p>
                   <p className="text-xs text-muted-foreground">Location-based automation</p>
@@ -193,7 +192,7 @@ export function DeviceSettings() {
             {integrations.length === 0 ? (
               <div className="text-center py-8">
                 <div className="w-12 h-12 rounded-full bg-muted mx-auto mb-3 flex items-center justify-center">
-                  <CloudCheck size={24} className="text-muted-foreground" />
+                  <Wifi size={24} className="text-muted-foreground" />
                 </div>
                 <p className="text-muted-foreground mb-2">No integrations</p>
                 <p className="text-sm text-muted-foreground mb-4">
@@ -261,7 +260,7 @@ export function DeviceSettings() {
             {systemSettings.length === 0 ? (
               <div className="text-center py-8">
                 <div className="w-12 h-12 rounded-full bg-muted mx-auto mb-3 flex items-center justify-center">
-                  <Gear size={24} className="text-muted-foreground" />
+                  <Settings size={24} className="text-muted-foreground" />
                 </div>
                 <p className="text-muted-foreground mb-2">No custom settings</p>
                 <p className="text-sm text-muted-foreground">
@@ -306,7 +305,7 @@ export function DeviceSettings() {
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 rounded-lg bg-accent/10 border border-accent/20">
                 <div className="flex items-center gap-3">
-                  <CheckCircle size={20} className="text-accent" />
+                  <Check size={20} className="text-accent" />
                   <div>
                     <p className="font-medium text-sm">System Health</p>
                     <p className="text-xs text-muted-foreground">All systems operational</p>
@@ -332,7 +331,7 @@ export function DeviceSettings() {
 
               <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10 border border-primary/20">
                 <div className="flex items-center gap-3">
-                  <CloudCheck size={20} className="text-primary" />
+                  <Wifi size={20} className="text-primary" />
                   <div>
                     <p className="font-medium text-sm">Cloud Sync</p>
                     <p className="text-xs text-muted-foreground">Last sync: 2 minutes ago</p>
