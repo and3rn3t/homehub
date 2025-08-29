@@ -370,6 +370,5 @@ export function DeviceSettings() {
       </TabsContent>
     </Tabs>
   </div>
-</div>
-)
+  )
 }
