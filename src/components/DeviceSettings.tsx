@@ -17,6 +17,8 @@ import {
 import { motion } from "framer-motion"
 import { toast } from "sonner"
 import { MonitoringSettings } from './MonitoringSettings'
+import { AdaptiveLighting } from './AdaptiveLighting'
+import { Intercom } from './Intercom'
 
 interface Integration {
   id: string
@@ -184,10 +186,12 @@ export function DeviceSettings() {
       <div className="flex-1 overflow-hidden">
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="h-full flex flex-col">
           <div className="px-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="integrations">Integrations</TabsTrigger>
               <TabsTrigger value="system">System</TabsTrigger>
               <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
+              <TabsTrigger value="adaptive">Adaptive</TabsTrigger>
+              <TabsTrigger value="intercom">Intercom</TabsTrigger>
             </TabsList>
           </div>
 
@@ -423,6 +427,14 @@ export function DeviceSettings() {
 
       <TabsContent value="monitoring" className="flex-1 overflow-hidden m-0 p-0">
         <MonitoringSettings />
+      </TabsContent>
+
+      <TabsContent value="adaptive" className="flex-1 overflow-hidden m-0 p-0">
+        <AdaptiveLighting />
+      </TabsContent>
+
+      <TabsContent value="intercom" className="flex-1 overflow-hidden m-0 p-0">
+        <Intercom />
       </TabsContent>
     </Tabs>
   </div>
