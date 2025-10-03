@@ -17,14 +17,18 @@ import {
 import { motion } from "framer-motion"
 import { toast } from "sonner"
 import { MonitoringSettings } from './MonitoringSettings'
+import { AdaptiveLighting } from './AdaptiveLighting'
+import { Intercom } from './Intercom'
 
 interface Integration {
   id: string
   name: string
-  type: 'homekit' | 'alexa' | 'google' | 'matter'
+  type: 'homekit' | 'alexa' | 'google' | 'matter' | 'thread' | 'zigbee' | 'zwave'
   status: 'connected' | 'disconnected' | 'error'
   enabled: boolean
   devices: number
+  protocol?: string
+  details?: string
 }
 
 interface SystemSetting {
@@ -39,7 +43,10 @@ const integrationIcons = {
   homekit: Wifi,
   alexa: Bell,
   google: Wifi,
-  matter: Check
+  matter: Check,
+  thread: Activity,
+  zigbee: Activity,
+  zwave: Activity
 }
 
 const categoryIcons = {
@@ -58,7 +65,8 @@ export function DeviceSettings() {
       type: "homekit",
       status: "connected",
       enabled: true,
-      devices: 4
+      devices: 4,
+      protocol: "Voice Assistant"
     },
     {
       id: "alexa",
@@ -66,7 +74,8 @@ export function DeviceSettings() {
       type: "alexa", 
       status: "disconnected",
       enabled: false,
-      devices: 0
+      devices: 0,
+      protocol: "Voice Assistant"
     },
     {
       id: "google",
@@ -74,7 +83,48 @@ export function DeviceSettings() {
       type: "google",
       status: "connected", 
       enabled: true,
-      devices: 3
+      devices: 3,
+      protocol: "Voice Assistant"
+    },
+    {
+      id: "thread",
+      name: "Thread Network",
+      type: "thread",
+      status: "connected",
+      enabled: true,
+      devices: 8,
+      protocol: "Low-Power Mesh",
+      details: "Border Router Active"
+    },
+    {
+      id: "zigbee",
+      name: "Zigbee",
+      type: "zigbee",
+      status: "connected",
+      enabled: true,
+      devices: 12,
+      protocol: "Mesh Network",
+      details: "ConBee II Coordinator"
+    },
+    {
+      id: "zwave",
+      name: "Z-Wave",
+      type: "zwave",
+      status: "disconnected",
+      enabled: false,
+      devices: 0,
+      protocol: "Mesh Network",
+      details: "No controller detected"
+    },
+    {
+      id: "matter",
+      name: "Matter",
+      type: "matter",
+      status: "connected",
+      enabled: true,
+      devices: 5,
+      protocol: "Universal Standard",
+      details: "Controller Active"
     }
   ])
   const [systemSettings, setSystemSettings] = useKV<SystemSetting[]>("system-settings", [
@@ -136,10 +186,12 @@ export function DeviceSettings() {
       <div className="flex-1 overflow-hidden">
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="h-full flex flex-col">
           <div className="px-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="integrations">Integrations</TabsTrigger>
               <TabsTrigger value="system">System</TabsTrigger>
               <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
+              <TabsTrigger value="adaptive">Adaptive</TabsTrigger>
+              <TabsTrigger value="intercom">Intercom</TabsTrigger>
             </TabsList>
           </div>
 
@@ -240,7 +292,10 @@ export function DeviceSettings() {
                                 </div>
                                 <div>
                                   <h3 className="font-medium text-sm">{integration.name}</h3>
-                                  <div className="flex items-center gap-2">
+                                  {integration.protocol && (
+                                    <p className="text-xs text-muted-foreground mb-1">{integration.protocol}</p>
+                                  )}
+                                  <div className="flex items-center gap-2 flex-wrap">
                                     <Badge 
                                       variant={integration.status === 'connected' ? 'default' : 'secondary'}
                                       className="h-4 text-xs"
@@ -250,6 +305,11 @@ export function DeviceSettings() {
                                     <span className="text-xs text-muted-foreground">
                                       {integration.devices} devices
                                     </span>
+                                    {integration.details && (
+                                      <span className="text-xs text-muted-foreground">
+                                        • {integration.details}
+                                      </span>
+                                    )}
                                   </div>
                                 </div>
                               </div>
@@ -367,6 +427,14 @@ export function DeviceSettings() {
 
       <TabsContent value="monitoring" className="flex-1 overflow-hidden m-0 p-0">
         <MonitoringSettings />
+      </TabsContent>
+
+      <TabsContent value="adaptive" className="flex-1 overflow-hidden m-0 p-0">
+        <AdaptiveLighting />
+      </TabsContent>
+
+      <TabsContent value="intercom" className="flex-1 overflow-hidden m-0 p-0">
+        <Intercom />
       </TabsContent>
     </Tabs>
   </div>

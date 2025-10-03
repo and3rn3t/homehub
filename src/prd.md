@@ -2,7 +2,7 @@
 
 ## Core Purpose & Success
 
-**Mission Statement**: Create a beautiful, efficient home automation hub that rivals Apple Home in design quality while providing comprehensive control over Matter and WiFi devices for Raspberry Pi deployment.
+**Mission Statement**: Create a beautiful, efficient home automation hub that rivals Apple Home in design quality while providing comprehensive control over Matter, Thread, Zigbee, Z-Wave, and WiFi devices through open standards for Raspberry Pi deployment.
 
 **Success Indicators**: 
 - Users can control all their smart home devices from a single, elegant interface
@@ -34,9 +34,11 @@
 ## Essential Features
 
 ### Device Management
-- **Functionality**: Discover, connect, and organize Matter/WiFi devices
-- **Purpose**: Central control point for all smart home devices
+- **Functionality**: Discover, connect, and organize Matter, Thread, Zigbee, Z-Wave, and WiFi devices
+- **Purpose**: Central control point for all smart home devices using open standards
 - **Success Criteria**: Devices appear within 30 seconds of network connection
+- **Thread Support**: Native Thread Border Router integration for low-power mesh networking
+- **Open Standards**: Zigbee and Z-Wave protocol support for legacy device compatibility
 
 ### Room Organization  
 - **Functionality**: Group devices by physical location with custom rooms
@@ -47,11 +49,28 @@
 - **Functionality**: One-tap activation of predefined device combinations
 - **Purpose**: Instant mood/activity changes (Good Morning, Movie Time, etc.)
 - **Success Criteria**: Scenes execute in under 2 seconds
+- **Suggested Scenes**: Intelligent scene recommendations based on time, context, and usage patterns
+- **Accessories as Triggers**: Use switches, buttons, and sensors to activate scenes
 
 ### Security & Camera Monitoring
 - **Functionality**: Live camera feeds, motion detection alerts, security event logging
 - **Purpose**: Comprehensive home security monitoring and camera management
 - **Success Criteria**: Live feeds load within 3 seconds, motion alerts appear within 30 seconds of detection
+- **Activity Zones**: Define specific areas for motion detection (inspired by Apple Home)
+- **Face Recognition**: Smart alerts with person identification
+- **Secure Video**: End-to-end encrypted video storage with intelligent analysis
+
+### Adaptive Lighting
+- **Functionality**: Automatic color temperature adjustment based on time of day (circadian rhythm)
+- **Purpose**: Natural lighting that supports human sleep/wake cycles and wellbeing
+- **Success Criteria**: Seamless transitions throughout the day without user intervention
+- **Color Science**: Warm tones in evening (2700K), cool daylight in morning (5000K+)
+
+### Intercom System
+- **Functionality**: Audio/video communication between rooms and devices
+- **Purpose**: Family communication hub without reaching for phones
+- **Success Criteria**: Sub-second connection time, crystal clear audio quality
+- **Integration**: Works with HomePods, smart displays, and mobile devices
 
 ### Visual Flow Designer
 - **Functionality**: Drag-and-drop automation workflow builder with node-based interface
@@ -77,6 +96,8 @@
 - **Functionality**: Multi-user accounts with role-based permissions and personalized dashboards
 - **Purpose**: Family-friendly access control with individual preferences
 - **Success Criteria**: Each user has personalized experience while maintaining security
+- **Child Safety**: Age-appropriate controls and restrictions for kids' access
+- **Guest Access**: Temporary access codes with limited permissions
 
 ### Advanced Device Health & Diagnostics
 - **Functionality**: Real-time device health monitoring, battery alerts, firmware updates, connectivity status
@@ -102,6 +123,8 @@
 - **Functionality**: Wi-Fi management, device network organization, bandwidth monitoring, security scanning
 - **Purpose**: Maintain healthy network infrastructure for reliable device communication
 - **Success Criteria**: Network issues identified and resolved before affecting device performance
+- **Thread Network**: Thread Border Router configuration and mesh network topology visualization
+- **Home Hub Status**: Display active hubs, device routing, and network health
 
 ### Intelligent Notifications & Alerts
 - **Functionality**: Smart notification rules, emergency escalation, maintenance reminders, custom channels
@@ -211,6 +234,61 @@
 - Raspberry Pi performance limitations
 - Matter protocol compatibility variations
 - Voice assistant API rate limits
+- Thread Border Router hardware requirements
+- Zigbee/Z-Wave USB dongle compatibility
+
+## Open Standards & Protocol Support
+
+**Philosophy**: Build on open, interoperable standards to ensure device compatibility and avoid vendor lock-in.
+
+### Supported Protocols
+
+#### Matter
+- **Purpose**: Industry-standard protocol for smart home device interoperability
+- **Implementation**: Native Matter controller support
+- **Benefits**: Works with devices from any Matter-certified manufacturer
+- **Requirements**: Matter-compatible devices, network connectivity
+
+#### Thread
+- **Purpose**: Low-power, mesh networking protocol for battery-operated devices
+- **Implementation**: Thread Border Router integration (can use Raspberry Pi with compatible radio)
+- **Benefits**: Extended range through mesh, excellent battery life, secure by design
+- **Requirements**: Thread Border Router, Thread-enabled devices
+- **Topology**: Visualize mesh network structure and signal strength
+
+#### Zigbee
+- **Purpose**: Mature mesh networking protocol with wide device support
+- **Implementation**: USB Zigbee coordinator (e.g., ConBee II, Sonoff Zigbee)
+- **Benefits**: Large ecosystem of affordable devices, reliable mesh networking
+- **Requirements**: USB Zigbee coordinator dongle
+
+#### Z-Wave
+- **Purpose**: Reliable mesh protocol with strong security
+- **Implementation**: USB Z-Wave controller (e.g., Aeotec Z-Stick)
+- **Benefits**: Excellent range, no Wi-Fi interference, mature ecosystem
+- **Requirements**: USB Z-Wave controller stick
+
+#### WiFi
+- **Purpose**: Direct IP connectivity for high-bandwidth devices
+- **Implementation**: Native support via local API discovery
+- **Benefits**: No additional hardware needed, high bandwidth
+- **Use Cases**: Cameras, smart displays, high-power devices
+
+### Protocol Comparison & Selection Guide
+
+| Protocol | Power | Range | Device Types | Best For |
+|----------|-------|-------|--------------|----------|
+| Matter   | Varies | Varies | All | Future-proof interoperability |
+| Thread   | Ultra-low | Excellent (mesh) | Sensors, locks | Battery devices, reliable mesh |
+| Zigbee   | Low | Good (mesh) | All | Cost-effective, large ecosystem |
+| Z-Wave   | Low | Excellent (mesh) | All | Reliability, no interference |
+| WiFi     | High | Good | Cameras, displays | High bandwidth needs |
+
+### Integration Strategy
+- **Unified Interface**: All protocols managed through single, consistent UI
+- **Auto-Discovery**: Automatic device detection across all supported protocols
+- **Protocol Bridge**: Enable communication between devices on different protocols
+- **Migration Path**: Easy migration of devices between protocols when replacing hardware
 
 ## Implementation Considerations
 
