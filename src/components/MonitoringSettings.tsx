@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { useKV } from '@/hooks/use-kv'
 import {
+  BatteryMedium,
   Bell,
   ChartLineUp,
   CheckCircle,
@@ -14,6 +15,7 @@ import {
   Gear as SettingsIcon,
   Shield,
   Warning,
+  WifiHigh,
   XCircle,
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
@@ -340,8 +342,8 @@ export function MonitoringSettings() {
               {Object.entries(settings.alertCategories).map(([category, enabled]) => {
                 const icons = {
                   offline: XCircle,
-                  battery: Battery,
-                  signal: Wifi,
+                  battery: BatteryMedium,
+                  signal: WifiHigh,
                   security: Shield,
                   maintenance: Clock,
                 }
@@ -383,7 +385,7 @@ export function MonitoringSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Wifi size={20} className="text-primary" />
+                <WifiHigh size={20} className="text-primary" />
                 Network Monitoring
               </CardTitle>
             </CardHeader>

@@ -306,7 +306,7 @@ export function GeofenceBuilder() {
       case 'enter':
         return Target
       case 'exit':
-        return Navigation
+        return NavigationArrow
       case 'dwell':
         return CircleDashed
       default:
@@ -417,7 +417,9 @@ export function GeofenceBuilder() {
                     <Label htmlFor="radius">Radius: {zoneForm.radius}m</Label>
                     <Slider
                       value={[zoneForm.radius]}
-                      onValueChange={([value]) => setZoneForm(prev => ({ ...prev, radius: value }))}
+                      onValueChange={([value]) =>
+                        setZoneForm(prev => ({ ...prev, radius: value ?? prev.radius }))
+                      }
                       max={1000}
                       min={25}
                       step={25}

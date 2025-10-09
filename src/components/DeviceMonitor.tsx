@@ -193,7 +193,7 @@ export function DeviceMonitor() {
           if (randomChange < 0.02) {
             // 2% chance of status change
             const statuses: DeviceStatus['status'][] = ['online', 'warning', 'error']
-            newStatus = statuses[Math.floor(Math.random() * statuses.length)]
+            newStatus = statuses[Math.floor(Math.random() * statuses.length)] ?? device.status
           }
 
           // Update battery levels

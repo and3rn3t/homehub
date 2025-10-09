@@ -19,24 +19,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { MOCK_USERS } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
+import type { User, UserPermissions } from '@/types'
 import { Crown, Shield, Trash, User as UserIcon, UserPlus } from '@phosphor-icons/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-interface User {
-  id: string
-  name: string
-  email: string
-  role: 'owner' | 'admin' | 'member' | 'guest'
-  avatar?: string
-  createdAt: string
-  lastActive: string
-  permissions: string[]
-}
-
 export function UserManagement() {
-  const [users, setUsers] = useKV<User[]>('home-users', [])
+  const [users, setUsers] = useKV<User[]>('home-users', MOCK_USERS)
   const [isAddingUser, setIsAddingUser] = useState(false)
   const [newUser, setNewUser] = useState({
     name: '',
@@ -55,9 +46,8 @@ export function UserManagement() {
       name: newUser.name,
       email: newUser.email,
       role: newUser.role,
-      createdAt: new Date().toISOString(),
-      lastActive: new Date().toISOString(),
       permissions: getDefaultPermissions(newUser.role),
+      lastActive: new Date(),
     }
 
     setUsers(currentUsers => [...currentUsers, user])
@@ -71,18 +61,37 @@ export function UserManagement() {
     toast.success('User removed from home')
   }
 
-  const getDefaultPermissions = (role: User['role']): string[] => {
+  const getDefaultPermissions = (role: User['role']): UserPermissions => {
     switch (role) {
       case 'owner':
-        return ['all']
       case 'admin':
-        return ['devices', 'scenes', 'automation', 'settings', 'users']
+        return {
+          canEditDevices: true,
+          canCreateScenes: true,
+          canManageUsers: true,
+          canViewSecurity: true,
+        }
       case 'member':
-        return ['devices', 'scenes']
+        return {
+          canEditDevices: true,
+          canCreateScenes: true,
+          canManageUsers: false,
+          canViewSecurity: false,
+        }
       case 'guest':
-        return ['scenes']
+        return {
+          canEditDevices: false,
+          canCreateScenes: false,
+          canManageUsers: false,
+          canViewSecurity: false,
+        }
       default:
-        return []
+        return {
+          canEditDevices: false,
+          canCreateScenes: false,
+          canManageUsers: false,
+          canViewSecurity: false,
+        }
     }
   }
 
@@ -226,7 +235,8 @@ export function UserManagement() {
                         {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                       </Badge>
                       <span className="text-muted-foreground text-xs">
-                        Last active: {new Date(user.lastActive).toLocaleDateString()}
+                        Last active:{' '}
+                        {user.lastActive ? new Date(user.lastActive).toLocaleDateString() : 'Never'}
                       </span>
                     </div>
                   </div>

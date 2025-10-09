@@ -106,8 +106,9 @@ export function NotificationCenter() {
         ]
         const severities: SystemAlert['severity'][] = ['info', 'warning', 'error']
 
-        const randomType = alertTypes[Math.floor(Math.random() * alertTypes.length)]
-        const randomSeverity = severities[Math.floor(Math.random() * severities.length)]
+        const randomType =
+          alertTypes[Math.floor(Math.random() * alertTypes.length)] ?? 'system-error'
+        const randomSeverity = severities[Math.floor(Math.random() * severities.length)] ?? 'info'
 
         const newAlert: SystemAlert = {
           id: `alert-${Date.now()}`,

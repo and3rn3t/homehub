@@ -1,6 +1,8 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { KV_KEYS, MOCK_SCENES } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
+import type { Scene } from '@/types'
 import {
   Bed,
   Coffee,
@@ -13,25 +15,6 @@ import {
 } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
-
-interface Scene {
-  id: string
-  name: string
-  description?: string
-  icon?: string
-  color?: string
-  devices: Array<{
-    deviceId: string
-    action: string
-    value?: any
-  }>
-  actions: Array<{
-    deviceId: string
-    action: string
-    value?: any
-  }>
-  isActive?: boolean
-}
 
 const sceneConfigs = {
   'good-morning': {
@@ -82,57 +65,17 @@ const sceneIcons = {
 }
 
 export function Scenes() {
-  const [scenes, setScenes] = useKV<Scene[]>('scenes', [
-    {
-      id: 'good-morning',
-      name: 'Good Morning',
-      isActive: false,
-      devices: ['living-room-light', 'thermostat-main'],
-      actions: [
-        { deviceId: 'living-room-light', action: 'turn_on', value: 100 },
-        { deviceId: 'thermostat-main', action: 'set_temperature', value: 72 },
-      ],
-    },
-    {
-      id: 'good-night',
-      name: 'Good Night',
-      isActive: false,
-      devices: ['living-room-light', 'front-door-lock'],
-      actions: [
-        { deviceId: 'living-room-light', action: 'turn_off', value: 0 },
-        { deviceId: 'front-door-lock', action: 'lock', value: true },
-      ],
-    },
-    {
-      id: 'movie-time',
-      name: 'Movie Time',
-      isActive: false,
-      devices: ['living-room-light'],
-      actions: [{ deviceId: 'living-room-light', action: 'dim', value: 20 }],
-    },
-  ])
-  const [activeScene, setActiveScene] = useKV<string | null>('active-scene', null)
+  const [scenes, _setScenes] = useKV<Scene[]>(KV_KEYS.SCENES, MOCK_SCENES)
+  const [activeScene, setActiveScene] = useKV<string | null>(KV_KEYS.ACTIVE_SCENE, null)
 
   const activateScene = (sceneId: string) => {
     setActiveScene(sceneId)
-    setScenes(currentScenes =>
-      currentScenes.map(scene => ({
-        ...scene,
-        isActive: scene.id === sceneId,
-      }))
-    )
 
     const scene = scenes.find(s => s.id === sceneId)
     toast.success(`${scene?.name || 'Scene'} activated`)
 
     setTimeout(() => {
       setActiveScene(null)
-      setScenes(currentScenes =>
-        currentScenes.map(scene => ({
-          ...scene,
-          isActive: false,
-        }))
-      )
     }, 2000)
   }
 
@@ -223,7 +166,7 @@ export function Scenes() {
                 >
                   <Card
                     className={`cursor-pointer overflow-hidden transition-all duration-200 ${
-                      scene.isActive ? 'ring-primary shadow-lg ring-2' : 'hover:shadow-lg'
+                      scene.id === activeScene ? 'ring-primary shadow-lg ring-2' : 'hover:shadow-lg'
                     }`}
                     onClick={() => activateScene(scene.id)}
                   >
@@ -237,7 +180,7 @@ export function Scenes() {
                           <h4 className="mb-1 text-lg font-semibold">{scene.name}</h4>
                         </div>
 
-                        {scene.isActive && (
+                        {scene.id === activeScene && (
                           <motion.div
                             initial={{ scale: 0, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
@@ -250,9 +193,9 @@ export function Scenes() {
                         <p className="text-muted-foreground mb-3 text-sm">{scene.description}</p>
                         <div className="flex items-center justify-between">
                           <span className="text-muted-foreground text-xs">
-                            {scene.devices.length} devices
+                            {scene.deviceStates.length} devices
                           </span>
-                          {scene.isActive && (
+                          {scene.id === activeScene && (
                             <motion.div
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}

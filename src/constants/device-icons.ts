@@ -1,48 +1,48 @@
 /**
  * Device Icon Mappings
- * 
+ *
  * Maps device types to Phosphor icon components.
  */
 
 import {
-  Lightbulb,
-  Thermometer,
-  Shield,
-  Wifi,
   Camera,
-  Lock,
+  Drop,
   Fan,
-  Television,
-  Speaker,
+  Lightbulb,
   Lightning,
-  Drop
-} from "@phosphor-icons/react"
+  Lock,
+  Shield,
+  SpeakerHigh,
+  Television,
+  Thermometer,
+  WifiHigh,
+} from '@phosphor-icons/react'
 
 export const DEVICE_ICONS = {
   light: Lightbulb,
   thermostat: Thermometer,
   security: Shield,
-  sensor: Wifi,
+  sensor: WifiHigh,
   camera: Camera,
   lock: Lock,
   fan: Fan,
   tv: Television,
-  speaker: Speaker,
+  speaker: SpeakerHigh,
   switch: Lightning,
   valve: Drop,
 } as const
 
 export const AUTOMATION_ICONS = {
-  schedule: import("@phosphor-icons/react").then(m => m.Clock),
-  geofence: import("@phosphor-icons/react").then(m => m.MapPin),
-  condition: import("@phosphor-icons/react").then(m => m.CalendarBlank),
+  schedule: import('@phosphor-icons/react').then(m => m.Clock),
+  geofence: import('@phosphor-icons/react').then(m => m.MapPin),
+  condition: import('@phosphor-icons/react').then(m => m.CalendarBlank),
 } as const
 
 export const ROOM_ICONS = {
-  'living-room': import("@phosphor-icons/react").then(m => m.Couch),
-  'bedroom': import("@phosphor-icons/react").then(m => m.Bed),
-  'kitchen': import("@phosphor-icons/react").then(m => m.ForkKnife),
-  'bathroom': import("@phosphor-icons/react").then(m => m.Bathtub),
-  'office': import("@phosphor-icons/react").then(m => m.Desk),
-  'garage': import("@phosphor-icons/react").then(m => m.GarageDoor),
+  'living-room': import('@phosphor-icons/react').then(m => m.Couch),
+  bedroom: import('@phosphor-icons/react').then(m => m.Bed),
+  kitchen: import('@phosphor-icons/react').then(m => m.ForkKnife),
+  bathroom: import('@phosphor-icons/react').then(m => m.Bathtub),
+  office: import('@phosphor-icons/react').then(m => m.Desk),
+  garage: import('@phosphor-icons/react').then(m => m.Garage),
 } as const

@@ -77,6 +77,11 @@ export function FlowTutorial({ onComplete }: FlowTutorialProps) {
   if (hasSeenTutorial || !isVisible) return null
 
   const currentStepData = tutorialSteps[currentStep]
+
+  if (!currentStepData) {
+    return null
+  }
+
   const isLastStep = currentStep === tutorialSteps.length - 1
 
   const nextStep = () => {

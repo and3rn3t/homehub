@@ -1,22 +1,22 @@
-import { useState } from 'react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useKV } from '@/hooks/use-kv'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
-  Microphone, 
-  SpeakerHigh,
-  Video,
+import {
+  DeviceMobile,
+  Microphone,
   Phone,
   PhoneDisconnect,
+  SpeakerHigh,
+  Television,
   User,
   Users,
-  DeviceMobile,
-  Television
-} from "@phosphor-icons/react"
-import { motion } from "framer-motion"
-import { toast } from "sonner"
+  Video,
+} from '@phosphor-icons/react'
+import { motion } from 'framer-motion'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
 interface IntercomDevice {
   id: string
@@ -37,36 +37,89 @@ interface ActiveCall {
 }
 
 const DEVICES: IntercomDevice[] = [
-  { id: "living-room-homepod", name: "Living Room", room: "Living Room", type: "homepod", status: "available", hasVideo: false, hasAudio: true },
-  { id: "kitchen-display", name: "Kitchen Display", room: "Kitchen", type: "display", status: "available", hasVideo: true, hasAudio: true },
-  { id: "bedroom-homepod", name: "Bedroom", room: "Bedroom", type: "homepod", status: "available", hasVideo: false, hasAudio: true },
-  { id: "kids-room-display", name: "Kids Room", room: "Kids Room", type: "display", status: "available", hasVideo: true, hasAudio: true },
-  { id: "mobile-primary", name: "iPhone", room: "Mobile", type: "mobile", status: "available", hasVideo: true, hasAudio: true },
-  { id: "living-tv", name: "Living Room TV", room: "Living Room", type: "tv", status: "offline", hasVideo: true, hasAudio: true },
+  {
+    id: 'living-room-homepod',
+    name: 'Living Room',
+    room: 'Living Room',
+    type: 'homepod',
+    status: 'available',
+    hasVideo: false,
+    hasAudio: true,
+  },
+  {
+    id: 'kitchen-display',
+    name: 'Kitchen Display',
+    room: 'Kitchen',
+    type: 'display',
+    status: 'available',
+    hasVideo: true,
+    hasAudio: true,
+  },
+  {
+    id: 'bedroom-homepod',
+    name: 'Bedroom',
+    room: 'Bedroom',
+    type: 'homepod',
+    status: 'available',
+    hasVideo: false,
+    hasAudio: true,
+  },
+  {
+    id: 'kids-room-display',
+    name: 'Kids Room',
+    room: 'Kids Room',
+    type: 'display',
+    status: 'available',
+    hasVideo: true,
+    hasAudio: true,
+  },
+  {
+    id: 'mobile-primary',
+    name: 'iPhone',
+    room: 'Mobile',
+    type: 'mobile',
+    status: 'available',
+    hasVideo: true,
+    hasAudio: true,
+  },
+  {
+    id: 'living-tv',
+    name: 'Living Room TV',
+    room: 'Living Room',
+    type: 'tv',
+    status: 'offline',
+    hasVideo: true,
+    hasAudio: true,
+  },
 ]
 
 export function Intercom() {
   const [devices, setDevices] = useState<IntercomDevice[]>(DEVICES)
   const [activeCall, setActiveCall] = useState<ActiveCall | null>(null)
   const [selectedDevice, setSelectedDevice] = useState<string | null>(null)
-  const [intercomEnabled, setIntercomEnabled] = useKV<boolean>("intercom-enabled", true)
+  const [_intercomEnabled, _setIntercomEnabled] = useKV<boolean>('intercom-enabled', true)
 
   const getDeviceIcon = (type: string) => {
     switch (type) {
-      case 'homepod': return SpeakerHigh
-      case 'display': return Television
-      case 'mobile': return DeviceMobile
-      case 'tv': return Television
-      default: return SpeakerHigh
+      case 'homepod':
+        return SpeakerHigh
+      case 'display':
+        return Television
+      case 'mobile':
+        return DeviceMobile
+      case 'tv':
+        return Television
+      default:
+        return SpeakerHigh
     }
   }
 
   const startCall = (fromDeviceId: string, toDeviceId: string, withVideo: boolean) => {
     const fromDevice = devices.find(d => d.id === fromDeviceId)
     const toDevice = devices.find(d => d.id === toDeviceId)
-    
+
     if (!fromDevice || !toDevice) return
-    
+
     if (toDevice.status !== 'available') {
       toast.error(`${toDevice.name} is ${toDevice.status}`)
       return
@@ -77,18 +130,20 @@ export function Intercom() {
       fromDevice: fromDevice.name,
       toDevice: toDevice.name,
       startTime: new Date(),
-      hasVideo: withVideo && fromDevice.hasVideo && toDevice.hasVideo
+      hasVideo: withVideo && fromDevice.hasVideo && toDevice.hasVideo,
     }
 
     setActiveCall(call)
-    
+
     // Update device statuses
-    setDevices(devices.map(d => {
-      if (d.id === fromDeviceId || d.id === toDeviceId) {
-        return { ...d, status: 'busy' }
-      }
-      return d
-    }))
+    setDevices(
+      devices.map(d => {
+        if (d.id === fromDeviceId || d.id === toDeviceId) {
+          return { ...d, status: 'busy' }
+        }
+        return d
+      })
+    )
 
     toast.success(`Calling ${toDevice.name}...`)
   }
@@ -97,23 +152,25 @@ export function Intercom() {
     if (!activeCall) return
 
     setActiveCall(null)
-    
-    // Reset device statuses
-    setDevices(devices.map(d => {
-      if (d.status === 'busy') {
-        return { ...d, status: 'available' }
-      }
-      return d
-    }))
 
-    toast.success("Call ended")
+    // Reset device statuses
+    setDevices(
+      devices.map(d => {
+        if (d.status === 'busy') {
+          return { ...d, status: 'available' }
+        }
+        return d
+      })
+    )
+
+    toast.success('Call ended')
   }
 
   const broadcastToAll = () => {
     const availableDevices = devices.filter(d => d.status === 'available')
-    
+
     if (availableDevices.length === 0) {
-      toast.error("No devices available for broadcast")
+      toast.error('No devices available for broadcast')
       return
     }
 
@@ -121,11 +178,11 @@ export function Intercom() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       <div className="p-6 pb-4">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Intercom</h1>
+            <h1 className="text-foreground text-2xl font-bold">Intercom</h1>
             <p className="text-muted-foreground">Communicate between devices and rooms</p>
           </div>
           <div className="flex items-center gap-2">
@@ -138,7 +195,7 @@ export function Intercom() {
         </div>
 
         <Tabs defaultValue="devices" className="flex flex-col">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsList className="mb-6 grid w-full grid-cols-2">
             <TabsTrigger value="devices">Devices</TabsTrigger>
             <TabsTrigger value="quick">Quick Actions</TabsTrigger>
           </TabsList>
@@ -146,39 +203,36 @@ export function Intercom() {
           <TabsContent value="devices" className="space-y-6">
             {/* Active Call Card */}
             {activeCall && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-              >
-                <Card className="border-2 border-primary">
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+                <Card className="border-primary border-2">
                   <CardContent className="p-6">
-                    <div className="text-center space-y-4">
+                    <div className="space-y-4 text-center">
                       <div className="flex items-center justify-center gap-4">
                         <div className="flex flex-col items-center">
-                          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                          <div className="bg-primary/10 mb-2 flex h-16 w-16 items-center justify-center rounded-full">
                             <User size={32} className="text-primary" />
                           </div>
                           <p className="font-medium">{activeCall.fromDevice}</p>
                         </div>
-                        
+
                         <div className="flex items-center gap-2">
                           {activeCall.hasVideo ? (
                             <Video size={24} className="text-primary" />
                           ) : (
                             <Microphone size={24} className="text-primary" />
                           )}
-                          <div className="h-1 w-8 bg-primary animate-pulse" />
+                          <div className="bg-primary h-1 w-8 animate-pulse" />
                         </div>
-                        
+
                         <div className="flex flex-col items-center">
-                          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                          <div className="bg-primary/10 mb-2 flex h-16 w-16 items-center justify-center rounded-full">
                             <User size={32} className="text-primary" />
                           </div>
                           <p className="font-medium">{activeCall.toDevice}</p>
                         </div>
                       </div>
-                      
-                      <div className="flex gap-3 justify-center">
+
+                      <div className="flex justify-center gap-3">
                         <Button variant="destructive" onClick={endCall}>
                           <PhoneDisconnect size={20} className="mr-2" />
                           End Call
@@ -191,18 +245,18 @@ export function Intercom() {
             )}
 
             {/* Device List */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {devices.map((device) => {
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {devices.map(device => {
                 const DeviceIcon = getDeviceIcon(device.type)
                 const isAvailable = device.status === 'available'
-                
+
                 return (
                   <motion.div
                     key={device.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                   >
-                    <Card 
+                    <Card
                       className={`cursor-pointer transition-all ${
                         selectedDevice === device.id ? 'border-primary border-2' : ''
                       } ${!isAvailable ? 'opacity-60' : ''}`}
@@ -211,17 +265,17 @@ export function Intercom() {
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center">
-                              <DeviceIcon 
-                                size={24} 
-                                className={isAvailable ? "text-primary" : "text-muted-foreground"} 
+                            <div className="bg-secondary flex h-12 w-12 items-center justify-center rounded-full">
+                              <DeviceIcon
+                                size={24}
+                                className={isAvailable ? 'text-primary' : 'text-muted-foreground'}
                               />
                             </div>
                             <div>
                               <h3 className="font-medium">{device.name}</h3>
-                              <p className="text-sm text-muted-foreground">{device.room}</p>
-                              <div className="flex gap-2 mt-1">
-                                <Badge 
+                              <p className="text-muted-foreground text-sm">{device.room}</p>
+                              <div className="mt-1 flex gap-2">
+                                <Badge
                                   variant={isAvailable ? 'default' : 'secondary'}
                                   className="h-4 text-xs"
                                 >
@@ -235,12 +289,12 @@ export function Intercom() {
                               </div>
                             </div>
                           </div>
-                          
+
                           {selectedDevice && selectedDevice !== device.id && isAvailable && (
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={(e) => {
+                              onClick={e => {
                                 e.stopPropagation()
                                 startCall(selectedDevice, device.id, device.hasVideo)
                               }}
@@ -264,24 +318,26 @@ export function Intercom() {
                 <CardTitle className="text-lg">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start h-auto py-4"
+                <Button
+                  variant="outline"
+                  className="h-auto w-full justify-start py-4"
                   onClick={broadcastToAll}
                 >
                   <Users size={20} className="mr-3" />
                   <div className="text-left">
                     <p className="font-medium">Broadcast to All Rooms</p>
-                    <p className="text-sm text-muted-foreground">Send message to all devices</p>
+                    <p className="text-muted-foreground text-sm">Send message to all devices</p>
                   </div>
                 </Button>
 
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start h-auto py-4"
+                <Button
+                  variant="outline"
+                  className="h-auto w-full justify-start py-4"
                   onClick={() => {
                     const firstDevice = devices.find(d => d.status === 'available')
-                    const secondDevice = devices.find(d => d.status === 'available' && d.id !== firstDevice?.id)
+                    const secondDevice = devices.find(
+                      d => d.status === 'available' && d.id !== firstDevice?.id
+                    )
                     if (firstDevice && secondDevice) {
                       startCall(firstDevice.id, secondDevice.id, false)
                     }
@@ -290,19 +346,19 @@ export function Intercom() {
                   <Microphone size={20} className="mr-3" />
                   <div className="text-left">
                     <p className="font-medium">Family Announcement</p>
-                    <p className="text-sm text-muted-foreground">Call everyone for dinner, etc.</p>
+                    <p className="text-muted-foreground text-sm">Call everyone for dinner, etc.</p>
                   </div>
                 </Button>
 
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start h-auto py-4"
-                  onClick={() => toast.info("Setting up bedtime routine...")}
+                <Button
+                  variant="outline"
+                  className="h-auto w-full justify-start py-4"
+                  onClick={() => toast.info('Setting up bedtime routine...')}
                 >
                   <Phone size={20} className="mr-3" />
                   <div className="text-left">
                     <p className="font-medium">Bedtime Check-in</p>
-                    <p className="text-sm text-muted-foreground">Call kids' rooms for goodnight</p>
+                    <p className="text-muted-foreground text-sm">Call kids' rooms for goodnight</p>
                   </div>
                 </Button>
               </CardContent>
@@ -313,7 +369,7 @@ export function Intercom() {
                 <CardTitle className="text-lg">Settings</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="text-sm text-muted-foreground">
+                <div className="text-muted-foreground text-sm">
                   <p className="mb-2">• Requires HomeKit-enabled devices</p>
                   <p className="mb-2">• Works with HomePod, iPad, iPhone, Apple TV</p>
                   <p className="mb-2">• End-to-end encrypted communication</p>
