@@ -1,15 +1,28 @@
-import { useState } from 'react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { useKV } from '@/hooks/use-kv'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { UserPlus, Crown, Shield, User as UserIcon, Trash2 } from "@phosphor-icons/react"
-import { toast } from "sonner"
+import { Crown, Shield, Trash, User as UserIcon, UserPlus } from '@phosphor-icons/react'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
 interface User {
   id: string
@@ -23,17 +36,17 @@ interface User {
 }
 
 export function UserManagement() {
-  const [users, setUsers] = useKV<User[]>("home-users", [])
+  const [users, setUsers] = useKV<User[]>('home-users', [])
   const [isAddingUser, setIsAddingUser] = useState(false)
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
-    role: 'member' as User['role']
+    role: 'member' as User['role'],
   })
 
   const handleAddUser = () => {
     if (!newUser.name || !newUser.email) {
-      toast.error("Please fill in all required fields")
+      toast.error('Please fill in all required fields')
       return
     }
 
@@ -44,7 +57,7 @@ export function UserManagement() {
       role: newUser.role,
       createdAt: new Date().toISOString(),
       lastActive: new Date().toISOString(),
-      permissions: getDefaultPermissions(newUser.role)
+      permissions: getDefaultPermissions(newUser.role),
     }
 
     setUsers(currentUsers => [...currentUsers, user])
@@ -55,7 +68,7 @@ export function UserManagement() {
 
   const handleRemoveUser = (userId: string) => {
     setUsers(currentUsers => currentUsers.filter(user => user.id !== userId))
-    toast.success("User removed from home")
+    toast.success('User removed from home')
   }
 
   const getDefaultPermissions = (role: User['role']): string[] => {
@@ -100,7 +113,7 @@ export function UserManagement() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">User Management</h1>
@@ -117,9 +130,7 @@ export function UserManagement() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add New User</DialogTitle>
-              <DialogDescription>
-                Invite someone to access your smart home system
-              </DialogDescription>
+              <DialogDescription>Invite someone to access your smart home system</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
@@ -127,7 +138,7 @@ export function UserManagement() {
                 <Input
                   id="name"
                   value={newUser.name}
-                  onChange={(e) => setNewUser(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e => setNewUser(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Enter full name"
                 />
               </div>
@@ -137,26 +148,37 @@ export function UserManagement() {
                   id="email"
                   type="email"
                   value={newUser.email}
-                  onChange={(e) => setNewUser(prev => ({ ...prev, email: e.target.value }))}
+                  onChange={e => setNewUser(prev => ({ ...prev, email: e.target.value }))}
                   placeholder="Enter email address"
                 />
               </div>
               <div>
                 <Label htmlFor="role">Role</Label>
-                <Select value={newUser.role} onValueChange={(value: User['role']) => setNewUser(prev => ({ ...prev, role: value }))}>
+                <Select
+                  value={newUser.role}
+                  onValueChange={(value: User['role']) =>
+                    setNewUser(prev => ({ ...prev, role: value }))
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="admin">Admin - Full access except user management</SelectItem>
+                    <SelectItem value="admin">
+                      Admin - Full access except user management
+                    </SelectItem>
                     <SelectItem value="member">Member - Device and scene control</SelectItem>
                     <SelectItem value="guest">Guest - Scene control only</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="flex gap-3 pt-4">
-                <Button onClick={handleAddUser} className="flex-1">Add User</Button>
-                <Button variant="outline" onClick={() => setIsAddingUser(false)} className="flex-1">Cancel</Button>
+                <Button onClick={handleAddUser} className="flex-1">
+                  Add User
+                </Button>
+                <Button variant="outline" onClick={() => setIsAddingUser(false)} className="flex-1">
+                  Cancel
+                </Button>
               </div>
             </div>
           </DialogContent>
@@ -168,8 +190,8 @@ export function UserManagement() {
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <UserIcon size={48} className="text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">No Users Added</h3>
-              <p className="text-muted-foreground text-center mb-6">
+              <h3 className="mb-2 text-lg font-medium">No Users Added</h3>
+              <p className="text-muted-foreground mb-6 text-center">
                 Add family members and guests to share access to your smart home
               </p>
               <Button onClick={() => setIsAddingUser(true)}>
@@ -179,33 +201,37 @@ export function UserManagement() {
             </CardContent>
           </Card>
         ) : (
-          users.map((user) => (
+          users.map(user => (
             <Card key={user.id}>
               <CardContent className="flex items-center justify-between p-6">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-12 w-12">
                     <AvatarImage src={user.avatar} />
                     <AvatarFallback>
-                      {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                      {user.name
+                        .split(' ')
+                        .map(n => n[0])
+                        .join('')
+                        .toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="mb-1 flex items-center gap-2">
                       <h3 className="font-medium">{user.name}</h3>
                       {getRoleIcon(user.role)}
                     </div>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
-                    <div className="flex items-center gap-2 mt-2">
+                    <p className="text-muted-foreground text-sm">{user.email}</p>
+                    <div className="mt-2 flex items-center gap-2">
                       <Badge variant={getRoleBadgeVariant(user.role)} className="text-xs">
                         {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                       </Badge>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-muted-foreground text-xs">
                         Last active: {new Date(user.lastActive).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   {user.role !== 'owner' && (
                     <Button
@@ -214,7 +240,7 @@ export function UserManagement() {
                       onClick={() => handleRemoveUser(user.id)}
                       className="text-destructive hover:text-destructive"
                     >
-                      <Trash2 size={16} />
+                      <Trash size={16} />
                     </Button>
                   )}
                 </div>
@@ -228,39 +254,39 @@ export function UserManagement() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Permission Overview</CardTitle>
-            <CardDescription>
-              What each role can access in your smart home
-            </CardDescription>
+            <CardDescription>What each role can access in your smart home</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4">
-              <div className="flex items-center justify-between py-2 border-b">
+              <div className="flex items-center justify-between border-b py-2">
                 <div className="flex items-center gap-2">
                   <Crown size={16} className="text-yellow-500" />
                   <span className="font-medium">Owner</span>
                 </div>
-                <span className="text-sm text-muted-foreground">Full access to everything</span>
+                <span className="text-muted-foreground text-sm">Full access to everything</span>
               </div>
-              <div className="flex items-center justify-between py-2 border-b">
+              <div className="flex items-center justify-between border-b py-2">
                 <div className="flex items-center gap-2">
                   <Shield size={16} className="text-blue-500" />
                   <span className="font-medium">Admin</span>
                 </div>
-                <span className="text-sm text-muted-foreground">Devices, scenes, automation, settings</span>
+                <span className="text-muted-foreground text-sm">
+                  Devices, scenes, automation, settings
+                </span>
               </div>
-              <div className="flex items-center justify-between py-2 border-b">
+              <div className="flex items-center justify-between border-b py-2">
                 <div className="flex items-center gap-2">
                   <UserIcon size={16} className="text-muted-foreground" />
                   <span className="font-medium">Member</span>
                 </div>
-                <span className="text-sm text-muted-foreground">Devices and scenes only</span>
+                <span className="text-muted-foreground text-sm">Devices and scenes only</span>
               </div>
               <div className="flex items-center justify-between py-2">
                 <div className="flex items-center gap-2">
                   <UserIcon size={16} className="text-muted-foreground" />
                   <span className="font-medium">Guest</span>
                 </div>
-                <span className="text-sm text-muted-foreground">Scenes only</span>
+                <span className="text-muted-foreground text-sm">Scenes only</span>
               </div>
             </div>
           </CardContent>

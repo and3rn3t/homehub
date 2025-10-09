@@ -1,21 +1,22 @@
+import { ActivityBar } from '@/components/ui/activity-bar'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useKV } from '@/hooks/use-kv'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
-  TrendUp, 
-  TrendDown, 
-  Zap, 
-  Wifi, 
-  Battery, 
-  Clock, 
+import {
+  BatteryMedium,
+  ChartLineUp,
+  CheckCircle,
+  Clock,
+  Lightning,
   Shield,
-  Activity,
-  AlertTriangle,
-  CheckCircle
-} from "@phosphor-icons/react"
+  TrendDown,
+  TrendUp,
+  Warning,
+  WifiHigh,
+} from '@phosphor-icons/react'
 
 interface DeviceHealth {
   id: string
@@ -44,133 +45,140 @@ interface Insight {
 }
 
 export function InsightsDashboard() {
-  const [devices] = useKV<DeviceHealth[]>("device-health", [
+  const [devices] = useKV<DeviceHealth[]>('device-health', [
     {
-      id: "1",
-      name: "Living Room Lights",
-      type: "Light",
+      id: '1',
+      name: 'Living Room Lights',
+      type: 'Light',
       status: 'online',
       signalStrength: 85,
       lastSeen: new Date().toISOString(),
-      firmwareVersion: "1.2.3",
-      uptime: 847
+      firmwareVersion: '1.2.3',
+      uptime: 847,
     },
     {
-      id: "2",
-      name: "Front Door Lock",
-      type: "Lock",
+      id: '2',
+      name: 'Front Door Lock',
+      type: 'Lock',
       status: 'online',
       batteryLevel: 23,
       signalStrength: 92,
       lastSeen: new Date().toISOString(),
-      firmwareVersion: "2.1.0",
-      uptime: 1205
+      firmwareVersion: '2.1.0',
+      uptime: 1205,
     },
     {
-      id: "3",
-      name: "Kitchen Motion Sensor",
-      type: "Sensor",
+      id: '3',
+      name: 'Kitchen Motion Sensor',
+      type: 'Sensor',
       status: 'warning',
       batteryLevel: 8,
       signalStrength: 67,
       lastSeen: new Date(Date.now() - 300000).toISOString(),
-      firmwareVersion: "1.0.1",
-      uptime: 2847
-    }
+      firmwareVersion: '1.0.1',
+      uptime: 2847,
+    },
   ])
 
-  const [usageData] = useKV<UsagePattern[]>("usage-patterns", 
+  const [usageData] = useKV<UsagePattern[]>(
+    'usage-patterns',
     Array.from({ length: 24 }, (_, i) => ({
       hour: i,
       deviceCount: Math.floor(Math.random() * 20) + 5,
-      energyUsage: Math.floor(Math.random() * 500) + 100
+      energyUsage: Math.floor(Math.random() * 500) + 100,
     }))
   )
 
-  const [insights] = useKV<Insight[]>("system-insights", [
+  const [insights] = useKV<Insight[]>('system-insights', [
     {
       type: 'optimization',
       title: 'Battery Alert',
       description: 'Kitchen Motion Sensor battery is critically low (8%)',
       impact: 'high',
-      actionable: true
+      actionable: true,
     },
     {
       type: 'energy',
       title: 'Peak Usage Detected',
-      description: 'Your energy usage peaks at 7 PM. Consider shifting some activities to save costs.',
+      description:
+        'Your energy usage peaks at 7 PM. Consider shifting some activities to save costs.',
       impact: 'medium',
-      actionable: true
+      actionable: true,
     },
     {
       type: 'security',
       title: 'Device Security Update',
       description: 'Front Door Lock has a firmware update available with security improvements.',
       impact: 'high',
-      actionable: true
+      actionable: true,
     },
     {
       type: 'usage',
       title: 'Automation Opportunity',
-      description: 'Living room lights are manually controlled 90% of the time. Consider automation.',
+      description:
+        'Living room lights are manually controlled 90% of the time. Consider automation.',
       impact: 'low',
-      actionable: true
-    }
+      actionable: true,
+    },
   ])
-
-  const getStatusColor = (status: DeviceHealth['status']) => {
-    switch (status) {
-      case 'online': return 'text-green-500'
-      case 'warning': return 'text-yellow-500' 
-      case 'offline': return 'text-red-500'
-      default: return 'text-muted-foreground'
-    }
-  }
 
   const getInsightIcon = (type: Insight['type']) => {
     switch (type) {
-      case 'energy': return <Zap size={16} className="text-yellow-500" />
-      case 'usage': return <Activity size={16} className="text-blue-500" />
-      case 'optimization': return <TrendUp size={16} className="text-green-500" />
-      case 'security': return <Shield size={16} className="text-red-500" />
+      case 'energy':
+        return <Lightning size={16} className="text-yellow-500" />
+      case 'usage':
+        return <ChartLineUp size={16} className="text-blue-500" />
+      case 'optimization':
+        return <TrendUp size={16} className="text-green-500" />
+      case 'security':
+        return <Shield size={16} className="text-red-500" />
     }
   }
 
   const getImpactBadge = (impact: Insight['impact']) => {
     switch (impact) {
-      case 'high': return <Badge variant="destructive">High Impact</Badge>
-      case 'medium': return <Badge variant="secondary">Medium Impact</Badge>
-      case 'low': return <Badge variant="outline">Low Impact</Badge>
+      case 'high':
+        return <Badge variant="destructive">High Impact</Badge>
+      case 'medium':
+        return <Badge variant="secondary">Medium Impact</Badge>
+      case 'low':
+        return <Badge variant="outline">Low Impact</Badge>
     }
   }
 
   const onlineDevices = devices.filter(d => d.status === 'online').length
   const warningDevices = devices.filter(d => d.status === 'warning').length
-  const offlineDevices = devices.filter(d => d.status === 'offline').length
   const lowBatteryDevices = devices.filter(d => d.batteryLevel && d.batteryLevel < 20).length
 
   const averageSignalStrength = Math.round(
     devices.reduce((acc, device) => acc + device.signalStrength, 0) / devices.length
   )
 
-  const peakUsageHour = usageData.reduce((max, current) => 
-    current.energyUsage > max.energyUsage ? current : max
-  )
+  const defaultUsagePattern: UsagePattern = { hour: 0, energyUsage: 0, deviceCount: 0 }
+  const peakUsageHour: UsagePattern =
+    usageData.length > 0
+      ? usageData.reduce(
+          (max, current) => (current.energyUsage > max.energyUsage ? current : max),
+          usageData[0] || defaultUsagePattern
+        )
+      : defaultUsagePattern
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-6">
       <div>
         <h1 className="text-2xl font-bold">Insights & Analytics</h1>
-        <p className="text-muted-foreground">Monitor your smart home health and optimize performance</p>
+        <p className="text-muted-foreground">
+          Monitor your smart home health and optimize performance
+        </p>
       </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Online Devices</p>
+                <p className="text-muted-foreground text-sm font-medium">Online Devices</p>
                 <p className="text-2xl font-bold text-green-500">{onlineDevices}</p>
               </div>
               <CheckCircle size={24} className="text-green-500" />
@@ -182,10 +190,10 @@ export function InsightsDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Warnings</p>
+                <p className="text-muted-foreground text-sm font-medium">Warnings</p>
                 <p className="text-2xl font-bold text-yellow-500">{warningDevices}</p>
               </div>
-              <AlertTriangle size={24} className="text-yellow-500" />
+              <Warning size={24} className="text-yellow-500" />
             </div>
           </CardContent>
         </Card>
@@ -194,10 +202,10 @@ export function InsightsDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Low Battery</p>
+                <p className="text-muted-foreground text-sm font-medium">Low Battery</p>
                 <p className="text-2xl font-bold text-red-500">{lowBatteryDevices}</p>
               </div>
-              <Battery size={24} className="text-red-500" />
+              <BatteryMedium size={24} className="text-red-500" />
             </div>
           </CardContent>
         </Card>
@@ -206,10 +214,10 @@ export function InsightsDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Avg Signal</p>
+                <p className="text-muted-foreground text-sm font-medium">Avg Signal</p>
                 <p className="text-2xl font-bold">{averageSignalStrength}%</p>
               </div>
-              <Wifi size={24} className="text-primary" />
+              <WifiHigh size={24} className="text-primary" />
             </div>
           </CardContent>
         </Card>
@@ -231,19 +239,22 @@ export function InsightsDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {insights.map((insight, index) => (
-                <div key={index} className="flex items-start gap-4 p-4 border rounded-lg">
-                  <div className="mt-0.5">
-                    {getInsightIcon(insight.type)}
-                  </div>
+              {insights.map(insight => (
+                <div
+                  key={`${insight.type}-${insight.title}`}
+                  className="flex items-start gap-4 rounded-lg border p-4"
+                >
+                  <div className="mt-0.5">{getInsightIcon(insight.type)}</div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="mb-1 flex items-center gap-2">
                       <h4 className="font-medium">{insight.title}</h4>
                       {getImpactBadge(insight.impact)}
                     </div>
-                    <p className="text-sm text-muted-foreground mb-3">{insight.description}</p>
+                    <p className="text-muted-foreground mb-3 text-sm">{insight.description}</p>
                     {insight.actionable && (
-                      <Button size="sm" variant="outline">Take Action</Button>
+                      <Button size="sm" variant="outline">
+                        Take Action
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -256,42 +267,59 @@ export function InsightsDashboard() {
           <Card>
             <CardHeader>
               <CardTitle>Device Health Monitor</CardTitle>
-              <CardDescription>
-                Real-time status of all connected devices
-              </CardDescription>
+              <CardDescription>Real-time status of all connected devices</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {devices.map((device) => (
-                <div key={device.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-3 h-3 rounded-full ${
-                      device.status === 'online' ? 'bg-green-500' :
-                      device.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
-                    }`} />
-                    <div>
-                      <h4 className="font-medium">{device.name}</h4>
-                      <p className="text-sm text-muted-foreground">{device.type} • v{device.firmwareVersion}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-6 text-sm">
-                    {device.batteryLevel && (
-                      <div className="flex items-center gap-2">
-                        <Battery size={16} className={device.batteryLevel < 20 ? 'text-red-500' : 'text-muted-foreground'} />
-                        <span className={device.batteryLevel < 20 ? 'text-red-500' : ''}>{device.batteryLevel}%</span>
+              {devices.map(device => {
+                const getStatusColor = () => {
+                  if (device.status === 'online') return 'bg-green-500'
+                  if (device.status === 'warning') return 'bg-yellow-500'
+                  return 'bg-red-500'
+                }
+
+                return (
+                  <div
+                    key={device.id}
+                    className="flex items-center justify-between rounded-lg border p-4"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`h-3 w-3 rounded-full ${getStatusColor()}`} />
+                      <div>
+                        <h4 className="font-medium">{device.name}</h4>
+                        <p className="text-muted-foreground text-sm">
+                          {device.type} • v{device.firmwareVersion}
+                        </p>
                       </div>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <Wifi size={16} className="text-muted-foreground" />
-                      <span>{device.signalStrength}%</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Clock size={16} className="text-muted-foreground" />
-                      <span>{Math.floor(device.uptime / 24)}d {device.uptime % 24}h</span>
+
+                    <div className="flex items-center gap-6 text-sm">
+                      {device.batteryLevel && (
+                        <div className="flex items-center gap-2">
+                          <BatteryMedium
+                            size={16}
+                            className={
+                              device.batteryLevel < 20 ? 'text-red-500' : 'text-muted-foreground'
+                            }
+                          />
+                          <span className={device.batteryLevel < 20 ? 'text-red-500' : ''}>
+                            {device.batteryLevel}%
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <WifiHigh size={16} className="text-muted-foreground" />
+                        <span>{device.signalStrength}%</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock size={16} className="text-muted-foreground" />
+                        <span>
+                          {Math.floor(device.uptime / 24)}d {device.uptime % 24}h
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </CardContent>
           </Card>
         </TabsContent>
@@ -305,26 +333,26 @@ export function InsightsDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div>
-                  <h4 className="font-medium mb-4">Peak Usage Time</h4>
-                  <div className="text-center p-6 bg-muted/50 rounded-lg">
-                    <div className="text-3xl font-bold mb-2">{peakUsageHour.hour}:00</div>
-                    <div className="text-sm text-muted-foreground">
+                  <h4 className="mb-4 font-medium">Peak Usage Time</h4>
+                  <div className="bg-muted/50 rounded-lg p-6 text-center">
+                    <div className="mb-2 text-3xl font-bold">{peakUsageHour.hour}:00</div>
+                    <div className="text-muted-foreground text-sm">
                       {peakUsageHour.energyUsage}W peak consumption
                     </div>
                   </div>
                 </div>
-                
+
                 <div>
-                  <h4 className="font-medium mb-4">Daily Energy Usage</h4>
+                  <h4 className="mb-4 font-medium">Daily Energy Usage</h4>
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
                       <span>Today</span>
                       <span className="font-medium">4.2 kWh</span>
                     </div>
                     <Progress value={85} className="h-2" />
-                    <div className="flex justify-between text-xs text-muted-foreground">
+                    <div className="text-muted-foreground flex justify-between text-xs">
                       <span>vs. yesterday: </span>
                       <span className="flex items-center gap-1 text-green-500">
                         <TrendDown size={12} />
@@ -336,21 +364,18 @@ export function InsightsDashboard() {
               </div>
 
               <div>
-                <h4 className="font-medium mb-4">Hourly Activity Pattern</h4>
+                <h4 className="mb-4 font-medium">Hourly Activity Pattern</h4>
                 <div className="grid grid-cols-12 gap-1">
-                  {usageData.map((data) => (
-                    <div key={data.hour} className="text-center">
-                      <div 
-                        className="bg-primary/20 rounded-sm mb-1 transition-all hover:bg-primary/40"
-                        style={{ height: `${(data.deviceCount / 25) * 60}px` }}
-                      />
-                      <div className="text-xs text-muted-foreground">
-                        {data.hour}h
-                      </div>
-                    </div>
+                  {usageData.map(data => (
+                    <ActivityBar
+                      key={data.hour}
+                      deviceCount={data.deviceCount}
+                      maxCount={25}
+                      label={`${data.hour}h`}
+                    />
                   ))}
                 </div>
-                <div className="text-xs text-muted-foreground mt-2 text-center">
+                <div className="text-muted-foreground mt-2 text-center text-xs">
                   Device activity throughout the day
                 </div>
               </div>

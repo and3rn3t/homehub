@@ -1,29 +1,40 @@
-import { useState, useEffect } from 'react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
+import { Slider } from '@/components/ui/slider'
+import { Switch } from '@/components/ui/switch'
 import { useKV } from '@/hooks/use-kv'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Slider } from "@/components/ui/slider"
-import { 
-  MapPin, 
-  Plus, 
-  House,
-  Car,
+import {
   Buildings,
+  CircleDashed,
+  House,
+  MapPin,
+  NavigationArrow,
+  Plus,
   ShoppingBag,
-  X,
-  Navigation,
   Target,
-  CircleDashed
-} from "@phosphor-icons/react"
-import { motion } from "framer-motion"
-import { toast } from "sonner"
+  X,
+} from '@phosphor-icons/react'
+import { motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 interface GeofenceZone {
   id: string
@@ -66,7 +77,7 @@ const ZONE_TYPES = [
   { value: 'work', label: 'Work', icon: Buildings },
   { value: 'school', label: 'School', icon: Buildings },
   { value: 'store', label: 'Store', icon: ShoppingBag },
-  { value: 'custom', label: 'Custom', icon: MapPin }
+  { value: 'custom', label: 'Custom', icon: MapPin },
 ]
 
 const SAMPLE_DEVICES = [
@@ -75,17 +86,17 @@ const SAMPLE_DEVICES = [
   { id: 'front-door-lock', name: 'Front Door Lock', type: 'lock' },
   { id: 'garage-door', name: 'Garage Door', type: 'cover' },
   { id: 'security-system', name: 'Security System', type: 'alarm' },
-  { id: 'all-lights', name: 'All Lights', type: 'group' }
+  { id: 'all-lights', name: 'All Lights', type: 'group' },
 ]
 
 const FAMILY_MEMBERS = [
   { id: 'user-1', name: 'John', avatar: '👨' },
   { id: 'user-2', name: 'Sarah', avatar: '👩' },
-  { id: 'user-3', name: 'Kids', avatar: '👶' }
+  { id: 'user-3', name: 'Kids', avatar: '👶' },
 ]
 
 export function GeofenceBuilder() {
-  const [geofenceZones, setGeofenceZones] = useKV<GeofenceZone[]>("geofence-zones", [
+  const [geofenceZones, setGeofenceZones] = useKV<GeofenceZone[]>('geofence-zones', [
     {
       id: 'home-zone',
       name: 'Home',
@@ -93,15 +104,15 @@ export function GeofenceBuilder() {
       longitude: -122.4194,
       radius: 100,
       type: 'home',
-      address: '123 Main St, San Francisco, CA'
-    }
+      address: '123 Main St, San Francisco, CA',
+    },
   ])
-  
-  const [geofenceRules, setGeofenceRules] = useKV<GeofenceRule[]>("geofence-rules", [])
+
+  const [geofenceRules, setGeofenceRules] = useKV<GeofenceRule[]>('geofence-rules', [])
   const [isCreateZoneDialogOpen, setIsCreateZoneDialogOpen] = useState(false)
   const [isCreateRuleDialogOpen, setIsCreateRuleDialogOpen] = useState(false)
-  const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null)
-  
+  const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null)
+
   // Zone form state
   const [zoneForm, setZoneForm] = useState({
     name: '',
@@ -109,7 +120,7 @@ export function GeofenceBuilder() {
     latitude: 37.7749,
     longitude: -122.4194,
     radius: 100,
-    address: ''
+    address: '',
   })
 
   // Rule form state
@@ -125,20 +136,20 @@ export function GeofenceBuilder() {
     startTime: '00:00',
     endTime: '23:59',
     selectedDays: [] as string[],
-    selectedUsers: [] as string[]
+    selectedUsers: [] as string[],
   })
 
   useEffect(() => {
     // Get user's current location for easier zone setup
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        position => {
           setCurrentLocation({
             lat: position.coords.latitude,
-            lng: position.coords.longitude
+            lng: position.coords.longitude,
           })
         },
-        (error) => {
+        error => {
           console.log('Location access denied:', error)
         }
       )
@@ -152,7 +163,7 @@ export function GeofenceBuilder() {
       latitude: currentLocation?.lat || 37.7749,
       longitude: currentLocation?.lng || -122.4194,
       radius: 100,
-      address: ''
+      address: '',
     })
   }
 
@@ -169,13 +180,13 @@ export function GeofenceBuilder() {
       startTime: '00:00',
       endTime: '23:59',
       selectedDays: [],
-      selectedUsers: []
+      selectedUsers: [],
     })
   }
 
   const createZone = () => {
     if (!zoneForm.name) {
-      toast.error("Please enter a zone name")
+      toast.error('Please enter a zone name')
       return
     }
 
@@ -186,24 +197,24 @@ export function GeofenceBuilder() {
       latitude: zoneForm.latitude,
       longitude: zoneForm.longitude,
       radius: zoneForm.radius,
-      address: zoneForm.address
+      address: zoneForm.address,
     }
 
     setGeofenceZones(current => [...current, newZone])
     setIsCreateZoneDialogOpen(false)
     resetZoneForm()
-    toast.success("Geofence zone created")
+    toast.success('Geofence zone created')
   }
 
   const createRule = () => {
     if (!ruleForm.name || !ruleForm.zoneId || !ruleForm.deviceId) {
-      toast.error("Please fill in all required fields")
+      toast.error('Please fill in all required fields')
       return
     }
 
     const selectedZone = geofenceZones.find(z => z.id === ruleForm.zoneId)
     const selectedDevice = SAMPLE_DEVICES.find(d => d.id === ruleForm.deviceId)
-    
+
     if (!selectedZone || !selectedDevice) return
 
     const newRule: GeofenceRule = {
@@ -215,42 +226,40 @@ export function GeofenceBuilder() {
       zoneName: selectedZone.name,
       triggerType: ruleForm.triggerType as any,
       dwellTime: ruleForm.triggerType === 'dwell' ? ruleForm.dwellTime : undefined,
-      actions: [{
-        id: crypto.randomUUID(),
-        deviceId: ruleForm.deviceId,
-        deviceName: selectedDevice.name,
-        action: ruleForm.action,
-        value: ruleForm.value
-      }],
+      actions: [
+        {
+          id: crypto.randomUUID(),
+          deviceId: ruleForm.deviceId,
+          deviceName: selectedDevice.name,
+          action: ruleForm.action,
+          value: ruleForm.value,
+        },
+      ],
       conditions: {
         timeRange: { start: ruleForm.startTime, end: ruleForm.endTime },
         daysOfWeek: ruleForm.selectedDays.length > 0 ? ruleForm.selectedDays : undefined,
-        userIds: ruleForm.selectedUsers.length > 0 ? ruleForm.selectedUsers : undefined
+        userIds: ruleForm.selectedUsers.length > 0 ? ruleForm.selectedUsers : undefined,
       },
       createdAt: new Date().toISOString(),
-      triggerCount: 0
+      triggerCount: 0,
     }
 
     setGeofenceRules(current => [...current, newRule])
     setIsCreateRuleDialogOpen(false)
     resetRuleForm()
-    toast.success("Geofence rule created")
+    toast.success('Geofence rule created')
   }
 
   const toggleRule = (ruleId: string) => {
-    setGeofenceRules(current => 
-      current.map(rule => 
-        rule.id === ruleId 
-          ? { ...rule, enabled: !rule.enabled }
-          : rule
-      )
+    setGeofenceRules(current =>
+      current.map(rule => (rule.id === ruleId ? { ...rule, enabled: !rule.enabled } : rule))
     )
-    toast.success("Rule updated")
+    toast.success('Rule updated')
   }
 
   const deleteRule = (ruleId: string) => {
     setGeofenceRules(current => current.filter(r => r.id !== ruleId))
-    toast.success("Rule deleted")
+    toast.success('Rule deleted')
   }
 
   const deleteZone = (zoneId: string) => {
@@ -260,17 +269,17 @@ export function GeofenceBuilder() {
       toast.error("Cannot delete zone - it's being used by geofence rules")
       return
     }
-    
+
     setGeofenceZones(current => current.filter(z => z.id !== zoneId))
-    toast.success("Zone deleted")
+    toast.success('Zone deleted')
   }
 
   const testRule = (ruleId: string) => {
     const rule = geofenceRules.find(r => r.id === ruleId)
     if (rule) {
-      setGeofenceRules(current => 
-        current.map(r => 
-          r.id === ruleId 
+      setGeofenceRules(current =>
+        current.map(r =>
+          r.id === ruleId
             ? { ...r, lastTriggered: new Date().toISOString(), triggerCount: r.triggerCount + 1 }
             : r
         )
@@ -284,20 +293,24 @@ export function GeofenceBuilder() {
       setZoneForm(prev => ({
         ...prev,
         latitude: currentLocation.lat,
-        longitude: currentLocation.lng
+        longitude: currentLocation.lng,
       }))
-      toast.success("Using current location")
+      toast.success('Using current location')
     } else {
-      toast.error("Location not available")
+      toast.error('Location not available')
     }
   }
 
   const getTriggerIcon = (triggerType: string) => {
     switch (triggerType) {
-      case 'enter': return Target
-      case 'exit': return Navigation
-      case 'dwell': return CircleDashed
-      default: return MapPin
+      case 'enter':
+        return Target
+      case 'exit':
+        return Navigation
+      case 'dwell':
+        return CircleDashed
+      default:
+        return MapPin
     }
   }
 
@@ -310,14 +323,14 @@ export function GeofenceBuilder() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       <div className="p-6 pb-4">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Geofencing</h1>
+            <h1 className="text-foreground text-2xl font-bold">Geofencing</h1>
             <p className="text-muted-foreground">Location-based automations</p>
           </div>
-          
+
           <div className="flex gap-2">
             <Dialog open={isCreateZoneDialogOpen} onOpenChange={setIsCreateZoneDialogOpen}>
               <DialogTrigger asChild>
@@ -326,12 +339,12 @@ export function GeofenceBuilder() {
                   Zone
                 </Button>
               </DialogTrigger>
-              
+
               <DialogContent className="max-w-lg">
                 <DialogHeader>
                   <DialogTitle>Create Geofence Zone</DialogTitle>
                 </DialogHeader>
-                
+
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="zone-name">Zone Name</Label>
@@ -339,15 +352,15 @@ export function GeofenceBuilder() {
                       id="zone-name"
                       placeholder="e.g., Home, Work, School"
                       value={zoneForm.name}
-                      onChange={(e) => setZoneForm(prev => ({ ...prev, name: e.target.value }))}
+                      onChange={e => setZoneForm(prev => ({ ...prev, name: e.target.value }))}
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label>Zone Type</Label>
-                    <Select 
+                    <Select
                       value={zoneForm.type}
-                      onValueChange={(value) => setZoneForm(prev => ({ ...prev, type: value }))}
+                      onValueChange={value => setZoneForm(prev => ({ ...prev, type: value }))}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -370,7 +383,9 @@ export function GeofenceBuilder() {
                         type="number"
                         step="any"
                         value={zoneForm.latitude}
-                        onChange={(e) => setZoneForm(prev => ({ ...prev, latitude: parseFloat(e.target.value) }))}
+                        onChange={e =>
+                          setZoneForm(prev => ({ ...prev, latitude: parseFloat(e.target.value) }))
+                        }
                       />
                     </div>
                     <div className="space-y-2">
@@ -380,19 +395,21 @@ export function GeofenceBuilder() {
                         type="number"
                         step="any"
                         value={zoneForm.longitude}
-                        onChange={(e) => setZoneForm(prev => ({ ...prev, longitude: parseFloat(e.target.value) }))}
+                        onChange={e =>
+                          setZoneForm(prev => ({ ...prev, longitude: parseFloat(e.target.value) }))
+                        }
                       />
                     </div>
                   </div>
 
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={useCurrentLocation}
                     disabled={!currentLocation}
                     className="w-full"
                   >
-                    <Navigation size={16} className="mr-2" />
+                    <NavigationArrow size={16} className="mr-2" />
                     Use Current Location
                   </Button>
 
@@ -414,12 +431,16 @@ export function GeofenceBuilder() {
                       id="address"
                       placeholder="Street address for reference"
                       value={zoneForm.address}
-                      onChange={(e) => setZoneForm(prev => ({ ...prev, address: e.target.value }))}
+                      onChange={e => setZoneForm(prev => ({ ...prev, address: e.target.value }))}
                     />
                   </div>
 
                   <div className="flex gap-3 pt-4">
-                    <Button variant="outline" onClick={() => setIsCreateZoneDialogOpen(false)} className="flex-1">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsCreateZoneDialogOpen(false)}
+                      className="flex-1"
+                    >
                       Cancel
                     </Button>
                     <Button onClick={createZone} className="flex-1">
@@ -437,12 +458,12 @@ export function GeofenceBuilder() {
                   Rule
                 </Button>
               </DialogTrigger>
-              
-              <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+
+              <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Create Geofence Rule</DialogTitle>
                 </DialogHeader>
-                
+
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <Label htmlFor="rule-name">Rule Name</Label>
@@ -450,7 +471,7 @@ export function GeofenceBuilder() {
                       id="rule-name"
                       placeholder="e.g., Arrive Home, Leave Work"
                       value={ruleForm.name}
-                      onChange={(e) => setRuleForm(prev => ({ ...prev, name: e.target.value }))}
+                      onChange={e => setRuleForm(prev => ({ ...prev, name: e.target.value }))}
                     />
                   </div>
 
@@ -460,7 +481,9 @@ export function GeofenceBuilder() {
                       id="rule-desc"
                       placeholder="What does this rule do?"
                       value={ruleForm.description}
-                      onChange={(e) => setRuleForm(prev => ({ ...prev, description: e.target.value }))}
+                      onChange={e =>
+                        setRuleForm(prev => ({ ...prev, description: e.target.value }))
+                      }
                     />
                   </div>
 
@@ -468,12 +491,12 @@ export function GeofenceBuilder() {
 
                   <div className="space-y-4">
                     <Label>Trigger</Label>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="zone-select">Zone</Label>
-                      <Select 
+                      <Select
                         value={ruleForm.zoneId}
-                        onValueChange={(value) => setRuleForm(prev => ({ ...prev, zoneId: value }))}
+                        onValueChange={value => setRuleForm(prev => ({ ...prev, zoneId: value }))}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select zone" />
@@ -490,9 +513,11 @@ export function GeofenceBuilder() {
 
                     <div className="space-y-2">
                       <Label htmlFor="trigger-type">Trigger Type</Label>
-                      <Select 
+                      <Select
                         value={ruleForm.triggerType}
-                        onValueChange={(value) => setRuleForm(prev => ({ ...prev, triggerType: value }))}
+                        onValueChange={value =>
+                          setRuleForm(prev => ({ ...prev, triggerType: value }))
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -513,7 +538,12 @@ export function GeofenceBuilder() {
                           type="number"
                           min="1"
                           value={ruleForm.dwellTime}
-                          onChange={(e) => setRuleForm(prev => ({ ...prev, dwellTime: parseInt(e.target.value) || 5 }))}
+                          onChange={e =>
+                            setRuleForm(prev => ({
+                              ...prev,
+                              dwellTime: parseInt(e.target.value) || 5,
+                            }))
+                          }
                         />
                       </div>
                     )}
@@ -523,12 +553,12 @@ export function GeofenceBuilder() {
 
                   <div className="space-y-4">
                     <Label>Action</Label>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="device-select">Device</Label>
-                      <Select 
+                      <Select
                         value={ruleForm.deviceId}
-                        onValueChange={(value) => setRuleForm(prev => ({ ...prev, deviceId: value }))}
+                        onValueChange={value => setRuleForm(prev => ({ ...prev, deviceId: value }))}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select device" />
@@ -545,9 +575,9 @@ export function GeofenceBuilder() {
 
                     <div className="space-y-2">
                       <Label htmlFor="action-select">Action</Label>
-                      <Select 
+                      <Select
                         value={ruleForm.action}
-                        onValueChange={(value) => setRuleForm(prev => ({ ...prev, action: value }))}
+                        onValueChange={value => setRuleForm(prev => ({ ...prev, action: value }))}
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -568,7 +598,7 @@ export function GeofenceBuilder() {
 
                   <div className="space-y-4">
                     <Label>Conditions (optional)</Label>
-                    
+
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-2">
                         <Label htmlFor="start-time">Start Time</Label>
@@ -576,7 +606,9 @@ export function GeofenceBuilder() {
                           id="start-time"
                           type="time"
                           value={ruleForm.startTime}
-                          onChange={(e) => setRuleForm(prev => ({ ...prev, startTime: e.target.value }))}
+                          onChange={e =>
+                            setRuleForm(prev => ({ ...prev, startTime: e.target.value }))
+                          }
                         />
                       </div>
                       <div className="space-y-2">
@@ -585,25 +617,29 @@ export function GeofenceBuilder() {
                           id="end-time"
                           type="time"
                           value={ruleForm.endTime}
-                          onChange={(e) => setRuleForm(prev => ({ ...prev, endTime: e.target.value }))}
+                          onChange={e =>
+                            setRuleForm(prev => ({ ...prev, endTime: e.target.value }))
+                          }
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <Label>Family Members (leave empty for all)</Label>
-                      <div className="flex gap-2 flex-wrap">
+                      <div className="flex flex-wrap gap-2">
                         {FAMILY_MEMBERS.map(member => (
                           <Button
                             key={member.id}
-                            variant={ruleForm.selectedUsers.includes(member.id) ? "default" : "outline"}
+                            variant={
+                              ruleForm.selectedUsers.includes(member.id) ? 'default' : 'outline'
+                            }
                             size="sm"
                             onClick={() => {
                               setRuleForm(prev => ({
                                 ...prev,
                                 selectedUsers: prev.selectedUsers.includes(member.id)
                                   ? prev.selectedUsers.filter(id => id !== member.id)
-                                  : [...prev.selectedUsers, member.id]
+                                  : [...prev.selectedUsers, member.id],
                               }))
                             }}
                           >
@@ -616,7 +652,11 @@ export function GeofenceBuilder() {
                   </div>
 
                   <div className="flex gap-3 pt-4">
-                    <Button variant="outline" onClick={() => setIsCreateRuleDialogOpen(false)} className="flex-1">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsCreateRuleDialogOpen(false)}
+                      className="flex-1"
+                    >
                       Cancel
                     </Button>
                     <Button onClick={createRule} className="flex-1">
@@ -629,31 +669,29 @@ export function GeofenceBuilder() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="mb-6 grid grid-cols-3 gap-3">
           <Card className="bg-accent/10 border-accent/20">
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-accent mb-1">
-                {geofenceZones.length}
-              </div>
-              <div className="text-xs text-muted-foreground">Zones</div>
+              <div className="text-accent mb-1 text-2xl font-bold">{geofenceZones.length}</div>
+              <div className="text-muted-foreground text-xs">Zones</div>
             </CardContent>
           </Card>
-          
+
           <Card className="bg-primary/10 border-primary/20">
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-primary mb-1">
+              <div className="text-primary mb-1 text-2xl font-bold">
                 {geofenceRules.filter(r => r.enabled).length}
               </div>
-              <div className="text-xs text-muted-foreground">Active Rules</div>
+              <div className="text-muted-foreground text-xs">Active Rules</div>
             </CardContent>
           </Card>
-          
+
           <Card className="bg-secondary border-border/50">
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-foreground mb-1">
+              <div className="text-foreground mb-1 text-2xl font-bold">
                 {geofenceRules.reduce((sum, rule) => sum + rule.triggerCount, 0)}
               </div>
-              <div className="text-xs text-muted-foreground">Total Triggers</div>
+              <div className="text-muted-foreground text-xs">Total Triggers</div>
             </CardContent>
           </Card>
         </div>
@@ -663,14 +701,14 @@ export function GeofenceBuilder() {
         <div className="space-y-6">
           {/* Zones Section */}
           <div>
-            <h2 className="text-lg font-semibold mb-3">Geofence Zones</h2>
+            <h2 className="mb-3 text-lg font-semibold">Geofence Zones</h2>
             {geofenceZones.length === 0 ? (
-              <Card className="border-dashed border-2 border-border/30">
+              <Card className="border-border/30 border-2 border-dashed">
                 <CardContent className="p-6 text-center">
                   <MapPin size={24} className="text-muted-foreground mx-auto mb-2" />
                   <p className="text-muted-foreground mb-4">No zones created yet</p>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => setIsCreateZoneDialogOpen(true)}
                   >
@@ -679,31 +717,31 @@ export function GeofenceBuilder() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {geofenceZones.map((zone) => {
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                {geofenceZones.map(zone => {
                   const ZoneIcon = ZONE_TYPES.find(t => t.value === zone.type)?.icon || MapPin
                   return (
                     <Card key={zone.id} className="hover:bg-accent/5 transition-colors">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between">
-                          <div className="flex items-start gap-3 flex-1">
-                            <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+                          <div className="flex flex-1 items-start gap-3">
+                            <div className="bg-secondary flex h-10 w-10 items-center justify-center rounded-full">
                               <ZoneIcon size={20} className="text-primary" />
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-medium text-sm mb-1">{zone.name}</h3>
-                              <p className="text-xs text-muted-foreground mb-2 capitalize">
+                            <div className="min-w-0 flex-1">
+                              <h3 className="mb-1 text-sm font-medium">{zone.name}</h3>
+                              <p className="text-muted-foreground mb-2 text-xs capitalize">
                                 {zone.type} • {zone.radius}m radius
                               </p>
                               {zone.address && (
-                                <p className="text-xs text-muted-foreground">{zone.address}</p>
+                                <p className="text-muted-foreground text-xs">{zone.address}</p>
                               )}
                             </div>
                           </div>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="w-8 h-8 text-destructive hover:text-destructive"
+                            className="text-destructive hover:text-destructive h-8 w-8"
                             onClick={() => deleteZone(zone.id)}
                           >
                             <X size={14} />
@@ -719,14 +757,14 @@ export function GeofenceBuilder() {
 
           {/* Rules Section */}
           <div>
-            <h2 className="text-lg font-semibold mb-3">Geofence Rules</h2>
+            <h2 className="mb-3 text-lg font-semibold">Geofence Rules</h2>
             {geofenceRules.length === 0 ? (
-              <Card className="border-dashed border-2 border-border/30">
+              <Card className="border-border/30 border-2 border-dashed">
                 <CardContent className="p-6 text-center">
                   <Target size={24} className="text-muted-foreground mx-auto mb-2" />
                   <p className="text-muted-foreground mb-4">No rules created yet</p>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => setIsCreateRuleDialogOpen(true)}
                     disabled={geofenceZones.length === 0}
@@ -734,83 +772,89 @@ export function GeofenceBuilder() {
                     Create First Rule
                   </Button>
                   {geofenceZones.length === 0 && (
-                    <p className="text-xs text-muted-foreground mt-2">Create a zone first</p>
+                    <p className="text-muted-foreground mt-2 text-xs">Create a zone first</p>
                   )}
                 </CardContent>
               </Card>
             ) : (
               <div className="space-y-3">
-                {geofenceRules.map((rule) => {
+                {geofenceRules.map(rule => {
                   const TriggerIcon = getTriggerIcon(rule.triggerType)
                   return (
                     <motion.div
                       key={rule.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                     >
                       <Card className="hover:bg-accent/5 transition-colors">
                         <CardContent className="p-4">
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex items-start gap-3 flex-1">
-                              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center mt-0.5">
-                                <TriggerIcon 
-                                  size={20} 
-                                  className={rule.enabled ? "text-primary" : "text-muted-foreground"} 
+                          <div className="mb-3 flex items-start justify-between">
+                            <div className="flex flex-1 items-start gap-3">
+                              <div className="bg-secondary mt-0.5 flex h-10 w-10 items-center justify-center rounded-full">
+                                <TriggerIcon
+                                  size={20}
+                                  className={
+                                    rule.enabled ? 'text-primary' : 'text-muted-foreground'
+                                  }
                                 />
                               </div>
-                              
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-medium text-sm mb-1">{rule.name}</h3>
+
+                              <div className="min-w-0 flex-1">
+                                <h3 className="mb-1 text-sm font-medium">{rule.name}</h3>
                                 {rule.description && (
-                                  <p className="text-xs text-muted-foreground mb-2">
+                                  <p className="text-muted-foreground mb-2 text-xs">
                                     {rule.description}
                                   </p>
                                 )}
-                                
-                                <div className="flex items-center gap-2 flex-wrap mb-2">
+
+                                <div className="mb-2 flex flex-wrap items-center gap-2">
                                   <Badge variant="secondary" className="h-5 text-xs">
                                     {formatTriggerText(rule)}
                                   </Badge>
                                   <Badge variant="outline" className="h-5 text-xs">
-                                    {rule.actions[0]?.action.replace('_', ' ')} {rule.actions[0]?.deviceName}
+                                    {rule.actions[0]?.action.replace('_', ' ')}{' '}
+                                    {rule.actions[0]?.deviceName}
                                   </Badge>
                                 </div>
-                                
-                                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+
+                                <div className="text-muted-foreground flex items-center gap-3 text-xs">
                                   <span>Triggered {rule.triggerCount} times</span>
                                   {rule.lastTriggered && (
-                                    <span>Last: {(() => {
-                                      try {
-                                        return new Date(rule.lastTriggered).toLocaleTimeString()
-                                      } catch {
-                                        return 'Invalid date'
-                                      }
-                                    })()}</span>
+                                    <span>
+                                      Last:{' '}
+                                      {(() => {
+                                        try {
+                                          return new Date(rule.lastTriggered).toLocaleTimeString()
+                                        } catch {
+                                          return 'Invalid date'
+                                        }
+                                      })()}
+                                    </span>
                                   )}
                                 </div>
                               </div>
                             </div>
-                            
-                            <div className="flex items-center gap-2 ml-3">
+
+                            <div className="ml-3 flex items-center gap-2">
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="w-8 h-8"
+                                className="h-8 w-8"
                                 onClick={() => testRule(rule.id)}
                               >
                                 <Target size={14} />
                               </Button>
-                              
+
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="w-8 h-8 text-destructive hover:text-destructive"
+                                className="text-destructive hover:text-destructive h-8 w-8"
                                 onClick={() => deleteRule(rule.id)}
                               >
                                 <X size={14} />
                               </Button>
-                              
+
                               <Switch
                                 checked={rule.enabled}
                                 onCheckedChange={() => toggleRule(rule.id)}

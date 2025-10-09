@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import "tw-animate-css";
+@import 'tw-animate-css';
 
 @layer base {
   * {
@@ -8,30 +8,67 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.1 0 0);
+  /* iOS 18 Liquid Glass - Light Mode */
+  --background: oklch(0.98 0.005 264);
+  --foreground: oklch(0.15 0.01 264);
 
-  --card: oklch(0.98 0.005 85);
-  --card-foreground: oklch(0.1 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.1 0 0);
+  /* Glass Materials with Vibrancy */
+  --card: oklch(0.99 0.002 264 / 0.72); /* Ultra-thin glass */
+  --card-foreground: oklch(0.15 0.01 264);
+  --popover: oklch(0.99 0.002 264 / 0.85); /* Thin glass */
+  --popover-foreground: oklch(0.15 0.01 264);
 
-  --primary: oklch(0.6 0.15 250);
+  /* iOS System Colors */
+  --primary: oklch(0.55 0.22 250); /* iOS System Blue */
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.9 0.02 85);
-  --secondary-foreground: oklch(0.3 0.02 85);
-  --accent: oklch(0.7 0.15 145);
+  --secondary: oklch(0.94 0.008 264 / 0.65); /* Regular glass */
+  --secondary-foreground: oklch(0.35 0.02 264);
+  --accent: oklch(0.65 0.19 145); /* iOS System Green */
   --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0.65 0.2 15);
+  --destructive: oklch(0.55 0.22 25); /* iOS System Red */
   --destructive-foreground: oklch(1 0 0);
 
-  --muted: oklch(0.95 0.01 85);
-  --muted-foreground: oklch(0.4 0.03 250);
-  --border: oklch(0.9 0.02 85);
-  --input: oklch(0.9 0.02 85);
-  --ring: oklch(0.6 0.15 250);
+  /* UI Elements */
+  --muted: oklch(0.96 0.005 264 / 0.5); /* Thick glass */
+  --muted-foreground: oklch(0.45 0.02 264);
+  --border: oklch(0.88 0.01 264 / 0.3); /* Translucent borders */
+  --input: oklch(0.94 0.008 264 / 0.65);
+  --ring: oklch(0.55 0.22 250 / 0.4); /* Focus ring */
 
-  --radius: 12px;
+  /* iOS Spacing System (8pt grid) */
+  --radius: 0.75rem; /* 12px */
+  --radius-sm: 0.5rem; /* 8px */
+  --radius-lg: 1rem; /* 16px */
+  --radius-xl: 1.5rem; /* 24px */
+}
+
+.dark {
+  /* iOS 18 Liquid Glass - Dark Mode with Rich Vibrancy */
+  --background: oklch(0.15 0.01 264);
+  --foreground: oklch(0.95 0.005 264);
+
+  /* Dark Glass Materials */
+  --card: oklch(0.2 0.01 264 / 0.72);
+  --card-foreground: oklch(0.95 0.005 264);
+  --popover: oklch(0.18 0.012 264 / 0.85);
+  --popover-foreground: oklch(0.95 0.005 264);
+
+  /* iOS System Colors (Dark Mode) */
+  --primary: oklch(0.6 0.2 250); /* Brighter blue for dark */
+  --primary-foreground: oklch(0.95 0.005 264);
+  --secondary: oklch(0.25 0.01 264 / 0.65);
+  --secondary-foreground: oklch(0.75 0.01 264);
+  --accent: oklch(0.7 0.17 145); /* Brighter green */
+  --accent-foreground: oklch(0.95 0.005 264);
+  --destructive: oklch(0.6 0.2 25); /* Brighter red */
+  --destructive-foreground: oklch(0.95 0.005 264);
+
+  /* Dark UI Elements */
+  --muted: oklch(0.22 0.01 264 / 0.5);
+  --muted-foreground: oklch(0.65 0.01 264);
+  --border: oklch(0.3 0.01 264 / 0.3);
+  --input: oklch(0.25 0.01 264 / 0.65);
+  --ring: oklch(0.6 0.2 250 / 0.4);
 }
 
 @theme {
@@ -55,17 +92,107 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --radius-sm: calc(var(--radius) * 0.5);
+  /* iOS Spacing System */
+  --radius-sm: var(--radius-sm);
   --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) * 1.5);
-  --radius-xl: calc(var(--radius) * 2);
-  --radius-2xl: calc(var(--radius) * 3);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: calc(var(--radius) * 4);
   --radius-full: 9999px;
 }
 
 @layer base {
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    /* iOS System Font Stack - SF Pro */
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue',
+      sans-serif;
+    /* iOS Typography Features */
+    font-feature-settings:
+      'liga' 1,
+      'calt' 1,
+      'kern' 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
+}
+
+/* Flow Designer Canvas Grid Pattern - iOS Blue Tint */
+.flow-canvas-grid {
+  background-image: radial-gradient(circle, oklch(0.7 0.02 250 / 0.15) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: 0 0;
+}
+
+/* Insights Dashboard Activity Bar */
+.activity-bar {
+  @apply bg-primary/20 hover:bg-primary/40 rounded-sm transition-all;
+  height: var(--bar-height, 0px);
+}
+
+/* Activity bar height levels (0-20) for discrete height values */
+.activity-bar-level-0 {
+  height: 0px;
+}
+.activity-bar-level-1 {
+  height: 3px;
+}
+.activity-bar-level-2 {
+  height: 6px;
+}
+.activity-bar-level-3 {
+  height: 9px;
+}
+.activity-bar-level-4 {
+  height: 12px;
+}
+.activity-bar-level-5 {
+  height: 15px;
+}
+.activity-bar-level-6 {
+  height: 18px;
+}
+.activity-bar-level-7 {
+  height: 21px;
+}
+.activity-bar-level-8 {
+  height: 24px;
+}
+.activity-bar-level-9 {
+  height: 27px;
+}
+.activity-bar-level-10 {
+  height: 30px;
+}
+.activity-bar-level-11 {
+  height: 33px;
+}
+.activity-bar-level-12 {
+  height: 36px;
+}
+.activity-bar-level-13 {
+  height: 39px;
+}
+.activity-bar-level-14 {
+  height: 42px;
+}
+.activity-bar-level-15 {
+  height: 45px;
+}
+.activity-bar-level-16 {
+  height: 48px;
+}
+.activity-bar-level-17 {
+  height: 51px;
+}
+.activity-bar-level-18 {
+  height: 54px;
+}
+.activity-bar-level-19 {
+  height: 57px;
+}
+.activity-bar-level-20 {
+  height: 60px;
 }
