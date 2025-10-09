@@ -54,7 +54,7 @@ export function useKV<T>(
 
   const [value, setValue] = useState<T>(getCachedValue)
   const isMounted = useRef(true)
-  const syncTimeoutRef = useRef<NodeJS.Timeout>()
+  const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   // Load initial value from Cloudflare KV
   useEffect(() => {
@@ -171,7 +171,7 @@ export function clearKVCache(): void {
   const keysToRemove: string[] = []
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i)
-    if (key && key.startsWith('kv:')) {
+    if (key?.startsWith('kv:')) {
       keysToRemove.push(key)
     }
   }

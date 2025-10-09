@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useKV } from '@/hooks/use-kv'
-import { House, SquaresFour, Gear, Lightning, ChartBar, ShieldCheck, Sliders, Activity, Users, ChartLine, HardDrives } from "@phosphor-icons/react"
+import { House, SquaresFour, Gear, Lightning, ChartBar, ShieldCheck, Sliders, Monitor, Users, ChartLine, HardDrives } from "@phosphor-icons/react"
 import { Toaster } from "@/components/ui/sonner"
 import { Dashboard } from './components/Dashboard'
 import { Rooms } from './components/Rooms'
@@ -111,7 +111,7 @@ function App() {
             value="monitor" 
             className="flex flex-col gap-1 p-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
           >
-            <Activity size={20} weight="regular" />
+            <Monitor size={20} weight="regular" />
             <span className="text-xs font-medium">Monitor</span>
           </TabsTrigger>
           

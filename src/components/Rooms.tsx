@@ -7,7 +7,7 @@ import {
   Lightbulb, 
   Thermometer, 
   Shield, 
-  Wifi, 
+  WifiHigh, 
   Plus,
   DotsThree
 } from "@phosphor-icons/react"
@@ -36,11 +36,11 @@ const deviceIcons = {
   light: Lightbulb,
   thermostat: Thermometer,
   security: Shield,
-  sensor: Wifi
+  sensor: WifiHigh
 }
 
 export function Rooms() {
-  const [rooms, setRooms] = useKV<Room[]>("rooms", [
+  const [rooms] = useKV<Room[]>("rooms", [
     {
       id: "living-room",
       name: "Living Room", 

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useKV } from '@/hooks/use-kv'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
@@ -148,8 +147,9 @@ export function AdaptiveLighting() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium">Wake Up Time</label>
+                  <label htmlFor="wake-up-time" className="text-sm font-medium">Wake Up Time</label>
                   <input
+                    id="wake-up-time"
                     type="time"
                     value={settings.wakeUpTime}
                     onChange={(e) => setSettings({ ...settings, wakeUpTime: e.target.value })}
@@ -157,8 +157,9 @@ export function AdaptiveLighting() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Sleep Time</label>
+                  <label htmlFor="sleep-time" className="text-sm font-medium">Sleep Time</label>
                   <input
+                    id="sleep-time"
                     type="time"
                     value={settings.sleepTime}
                     onChange={(e) => setSettings({ ...settings, sleepTime: e.target.value })}
@@ -168,8 +169,9 @@ export function AdaptiveLighting() {
               </div>
 
               <div>
-                <label className="text-sm font-medium mb-2 block">Transition Duration (minutes)</label>
+                <label htmlFor="transition-duration" className="text-sm font-medium mb-2 block">Transition Duration (minutes)</label>
                 <Slider
+                  id="transition-duration"
                   value={[settings.transitionDuration]}
                   onValueChange={([value]) => setSettings({ ...settings, transitionDuration: value })}
                   min={10}
@@ -201,10 +203,11 @@ export function AdaptiveLighting() {
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-medium">Morning (5AM - 9AM)</label>
+                    <label htmlFor="morning-temp" className="text-sm font-medium">Morning (5AM - 9AM)</label>
                     <Badge variant="outline">{settings.morningColorTemp}K</Badge>
                   </div>
                   <Slider
+                    id="morning-temp"
                     value={[settings.morningColorTemp]}
                     onValueChange={([value]) => setSettings({ ...settings, morningColorTemp: value })}
                     min={2700}
@@ -215,10 +218,11 @@ export function AdaptiveLighting() {
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-medium">Day (9AM - 5PM)</label>
+                    <label htmlFor="day-temp" className="text-sm font-medium">Day (9AM - 5PM)</label>
                     <Badge variant="outline">{settings.dayColorTemp}K</Badge>
                   </div>
                   <Slider
+                    id="day-temp"
                     value={[settings.dayColorTemp]}
                     onValueChange={([value]) => setSettings({ ...settings, dayColorTemp: value })}
                     min={2700}
@@ -229,10 +233,11 @@ export function AdaptiveLighting() {
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-medium">Evening (5PM - 9PM)</label>
+                    <label htmlFor="evening-temp" className="text-sm font-medium">Evening (5PM - 9PM)</label>
                     <Badge variant="outline">{settings.eveningColorTemp}K</Badge>
                   </div>
                   <Slider
+                    id="evening-temp"
                     value={[settings.eveningColorTemp]}
                     onValueChange={([value]) => setSettings({ ...settings, eveningColorTemp: value })}
                     min={2700}
@@ -243,10 +248,11 @@ export function AdaptiveLighting() {
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-medium">Night (9PM - 5AM)</label>
+                    <label htmlFor="night-temp" className="text-sm font-medium">Night (9PM - 5AM)</label>
                     <Badge variant="outline">{settings.nightColorTemp}K</Badge>
                   </div>
                   <Slider
+                    id="night-temp"
                     value={[settings.nightColorTemp]}
                     onValueChange={([value]) => setSettings({ ...settings, nightColorTemp: value })}
                     min={2700}

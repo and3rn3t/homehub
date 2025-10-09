@@ -1,6 +1,5 @@
-import { useState } from 'react'
 import { useKV } from '@/hooks/use-kv'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
@@ -9,9 +8,7 @@ import {
   Clock, 
   CalendarBlank, 
   MapPin, 
-  Plus,
   Play,
-  Pause,
   Pencil,
   Gear,
   FlowArrow
@@ -101,6 +98,7 @@ export function Automations() {
         hour12: true
       }).format(date)
     } catch (error) {
+      console.error('Date formatting error:', error)
       return 'Invalid date'
     }
   }

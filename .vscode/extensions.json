@@ -1,0 +1,46 @@
+{
+  "recommendations": [
+    // ✨ Essential (Install First!)
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+
+    // 🎨 React & TypeScript
+    "dsznajder.es7-react-js-snippets",
+    "usernamehw.errorlens",
+    "yoavbls.pretty-ts-errors",
+    "mikestead.dotenv",
+
+    // ☁️ Cloudflare Development
+    "cloudflare.vscode-cloudflare-workers",
+
+    // 📝 Code Quality & Documentation
+    "streetsidesoftware.code-spell-checker",
+    "bierner.markdown-mermaid",
+    "DavidAnson.vscode-markdownlint",
+
+    // 🔍 Git & Version Control
+    "eamodio.gitlens",
+    "github.vscode-pull-request-github",
+    "mhutchie.git-graph",
+
+    // 🛠️ Utilities
+    "christian-kohler.path-intellisense",
+    "ms-vscode.vscode-typescript-next",
+    "EditorConfig.EditorConfig",
+    "formulahendry.auto-rename-tag",
+    "wix.vscode-import-cost",
+
+    // 🎯 Optional but Useful
+    "ms-vscode.vscode-json-languageservice",
+    "kisstkondoros.vscode-gutter-preview",
+    "PKief.material-icon-theme",
+    "GitHub.copilot"
+  ],
+  "unwantedRecommendations": [
+    // These may conflict with our setup
+    "hookyqr.beautify",
+    "HookyQR.JSBeautify",
+    "dbaeumer.jshint"
+  ]
+}

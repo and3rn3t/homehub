@@ -1,5 +1,5 @@
 import { useKV } from '@/hooks/use-kv'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
@@ -8,13 +8,13 @@ import {
   Lightbulb, 
   Thermometer, 
   Shield, 
-  Wifi, 
+  WifiHigh, 
   Plus,
   Sun,
   Moon,
-  Home as HomeIcon,
-  AlertTriangle,
-  Activity,
+  House as HomeIcon,
+  Warning,
+  Pulse,
   CheckCircle
 } from "@phosphor-icons/react"
 import { motion } from "framer-motion"
@@ -48,7 +48,7 @@ const deviceIcons = {
   light: Lightbulb,
   thermostat: Thermometer,
   security: Shield,
-  sensor: Wifi
+  sensor: WifiHigh
 }
 
 export function Dashboard() {
@@ -101,7 +101,7 @@ export function Dashboard() {
   ])
   
   const [deviceAlerts] = useKV<DeviceAlert[]>("device-alerts", [])
-  const [favoriteDevices, setFavoriteDevices] = useKV<string[]>("favorite-devices", ["living-room-light", "thermostat-main"])
+  const [favoriteDevices] = useKV<string[]>("favorite-devices", ["living-room-light", "thermostat-main"])
   
   const quickScenesData = [
     { id: "good-morning", name: "Good Morning", icon: "sun" },
@@ -159,7 +159,7 @@ export function Dashboard() {
         {/* Alert Summary */}
         {(criticalAlerts.length > 0 || offlineDevices.length > 0 || lowBatteryDevices.length > 0) && (
           <Alert className="mb-6 border-red-200 bg-red-50">
-            <AlertTriangle size={16} className="text-red-600" />
+            <Warning size={16} className="text-red-600" />
             <AlertDescription className="text-red-700">
               <div className="flex items-center justify-between">
                 <div>
@@ -194,7 +194,7 @@ export function Dashboard() {
           </Card>
           <Card className="border-red-200 bg-red-50">
             <CardContent className="p-3 text-center">
-              <AlertTriangle size={20} className="text-red-600 mx-auto mb-1" />
+              <Warning size={20} className="text-red-600 mx-auto mb-1" />
               <div className="text-lg font-semibold text-red-800">
                 {offlineDevices.length}
               </div>
@@ -203,7 +203,7 @@ export function Dashboard() {
           </Card>
           <Card className="border-blue-200 bg-blue-50">
             <CardContent className="p-3 text-center">
-              <Activity size={20} className="text-blue-600 mx-auto mb-1" />
+              <Pulse size={20} className="text-blue-600 mx-auto mb-1" />
               <div className="text-lg font-semibold text-blue-800">
                 {activeAlerts.length}
               </div>
