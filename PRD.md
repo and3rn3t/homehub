@@ -3,16 +3,19 @@
 A comprehensive home automation control interface that provides intuitive management of smart home devices, automation schedules, and ecosystem integrations with a native iOS-inspired design.
 
 **Experience Qualities**:
+
 1. **Intuitive** - Every interaction should feel natural and discoverable, mirroring iOS native app behaviors
 2. **Responsive** - Real-time device status updates and immediate feedback for all user actions
 3. **Elegant** - Sophisticated visual hierarchy with purposeful animations and iOS design language
 
 **Complexity Level**: Complex Application (advanced functionality, accounts)
+
 - This requires comprehensive state management across multiple device types, automation rules, scheduling systems, and user preferences with persistent data storage.
 
 ## Essential Features
 
 ### Device Management
+
 - **Functionality**: View, control, and monitor all connected smart home devices
 - **Purpose**: Central control hub for all home automation devices
 - **Trigger**: Home screen device grid or device detail navigation
@@ -20,6 +23,7 @@ A comprehensive home automation control interface that provides intuitive manage
 - **Success criteria**: All device states persist and update in real-time
 
 ### Room Organization
+
 - **Functionality**: Group devices by physical location and manage room-based controls
 - **Purpose**: Logical organization matching home layout for intuitive navigation
 - **Trigger**: Room selection from main navigation or room quick actions
@@ -27,6 +31,7 @@ A comprehensive home automation control interface that provides intuitive manage
 - **Success criteria**: Room groupings persist and support bulk operations
 
 ### Automation & Scheduling
+
 - **Functionality**: Create time-based and condition-based automation rules
 - **Purpose**: Reduce manual intervention and optimize energy efficiency
 - **Trigger**: Automation tab or device long-press for quick automation
@@ -34,6 +39,7 @@ A comprehensive home automation control interface that provides intuitive manage
 - **Success criteria**: Automations execute reliably and can be easily modified
 
 ### Scene Management
+
 - **Functionality**: Create and activate predefined device state combinations
 - **Purpose**: One-touch control for common lighting/device configurations
 - **Trigger**: Scene widget on dashboard or dedicated scenes tab
@@ -41,6 +47,7 @@ A comprehensive home automation control interface that provides intuitive manage
 - **Success criteria**: Scenes activate all devices simultaneously with clear status indication
 
 ### Energy Monitoring
+
 - **Functionality**: Track power consumption across devices and provide insights
 - **Purpose**: Energy awareness and cost optimization
 - **Trigger**: Energy tab or device detail energy view
@@ -64,7 +71,7 @@ The design should evoke premium sophistication and technological confidence, fee
 Custom palette inspired by iOS system colors with enhanced contrast for device status indication.
 
 - **Primary Color**: iOS Blue (oklch(0.6 0.15 250)) - Communicates trust, technology, and primary actions
-- **Secondary Colors**: 
+- **Secondary Colors**:
   - Warm Gray (oklch(0.9 0.02 85)) for backgrounds and subtle elements
   - Cool Gray (oklch(0.4 0.03 250)) for secondary text and inactive states
 - **Accent Color**: iOS Green (oklch(0.7 0.15 145)) for success states, active devices, and positive actions

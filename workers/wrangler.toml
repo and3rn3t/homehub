@@ -1,0 +1,27 @@
+name = "homehub-kv-worker"
+main = "src/index.ts"
+compatibility_date = "2024-10-09"
+
+# KV Namespace Bindings
+# Replace these IDs with your own after running:
+# wrangler kv:namespace create "HOMEHUB_KV"
+# wrangler kv:namespace create "HOMEHUB_KV" --preview
+
+kv_namespaces = [
+  { binding = "HOMEHUB_KV", id = "YOUR_NAMESPACE_ID", preview_id = "YOUR_PREVIEW_NAMESPACE_ID" }
+]
+
+# Worker settings
+[build]
+command = "npm run build"
+
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+[env.staging]
+vars = { ENVIRONMENT = "staging" }
+
+# Optional: Custom domain
+# routes = [
+#   { pattern = "api.yourdomain.com/*", zone_name = "yourdomain.com" }
+# ]

@@ -5,19 +5,42 @@ HomeHub is an iOS-inspired home automation dashboard built with React 19, Vite, 
 
 ## Architecture & Tech Stack
 
-### Core Framework: GitHub Spark
-- **State Management**: Use `useKV()` hook from `@github/spark/hooks` for ALL persistent state (devices, rooms, scenes, users, etc.)
-- **Database**: Key-value store (`dbType: "kv"` in `spark.meta.json`) - no SQL, no complex queries
-- **Import Proxy**: Phosphor icons are proxied through Spark's Vite plugin - always import from `@phosphor-icons/react`
+### Core Framework: Cloudflare Stack
+- **State Management**: Custom `useKV()` hook from `@/hooks/use-kv` for ALL persistent state (devices, rooms, scenes, users, etc.)
+- **Database**: Cloudflare KV (key-value store) - no SQL, no complex queries, globally distributed
+- **Backend**: Cloudflare Workers providing REST API for KV operations
+- **Icons**: Phosphor Icons from `@phosphor-icons/react` (direct imports, no proxy needed)
+- **Caching**: localStorage + in-memory cache for instant reads, optimistic updates for responsive UI
 
 ### State Pattern Example
 ```tsx
 // CORRECT: Persistent state with useKV
+import { useKV } from '@/hooks/use-kv'
+
 const [devices, setDevices] = useKV<Device[]>("devices", [])
 const [activeScene, setActiveScene] = useKV<string | null>("active-scene", null)
 
 // WRONG: useState for persistent data
 const [devices, setDevices] = useState<Device[]>([]) // Will be lost on refresh!
+```
+
+### How It Works
+
+```mermaid
+graph LR
+    A[React Component] --> B[useKV hook]
+    B --> C[localStorage cache]
+    B --> D[Optimistic UI update<br/>instant]
+    D --> E[Debounced sync<br/>500ms]
+    E --> F[Cloudflare Worker API]
+    F --> G[Cloudflare KV]
+    C -.cached read.-> A
+    
+    style A fill:#4a9eff,stroke:#333,stroke-width:2px,color:#fff
+    style B fill:#10b981,stroke:#333,stroke-width:2px,color:#fff
+    style D fill:#22c55e,stroke:#333,stroke-width:2px,color:#fff
+    style F fill:#f59e0b,stroke:#333,stroke-width:2px,color:#fff
+    style G fill:#8b5cf6,stroke:#333,stroke-width:2px,color:#fff
 ```
 
 ### Component Architecture
@@ -117,11 +140,13 @@ export function Dashboard() {
 
 ## Critical Integration Points
 
-### Spark KV Store
-- All data persists to Spark's key-value store automatically
+### Cloudflare KV Store
+- All data persists to Cloudflare KV via Worker API automatically
 - Keys are string identifiers (e.g., `"devices"`, `"current-tab"`, `"security-cameras"`)
-- No manual save/load - `useKV` handles sync
-- Data lives in browser + Spark cloud (GitHub backend)
+- No manual save/load - `useKV` handles sync with debouncing
+- Data lives in: localStorage (instant) → Cloudflare KV (persistent, global)
+- Optimistic updates: UI responds immediately, sync happens in background
+- 500ms debounce: Multiple rapid updates are batched into single API call
 
 ### Component Communication
 - **Parent-Child**: Props drilling (simple, explicit)
@@ -131,6 +156,21 @@ export function Dashboard() {
 ### Routing
 - Single-page app with tab navigation (no React Router)
 - Navigation state stored in KV: `useKV("current-tab", "dashboard")`
+
+### Documentation Standards
+- **Diagrams**: Use Mermaid for all flowcharts and architecture diagrams
+- **Mermaid Package**: Installed as dev dependency (`npm install --save-dev mermaid`)
+- **Diagram Types**:
+  - `graph TD` - Top-down flowcharts
+  - `graph LR` - Left-right flow diagrams
+  - `sequenceDiagram` - Interaction sequences
+- **Styling**: Use consistent color scheme (see `docs/ARCHITECTURE.md`)
+  - React: `#4a9eff` (blue)
+  - Hooks/State: `#10b981` (green)
+  - Worker: `#f59e0b` (orange)
+  - KV Storage: `#8b5cf6` (purple)
+- **No ASCII Art**: Replace all text-based diagrams with Mermaid
+- **Reference**: See `docs/ARCHITECTURE.md` for comprehensive examples
 
 ## Design System Patterns
 
@@ -726,8 +766,13 @@ interface Flow {
 - **Main Entry**: `src/main.tsx` (React 19, ErrorBoundary setup)
 - **App Shell**: `src/App.tsx` (tab navigation, main routing)
 - **Design Spec**: `PRD.md` (feature requirements, color palette, UX flows)
-- **Config**: `vite.config.ts` (Spark plugin, icon proxy, path aliases)
+- **Config**: `vite.config.ts` (React, Tailwind, path aliases)
 - **Styles**: `src/index.css` (OKLCH color system, CSS variables)
 - **Type System**: `src/types/` (all TypeScript interfaces with JSDoc)
 - **Constants**: `src/constants/` (KV keys, mock data, icon mappings)
-- **Refactor Plan**: `REFACTOR_PLAN.md` (organizational roadmap)
+- **Backend**: `workers/src/index.ts` (Cloudflare Worker REST API)
+- **State Hook**: `src/hooks/use-kv.ts` (Custom hook with caching + optimistic updates)
+- **API Client**: `src/lib/kv-client.ts` (Worker communication layer)
+- **Architecture**: `docs/ARCHITECTURE.md` (Visual system diagrams with Mermaid)
+- **Deployment**: `docs/CLOUDFLARE_DEPLOYMENT.md` (Complete setup guide)
+- **Migration**: `docs/CLOUDFLARE_MIGRATION.md` (From Spark to Cloudflare)

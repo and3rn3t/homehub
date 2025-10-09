@@ -1,6 +1,5 @@
-import { useState } from 'react'
-import { useKV } from '@github/spark/hooks'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useKV } from '@/hooks/use-kv'
 import { House, SquaresFour, Gear, Lightning, ChartBar, ShieldCheck, Sliders, Activity, Users, ChartLine, HardDrives } from "@phosphor-icons/react"
 import { Toaster } from "@/components/ui/sonner"
 import { Dashboard } from './components/Dashboard'

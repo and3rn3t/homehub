@@ -1,0 +1,23 @@
+{
+  "name": "homehub-kv-worker",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker for HomeHub KV storage",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy --env staging",
+    "deploy:production": "wrangler deploy --env production",
+    "tail": "wrangler tail",
+    "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --format=esm"
+  },
+  "keywords": ["cloudflare", "worker", "kv"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241011.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.2",
+    "wrangler": "^3.82.0"
+  }
+}
