@@ -228,13 +228,8 @@ npm run validate
 ```json
 {
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md}": [
-      "prettier --write"
-    ]
+    "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
+    "*.{json,md}": ["prettier --write"]
   }
 }
 ```
@@ -593,17 +588,17 @@ npm run dev
 
 ## 📊 Setup Time Estimate
 
-| Section | Time | Priority |
-|---------|------|----------|
-| Node.js Version | 5 min | Medium |
-| Environment Vars | 5 min | **Critical** |
-| Install Deps | 3 min | **Critical** |
-| Cloudflare Setup | 15 min | **Critical** |
-| Git Config | 5 min | Medium |
-| VS Code Extensions | 5 min | **Critical** |
-| Verify TypeScript | 2 min | Medium |
-| Test Local Dev | 5 min | **Critical** |
-| Code Quality | 3 min | Medium |
-| Documentation | 15 min | Low |
+| Section            | Time   | Priority     |
+| ------------------ | ------ | ------------ |
+| Node.js Version    | 5 min  | Medium       |
+| Environment Vars   | 5 min  | **Critical** |
+| Install Deps       | 3 min  | **Critical** |
+| Cloudflare Setup   | 15 min | **Critical** |
+| Git Config         | 5 min  | Medium       |
+| VS Code Extensions | 5 min  | **Critical** |
+| Verify TypeScript  | 2 min  | Medium       |
+| Test Local Dev     | 5 min  | **Critical** |
+| Code Quality       | 3 min  | Medium       |
+| Documentation      | 15 min | Low          |
 
 **Total Time**: ~30 min (critical items only) | ~60 min (everything)

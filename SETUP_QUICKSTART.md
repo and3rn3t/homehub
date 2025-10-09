@@ -121,12 +121,12 @@ Before you start coding:
 
 ## 🆘 Quick Troubleshooting
 
-| Problem | Solution |
-|---------|----------|
-| Port already in use | `npx kill-port 5173` or `npx kill-port 8787` |
-| ESLint not working | Reload VS Code: `Ctrl+Shift+P` → "Reload Window" |
-| TypeScript errors | `rm -rf node_modules/.cache && npm run type-check` |
-| Worker won't start | Check `workers/wrangler.toml` configuration |
+| Problem             | Solution                                           |
+| ------------------- | -------------------------------------------------- |
+| Port already in use | `npx kill-port 5173` or `npx kill-port 8787`       |
+| ESLint not working  | Reload VS Code: `Ctrl+Shift+P` → "Reload Window"   |
+| TypeScript errors   | `rm -rf node_modules/.cache && npm run type-check` |
+| Worker won't start  | Check `workers/wrangler.toml` configuration        |
 
 ---
 
@@ -138,15 +138,15 @@ See [docs/SETUP_CHECKLIST.md](./docs/SETUP_CHECKLIST.md) for complete details.
 
 ## 🎯 Commands Reference
 
-| Command | What It Does |
-|---------|--------------|
-| `npm run dev` | Start frontend (port 5173) |
-| `npm run worker:dev` | Start worker (port 8787) |
-| `npm run build` | Build for production |
-| `npm run lint` | Check code quality |
-| `npm run format` | Auto-format code |
-| `npm run validate` | Run all checks |
-| `npm run type-check` | Check TypeScript |
+| Command              | What It Does               |
+| -------------------- | -------------------------- |
+| `npm run dev`        | Start frontend (port 5173) |
+| `npm run worker:dev` | Start worker (port 8787)   |
+| `npm run build`      | Build for production       |
+| `npm run lint`       | Check code quality         |
+| `npm run format`     | Auto-format code           |
+| `npm run validate`   | Run all checks             |
+| `npm run type-check` | Check TypeScript           |
 
 ---
 
