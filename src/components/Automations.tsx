@@ -202,18 +202,22 @@ export function Automations() {
                               </div>
 
                               <div className="ml-3 flex items-center gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8"
-                                  onClick={() => runAutomation(automation.id)}
-                                >
-                                  <Play size={14} />
-                                </Button>
+                                <motion.div whileTap={{ scale: 0.9 }}>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={() => runAutomation(automation.id)}
+                                  >
+                                    <Play size={14} />
+                                  </Button>
+                                </motion.div>
 
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                  <Pencil size={14} />
-                                </Button>
+                                <motion.div whileTap={{ scale: 0.9 }}>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <Pencil size={14} />
+                                  </Button>
+                                </motion.div>
 
                                 <Switch
                                   checked={automation.enabled}

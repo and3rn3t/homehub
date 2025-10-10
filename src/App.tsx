@@ -9,6 +9,7 @@ import { DeviceMonitor } from './components/DeviceMonitor'
 import { DeviceSettings } from './components/DeviceSettings'
 import { Energy } from './components/Energy'
 import { InsightsDashboard } from './components/InsightsDashboard'
+import { LoadingStatesDemo } from './components/LoadingStatesDemo'
 import { Rooms } from './components/Rooms'
 import { Scenes } from './components/Scenes'
 import { Security } from './components/Security'
@@ -113,6 +114,9 @@ function App() {
                   <TabsTrigger value="backup" className="data-[state=active]:bg-primary/10">
                     Backup
                   </TabsTrigger>
+                  <TabsTrigger value="developer" className="data-[state=active]:bg-primary/10">
+                    Developer
+                  </TabsTrigger>
                 </TabsList>
               </div>
               <div className="flex-1 overflow-hidden">
@@ -125,58 +129,61 @@ function App() {
                 <TabsContent value="backup" className="m-0 h-full p-0">
                   <BackupRecovery />
                 </TabsContent>
+                <TabsContent value="developer" className="m-0 h-full p-0">
+                  <LoadingStatesDemo />
+                </TabsContent>
               </div>
             </Tabs>
           </TabsContent>
         </div>
 
-        <TabsList className="bg-card/80 border-border grid h-20 w-full grid-cols-6 rounded-none border-t p-2 backdrop-blur-xl">
+        <TabsList className="bg-card/80 border-border grid h-16 w-full grid-cols-6 rounded-none border-t p-1 backdrop-blur-xl sm:h-20 sm:p-2">
           <TabsTrigger
             value="home"
-            className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary flex flex-col gap-1 p-2"
+            className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary flex min-h-[44px] flex-col gap-0.5 p-1 sm:gap-1 sm:p-2"
           >
-            <House size={24} weight="regular" />
-            <span className="text-xs font-medium">Home</span>
+            <House size={20} weight="regular" className="sm:h-6 sm:w-6" />
+            <span className="text-[10px] font-medium sm:text-xs">Home</span>
           </TabsTrigger>
 
           <TabsTrigger
             value="devices"
-            className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary flex flex-col gap-1 p-2"
+            className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary flex min-h-[44px] flex-col gap-0.5 p-1 sm:gap-1 sm:p-2"
           >
-            <Cpu size={24} weight="regular" />
-            <span className="text-xs font-medium">Devices</span>
+            <Cpu size={20} weight="regular" className="sm:h-6 sm:w-6" />
+            <span className="text-[10px] font-medium sm:text-xs">Devices</span>
           </TabsTrigger>
 
           <TabsTrigger
             value="control"
-            className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary flex flex-col gap-1 p-2"
+            className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary flex min-h-[44px] flex-col gap-0.5 p-1 sm:gap-1 sm:p-2"
           >
-            <Lightning size={24} weight="regular" />
-            <span className="text-xs font-medium">Control</span>
+            <Lightning size={20} weight="regular" className="sm:h-6 sm:w-6" />
+            <span className="text-[10px] font-medium sm:text-xs">Control</span>
           </TabsTrigger>
 
           <TabsTrigger
             value="security"
-            className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary flex flex-col gap-1 p-2"
+            className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary flex min-h-[44px] flex-col gap-0.5 p-1 sm:gap-1 sm:p-2"
           >
-            <ShieldCheck size={24} weight="regular" />
-            <span className="text-xs font-medium">Security</span>
+            <ShieldCheck size={20} weight="regular" className="sm:h-6 sm:w-6" />
+            <span className="text-[10px] font-medium sm:text-xs">Security</span>
           </TabsTrigger>
 
           <TabsTrigger
             value="insights"
-            className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary flex flex-col gap-1 p-2"
+            className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary flex min-h-[44px] flex-col gap-0.5 p-1 sm:gap-1 sm:p-2"
           >
-            <ChartLine size={24} weight="regular" />
-            <span className="text-xs font-medium">Insights</span>
+            <ChartLine size={20} weight="regular" className="sm:h-6 sm:w-6" />
+            <span className="text-[10px] font-medium sm:text-xs">Insights</span>
           </TabsTrigger>
 
           <TabsTrigger
             value="settings"
-            className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary flex flex-col gap-1 p-2"
+            className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary flex min-h-[44px] flex-col gap-0.5 p-1 sm:gap-1 sm:p-2"
           >
-            <Sliders size={24} weight="regular" />
-            <span className="text-xs font-medium">Settings</span>
+            <Sliders size={20} weight="regular" className="sm:h-6 sm:w-6" />
+            <span className="text-[10px] font-medium sm:text-xs">Settings</span>
           </TabsTrigger>
         </TabsList>
       </Tabs>

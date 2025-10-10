@@ -366,7 +366,7 @@ export function NotificationBell() {
       <Button
         variant="outline"
         size="icon"
-        className="relative rounded-full"
+        className="relative h-11 w-11 rounded-full"
         onClick={() => setIsVisible(!isVisible)}
       >
         <Bell size={20} />

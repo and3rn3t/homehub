@@ -1,35 +1,74 @@
 /**
  * Custom useKV Hook
- * 
+ *
  * Drop-in replacement for @github/spark/hooks useKV.
  * Provides persistent state management with Cloudflare KV backend.
- * 
+ *
  * Features:
  * - localStorage cache for instant reads
  * - Optimistic updates
  * - Automatic sync with Cloudflare KV
  * - Same API as Spark's useKV
- * 
+ * - Optional loading states
+ *
  * Usage:
  *   const [devices, setDevices] = useKV<Device[]>("devices", [])
+ *   const [devices, setDevices, { isLoading, isError }] = useKV<Device[]>("devices", [], { withMeta: true })
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react'
 import { getKVClient } from '@/lib/kv-client'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 // Cache for optimistic updates and offline support
-const localCache = new Map<string, any>()
+const localCache = new Map<string, unknown>()
 
 // Track pending sync operations
 const pendingSyncs = new Map<string, Promise<void>>()
+
+// Track loading states (reserved for future use)
+// const loadingStates = new Map<string, boolean>()
+
+/**
+ * Metadata about the KV state
+ */
+export interface UseKVMeta {
+  isLoading: boolean
+  isError: boolean
+  isSyncing: boolean
+}
+
+/**
+ * Options for useKV hook
+ */
+export interface UseKVOptions {
+  /** Return metadata (loading/error states) */
+  withMeta?: boolean
+  /** Skip initial load from KV (use cache only) */
+  skipInitialLoad?: boolean
+}
 
 /**
  * Custom useKV hook with Cloudflare KV backend
  */
 export function useKV<T>(
   key: string,
-  defaultValue: T
-): [T, (value: T | ((prev: T) => T)) => void] {
+  defaultValue: T,
+  options: UseKVOptions & { withMeta: true }
+): [T, (value: T | ((prev: T) => T)) => void, UseKVMeta]
+
+export function useKV<T>(
+  key: string,
+  defaultValue: T,
+  options?: UseKVOptions & { withMeta?: false }
+): [T, (value: T | ((prev: T) => T)) => void]
+
+export function useKV<T>(
+  key: string,
+  defaultValue: T,
+  options?: UseKVOptions
+): [T, (value: T | ((prev: T) => T)) => void, UseKVMeta?] {
+  const { withMeta = false, skipInitialLoad = false } = options || {}
+
   // Initialize state from cache or default
   const getCachedValue = useCallback((): T => {
     // Check memory cache first
@@ -53,6 +92,10 @@ export function useKV<T>(
   }, [key, defaultValue])
 
   const [value, setValue] = useState<T>(getCachedValue)
+  const [isLoading, setIsLoading] = useState(!localCache.has(key) && !skipInitialLoad)
+  const [isError, setIsError] = useState(false)
+  const [isSyncing, setIsSyncing] = useState(false)
+
   const isMounted = useRef(true)
   const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
@@ -60,8 +103,16 @@ export function useKV<T>(
   useEffect(() => {
     isMounted.current = true
 
+    if (skipInitialLoad) {
+      setIsLoading(false)
+      return
+    }
+
     const loadFromKV = async () => {
       try {
+        setIsLoading(true)
+        setIsError(false)
+
         const client = getKVClient()
         const remoteValue = await client.get<T>(key)
 
@@ -78,8 +129,12 @@ export function useKV<T>(
           localCache.set(key, defaultValue)
           localStorage.setItem(`kv:${key}`, JSON.stringify(defaultValue))
         }
+
+        setIsLoading(false)
       } catch (error) {
         console.error(`Failed to load KV value for key "${key}":`, error)
+        setIsError(true)
+        setIsLoading(false)
         // Fall back to cached/default value on error
       }
     }
@@ -92,15 +147,22 @@ export function useKV<T>(
         clearTimeout(syncTimeoutRef.current)
       }
     }
-  }, [key, defaultValue])
+  }, [key, defaultValue, skipInitialLoad])
+
+  // Helper to handle sync after debounce
+  const handleDebouncedSync = useCallback(async (syncKey: string, syncValue: T) => {
+    await syncToKV(syncKey, syncValue)
+    if (isMounted.current) {
+      setIsSyncing(false)
+    }
+  }, [])
 
   // Update function with optimistic updates and debounced sync
   const updateValue = useCallback(
     (newValue: T | ((prev: T) => T)) => {
-      setValue((prev) => {
-        const nextValue = typeof newValue === 'function' 
-          ? (newValue as (prev: T) => T)(prev) 
-          : newValue
+      setValue(prev => {
+        const nextValue =
+          typeof newValue === 'function' ? (newValue as (prev: T) => T)(prev) : newValue
 
         // Optimistic update - update caches immediately
         localCache.set(key, nextValue)
@@ -115,23 +177,33 @@ export function useKV<T>(
           clearTimeout(syncTimeoutRef.current)
         }
 
+        setIsSyncing(true)
         syncTimeoutRef.current = setTimeout(() => {
-          syncToKV(key, nextValue)
+          handleDebouncedSync(key, nextValue)
         }, 500)
 
         return nextValue
       })
     },
-    [key]
+    [key, handleDebouncedSync]
   )
 
-  return [value, updateValue]
+  // Return with or without metadata
+  if (withMeta) {
+    return [value, updateValue, { isLoading, isError, isSyncing }] as [
+      T,
+      typeof updateValue,
+      UseKVMeta,
+    ]
+  }
+
+  return [value, updateValue] as [T, typeof updateValue]
 }
 
 /**
  * Sync value to Cloudflare KV (debounced)
  */
-async function syncToKV(key: string, value: any): Promise<void> {
+async function syncToKV(key: string, value: unknown): Promise<void> {
   // If already syncing this key, wait for that to finish
   if (pendingSyncs.has(key)) {
     await pendingSyncs.get(key)
@@ -143,7 +215,8 @@ async function syncToKV(key: string, value: any): Promise<void> {
       await client.set(key, value)
     } catch (error) {
       console.error(`Failed to sync to KV for key "${key}":`, error)
-      // TODO: Implement retry logic or error queue
+      // Retry logic can be added here in the future
+      // For now, errors are logged and the update remains in localStorage
     } finally {
       pendingSyncs.delete(key)
     }
@@ -166,7 +239,7 @@ export async function flushKVChanges(): Promise<void> {
  */
 export function clearKVCache(): void {
   localCache.clear()
-  
+
   // Clear localStorage KV entries
   const keysToRemove: string[] = []
   for (let i = 0; i < localStorage.length; i++) {
@@ -175,6 +248,6 @@ export function clearKVCache(): void {
       keysToRemove.push(key)
     }
   }
-  
+
   keysToRemove.forEach(key => localStorage.removeItem(key))
 }

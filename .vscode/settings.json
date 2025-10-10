@@ -55,5 +55,8 @@
   // Path Intellisense
   "path-intellisense.mappings": {
     "@": "${workspaceRoot}/src"
+  },
+  "[powershell]": {
+    "editor.defaultFormatter": "ms-vscode.powershell"
   }
 }

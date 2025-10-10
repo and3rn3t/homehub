@@ -80,7 +80,7 @@ export function Security() {
       if (diffMins < 60) return `${diffMins}m ago`
       if (diffHours < 24) return `${diffHours}h ago`
       return date.toLocaleDateString()
-    } catch (error) {
+    } catch (_error) {
       return 'Invalid date'
     }
   }
@@ -194,7 +194,7 @@ export function Security() {
                 >
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Card className="hover:bg-accent/5 relative cursor-pointer overflow-hidden transition-colors">
+                      <Card className="hover:bg-accent/5 relative cursor-pointer overflow-hidden transition-all duration-200 hover:shadow-lg">
                         <div className="relative aspect-video overflow-hidden rounded-t-lg bg-black">
                           {camera.status !== 'offline' ? (
                             <img

@@ -1,11 +1,13 @@
 # HomeHub - AI Coding Agent Instructions
 
 ## Project Overview
+
 HomeHub is an iOS-inspired home automation dashboard built with React 19, Vite, and GitHub Spark. This is a **proof-of-concept framework demo** for DIY home automation - the foundation is being built for future integration with real smart devices. Currently uses mock data with the goal of becoming a production-ready personal home automation system.
 
 ## Architecture & Tech Stack
 
 ### Core Framework: Cloudflare Stack
+
 - **State Management**: Custom `useKV()` hook from `@/hooks/use-kv` for ALL persistent state (devices, rooms, scenes, users, etc.)
 - **Database**: Cloudflare KV (key-value store) - no SQL, no complex queries, globally distributed
 - **Backend**: Cloudflare Workers providing REST API for KV operations
@@ -13,12 +15,13 @@ HomeHub is an iOS-inspired home automation dashboard built with React 19, Vite, 
 - **Caching**: localStorage + in-memory cache for instant reads, optimistic updates for responsive UI
 
 ### State Pattern Example
+
 ```tsx
 // CORRECT: Persistent state with useKV
 import { useKV } from '@/hooks/use-kv'
 
-const [devices, setDevices] = useKV<Device[]>("devices", [])
-const [activeScene, setActiveScene] = useKV<string | null>("active-scene", null)
+const [devices, setDevices] = useKV<Device[]>('devices', [])
+const [activeScene, setActiveScene] = useKV<string | null>('active-scene', null)
 
 // WRONG: useState for persistent data
 const [devices, setDevices] = useState<Device[]>([]) // Will be lost on refresh!
@@ -35,7 +38,7 @@ graph LR
     E --> F[Cloudflare Worker API]
     F --> G[Cloudflare KV]
     C -.cached read.-> A
-    
+
     style A fill:#4a9eff,stroke:#333,stroke-width:2px,color:#fff
     style B fill:#10b981,stroke:#333,stroke-width:2px,color:#fff
     style D fill:#22c55e,stroke:#333,stroke-width:2px,color:#fff
@@ -44,17 +47,20 @@ graph LR
 ```
 
 ### Component Architecture
+
 - **Main App**: Tab-based navigation in `App.tsx` with 11 sections (Dashboard, Rooms, Automations, Scenes, Energy, Monitor, Security, Users, Insights, Backup, Settings)
 - **Feature Components**: Each tab is a self-contained component in `src/components/` (e.g., `Dashboard.tsx`, `Rooms.tsx`)
 - **UI Components**: shadcn/ui components in `src/components/ui/` - DO NOT modify these directly, they're generated
 
 ### Styling System
+
 - **CSS Framework**: Tailwind CSS 4 with Tailwind Vite plugin
 - **Theme**: OKLCH color system defined in `src/index.css` and `src/main.css`
 - **iOS Design**: Custom color palette (`primary: oklch(0.6 0.15 250)` iOS Blue, `accent: oklch(0.7 0.15 145)` iOS Green)
 - **Utility**: Use `cn()` from `@/lib/utils` to merge Tailwind classes (uses `clsx` + `tailwind-merge`)
 
 ### Icons & Animations
+
 - **Icons**: Phosphor Icons exclusively (`@phosphor-icons/react`) - weight="regular" for consistency
 - **Animations**: Framer Motion for spring physics and transitions
 - **Toast Notifications**: Sonner (`import { toast } from "sonner"`)
@@ -62,6 +68,7 @@ graph LR
 ## Key Developer Workflows
 
 ### Running the App
+
 ```bash
 npm run dev        # Start Vite dev server (default port 5173)
 npm run build      # Production build (tsc + vite build)
@@ -69,26 +76,27 @@ npm run preview    # Preview production build
 ```
 
 ### Adding Components
+
 1. **Feature Component**: Create in `src/components/` following naming convention (PascalCase, descriptive)
 2. **UI Component**: Use shadcn CLI or manually add to `src/components/ui/` (New York style, see `components.json`)
 3. **Import Aliases**: Use `@/` prefix for all imports (`@/components`, `@/lib/utils`, `@/hooks`)
 
 ### State Management Pattern
+
 ```tsx
 // Multi-device state
-const [devices, setDevices] = useKV<Device[]>("devices-key", defaultDevices)
+const [devices, setDevices] = useKV<Device[]>('devices-key', defaultDevices)
 
 // Update single device
 const toggleDevice = (deviceId: string) => {
-  setDevices(prev => prev.map(d => 
-    d.id === deviceId ? { ...d, enabled: !d.enabled } : d
-  ))
+  setDevices(prev => prev.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d)))
 }
 ```
 
 ## Project Organization
 
 ### Directory Structure
+
 ```
 src/
 ├── components/
@@ -103,18 +111,21 @@ src/
 ```
 
 ### TypeScript Conventions
+
 - **Import types from `@/types`**: `import type { Device, Room } from '@/types'`
 - **Use centralized KV keys**: `import { KV_KEYS } from '@/constants'`
 - **Type all useKV calls**: `useKV<Device[]>(KV_KEYS.DEVICES, [])`
 - **All types documented**: JSDoc comments on interfaces and properties
 
 ### Component Structure
+
 1. Imports (React, types, hooks, UI components, icons)
 2. Functional component with hooks
 3. Helper functions
 4. JSX with Framer Motion animations
 
 **Example:**
+
 ```tsx
 import { useKV } from '@github/spark/hooks'
 import type { Device } from '@/types'
@@ -129,11 +140,13 @@ export function Dashboard() {
 ```
 
 ### Error Handling
+
 - Root-level: `react-error-boundary` with `ErrorFallback.tsx`
 - Dev mode: Errors are rethrown for better DX (`if (import.meta.env.DEV) throw error`)
 - Production: Friendly error UI with reload option
 
 ### File Naming
+
 - Components: PascalCase (`Dashboard.tsx`, `FlowDesigner.tsx`)
 - Utils: camelCase (`utils.ts`)
 - Styles: kebab-case (`main.css`, `theme.css`)
@@ -141,6 +154,7 @@ export function Dashboard() {
 ## Critical Integration Points
 
 ### Cloudflare KV Store
+
 - All data persists to Cloudflare KV via Worker API automatically
 - Keys are string identifiers (e.g., `"devices"`, `"current-tab"`, `"security-cameras"`)
 - No manual save/load - `useKV` handles sync with debouncing
@@ -149,15 +163,18 @@ export function Dashboard() {
 - 500ms debounce: Multiple rapid updates are batched into single API call
 
 ### Component Communication
+
 - **Parent-Child**: Props drilling (simple, explicit)
 - **Cross-Component**: Shared KV keys (e.g., `"active-scene"` read by Dashboard + Scenes)
 - **Notifications**: Sonner toast for user feedback (`toast.success()`, `toast.error()`)
 
 ### Routing
+
 - Single-page app with tab navigation (no React Router)
 - Navigation state stored in KV: `useKV("current-tab", "dashboard")`
 
 ### Documentation Standards
+
 - **Diagrams**: Use Mermaid for all flowcharts and architecture diagrams
 - **Mermaid Package**: Installed as dev dependency (`npm install --save-dev mermaid`)
 - **Diagram Types**:
@@ -175,144 +192,155 @@ export function Dashboard() {
 ## Design System Patterns
 
 ### iOS Visual Language
+
 - Spring animations with Framer Motion (`initial`, `animate`, `exit` props)
 - Card-based layouts with backdrop blur: `bg-card/80 backdrop-blur-xl`
 - Status badges with color coding (online=green, offline=red, warning=yellow)
 - Toggle switches instead of checkboxes for binary states
 
 ### Responsive Design
+
 - Mobile-first with coarse pointer detection: `coarse: { raw: "(pointer: coarse)" }`
 - Grid layouts adapt to screen size (11-column tab bar on desktop)
 
 ### Typography
+
 - SF Pro system fonts (via CSS variable fallbacks)
 - Hierarchy: H1 (28px Bold), H2 (20px Semibold), H3 (16px Medium), Body (14px Regular)
 
 ## Common Pitfalls
 
-❌ **Don't** use `useState` for persistent data (devices, settings, user data)  
+❌ **Don't** use `useState` for persistent data (devices, settings, user data)
 ✅ **Do** use `useKV` for anything that should survive page refresh
 
-❌ **Don't** define inline interfaces in component files  
+❌ **Don't** define inline interfaces in component files
 ✅ **Do** import types from `@/types`
 
-❌ **Don't** hardcode KV store keys as strings  
+❌ **Don't** hardcode KV store keys as strings
 ✅ **Do** use constants from `@/constants/kv-keys`
 
-❌ **Don't** scatter mock data across components  
+❌ **Don't** scatter mock data across components
 ✅ **Do** import from `@/constants/mock-data`
 
-❌ **Don't** modify `src/components/ui/*` files directly  
+❌ **Don't** modify `src/components/ui/*` files directly
 ✅ **Do** extend UI components with wrapper components or className overrides
 
-❌ **Don't** import icons from other libraries  
+❌ **Don't** import icons from other libraries
 ✅ **Do** use Phosphor Icons exclusively (already configured with Vite proxy)
 
-❌ **Don't** hardcode colors in JSX  
+❌ **Don't** hardcode colors in JSX
 ✅ **Do** use Tailwind theme colors (`bg-primary`, `text-accent`, etc.)
 
 ## Core Data Models
 
 ### Device Interface
+
 Primary entity for all smart home devices. Defined inline in components but follows this pattern:
 
 ```tsx
 interface Device {
-  id: string                    // Unique identifier (UUID)
-  name: string                  // Display name ("Living Room Light")
+  id: string // Unique identifier (UUID)
+  name: string // Display name ("Living Room Light")
   type: 'light' | 'thermostat' | 'security' | 'sensor'
-  room: string                  // Room association for grouping
+  room: string // Room association for grouping
   status: 'online' | 'offline' | 'warning' | 'error'
-  enabled: boolean              // Power state
-  value?: number                // Current value (temperature, brightness, etc.)
-  unit?: string                 // Measurement unit ("°F", "%", "W")
-  lastSeen?: Date              // Last communication timestamp
-  batteryLevel?: number         // Battery percentage (0-100)
-  signalStrength?: number       // WiFi/connectivity strength (0-100)
+  enabled: boolean // Power state
+  value?: number // Current value (temperature, brightness, etc.)
+  unit?: string // Measurement unit ("°F", "%", "W")
+  lastSeen?: Date // Last communication timestamp
+  batteryLevel?: number // Battery percentage (0-100)
+  signalStrength?: number // WiFi/connectivity strength (0-100)
 }
 ```
 
-**KV Store Key**: `"devices"` - Array of all devices across the home  
+**KV Store Key**: `"devices"` - Array of all devices across the home
 **Usage Pattern**: Map operations for updates, filter for room/type views
 
 ### Room Interface
+
 Organizational unit for grouping devices by physical location:
 
 ```tsx
 interface Room {
-  id: string                    // Unique identifier
-  name: string                  // Display name ("Living Room", "Master Bedroom")
-  icon: string                  // Phosphor icon name for UI
-  deviceIds: string[]           // References to Device.id
-  color?: string                // Optional theme color for room cards
+  id: string // Unique identifier
+  name: string // Display name ("Living Room", "Master Bedroom")
+  icon: string // Phosphor icon name for UI
+  deviceIds: string[] // References to Device.id
+  color?: string // Optional theme color for room cards
 }
 ```
 
-**KV Store Key**: `"rooms"` - Array of room definitions  
+**KV Store Key**: `"rooms"` - Array of room definitions
 **Cross-Reference**: Join with devices via `deviceIds` array
 
 ### Scene Interface
+
 Predefined device state combinations for one-touch control:
 
 ```tsx
 interface Scene {
-  id: string                    // Unique identifier
-  name: string                  // Display name ("Movie Time", "Good Morning")
-  icon: string                  // Phosphor icon name
-  description?: string          // Optional user-facing description
-  deviceStates: Array<{         // Target states for each device
+  id: string // Unique identifier
+  name: string // Display name ("Movie Time", "Good Morning")
+  icon: string // Phosphor icon name
+  description?: string // Optional user-facing description
+  deviceStates: Array<{
+    // Target states for each device
     deviceId: string
     enabled: boolean
-    value?: number              // Target brightness/temperature/etc.
+    value?: number // Target brightness/temperature/etc.
   }>
-  enabled: boolean              // Scene availability toggle
-  lastActivated?: Date         // Timestamp of last execution
+  enabled: boolean // Scene availability toggle
+  lastActivated?: Date // Timestamp of last execution
 }
 ```
 
-**KV Store Keys**: 
+**KV Store Keys**:
+
 - `"scenes"` - Array of scene definitions
 - `"active-scene"` - Currently active scene ID (string | null)
 
 ### Automation Interface
+
 Time/condition-based rules for automatic device control:
 
 ```tsx
 interface Automation {
-  id: string                    // Unique identifier
-  name: string                  // Display name
-  enabled: boolean              // Master switch for rule execution
+  id: string // Unique identifier
+  name: string // Display name
+  enabled: boolean // Master switch for rule execution
   trigger: {
     type: 'time' | 'condition' | 'geofence' | 'device-state'
     // Time trigger
-    time?: string               // "HH:MM" format
-    days?: string[]             // ["monday", "wednesday", ...]
+    time?: string // "HH:MM" format
+    days?: string[] // ["monday", "wednesday", ...]
     // Condition trigger
     deviceId?: string
     operator?: '<' | '>' | '==' | '!='
     threshold?: number
     // Geofence trigger
-    location?: { lat: number, lng: number, radius: number }
+    location?: { lat: number; lng: number; radius: number }
   }
-  actions: Array<{              // Actions to execute when triggered
+  actions: Array<{
+    // Actions to execute when triggered
     deviceId: string
     enabled: boolean
     value?: number
   }>
-  lastRun?: Date               // Last execution timestamp
+  lastRun?: Date // Last execution timestamp
 }
 ```
 
 **KV Store Key**: `"automations"` - Array of automation rules
 
 ### User Interface
+
 User management for access control and permissions:
 
 ```tsx
 interface User {
-  id: string                    // Unique identifier
-  name: string                  // Full name
-  email: string                 // Email address (used for login)
+  id: string // Unique identifier
+  name: string // Full name
+  email: string // Email address (used for login)
   role: 'admin' | 'member' | 'guest'
   permissions: {
     canEditDevices: boolean
@@ -320,67 +348,70 @@ interface User {
     canManageUsers: boolean
     canViewSecurity: boolean
   }
-  avatar?: string               // Profile image URL
-  lastActive?: Date            // Last login/activity timestamp
+  avatar?: string // Profile image URL
+  lastActive?: Date // Last login/activity timestamp
 }
 ```
 
 **KV Store Key**: `"home-users"` - Array of user accounts
 
 ### Security Entities
+
 Camera and event tracking for security monitoring:
 
 ```tsx
 interface Camera {
   id: string
-  name: string                  // "Front Door Camera"
-  location: string              // Room or outdoor location
+  name: string // "Front Door Camera"
+  location: string // Room or outdoor location
   status: 'recording' | 'idle' | 'offline'
   recordingEnabled: boolean
   motionDetection: boolean
   nightVision: boolean
   lastMotion?: Date
-  streamUrl?: string            // Future: live feed URL
+  streamUrl?: string // Future: live feed URL
 }
 
 interface SecurityEvent {
   id: string
   type: 'motion' | 'door-open' | 'alarm' | 'camera-offline'
   severity: 'low' | 'medium' | 'high' | 'critical'
-  message: string               // Human-readable description
+  message: string // Human-readable description
   timestamp: Date
   acknowledged: boolean
-  cameraId?: string            // Optional reference to Camera.id
+  cameraId?: string // Optional reference to Camera.id
 }
 ```
 
 **KV Store Keys**:
+
 - `"security-cameras"` - Array of camera definitions
 - `"security-events"` - Array of security events
 - `"security-armed"` - Boolean for system arm state
 
 ### Flow/Automation Designer
+
 Visual flow builder for complex automation logic:
 
 ```tsx
 interface FlowNode {
-  id: string                    // Unique node identifier
+  id: string // Unique node identifier
   type: 'trigger' | 'condition' | 'action' | 'delay'
-  subtype: string              // Specific node variant
-  label: string                // Display name in designer
-  icon: any                    // Phosphor icon component
-  position: { x: number, y: number }  // Canvas coordinates
-  data: any                    // Node-specific configuration
-  connections: string[]        // Array of connected node IDs
+  subtype: string // Specific node variant
+  label: string // Display name in designer
+  icon: any // Phosphor icon component
+  position: { x: number; y: number } // Canvas coordinates
+  data: any // Node-specific configuration
+  connections: string[] // Array of connected node IDs
 }
 
 interface Flow {
   id: string
   name: string
   description?: string
-  nodes: FlowNode[]            // All nodes in the flow
-  enabled: boolean             // Flow execution toggle
-  created: string              // ISO timestamp
+  nodes: FlowNode[] // All nodes in the flow
+  enabled: boolean // Flow execution toggle
+  created: string // ISO timestamp
 }
 ```
 
@@ -389,6 +420,7 @@ interface Flow {
 ## Product Roadmap
 
 ### Phase 1: Foundation (Current - Q4 2025)
+
 **Goal**: Establish core UI/UX patterns and data architecture
 
 - [x] Tab-based navigation with 11 sections
@@ -410,7 +442,8 @@ interface Flow {
   - Loading states and error boundaries
   - Responsive layout testing (mobile/tablet/desktop)
 
-**Success Metrics**: 
+**Success Metrics**:
+
 - Zero TypeScript errors
 - All 11 tabs render without crashes
 - <100ms UI response time for interactions
@@ -418,6 +451,7 @@ interface Flow {
 ---
 
 ### Phase 2: Device Protocol Integration (Q1 2026)
+
 **Goal**: Connect to real smart home devices via standardized protocols
 
 - [ ] **Milestone 2.1**: MQTT Broker Setup
@@ -442,6 +476,7 @@ interface Flow {
   - Monitor connection stability over 7 days
 
 **Success Metrics**:
+
 - Control 3+ physical devices via app
 - <500ms device response time
 - 99.5% uptime over 7-day test
@@ -450,6 +485,7 @@ interface Flow {
 ---
 
 ### Phase 3: Automation Engine (Q2 2026)
+
 **Goal**: Execute automation rules reliably without manual intervention
 
 - [ ] **Milestone 3.1**: Scheduler Service
@@ -479,6 +515,7 @@ interface Flow {
   - Multiple user location support
 
 **Success Metrics**:
+
 - 10+ automations running simultaneously
 - <5 second trigger latency
 - 99.9% execution reliability
@@ -487,6 +524,7 @@ interface Flow {
 ---
 
 ### Phase 4: Energy & Monitoring (Q3 2026)
+
 **Goal**: Provide actionable insights on energy usage and device health
 
 - [ ] **Milestone 4.1**: Power Monitoring Integration
@@ -516,6 +554,7 @@ interface Flow {
   - ROI calculator for smart device investments
 
 **Success Metrics**:
+
 - Track energy for 20+ devices
 - ±5% accuracy vs. utility meter
 - Store 1M+ data points efficiently
@@ -524,6 +563,7 @@ interface Flow {
 ---
 
 ### Phase 5: Security & Surveillance (Q4 2026)
+
 **Goal**: Integrate cameras and create a comprehensive security system
 
 - [ ] **Milestone 5.1**: Camera Integration
@@ -553,6 +593,7 @@ interface Flow {
   - Event log export for insurance claims
 
 **Success Metrics**:
+
 - 4+ cameras streaming reliably
 - <2 second notification latency
 - 95% person detection accuracy
@@ -561,6 +602,7 @@ interface Flow {
 ---
 
 ### Phase 6: Multi-User & Permissions (Q1 2027)
+
 **Goal**: Enable household collaboration with role-based access
 
 - [ ] **Milestone 6.1**: Authentication System
@@ -590,6 +632,7 @@ interface Flow {
   - Arrival notifications
 
 **Success Metrics**:
+
 - Support 5+ concurrent users
 - <200ms permission check latency
 - Zero unauthorized access attempts
@@ -598,6 +641,7 @@ interface Flow {
 ---
 
 ### Phase 7: Voice & AI Integration (Q2 2027)
+
 **Goal**: Enable natural language control and intelligent automation
 
 - [ ] **Milestone 7.1**: Voice Assistant Integration
@@ -627,6 +671,7 @@ interface Flow {
   - Setup wizard for new devices
 
 **Success Metrics**:
+
 - 90%+ voice command accuracy
 - Support 50+ natural language variations
 - Generate 2+ useful automation suggestions per week
@@ -635,6 +680,7 @@ interface Flow {
 ---
 
 ### Phase 8: Advanced Features (Q3-Q4 2027)
+
 **Goal**: Differentiate with professional-grade capabilities
 
 - [ ] **Milestone 8.1**: Zigbee/Z-Wave Support
@@ -664,6 +710,7 @@ interface Flow {
   - Multi-home support (vacation home, etc.)
 
 **Success Metrics**:
+
 - 50+ device ecosystem
 - Support 10+ different protocols
 - <1 hour full system recovery time
@@ -672,6 +719,7 @@ interface Flow {
 ---
 
 ### Phase 9: Mobile & Edge (2028)
+
 **Goal**: Native mobile apps and offline-first architecture
 
 - [ ] **Milestone 9.1**: React Native Mobile App
@@ -701,6 +749,7 @@ interface Flow {
   - Battery usage <2% per day
 
 **Success Metrics**:
+
 - 10,000+ mobile app installs
 - 4.5+ star rating on app stores
 - 24-hour offline functionality
@@ -709,6 +758,7 @@ interface Flow {
 ---
 
 ### Phase 10: Platform & Ecosystem (2029+)
+
 **Goal**: Build a community and sustainable platform
 
 - [ ] **Milestone 10.1**: Developer Platform
@@ -733,6 +783,7 @@ interface Flow {
   - Grid demand response participation
 
 **Success Metrics**:
+
 - 100+ community-contributed plugins
 - 50,000+ active users
 - Self-sustaining community support
@@ -742,20 +793,35 @@ interface Flow {
 
 ## Development Status
 
-**Current State**: Phase 1 - Framework demo with mock data  
-**Current Focus**: Completing Phase 1 milestones
+**Current State**: Phase 1.3 Complete - Polished UI with loading states
+**Current Focus**: Phase 1.3.4-1.3.6 (Error handling + Responsive + Final polish)
 
 **Component Maturity**:
-- ✅ UI/UX Framework: Solid foundation
-- ✅ State Management: Spark KV working well
+
+- ✅ UI/UX Framework: Production-ready with iOS-quality animations
+- ✅ State Management: Enhanced useKV with loading states
+- ✅ Loading States: Skeleton loaders + 6 spinner variants
+- ✅ User Feedback: Spring animations + contextual toasts
 - 🚧 Device Control: Mock data, needs real implementation (Phase 2)
 - 🚧 Automation Engine: UI complete, execution logic needed (Phase 3)
 - 📋 Security: Placeholder for future camera integration (Phase 5)
 - 📋 Multi-User: Basic UI exists, authentication needed (Phase 6)
 - 📋 AI Features: Not started (Phase 7)
 
+**Phase 1 Progress**: 85% Complete
+
+- ✅ Phase 1.1: Data models standardized (0 TypeScript errors)
+- ✅ Phase 1.2: Comprehensive mock data (27 devices, 7 rooms, 12 scenes, etc.)
+- ✅ Phase 1.3.1: Spring animations (Dashboard + Scenes)
+- ✅ Phase 1.3.2: Enhanced toast notifications
+- ✅ Phase 1.3.3: Loading states & skeleton loaders
+- ⏳ Phase 1.3.4: Error boundaries (next)
+- ⏳ Phase 1.3.5: Responsive layout testing
+- ⏳ Phase 1.3.6: Final polish pass
+
 **Recommended Priority Order**:
-1. **Phase 1** → Get foundation bulletproof
+
+1. **Phase 1** → Get foundation bulletproof (85% complete, ~5-8 hours remaining)
 2. **Phase 2** → Start with 1-2 devices, prove the concept
 3. **Phase 3** → Make it useful (automations save time)
 4. **Phase 4** → Make it valuable (save money on energy)
@@ -763,6 +829,7 @@ interface Flow {
 6. **Phases 6-10** → Scale based on personal needs
 
 ## Reference Files
+
 - **Main Entry**: `src/main.tsx` (React 19, ErrorBoundary setup)
 - **App Shell**: `src/App.tsx` (tab navigation, main routing)
 - **Design Spec**: `PRD.md` (feature requirements, color palette, UX flows)
@@ -771,8 +838,10 @@ interface Flow {
 - **Type System**: `src/types/` (all TypeScript interfaces with JSDoc)
 - **Constants**: `src/constants/` (KV keys, mock data, icon mappings)
 - **Backend**: `workers/src/index.ts` (Cloudflare Worker REST API)
-- **State Hook**: `src/hooks/use-kv.ts` (Custom hook with caching + optimistic updates)
+- **State Hook**: `src/hooks/use-kv.ts` (Enhanced with loading states + metadata)
 - **API Client**: `src/lib/kv-client.ts` (Worker communication layer)
+- **Loading Components**: `src/components/ui/skeleton.tsx`, `src/components/ui/spinner.tsx`
 - **Architecture**: `docs/ARCHITECTURE.md` (Visual system diagrams with Mermaid)
 - **Deployment**: `docs/CLOUDFLARE_DEPLOYMENT.md` (Complete setup guide)
 - **Migration**: `docs/CLOUDFLARE_MIGRATION.md` (From Spark to Cloudflare)
+- **Phase 1.3 Docs**: `docs/PHASE_1.3_ANIMATIONS.md`, `docs/PHASE_1.3_LOADING_STATES.md`, `docs/PHASE_1.3_SUMMARY.md`
