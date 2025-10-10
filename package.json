@@ -90,7 +90,7 @@
     "@tailwindcss/postcss": "^4.1.8",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
-    "@types/mqtt": "^0.0.34",
+    "@types/mqtt": "^2.0.0",
     "@types/node": "^24.7.1",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
