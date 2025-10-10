@@ -132,6 +132,13 @@ export function useKV<T>(
 
         setIsLoading(false)
       } catch (error) {
+        // Ignore abort errors - these happen during component cleanup or hot reload
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.debug(`KV load aborted for key "${key}" (component cleanup)`)
+          setIsLoading(false)
+          return
+        }
+
         console.error(`Failed to load KV value for key "${key}":`, error)
         setIsError(true)
         setIsLoading(false)

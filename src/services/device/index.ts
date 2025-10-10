@@ -6,4 +6,5 @@
 
 export * from './DeviceAdapter'
 export * from './DeviceRegistry'
+export * from './HTTPDeviceAdapter'
 export * from './MQTTDeviceAdapter'

@@ -1,6 +1,6 @@
 /**
  * Cloudflare KV API Client
- * 
+ *
  * Client for communicating with Cloudflare Worker KV API.
  */
 
@@ -28,10 +28,10 @@ export class KVClient {
    * Get value from KV store
    */
   async get<T = any>(key: string): Promise<T | null> {
-    try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), this.config.timeout)
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), this.config.timeout)
 
+    try {
       const response = await fetch(`${this.config.baseUrl}/kv/${key}`, {
         method: 'GET',
         headers: this.getHeaders(),
@@ -51,6 +51,14 @@ export class KVClient {
       const data = await response.json()
       return data.value as T
     } catch (error) {
+      clearTimeout(timeoutId)
+
+      // Ignore abort errors - these are expected during component cleanup
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.debug(`KV get aborted for key "${key}" (component cleanup)`)
+        return null
+      }
+
       console.error(`KV get error for key "${key}":`, error)
       throw error
     }

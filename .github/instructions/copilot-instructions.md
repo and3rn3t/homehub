@@ -793,55 +793,137 @@ interface Flow {
 
 ## Development Status
 
-**Current State**: Phase 1.3 Complete - Polished UI with loading states
-**Current Focus**: Phase 1.3.4-1.3.6 (Error handling + Responsive + Final polish)
+**Current State**: Milestone 2.2.3 Complete - Multi-Protocol Device Discovery ✅
+**Current Focus**: Phase 2.2 Device Integration (HTTP-based control)
+**Test Coverage**: 82% complete (36/44 tests passed)
 
 **Component Maturity**:
 
 - ✅ UI/UX Framework: Production-ready with iOS-quality animations
-- ✅ State Management: Enhanced useKV with loading states
+- ✅ State Management: Enhanced useKV with loading states + persistence
 - ✅ Loading States: Skeleton loaders + 6 spinner variants
 - ✅ User Feedback: Spring animations + contextual toasts
-- 🚧 Device Control: Mock data, needs real implementation (Phase 2)
+- ✅ **Device Discovery**: HTTP scanner with multi-protocol support (Shelly/TP-Link/Hue)
+- ✅ **Room Assignment**: Dialog-based device organization
+- ✅ **Enhanced Device Controls**: Interactive cards with visual feedback
+- ✅ **Data Persistence**: 100% reliability (survives refresh/restart)
+- 🚧 Device Control: HTTP commands partially implemented, needs real device testing
 - 🚧 Automation Engine: UI complete, execution logic needed (Phase 3)
 - 📋 Security: Placeholder for future camera integration (Phase 5)
 - 📋 Multi-User: Basic UI exists, authentication needed (Phase 6)
 - 📋 AI Features: Not started (Phase 7)
 
-**Phase 1 Progress**: 85% Complete
+**Phase 1 Progress**: ✅ 100% Complete
 
 - ✅ Phase 1.1: Data models standardized (0 TypeScript errors)
 - ✅ Phase 1.2: Comprehensive mock data (27 devices, 7 rooms, 12 scenes, etc.)
 - ✅ Phase 1.3.1: Spring animations (Dashboard + Scenes)
 - ✅ Phase 1.3.2: Enhanced toast notifications
 - ✅ Phase 1.3.3: Loading states & skeleton loaders
-- ⏳ Phase 1.3.4: Error boundaries (next)
-- ⏳ Phase 1.3.5: Responsive layout testing
-- ⏳ Phase 1.3.6: Final polish pass
+- ✅ Phase 1.3.4: Error boundaries
+- ✅ Phase 1.3.5: Responsive layout testing
+- ✅ Phase 1.3.6: Final polish pass
+
+**Phase 2 Progress**: 🚧 In Progress (~60% Complete)
+
+- ✅ Phase 2.1: MQTT broker setup (Mosquitto configured)
+- ✅ Phase 2.2.1: HTTP integration architecture
+- ✅ Phase 2.2.2: Virtual device testing framework
+- ✅ Phase 2.2.3: Multi-protocol device discovery (HTTP scanner complete)
+- 🚧 Phase 2.2.4: Real device control commands (next milestone)
+- ⏳ Phase 2.2.5: Advanced discovery (mDNS/SSDP)
+
+**Recent Achievements** (Milestone 2.2.3):
+
+1. **HTTPScanner Service** - Multi-protocol support (Shelly, TP-Link, Hue)
+2. **DiscoveryManager** - Orchestrates scanning, deduplication
+3. **DeviceDiscovery UI** - Progress tracking, device list, add buttons
+4. **Room Assignment** - Dialog with dropdown for device organization
+5. **Enhanced Device Cards** - Interactive with borders, hover effects, animations
+6. **Data Persistence** - KV store + localStorage, 100% reliable
+7. **Virtual Device Framework** - Test helpers for HTTP devices
+8. **Comprehensive Testing** - 36/44 tests passed, 82% coverage
 
 **Recommended Priority Order**:
 
-1. **Phase 1** → Get foundation bulletproof (85% complete, ~5-8 hours remaining)
-2. **Phase 2** → Start with 1-2 devices, prove the concept
-3. **Phase 3** → Make it useful (automations save time)
-4. **Phase 4** → Make it valuable (save money on energy)
-5. **Phase 5** → Make it secure (protect your home)
-6. **Phases 6-10** → Scale based on personal needs
+1. ✅ **Phase 1** → Foundation complete (100%)
+2. 🚧 **Phase 2** → Device integration in progress (60% complete)
+   - Next: Real HTTP device control commands
+   - Next: Device settings panel (edit, remove, configure)
+   - Next: Advanced discovery (mDNS/SSDP)
+3. ⏳ **Phase 3** → Make it useful (automations save time)
+4. ⏳ **Phase 4** → Make it valuable (save money on energy)
+5. ⏳ **Phase 5** → Make it secure (protect your home)
+6. ⏳ **Phases 6-10** → Scale based on personal needs
 
 ## Reference Files
+
+### Core Framework
 
 - **Main Entry**: `src/main.tsx` (React 19, ErrorBoundary setup)
 - **App Shell**: `src/App.tsx` (tab navigation, main routing)
 - **Design Spec**: `PRD.md` (feature requirements, color palette, UX flows)
 - **Config**: `vite.config.ts` (React, Tailwind, path aliases)
 - **Styles**: `src/index.css` (OKLCH color system, CSS variables)
+
+### State & Data
+
 - **Type System**: `src/types/` (all TypeScript interfaces with JSDoc)
 - **Constants**: `src/constants/` (KV keys, mock data, icon mappings)
-- **Backend**: `workers/src/index.ts` (Cloudflare Worker REST API)
 - **State Hook**: `src/hooks/use-kv.ts` (Enhanced with loading states + metadata)
 - **API Client**: `src/lib/kv-client.ts` (Worker communication layer)
+- **Backend**: `workers/src/index.ts` (Cloudflare Worker REST API)
+
+### Device Discovery & Control
+
+- **HTTPScanner**: `src/services/discovery/HTTPScanner.ts` (Multi-protocol device discovery)
+- **DiscoveryManager**: `src/services/discovery/DiscoveryManager.ts` (Scanner orchestration)
+- **DeviceDiscovery UI**: `src/components/DeviceDiscovery.tsx` (Discovery dialog)
+- **Virtual Device Script**: `scripts/virtual-device.js` (HTTP device simulator)
+- **Test Scripts**: `scripts/test-*.js` (Integration and persistence testing)
+
+### UI Components
+
 - **Loading Components**: `src/components/ui/skeleton.tsx`, `src/components/ui/spinner.tsx`
-- **Architecture**: `docs/ARCHITECTURE.md` (Visual system diagrams with Mermaid)
-- **Deployment**: `docs/CLOUDFLARE_DEPLOYMENT.md` (Complete setup guide)
-- **Migration**: `docs/CLOUDFLARE_MIGRATION.md` (From Spark to Cloudflare)
-- **Phase 1.3 Docs**: `docs/PHASE_1.3_ANIMATIONS.md`, `docs/PHASE_1.3_LOADING_STATES.md`, `docs/PHASE_1.3_SUMMARY.md`
+- **Dashboard**: `src/components/Dashboard.tsx` (Main home view)
+- **Rooms**: `src/components/Rooms.tsx` (Room management with enhanced device controls)
+- **DeviceMonitor**: `src/components/DeviceMonitor.tsx` (Device health monitoring)
+
+### Documentation (Essential)
+
+- **Documentation Index**: `docs/INDEX.md` (Complete catalog with navigation)
+- **Documentation README**: `docs/README.md` (Documentation overview)
+- **Architecture**: `docs/guides/ARCHITECTURE.md` (Visual system diagrams with Mermaid)
+- **Setup**: `docs/guides/SETUP_QUICKSTART.md` (Getting started guide)
+- **Best Practices**: `docs/guides/BEST_PRACTICES.md` (Coding standards)
+- **Deployment**: `docs/deployment/CLOUDFLARE_DEPLOYMENT.md` (Complete deployment guide)
+- **Security**: `docs/deployment/SECURITY.md` (Security guidelines)
+
+### Documentation (Current Milestone)
+
+- **Discovery Complete**: `docs/development/MILESTONE_2.2.3_DISCOVERY_COMPLETE.md` (Latest milestone)
+- **Test Plan**: `docs/development/DISCOVERY_TEST_PLAN.md` (Comprehensive testing guide)
+- **Test Results**: `docs/development/DISCOVERY_TEST_RESULTS.md` (82% pass rate, 36/44 tests)
+- **Device Controls**: `docs/development/ROOMS_DEVICE_CONTROL.md` (Enhanced UI patterns)
+- **Accessibility Fix**: `docs/development/DEVICE_ACCESSIBILITY_FIX.md` (UI improvements)
+
+### Documentation (Phase 1 - Foundation)
+
+- **Phase 1 Complete**: `docs/history/PHASE_1_COMPLETE.md` (Foundation summary)
+- **Animations**: `docs/history/PHASE_1.3_ANIMATIONS.md` (Spring animation patterns)
+- **Loading States**: `docs/history/PHASE_1.3_LOADING_STATES.md` (Skeleton & spinner guide)
+- **Error Boundaries**: `docs/history/PHASE_1.3.4_ERROR_BOUNDARIES.md` (Error handling)
+- **Responsive**: `docs/history/PHASE_1.3.5_RESPONSIVE.md` (Mobile-first design)
+
+### Documentation (Quick Reference)
+
+- **Configuration**: `docs/guides/CONFIGURATION_QUICKREF.md` (Config lookup)
+- **Virtual Devices**: `docs/guides/VIRTUAL_DEVICES_QUICKREF.md` (Testing helpers)
+- **HTTP Adapter**: `docs/guides/HTTP_ADAPTER_QUICKSTART.md` (HTTP integration)
+- **Extensions**: `docs/guides/EXTENSIONS_QUICKREF.md` (VS Code extensions)
+
+### Documentation (Planning)
+
+- **Next Steps**: `docs/development/NEXT_STEPS.md` (Roadmap and priorities)
+
+**Note**: Documentation has been reorganized into clear categories (guides/, deployment/, development/, history/, archive/). See `docs/README.md` for complete structure and `docs/INDEX.md` for full catalog.

@@ -3,7 +3,9 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
+import { KV_KEYS, MOCK_DEVICES } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
+import type { Device } from '@/types'
 import {
   BatteryMedium,
   BatteryWarning,
@@ -88,86 +90,31 @@ const alertSeverityColors = {
 }
 
 export function DeviceMonitor() {
-  const [devices, setDevices] = useKV<DeviceStatus[]>('device-status', [
-    {
-      id: 'living-room-light',
-      name: 'Living Room Light',
-      type: 'light',
-      room: 'Living Room',
-      status: 'online',
-      lastSeen: new Date(),
-      enabled: true,
-      signalStrength: 95,
-      alerts: [],
-    },
-    {
-      id: 'thermostat-main',
-      name: 'Main Thermostat',
-      type: 'thermostat',
-      room: 'Living Room',
-      status: 'online',
-      lastSeen: new Date(),
-      enabled: true,
-      value: 72,
-      unit: '°F',
-      batteryLevel: 85,
-      signalStrength: 88,
-      alerts: [],
-    },
-    {
-      id: 'front-door-lock',
-      name: 'Front Door Lock',
-      type: 'security',
-      room: 'Entryway',
-      status: 'warning',
-      lastSeen: new Date(Date.now() - 300000), // 5 minutes ago
-      enabled: true,
-      batteryLevel: 15,
-      signalStrength: 92,
-      alerts: [
-        {
-          id: 'battery-low-1',
-          type: 'low-battery',
-          message: 'Battery level is critically low (15%)',
-          severity: 'high',
-          timestamp: new Date(Date.now() - 120000),
-          acknowledged: false,
-        },
-      ],
-    },
-    {
-      id: 'motion-sensor',
-      name: 'Motion Sensor',
-      type: 'sensor',
-      room: 'Living Room',
-      status: 'offline',
-      lastSeen: new Date(Date.now() - 900000), // 15 minutes ago
-      enabled: true,
-      batteryLevel: 45,
-      signalStrength: 0,
-      alerts: [
-        {
-          id: 'offline-1',
-          type: 'offline',
-          message: 'Device has been offline for 15 minutes',
-          severity: 'critical',
-          timestamp: new Date(Date.now() - 900000),
-          acknowledged: false,
-        },
-      ],
-    },
-    {
-      id: 'security-camera',
-      name: 'Security Camera',
-      type: 'camera',
-      room: 'Front Yard',
-      status: 'online',
-      lastSeen: new Date(),
-      enabled: true,
-      signalStrength: 76,
-      alerts: [],
-    },
-  ])
+  // Read actual devices from KV store
+  const [kvDevices] = useKV<Device[]>(KV_KEYS.DEVICES, MOCK_DEVICES)
+
+  // Convert Device[] to DeviceStatus[] for monitoring
+  const convertToDeviceStatus = (device: Device): DeviceStatus => ({
+    id: device.id,
+    name: device.name,
+    type: device.type as DeviceStatus['type'],
+    room: device.room,
+    status: device.status,
+    lastSeen: device.lastSeen || new Date(),
+    enabled: device.enabled,
+    batteryLevel: device.batteryLevel,
+    signalStrength: device.signalStrength,
+    value: device.value,
+    unit: device.unit,
+    alerts: [], // Alerts would be populated from separate KV store or logic
+  })
+
+  const [devices, setDevices] = useState<DeviceStatus[]>(() => kvDevices.map(convertToDeviceStatus))
+
+  // Sync with KV store when kvDevices changes
+  useEffect(() => {
+    setDevices(kvDevices.map(convertToDeviceStatus))
+  }, [kvDevices])
 
   const [settings, setSettings] = useKV<MonitoringSettings>('monitoring-settings', {
     alertsEnabled: true,

@@ -3,12 +3,15 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ErrorState } from '@/components/ui/error-state'
+import { ProtocolBadge } from '@/components/ui/protocol-badge'
 import { DeviceCardSkeleton, StatusCardSkeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { KV_KEYS, MOCK_DEVICES } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
 import { useMQTTConnection } from '@/hooks/use-mqtt-connection'
 import { useMQTTDevices } from '@/hooks/use-mqtt-devices'
+import { DeviceRegistry } from '@/services/device'
+import { HTTPDeviceAdapter } from '@/services/device/HTTPDeviceAdapter'
 import type { Device, DeviceAlert } from '@/types'
 import {
   ArrowsClockwise,
@@ -26,7 +29,9 @@ import {
   WifiSlash,
 } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { DeviceDiscovery } from './DeviceDiscovery'
 import { NotificationBell } from './NotificationCenter'
 
 const deviceIcons = {
@@ -37,15 +42,20 @@ const deviceIcons = {
 }
 
 export function Dashboard() {
+  // Initialize multi-protocol device registry (singleton)
+  const deviceRegistry = useMemo(() => DeviceRegistry.getInstance(), [])
+
+  // Discovery dialog state
+  const [discoveryOpen, setDiscoveryOpen] = useState(false)
+
   // Try MQTT connection first
   const {
     devices: mqttDevices,
     isConnected: mqttConnected,
     connectionState,
-    sendCommand,
     discoverDevices,
     isLoading: mqttLoading,
-    error: mqttError,
+    error: _mqttError, // Intentionally unused - MQTT is optional
   } = useMQTTDevices({
     autoConnect: true,
     enableDiscovery: true,
@@ -63,12 +73,14 @@ export function Dashboard() {
   // Use MQTT devices if connected, otherwise fallback to KV store
   const devices = mqttConnected && mqttDevices.length > 0 ? mqttDevices : kvDevices
   const isLoading = mqttLoading || kvLoading
-  const isError = mqttError !== null || kvError
+  // Only show error if KV store fails (MQTT is optional, KV is the fallback)
+  const isError = kvError && devices.length === 0
 
   const [deviceAlerts] = useKV<DeviceAlert[]>('device-alerts', [])
   const [favoriteDevices] = useKV<string[]>('favorite-devices', [
-    'living-room-light',
+    'living-room-lamp', // HTTP device (Shelly Plus 1)
     'thermostat-main',
+    'bedroom-lamp', // HTTP device (TPLink)
   ])
 
   const quickScenesData = [
@@ -85,26 +97,92 @@ export function Dashboard() {
     shield: Shield,
   }
 
-  const toggleDevice = (deviceId: string) => {
-    const device = devices.find(d => d.id === deviceId)
+  // Initialize HTTP device connections and monitoring
+  useEffect(() => {
+    const httpDevices = devices.filter(d => d.protocol === 'http')
+    if (httpDevices.length === 0) return
 
-    // Use MQTT if connected
-    if (mqttConnected) {
-      sendCommand(deviceId, { command: 'toggle' })
-        .then(() => {
-          toast.success(`${device?.name} turned ${device?.enabled ? 'off' : 'on'}`)
+    // Register and connect HTTP adapter with correct port and Shelly preset
+    const httpAdapter = new HTTPDeviceAdapter({
+      baseUrl: 'http://localhost:8001', // Virtual device port
+      authType: 'none',
+      pollingInterval: 5000,
+      preset: 'shelly', // Use Shelly Gen2 API format
+    })
+
+    deviceRegistry.registerAdapter(httpAdapter)
+    httpAdapter.connect()
+
+    console.log(
+      `✅ HTTP adapter registered with ${httpDevices.length} devices:`,
+      httpDevices.map(d => d.name)
+    )
+
+    return () => {
+      httpAdapter.disconnect()
+    }
+  }, [devices, deviceRegistry])
+
+  const toggleDevice = async (deviceId: string) => {
+    const device = devices.find(d => d.id === deviceId)
+    if (!device) {
+      toast.error('Device not found')
+      return
+    }
+
+    console.log(`🔄 Toggling device: ${device.name} (${device.id}, protocol: ${device.protocol})`)
+
+    try {
+      // Get appropriate adapter based on device protocol
+      const adapter = deviceRegistry.getAdapter(device.protocol)
+      console.log(`🔌 Adapter for ${device.protocol}:`, adapter ? 'Found' : 'Not found')
+
+      if (!adapter) {
+        console.log('⚠️ No adapter found, using KV fallback')
+        // Fallback to KV store if no adapter registered
+        setKvDevices(currentDevices =>
+          currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
+        )
+        toast.success(`${device.name} turned ${!device.enabled ? 'on' : 'off'}`)
+        return
+      }
+
+      // Check if adapter is connected
+      const isConnected = adapter.isConnected()
+      console.log(`🔗 Adapter connected:`, isConnected)
+
+      if (!isConnected) {
+        toast.warning(`${device.protocol.toUpperCase()} adapter not connected`, {
+          description: 'Using fallback mode',
         })
-        .catch(err => {
-          toast.error(`Failed to control ${device?.name}`, {
-            description: err.message,
-          })
-        })
-    } else {
-      // Fallback to KV store
+        // Fallback to KV store
+        setKvDevices(currentDevices =>
+          currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
+        )
+        return
+      }
+
+      // Send toggle command via adapter
+      console.log(`📤 Sending toggle command to device ${deviceId} via ${device.protocol}`)
+      await adapter.sendCommand({
+        deviceId,
+        command: 'toggle',
+      })
+      console.log(`✅ Toggle command sent successfully`)
+
+      // Optimistic update in KV store
       setKvDevices(currentDevices =>
         currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
       )
-      toast.success(`${device?.name} turned ${device?.enabled ? 'off' : 'on'}`)
+
+      toast.success(`${device.name} turned ${!device.enabled ? 'on' : 'off'}`, {
+        description: `via ${device.protocol.toUpperCase()}`,
+      })
+    } catch (err) {
+      console.error('Device control error:', err)
+      toast.error(`Failed to control ${device.name}`, {
+        description: err instanceof Error ? err.message : 'Unknown error',
+      })
     }
   }
 
@@ -254,12 +332,28 @@ export function Dashboard() {
           <div className="flex items-center gap-3">
             <NotificationBell />
             <motion.div whileTap={{ scale: 0.9 }} whileHover={{ scale: 1.05 }}>
-              <Button variant="outline" size="icon" className="h-11 w-11 rounded-full">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-11 w-11 rounded-full"
+                onClick={() => setDiscoveryOpen(true)}
+              >
                 <Plus size={20} />
               </Button>
             </motion.div>
           </div>
         </div>
+
+        {/* Device Discovery Dialog */}
+        <DeviceDiscovery
+          open={discoveryOpen}
+          onOpenChange={setDiscoveryOpen}
+          onDevicesAdded={newDevices => {
+            // Add new devices to Dashboard's device list
+            setKvDevices(prev => [...prev, ...newDevices])
+            toast.success(`Added ${newDevices.length} device${newDevices.length !== 1 ? 's' : ''}`)
+          }}
+        />
 
         {/* Alert Summary */}
         {(criticalAlerts.length > 0 ||
@@ -468,6 +562,7 @@ export function Dashboard() {
                               <h3 className="text-sm font-medium">{device.name}</h3>
                               <div className="flex items-center gap-2">
                                 <p className="text-muted-foreground text-xs">{device.room}</p>
+                                <ProtocolBadge protocol={device.protocol} />
                                 <Badge
                                   variant={
                                     device.status === 'online'

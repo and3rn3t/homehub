@@ -80,7 +80,7 @@ graph TD
     B --> E[Debounced Sync<br/>500ms]
     E --> F[Cloudflare Worker<br/>REST API]
     F --> G[Cloudflare KV<br/>Persistent Storage]
-    
+
     style A fill:#4a9eff,stroke:#333,stroke-width:2px,color:#fff
     style B fill:#10b981,stroke:#333,stroke-width:2px,color:#fff
     style F fill:#f59e0b,stroke:#333,stroke-width:2px,color:#fff
@@ -195,13 +195,11 @@ npm run deploy           # Deploy to Cloudflare
 import { useKV } from '@/hooks/use-kv'
 
 // Persistent state (survives page refresh)
-const [devices, setDevices] = useKV<Device[]>("devices", [])
+const [devices, setDevices] = useKV<Device[]>('devices', [])
 
 // Update device
 const toggleDevice = (id: string) => {
-  setDevices(prev => prev.map(d => 
-    d.id === id ? { ...d, enabled: !d.enabled } : d
-  ))
+  setDevices(prev => prev.map(d => (d.id === id ? { ...d, enabled: !d.enabled } : d)))
   // UI updates instantly, syncs to Cloudflare KV in background
 }
 ```
@@ -284,8 +282,8 @@ Full roadmap: [Copilot Instructions](.github/copilot-instructions.md#product-roa
 
 ## 🎯 Current Status
 
-**Phase**: 1 (Foundation)  
-**Progress**: 85% complete  
+**Phase**: 1 (Foundation)
+**Progress**: 85% complete
 **Next Milestone**: Deploy to Cloudflare Pages
 
 **What Works**:
@@ -304,6 +302,34 @@ Full roadmap: [Copilot Instructions](.github/copilot-instructions.md#product-roa
 
 ---
 
+## 📚 Documentation
+
+Comprehensive documentation is available in the [`docs/`](docs/) directory:
+
+### Quick Links
+
+- **🚀 [Getting Started](docs/guides/SETUP_QUICKSTART.md)** - Get running in 15 minutes
+- **🏗️ [Architecture](docs/guides/ARCHITECTURE.md)** - System design and data flow
+- **💻 [Best Practices](docs/guides/BEST_PRACTICES.md)** - Coding standards
+- **🧪 [Testing Guide](docs/development/DISCOVERY_TEST_PLAN.md)** - Comprehensive test plan
+- **🚀 [Deployment](docs/deployment/CLOUDFLARE_DEPLOYMENT.md)** - Deploy to production
+- **📖 [Full Documentation Index](docs/INDEX.md)** - Complete catalog
+
+### Documentation Structure
+
+```
+docs/
+├── guides/         # User guides & references (13 files)
+├── deployment/     # Production deployment (6 files)
+├── development/    # Active work (9 files)
+├── history/        # Completed features (24 files)
+└── archive/        # Historical documents (13 files)
+```
+
+**See [`docs/README.md`](docs/README.md) for the complete documentation overview.**
+
+---
+
 ## 🤝 Contributing
 
 This is a personal project, but suggestions and feedback are welcome!
@@ -316,10 +342,11 @@ This is a personal project, but suggestions and feedback are welcome!
 
 ### Code Standards
 
-- Follow TypeScript conventions in `docs/BEST_PRACTICES.md`
+- Follow TypeScript conventions in [`docs/guides/BEST_PRACTICES.md`](docs/guides/BEST_PRACTICES.md)
 - Use `useKV` for persistent state (never `useState` for data that should persist)
 - Import types from `@/types`
 - Use Phosphor Icons exclusively
+- See [`docs/guides/ARCHITECTURE.md`](docs/guides/ARCHITECTURE.md) for architectural patterns
 
 ---
 

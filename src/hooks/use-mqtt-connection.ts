@@ -33,7 +33,13 @@ export function useMQTTConnection(): UseMQTTConnectionReturn {
    */
   const getClient = useCallback(() => {
     if (!clientRef.current) {
-      clientRef.current = MQTTClientService.getInstance()
+      try {
+        clientRef.current = MQTTClientService.getInstance()
+      } catch (_err) {
+        // MQTT not configured - this is expected
+        console.debug('MQTT not configured')
+        return null
+      }
     }
     return clientRef.current
   }, [])
@@ -45,6 +51,11 @@ export function useMQTTConnection(): UseMQTTConnectionReturn {
     try {
       setError(null)
       const client = getClient()
+      if (!client) {
+        // MQTT not configured - silently skip
+        console.debug('MQTT client not available')
+        return
+      }
       await client.connect()
     } catch (err) {
       console.error('Failed to connect to MQTT broker:', err)
@@ -58,6 +69,7 @@ export function useMQTTConnection(): UseMQTTConnectionReturn {
    */
   const disconnect = useCallback(() => {
     const client = getClient()
+    if (!client) return
     client.disconnect()
   }, [getClient])
 
@@ -65,7 +77,13 @@ export function useMQTTConnection(): UseMQTTConnectionReturn {
    * Monitor connection state changes
    */
   useEffect(() => {
+    // Get client instance
     const client = getClient()
+    if (!client) {
+      // MQTT not configured - this is expected
+      console.debug('MQTT client not available, skipping event listeners')
+      return
+    }
 
     const handleConnect = () => {
       setConnectionState('connected')

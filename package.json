@@ -17,7 +17,12 @@
     "deploy": "npm run build && wrangler pages deploy dist",
     "worker:dev": "cd workers && npm run dev",
     "worker:deploy": "cd workers && npm run deploy",
-    "validate": "npm run type-check && npm run lint && npm run format:check"
+    "validate": "npm run type-check && npm run lint && npm run format:check",
+    "test-device": "node scripts/test-device-simple.js",
+    "http-device": "node scripts/http-virtual-device.js",
+    "http-devices": "node scripts/launch-http-devices.js --preset full-house",
+    "test:multi-protocol": "node scripts/test-multi-protocol.js",
+    "monitor": "node scripts/monitor-device.js"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -83,15 +88,19 @@
   "devDependencies": {
     "@eslint/js": "^9.21.0",
     "@tailwindcss/postcss": "^4.1.8",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
     "@types/mqtt": "^0.0.34",
     "@types/node": "^24.7.1",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
     "@vitejs/plugin-react-swc": "^3.10.1",
+    "cors": "^2.8.5",
     "eslint": "^9.28.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
+    "express": "^5.1.0",
     "globals": "^16.0.0",
     "mermaid": "^11.12.0",
     "prettier": "^3.6.2",

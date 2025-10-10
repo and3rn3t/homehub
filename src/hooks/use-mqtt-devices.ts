@@ -67,9 +67,18 @@ export function useMQTTDevices(options: UseMQTTDevicesOptions = {}): UseMQTTDevi
       setIsLoading(true)
       setError(null)
 
-      // Get singleton instances
-      mqttClientRef.current = MQTTClientService.getInstance()
+      // Always initialize DeviceRegistry (needed for HTTP devices too)
       deviceRegistryRef.current = DeviceRegistry.getInstance()
+
+      // Get MQTT client - gracefully skip if not configured
+      try {
+        mqttClientRef.current = MQTTClientService.getInstance()
+      } catch (_err) {
+        // MQTT not configured - this is expected, MQTT features will be disabled
+        console.debug('MQTT not configured, MQTT features disabled')
+        setIsLoading(false)
+        return
+      }
 
       // Create adapter if not exists
       if (!adapterRef.current) {
@@ -175,6 +184,7 @@ export function useMQTTDevices(options: UseMQTTDevicesOptions = {}): UseMQTTDevi
         lastSeen: new Date(),
         signalStrength: 100,
         unit: discovered.metadata?.unit as string | undefined,
+        protocol: 'mqtt' as const, // MQTT discovered devices
       }))
 
       // Merge with existing devices (avoid duplicates)
