@@ -7,8 +7,11 @@ import { DeviceCardSkeleton, StatusCardSkeleton } from '@/components/ui/skeleton
 import { Switch } from '@/components/ui/switch'
 import { KV_KEYS, MOCK_DEVICES } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
+import { useMQTTConnection } from '@/hooks/use-mqtt-connection'
+import { useMQTTDevices } from '@/hooks/use-mqtt-devices'
 import type { Device, DeviceAlert } from '@/types'
 import {
+  ArrowsClockwise,
   CheckCircle,
   House as HomeIcon,
   Lightbulb,
@@ -20,6 +23,7 @@ import {
   Thermometer,
   Warning,
   WifiHigh,
+  WifiSlash,
 } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
@@ -33,11 +37,33 @@ const deviceIcons = {
 }
 
 export function Dashboard() {
-  const [devices, setDevices, { isLoading, isError }] = useKV<Device[]>(
+  // Try MQTT connection first
+  const {
+    devices: mqttDevices,
+    isConnected: mqttConnected,
+    connectionState,
+    sendCommand,
+    discoverDevices,
+    isLoading: mqttLoading,
+    error: mqttError,
+  } = useMQTTDevices({
+    autoConnect: true,
+    enableDiscovery: true,
+  })
+
+  const { connect: reconnectMQTT } = useMQTTConnection()
+
+  // Fallback to KV store if MQTT not available
+  const [kvDevices, setKvDevices, { isLoading: kvLoading, isError: kvError }] = useKV<Device[]>(
     KV_KEYS.DEVICES,
     MOCK_DEVICES,
     { withMeta: true }
   )
+
+  // Use MQTT devices if connected, otherwise fallback to KV store
+  const devices = mqttConnected && mqttDevices.length > 0 ? mqttDevices : kvDevices
+  const isLoading = mqttLoading || kvLoading
+  const isError = mqttError !== null || kvError
 
   const [deviceAlerts] = useKV<DeviceAlert[]>('device-alerts', [])
   const [favoriteDevices] = useKV<string[]>('favorite-devices', [
@@ -60,13 +86,26 @@ export function Dashboard() {
   }
 
   const toggleDevice = (deviceId: string) => {
-    setDevices(currentDevices =>
-      currentDevices.map(device =>
-        device.id === deviceId ? { ...device, enabled: !device.enabled } : device
-      )
-    )
     const device = devices.find(d => d.id === deviceId)
-    toast.success(`${device?.name} turned ${device?.enabled ? 'off' : 'on'}`)
+
+    // Use MQTT if connected
+    if (mqttConnected) {
+      sendCommand(deviceId, { command: 'toggle' })
+        .then(() => {
+          toast.success(`${device?.name} turned ${device?.enabled ? 'off' : 'on'}`)
+        })
+        .catch(err => {
+          toast.error(`Failed to control ${device?.name}`, {
+            description: err.message,
+          })
+        })
+    } else {
+      // Fallback to KV store
+      setKvDevices(currentDevices =>
+        currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
+      )
+      toast.success(`${device?.name} turned ${device?.enabled ? 'off' : 'on'}`)
+    }
   }
 
   const activateScene = (sceneName: string) => {
@@ -167,9 +206,50 @@ export function Dashboard() {
     <div className="flex h-full flex-col">
       <div className="p-4 pb-3 sm:p-6 sm:pb-4">
         <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-foreground text-xl font-bold sm:text-2xl">Good Morning</h1>
-            <p className="text-muted-foreground text-sm sm:text-base">Welcome home</p>
+          <div className="flex items-center gap-3">
+            <div>
+              <h1 className="text-foreground text-xl font-bold sm:text-2xl">Good Morning</h1>
+              <p className="text-muted-foreground text-sm sm:text-base">Welcome home</p>
+            </div>
+            {/* MQTT Connection Status */}
+            {connectionState !== 'offline' && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex items-center gap-2"
+              >
+                {mqttConnected ? (
+                  <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
+                    <WifiHigh size={14} className="mr-1" />
+                    MQTT Connected
+                  </Badge>
+                ) : connectionState === 'reconnecting' ? (
+                  <Badge
+                    variant="outline"
+                    className="border-yellow-200 bg-yellow-50 text-yellow-700"
+                  >
+                    <ArrowsClockwise size={14} className="mr-1 animate-spin" />
+                    Reconnecting...
+                  </Badge>
+                ) : connectionState === 'error' ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+                    onClick={() => {
+                      reconnectMQTT().catch(err => {
+                        toast.error('Failed to reconnect', {
+                          description: err.message,
+                        })
+                      })
+                    }}
+                  >
+                    <WifiSlash size={14} className="mr-1" />
+                    Reconnect
+                  </Button>
+                ) : null}
+              </motion.div>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <NotificationBell />
@@ -309,9 +389,28 @@ export function Dashboard() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold sm:text-lg">Favorite Devices</h2>
-            <Button variant="ghost" size="sm" className="text-primary">
-              Edit
-            </Button>
+            <div className="flex items-center gap-2">
+              {mqttConnected && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-primary"
+                  onClick={() => {
+                    toast.promise(discoverDevices(), {
+                      loading: 'Discovering devices...',
+                      success: 'Device discovery complete',
+                      error: 'Failed to discover devices',
+                    })
+                  }}
+                >
+                  <ArrowsClockwise size={16} className="mr-1" />
+                  Discover
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" className="text-primary">
+                Edit
+              </Button>
+            </div>
           </div>
 
           {favoriteDeviceList.length === 0 ? (
