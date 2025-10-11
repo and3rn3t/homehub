@@ -115,7 +115,8 @@ export function Dashboard() {
     return () => {
       httpAdapter.disconnect()
     }
-  }, [devices, deviceRegistry])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deviceRegistry]) // Only re-run if deviceRegistry changes (stable)
 
   const toggleDevice = useCallback(
     async (deviceId: string) => {
@@ -323,33 +324,6 @@ export function Dashboard() {
     [devices, favoriteDevices]
   )
 
-  // Debug logging for favorites
-  console.log('🔍 Dashboard Favorites Debug:', {
-    'favoriteDevices (from useKV)': favoriteDevices,
-    'favoriteDevices type': typeof favoriteDevices,
-    'favoriteDevices isArray': Array.isArray(favoriteDevices),
-    'devices count': devices.length,
-    'device IDs (first 10)': devices.slice(0, 10).map(d => d.id),
-    'favoriteDeviceList count': favoriteDeviceList.length,
-    favoriteDeviceList: favoriteDeviceList.map(d => ({ id: d.id, name: d.name })),
-  })
-
-  // EMERGENCY: Check localStorage directly in render
-  const directCheck = localStorage.getItem('kv:favorite-devices')
-  console.log('🚨 EMERGENCY CHECK - Direct localStorage read:', directCheck)
-  if (directCheck) {
-    try {
-      const parsed = JSON.parse(directCheck)
-      console.log('🚨 Parsed favorites from localStorage:', parsed)
-      console.log(
-        '🚨 Does it match useKV value?',
-        JSON.stringify(parsed) === JSON.stringify(favoriteDevices)
-      )
-    } catch (e) {
-      console.error('🚨 Failed to parse:', e)
-    }
-  }
-
   // Auto-fix: If we have devices and favoriteDevices but no matches, fix it
   if (devices.length > 0 && favoriteDevices.length > 0 && favoriteDeviceList.length === 0) {
     console.warn("⚠️ MISMATCH DETECTED: Favorite IDs don't match device IDs!")
@@ -509,17 +483,6 @@ export function Dashboard() {
             </motion.div>
           </div>
         </div>
-
-        {/* Device Discovery Dialog */}
-        <DeviceDiscovery
-          open={discoveryOpen}
-          onOpenChange={setDiscoveryOpen}
-          onDevicesAdded={newDevices => {
-            // Add new devices to Dashboard's device list
-            setKvDevices(prev => [...prev, ...newDevices])
-            toast.success(`Added ${newDevices.length} device${newDevices.length !== 1 ? 's' : ''}`)
-          }}
-        />
 
         {/* Alert Summary */}
         {(criticalAlerts.length > 0 ||
@@ -713,7 +676,15 @@ export function Dashboard() {
       )}
 
       {/* Device Discovery Dialog */}
-      <DeviceDiscovery open={discoveryOpen} onOpenChange={setDiscoveryOpen} />
+      <DeviceDiscovery
+        open={discoveryOpen}
+        onOpenChange={setDiscoveryOpen}
+        onDevicesAdded={newDevices => {
+          // Add new devices to Dashboard's device list
+          setKvDevices(prev => [...prev, ...newDevices])
+          toast.success(`Added ${newDevices.length} device${newDevices.length !== 1 ? 's' : ''}`)
+        }}
+      />
     </div>
   )
 }

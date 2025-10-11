@@ -192,9 +192,10 @@ export function DeviceControlPanel({
     }
   }
 
-  const getTimeAgo = (date: Date | undefined) => {
+  const getTimeAgo = (date: Date | string | undefined) => {
     if (!date) return 'Unknown'
-    const minutes = Math.floor((Date.now() - date.getTime()) / 60000)
+    const dateObj = typeof date === 'string' ? new Date(date) : date
+    const minutes = Math.floor((Date.now() - dateObj.getTime()) / 60000)
     if (minutes < 1) return 'Just now'
     if (minutes < 60) return `${minutes}m ago`
     const hours = Math.floor(minutes / 60)

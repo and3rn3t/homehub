@@ -1,9 +1,11 @@
 /**
  * Device Discovery Component
  *
- * Dialog for scanning and adding discovered devices.
+ * Dialog for scanning and adding discovered devices via multiple protocols.
+ * Supports HTTP, mDNS, and SSDP discovery methods.
  */
 
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
@@ -12,7 +14,7 @@ import { useKV } from '@/hooks/use-kv'
 import type { DiscoveredDevice } from '@/services/discovery'
 import { discoveryManager } from '@/services/discovery'
 import type { Device } from '@/types'
-import { CheckCircle, MagnifyingGlass, XCircle } from '@phosphor-icons/react'
+import { CheckCircle, MagnifyingGlass, WifiHigh, XCircle } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -23,38 +25,80 @@ interface DeviceDiscoveryProps {
   onDevicesAdded?: (devices: Device[]) => void
 }
 
-export function DeviceDiscovery({ open, onOpenChange, onDevicesAdded }: DeviceDiscoveryProps) {
+interface ScanProgress {
+  protocol: string
+  status: 'pending' | 'scanning' | 'complete'
+  found: number
+}
+
+export function DeviceDiscovery({
+  open,
+  onOpenChange,
+  onDevicesAdded,
+}: Readonly<DeviceDiscoveryProps>) {
   const [scanning, setScanning] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [scanProgress, setScanProgress] = useState<ScanProgress[]>([])
   const [discoveredDevices, setDiscoveredDevices] = useState<DiscoveredDevice[]>([])
-  const [devices, setDevices] = useKV<Device[]>(KV_KEYS.DEVICES, [])
+  // Read existing devices to check for duplicates (read-only, skip initial load to avoid conflicts)
+  const [devices] = useKV<Device[]>(KV_KEYS.DEVICES, [], { skipInitialLoad: true })
 
   const startScan = async () => {
     setScanning(true)
     setProgress(0)
     setDiscoveredDevices([])
 
+    // Initialize scan progress for each scanner
+    const availableScanners = discoveryManager.getAvailableScanners()
+    setScanProgress(
+      availableScanners.map(scanner => ({
+        protocol: scanner,
+        status: 'pending',
+        found: 0,
+      }))
+    )
+
     try {
       // Simulate progress (actual progress tracking requires callback support)
       const progressInterval = setInterval(() => {
-        setProgress(prev => Math.min(prev + 10, 90))
-      }, 500)
+        setProgress(prev => Math.min(prev + 8, 90))
+      }, 800)
+
+      // Update scanner status as they run
+      setScanProgress(prev => prev.map((p, i) => (i === 0 ? { ...p, status: 'scanning' } : p)))
 
       const found = await discoveryManager.discoverDevices({
         ipRange: '127.0.0.1/32', // Start with localhost only
         ports: [8001, 8080, 80, 443],
-        timeout: 2000,
+        timeout: 3000,
         maxConcurrent: 5,
       })
 
       clearInterval(progressInterval)
       setProgress(100)
+
+      // Mark all scanners as complete
+      setScanProgress(prev =>
+        prev.map(p => ({
+          ...p,
+          status: 'complete',
+          found: found.filter(d => d.metadata.discoveryMethod === p.protocol.toLowerCase()).length,
+        }))
+      )
+
       setDiscoveredDevices(found)
 
-      toast.success(`Found ${found.length} device${found.length !== 1 ? 's' : ''}`)
+      const message =
+        found.length === 0
+          ? 'No devices found'
+          : `Found ${found.length} device${found.length !== 1 ? 's' : ''}`
+      toast.success(message, {
+        description: `Scanned via ${availableScanners.join(', ')}`,
+      })
     } catch (error) {
       console.error('[DeviceDiscovery] Scan failed:', error)
       toast.error('Discovery scan failed')
+      setScanProgress(prev => prev.map(p => ({ ...p, status: 'complete' })))
     } finally {
       setScanning(false)
     }
@@ -83,14 +127,12 @@ export function DeviceDiscovery({ open, onOpenChange, onDevicesAdded }: DeviceDi
       return
     }
 
-    // Add to devices list
-    setDevices(prev => [...prev, newDevice])
     toast.success(`Added ${discovered.name}`)
 
     // Remove from discovered list
     setDiscoveredDevices(prev => prev.filter(d => d.id !== discovered.id))
 
-    // Notify parent
+    // Notify parent to add the device (parent manages the KV store)
     onDevicesAdded?.([newDevice])
   }
 
@@ -126,12 +168,45 @@ export function DeviceDiscovery({ open, onOpenChange, onDevicesAdded }: DeviceDi
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="space-y-2"
+              className="space-y-3"
             >
               <Progress value={progress} />
               <p className="text-muted-foreground text-center text-sm">
                 Scanning network... {progress}%
               </p>
+
+              {/* Scanner Status */}
+              {scanProgress.length > 0 && (
+                <div className="bg-muted/20 space-y-2 rounded-lg border p-3">
+                  {scanProgress.map(scanner => (
+                    <div key={scanner.protocol} className="flex items-center gap-2 text-sm">
+                      <div className="flex h-5 w-5 items-center justify-center">
+                        {scanner.status === 'complete' ? (
+                          <CheckCircle weight="fill" className="h-4 w-4 text-green-500" />
+                        ) : scanner.status === 'scanning' ? (
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                          >
+                            <WifiHigh weight="bold" className="h-4 w-4 text-blue-500" />
+                          </motion.div>
+                        ) : (
+                          <div className="bg-muted-foreground/30 h-2 w-2 rounded-full" />
+                        )}
+                      </div>
+                      <span className="flex-1 font-medium">{scanner.protocol}</span>
+                      {scanner.found > 0 && (
+                        <Badge variant="secondary" className="text-xs">
+                          {scanner.found} found
+                        </Badge>
+                      )}
+                      {scanner.status === 'scanning' && (
+                        <span className="text-muted-foreground text-xs">Scanning...</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -156,10 +231,15 @@ export function DeviceDiscovery({ open, onOpenChange, onDevicesAdded }: DeviceDi
                   >
                     <div className="flex-1">
                       <div className="font-medium">{device.name}</div>
-                      <div className="text-muted-foreground text-sm">
-                        {device.metadata.ip}:{device.metadata.port}
+                      <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                        <span>
+                          {device.metadata.ip}:{device.metadata.port}
+                        </span>
+                        <Badge variant="outline" className="text-xs">
+                          {device.metadata.discoveryMethod.toUpperCase()}
+                        </Badge>
                       </div>
-                      {device.metadata.model && (
+                      {(device.metadata.model || device.metadata.manufacturer) && (
                         <div className="text-muted-foreground mt-1 text-xs">
                           {device.metadata.manufacturer} {device.metadata.model}
                         </div>

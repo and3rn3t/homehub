@@ -5,6 +5,8 @@
  */
 
 import { HTTPScanner } from './HTTPScanner'
+import { MDNSScanner } from './mDNSScanner'
+import { SSDPScanner } from './SSDPScanner'
 import type { DiscoveredDevice, DiscoveryScanner, DiscoveryScanOptions } from './types'
 
 export class DiscoveryManager {
@@ -13,7 +15,9 @@ export class DiscoveryManager {
   constructor() {
     // Register available scanners
     this.scanners.push(new HTTPScanner())
-    // Future: Add mDNS, SSDP scanners when backend ready
+    this.scanners.push(new MDNSScanner())
+    this.scanners.push(new SSDPScanner())
+    console.log(`[DiscoveryManager] Registered ${this.scanners.length} scanners`)
   }
 
   /**

@@ -129,8 +129,19 @@ export function useKV<T>(
           try {
             const parsedValue = JSON.parse(storedValue)
             localCache.set(key, parsedValue)
-            setValue(parsedValue)
-            console.log(`✅ useKV(${key}): Loaded from localStorage, skipping worker fetch`)
+
+            // Only update state if this is truly the initial load
+            // Compare with current value to avoid unnecessary re-renders
+            setValue(currentValue => {
+              // If this is the first load (still has default value structure), update it
+              if (JSON.stringify(currentValue) !== JSON.stringify(parsedValue)) {
+                console.log(`✅ useKV(${key}): Loaded from localStorage, updating state`)
+                return parsedValue
+              }
+              console.log(`✅ useKV(${key}): Loaded from localStorage, state already up-to-date`)
+              return currentValue
+            })
+
             setIsLoading(false)
             return
           } catch (e) {

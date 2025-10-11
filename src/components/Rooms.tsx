@@ -231,6 +231,72 @@ export function Rooms() {
 
       <div className="flex-1 overflow-y-auto px-4 pb-6 sm:px-6">
         <div className="space-y-6">
+          {/* All Devices Section - Show everything */}
+          <div>
+            <h2 className="text-foreground mb-3 text-lg font-semibold">
+              All Devices ({devices.length})
+            </h2>
+            <Card>
+              <CardContent className="p-4">
+                <div className="space-y-2">
+                  {devices.map(device => {
+                    const IconComponent = deviceIcons[device.type] || WifiHigh
+                    return (
+                      <div
+                        key={device.id}
+                        className="hover:bg-accent/50 flex cursor-pointer items-center justify-between rounded-lg p-3 transition-colors"
+                        onClick={() => {
+                          setControlDevice(device)
+                          setControlPanelOpen(true)
+                        }}
+                      >
+                        <div className="flex flex-1 items-center gap-3">
+                          <div
+                            className={`flex h-10 w-10 items-center justify-center rounded-full ${
+                              device.enabled ? 'bg-primary/10' : 'bg-secondary'
+                            }`}
+                          >
+                            <IconComponent
+                              size={20}
+                              className={device.enabled ? 'text-primary' : 'text-muted-foreground'}
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{device.name}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-muted-foreground text-xs">{device.room}</p>
+                              <Badge
+                                variant={device.status === 'online' ? 'default' : 'destructive'}
+                                className="text-xs"
+                              >
+                                {device.status}
+                              </Badge>
+                              {device.protocol && (
+                                <Badge variant="outline" className="text-xs">
+                                  {device.protocol.toUpperCase()}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={e => {
+                            e.stopPropagation()
+                            toggleDevice(device.id)
+                          }}
+                        >
+                          {device.enabled ? 'Turn Off' : 'Turn On'}
+                        </Button>
+                      </div>
+                    )
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           {/* Unassigned Devices Section */}
           {unassignedDevices.length > 0 && (
             <div>
