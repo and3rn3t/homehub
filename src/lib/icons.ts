@@ -81,6 +81,7 @@ import {
   House,
   Info,
   Layers,
+  LayoutGrid,
   // Device Icons
   Lightbulb,
   LineChart,
@@ -244,6 +245,7 @@ export {
   House as HouseIcon,
   Info as InfoIcon,
   Layers as LayersIcon,
+  LayoutGrid as LayoutGridIcon,
   // Device Icons
   Lightbulb as LightbulbIcon,
   LineChart as LineChartIcon,
