@@ -5,7 +5,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useKV } from '@/hooks/use-kv'
-import { BatteryIcon, LineChartIcon, CheckCircleIcon, ClockIcon, ZapIcon, ShieldIcon, TrendingDownIcon, TrendingUpIcon, AlertTriangleIcon, WifiIcon,  } from '@/lib/icons'
+import {
+  AlertTriangleIcon,
+  BatteryIcon,
+  BoltIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  LineChartIcon,
+  ShieldIcon,
+  TrendingDownIcon,
+  TrendingUpIcon,
+  WifiIcon,
+} from '@/lib/icons'
 
 interface DeviceHealth {
   id: string
@@ -114,13 +125,13 @@ export function InsightsDashboard() {
   const getInsightIcon = (type: Insight['type']) => {
     switch (type) {
       case 'energy':
-        return <Lightning size={16} className="text-yellow-500" />
+        return <BoltIcon className="h-4 w-4 text-yellow-500" />
       case 'usage':
-        return <ChartLineUp size={16} className="text-blue-500" />
+        return <LineChartIcon className="h-4 w-4 text-blue-500" />
       case 'optimization':
-        return <TrendUp size={16} className="text-green-500" />
+        return <TrendingUpIcon className="h-4 w-4 text-green-500" />
       case 'security':
-        return <Shield size={16} className="text-red-500" />
+        return <ShieldIcon className="h-4 w-4 text-red-500" />
     }
   }
 
@@ -170,7 +181,7 @@ export function InsightsDashboard() {
                 <p className="text-muted-foreground text-sm font-medium">Online Devices</p>
                 <p className="text-2xl font-bold text-green-500">{onlineDevices}</p>
               </div>
-              <CheckCircle size={24} className="text-green-500" />
+              <CheckCircleIcon className="h-6 w-6 text-green-500" />
             </div>
           </CardContent>
         </Card>
@@ -182,7 +193,7 @@ export function InsightsDashboard() {
                 <p className="text-muted-foreground text-sm font-medium">Warnings</p>
                 <p className="text-2xl font-bold text-yellow-500">{warningDevices}</p>
               </div>
-              <Warning size={24} className="text-yellow-500" />
+              <AlertTriangleIcon className="h-6 w-6 text-yellow-500" />
             </div>
           </CardContent>
         </Card>
@@ -194,7 +205,7 @@ export function InsightsDashboard() {
                 <p className="text-muted-foreground text-sm font-medium">Low Battery</p>
                 <p className="text-2xl font-bold text-red-500">{lowBatteryDevices}</p>
               </div>
-              <BatteryMedium size={24} className="text-red-500" />
+              <BatteryIcon className="h-6 w-6 text-red-500" />
             </div>
           </CardContent>
         </Card>
@@ -206,7 +217,7 @@ export function InsightsDashboard() {
                 <p className="text-muted-foreground text-sm font-medium">Avg Signal</p>
                 <p className="text-2xl font-bold">{averageSignalStrength}%</p>
               </div>
-              <WifiHigh size={24} className="text-primary" />
+              <WifiIcon className="text-primary h-6 w-6" />
             </div>
           </CardContent>
         </Card>
@@ -284,10 +295,11 @@ export function InsightsDashboard() {
                     <div className="flex items-center gap-6 text-sm">
                       {device.batteryLevel && (
                         <div className="flex items-center gap-2">
-                          <BatteryMedium
-                            size={16}
+                          <BatteryIcon
                             className={
-                              device.batteryLevel < 20 ? 'text-red-500' : 'text-muted-foreground'
+                              device.batteryLevel < 20
+                                ? 'h-4 w-4 text-red-500'
+                                : 'text-muted-foreground h-4 w-4'
                             }
                           />
                           <span className={device.batteryLevel < 20 ? 'text-red-500' : ''}>
@@ -296,11 +308,11 @@ export function InsightsDashboard() {
                         </div>
                       )}
                       <div className="flex items-center gap-2">
-                        <WifiHigh size={16} className="text-muted-foreground" />
+                        <WifiIcon className="text-muted-foreground h-4 w-4" />
                         <span>{device.signalStrength}%</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Clock size={16} className="text-muted-foreground" />
+                        <ClockIcon className="text-muted-foreground h-4 w-4" />
                         <span>
                           {Math.floor(device.uptime / 24)}d {device.uptime % 24}h
                         </span>
@@ -344,7 +356,7 @@ export function InsightsDashboard() {
                     <div className="text-muted-foreground flex justify-between text-xs">
                       <span>vs. yesterday: </span>
                       <span className="flex items-center gap-1 text-green-500">
-                        <TrendDown size={12} />
+                        <TrendingDownIcon className="h-3 w-3" />
                         -12%
                       </span>
                     </div>

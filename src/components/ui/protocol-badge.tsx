@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge'
+import { LightbulbIcon, RadioIcon, WifiIcon } from '@/lib/icons'
 import type { DeviceProtocol } from '@/types'
-import { CloudArrowUp, LightbulbIcon, WifiIcon } from '@/lib/icons'
 
 interface ProtocolBadgeProps {
   protocol: DeviceProtocol
@@ -21,17 +21,17 @@ export function ProtocolBadge({ protocol, className }: ProtocolBadgeProps) {
     >
       {protocol === 'mqtt' ? (
         <>
-          <CloudArrowUp weight="regular" className="mr-1 h-3 w-3" />
+          <RadioIcon className="mr-1 h-3 w-3" />
           MQTT
         </>
       ) : protocol === 'hue' ? (
         <>
-          <Lightbulb weight="regular" className="mr-1 h-3 w-3" />
+          <LightbulbIcon className="mr-1 h-3 w-3" />
           Hue
         </>
       ) : (
         <>
-          <WifiHigh weight="regular" className="mr-1 h-3 w-3" />
+          <WifiIcon className="mr-1 h-3 w-3" />
           HTTP
         </>
       )}

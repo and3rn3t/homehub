@@ -13,19 +13,29 @@ import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useKV } from '@/hooks/use-kv'
+import {
+  BatteryIcon,
+  EditIcon,
+  RefreshIcon,
+  SunRoomIcon,
+  ThermometerIcon,
+  TrashIcon,
+  WifiIcon,
+  XIcon,
+} from '@/lib/icons'
 import type { Device } from '@/types'
-import { RefreshIcon, BatteryIcon, PaletteIcon, EditIcon, SunRoomIcon, ThermometerIcon, TrashIcon, WifiIcon, XIcon,  } from '@/lib/icons'
 import { motion } from 'framer-motion'
+import { Palette } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { FavoriteButton } from './FavoriteButton'
 
 interface DeviceControlPanelProps {
-  device: Device
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onUpdate: (deviceId: string, updates: Partial<Device>) => void
-  onDelete?: (deviceId: string) => void
+  readonly device: Device
+  readonly open: boolean
+  readonly onOpenChange: (open: boolean) => void
+  readonly onUpdate: (deviceId: string, updates: Partial<Device>) => void
+  readonly onDelete?: (deviceId: string) => void
 }
 
 export function DeviceControlPanel({
@@ -229,7 +239,7 @@ export function DeviceControlPanel({
                       setDeviceName(device.name)
                     }}
                   >
-                    <X size={16} />
+                    <XIcon className="h-4 w-4" />
                   </Button>
                 </div>
               ) : (
@@ -247,7 +257,7 @@ export function DeviceControlPanel({
                     className="h-7 w-7"
                     onClick={() => setIsRenaming(true)}
                   >
-                    <Pencil size={14} />
+                    <EditIcon className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               )}
@@ -285,7 +295,7 @@ export function DeviceControlPanel({
             {/* Power Toggle */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Sun size={20} />
+                <SunRoomIcon className="h-5 w-5" />
                 <Label htmlFor="power-toggle" className="text-base">
                   Power
                 </Label>
@@ -307,7 +317,7 @@ export function DeviceControlPanel({
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Sun size={20} />
+                    <SunRoomIcon className="h-5 w-5" />
                     <Label className="text-base">Brightness</Label>
                   </div>
                   <span className="text-muted-foreground text-sm font-medium">{brightness}%</span>
@@ -333,7 +343,7 @@ export function DeviceControlPanel({
                 className="space-y-3"
               >
                 <div className="flex items-center gap-2">
-                  <Palette size={20} />
+                  <Palette className="h-5 w-5" />
                   <Label className="text-base">Color</Label>
                 </div>
                 <div className="flex gap-3">
@@ -354,6 +364,7 @@ export function DeviceControlPanel({
                     <div
                       className="border-border absolute top-1/2 right-2 h-8 w-8 -translate-y-1/2 rounded border-2"
                       style={{ backgroundColor: colorHex }}
+                      aria-label="Current color preview"
                     />
                   </div>
                   <Input
@@ -379,14 +390,16 @@ export function DeviceControlPanel({
                   ].map(color => (
                     <button
                       key={color}
+                      type="button"
                       onClick={() => {
                         setColorHex(color)
                         handleColorChange(color)
                       }}
                       disabled={!device.enabled || device.status === 'offline' || isUpdating}
-                      className="hover:ring-primary ring-border h-8 w-8 rounded-full ring-2 transition-all hover:scale-110 hover:ring-offset-2 disabled:opacity-50 disabled:hover:scale-100"
+                      className="ring-border hover:ring-primary h-8 w-8 rounded-full ring-2 transition-all hover:scale-110 hover:ring-offset-2 disabled:opacity-50 disabled:hover:scale-100"
                       style={{ backgroundColor: color }}
                       title={color}
+                      aria-label={`Set color to ${color}`}
                     />
                   ))}
                 </div>
@@ -403,7 +416,7 @@ export function DeviceControlPanel({
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Thermometer size={20} />
+                    <ThermometerIcon className="h-5 w-5" />
                     <Label className="text-base">Color Temperature</Label>
                   </div>
                   <span className="text-muted-foreground text-sm font-medium">{colorTemp}K</span>
@@ -457,15 +470,16 @@ export function DeviceControlPanel({
               {device.batteryLevel !== undefined && (
                 <div className="bg-secondary/50 flex items-center justify-between rounded-lg p-3">
                   <div className="flex items-center gap-2">
-                    <BatteryFull size={16} />
+                    <BatteryIcon className="h-4 w-4" />
                     <span className="text-muted-foreground text-sm">Battery</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm">{device.batteryLevel}%</span>
                     <div className="bg-border h-2 w-16 rounded-full">
                       <div
-                        className="h-full rounded-full bg-green-500"
+                        className="h-full rounded-full bg-green-500 transition-all"
                         style={{ width: `${device.batteryLevel}%` }}
+                        aria-label={`Battery level: ${device.batteryLevel}%`}
                       />
                     </div>
                   </div>
@@ -475,15 +489,16 @@ export function DeviceControlPanel({
               {device.signalStrength !== undefined && (
                 <div className="bg-secondary/50 flex items-center justify-between rounded-lg p-3">
                   <div className="flex items-center gap-2">
-                    <WifiHigh size={16} />
+                    <WifiIcon className="h-4 w-4" />
                     <span className="text-muted-foreground text-sm">Signal</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm">{device.signalStrength}%</span>
                     <div className="bg-border h-2 w-16 rounded-full">
                       <div
-                        className="h-full rounded-full bg-blue-500"
+                        className="h-full rounded-full bg-blue-500 transition-all"
                         style={{ width: `${device.signalStrength}%` }}
+                        aria-label={`Signal strength: ${device.signalStrength}%`}
                       />
                     </div>
                   </div>
@@ -539,7 +554,7 @@ export function DeviceControlPanel({
                   toast.info('Refreshing device state...')
                 }}
               >
-                <ArrowsClockwise size={16} className="mr-2" />
+                <RefreshIcon className="mr-2 h-4 w-4" />
                 Refresh State
               </Button>
 
@@ -549,7 +564,7 @@ export function DeviceControlPanel({
                   className="w-full justify-start"
                   onClick={handleDelete}
                 >
-                  <Trash size={16} className="mr-2" />
+                  <TrashIcon className="mr-2 h-4 w-4" />
                   Remove Device
                 </Button>
               )}

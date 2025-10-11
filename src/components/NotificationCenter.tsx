@@ -27,12 +27,12 @@ interface SystemAlert {
 }
 
 const alertIcons = {
-  'device-offline': WifiSlash,
-  'low-battery': BatteryMedium,
-  'weak-signal': WifiSlash,
-  'system-error': XCircle,
-  maintenance: Wrench,
-  security: Warning,
+  'device-offline': WifiOffIcon,
+  'low-battery': BatteryIcon,
+  'weak-signal': WifiOffIcon,
+  'system-error': XCircleIcon,
+  maintenance: WrenchIcon,
+  security: AlertTriangleIcon,
 }
 
 const severityColors = {
@@ -216,7 +216,7 @@ export function NotificationCenter() {
             <CardContent className="p-0">
               <div className="border-border flex items-center justify-between border-b p-4">
                 <div className="flex items-center gap-2">
-                  <Bell size={20} className="text-primary" />
+                  <BellIcon className="text-primary" />
                   <h3 className="text-foreground font-semibold">Notifications</h3>
                   {unacknowledgedAlerts.length > 0 && (
                     <Badge variant="destructive" className="h-5 text-xs">
@@ -251,7 +251,7 @@ export function NotificationCenter() {
                     onClick={() => setIsVisible(false)}
                     className="h-7 w-7 p-0"
                   >
-                    <X size={16} />
+                    <XIcon />
                   </Button>
                 </div>
               </div>
@@ -259,14 +259,14 @@ export function NotificationCenter() {
               <div className="max-h-96 overflow-y-auto">
                 {recentAlerts.length === 0 ? (
                   <div className="p-8 text-center">
-                    <CheckCircle size={32} className="mx-auto mb-2 text-green-500" />
+                    <CheckCircleIcon className="mx-auto mb-2 text-green-500" />
                     <p className="text-muted-foreground text-sm">No alerts</p>
                     <p className="text-muted-foreground text-xs">Your system is running smoothly</p>
                   </div>
                 ) : (
                   <div className="space-y-1 p-2">
                     {recentAlerts.map(alert => {
-                      const IconComponent = alertIcons[alert.type] || Info
+                      const IconComponent = alertIcons[alert.type] || InfoIcon
 
                       return (
                         <motion.div
@@ -321,7 +321,7 @@ export function NotificationCenter() {
                                     onClick={() => dismissAlert(alert.id)}
                                     className="h-6 w-6 p-0"
                                   >
-                                    <X size={12} />
+                                    <XIcon />
                                   </Button>
                                 </div>
                               </div>
@@ -359,7 +359,7 @@ export function NotificationBell() {
         className="relative h-11 w-11 rounded-full"
         onClick={() => setIsVisible(!isVisible)}
       >
-        <Bell size={20} />
+        <BellIcon />
         {unacknowledgedCount > 0 && (
           <div
             className={`absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-xs font-medium ${

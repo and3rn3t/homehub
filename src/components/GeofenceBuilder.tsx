@@ -21,7 +21,15 @@ import { Separator } from '@/components/ui/separator'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { useKV } from '@/hooks/use-kv'
-import { Buildings, CircleDashed, House, MapPinIcon, NavigationArrow, PlusIcon, ShoppingBag, Target, XIcon,  } from '@/lib/icons'
+import {
+  BuildingIcon,
+  HouseIcon,
+  MapPinIcon,
+  NavigationIcon,
+  PlusIcon,
+  StoreIcon,
+  XIcon,
+} from '@/lib/icons'
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -63,11 +71,11 @@ interface GeofenceRule {
 }
 
 const ZONE_TYPES = [
-  { value: 'home', label: 'Home', icon: House },
-  { value: 'work', label: 'Work', icon: Buildings },
-  { value: 'school', label: 'School', icon: Buildings },
-  { value: 'store', label: 'Store', icon: ShoppingBag },
-  { value: 'custom', label: 'Custom', icon: MapPin },
+  { value: 'home', label: 'Home', icon: HouseIcon },
+  { value: 'work', label: 'Work', icon: BuildingIcon },
+  { value: 'school', label: 'School', icon: BuildingIcon },
+  { value: 'store', label: 'Store', icon: StoreIcon },
+  { value: 'custom', label: 'Custom', icon: MapPinIcon },
 ]
 
 const SAMPLE_DEVICES = [
@@ -294,13 +302,13 @@ export function GeofenceBuilder() {
   const getTriggerIcon = (triggerType: string) => {
     switch (triggerType) {
       case 'enter':
-        return Target
+        return MapPinIcon
       case 'exit':
-        return NavigationArrow
+        return NavigationIcon
       case 'dwell':
-        return CircleDashed
+        return MapPinIcon
       default:
-        return MapPin
+        return MapPinIcon
     }
   }
 
@@ -325,7 +333,7 @@ export function GeofenceBuilder() {
             <Dialog open={isCreateZoneDialogOpen} onOpenChange={setIsCreateZoneDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
-                  <Plus size={16} className="mr-2" />
+                  <PlusIcon className="mr-2 h-4 w-4" />
                   Zone
                 </Button>
               </DialogTrigger>
@@ -399,7 +407,7 @@ export function GeofenceBuilder() {
                     disabled={!currentLocation}
                     className="w-full"
                   >
-                    <NavigationArrow size={16} className="mr-2" />
+                    <NavigationIcon className="mr-2 h-4 w-4" />
                     Use Current Location
                   </Button>
 
@@ -446,7 +454,7 @@ export function GeofenceBuilder() {
             <Dialog open={isCreateRuleDialogOpen} onOpenChange={setIsCreateRuleDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="rounded-full">
-                  <Plus size={20} className="mr-2" />
+                  <PlusIcon className="mr-2 h-5 w-5" />
                   Rule
                 </Button>
               </DialogTrigger>
@@ -697,7 +705,7 @@ export function GeofenceBuilder() {
             {geofenceZones.length === 0 ? (
               <Card className="border-border/30 border-2 border-dashed">
                 <CardContent className="p-6 text-center">
-                  <MapPin size={24} className="text-muted-foreground mx-auto mb-2" />
+                  <MapPinIcon className="text-muted-foreground mx-auto mb-2 h-6 w-6" />
                   <p className="text-muted-foreground mb-4">No zones created yet</p>
                   <Button
                     variant="outline"
@@ -711,7 +719,7 @@ export function GeofenceBuilder() {
             ) : (
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 {geofenceZones.map(zone => {
-                  const ZoneIcon = ZONE_TYPES.find(t => t.value === zone.type)?.icon || MapPin
+                  const ZoneIcon = ZONE_TYPES.find(t => t.value === zone.type)?.icon || MapPinIcon
                   return (
                     <Card key={zone.id} className="hover:bg-accent/5 transition-colors">
                       <CardContent className="p-4">
@@ -736,7 +744,7 @@ export function GeofenceBuilder() {
                             className="text-destructive hover:text-destructive h-8 w-8"
                             onClick={() => deleteZone(zone.id)}
                           >
-                            <X size={14} />
+                            <XIcon className="h-3.5 w-3.5" />
                           </Button>
                         </div>
                       </CardContent>
@@ -753,7 +761,7 @@ export function GeofenceBuilder() {
             {geofenceRules.length === 0 ? (
               <Card className="border-border/30 border-2 border-dashed">
                 <CardContent className="p-6 text-center">
-                  <Target size={24} className="text-muted-foreground mx-auto mb-2" />
+                  <MapPinIcon className="text-muted-foreground mx-auto mb-2 h-6 w-6" />
                   <p className="text-muted-foreground mb-4">No rules created yet</p>
                   <Button
                     variant="outline"
@@ -835,7 +843,7 @@ export function GeofenceBuilder() {
                                 className="h-8 w-8"
                                 onClick={() => testRule(rule.id)}
                               >
-                                <Target size={14} />
+                                <MapPinIcon className="h-3.5 w-3.5" />
                               </Button>
 
                               <Button
@@ -844,7 +852,7 @@ export function GeofenceBuilder() {
                                 className="text-destructive hover:text-destructive h-8 w-8"
                                 onClick={() => deleteRule(rule.id)}
                               >
-                                <X size={14} />
+                                <XIcon className="h-3.5 w-3.5" />
                               </Button>
 
                               <Switch

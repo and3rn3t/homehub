@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { useKV } from '@/hooks/use-kv'
-import { ClockIcon, InfoIcon, LightbulbIcon, Moon, SunRoomIcon } from '@/lib/icons'
+import { ClockIcon, InfoIcon, LightbulbIcon, MoonIcon, SunRoomIcon } from '@/lib/icons'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -100,10 +100,10 @@ export function AdaptiveLighting() {
     const now = new Date()
     const hour = now.getHours()
 
-    if (hour >= 5 && hour < 9) return { phase: 'Morning', icon: Sun, color: 'text-orange-500' }
-    if (hour >= 9 && hour < 17) return { phase: 'Day', icon: Sun, color: 'text-yellow-500' }
-    if (hour >= 17 && hour < 21) return { phase: 'Evening', icon: Sun, color: 'text-orange-600' }
-    return { phase: 'Night', icon: Moon, color: 'text-blue-500' }
+    if (hour >= 5 && hour < 9) return { phase: 'Morning', icon: SunRoomIcon, color: 'text-orange-500' }
+    if (hour >= 9 && hour < 17) return { phase: 'Day', icon: SunRoomIcon, color: 'text-yellow-500' }
+    if (hour >= 17 && hour < 21) return { phase: 'Evening', icon: SunRoomIcon, color: 'text-orange-600' }
+    return { phase: 'Night', icon: MoonIcon, color: 'text-blue-500' }
   }
 
   const currentPhase = getCurrentPhase()
@@ -155,7 +155,7 @@ export function AdaptiveLighting() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
-                <Clock size={20} />
+                <ClockIcon size={20} />
                 Schedule Settings
               </CardTitle>
             </CardHeader>
@@ -228,13 +228,13 @@ export function AdaptiveLighting() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
-                <Sun size={20} />
+                <SunRoomIcon size={20} />
                 Color Temperature Settings
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="bg-muted/50 flex items-start gap-2 rounded-lg p-4">
-                <Info size={16} className="text-muted-foreground mt-0.5 flex-shrink-0" />
+                <InfoIcon size={16} className="text-muted-foreground mt-0.5 flex-shrink-0" />
                 <p className="text-muted-foreground text-xs">
                   Lower temperatures (2700K) are warmer and better for evening/night. Higher
                   temperatures (5500K+) are cooler and better for daytime alertness.
@@ -330,7 +330,7 @@ export function AdaptiveLighting() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
-                <Lightbulb size={20} />
+                <LightbulbIcon size={20} />
                 Affected Lights
               </CardTitle>
             </CardHeader>

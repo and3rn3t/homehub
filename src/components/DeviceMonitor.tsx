@@ -5,8 +5,23 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { KV_KEYS, MOCK_DEVICES } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
+import {
+  AlertTriangleIcon,
+  BatteryIcon,
+  BatteryWarningIcon,
+  BellIcon,
+  BellOffIcon,
+  CameraIcon,
+  ClockIcon,
+  LightbulbIcon,
+  LineChartIcon,
+  ShieldIcon,
+  SpeakerIcon,
+  ThermometerIcon,
+  WifiIcon,
+  WifiOffIcon,
+} from '@/lib/icons'
 import type { Device } from '@/types'
-import { BatteryIcon, BatteryWarningIcon, BellIcon, BellOffIcon, CameraIcon, LineChartIcon, ClockIcon, LightbulbIcon, ShieldIcon, SpeakerIcon, ThermometerIcon, AlertTriangleIcon, WifiIcon, WifiOffIcon,  } from '@/lib/icons'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -45,12 +60,12 @@ interface MonitoringSettings {
 }
 
 const deviceIcons = {
-  light: Lightbulb,
-  thermostat: Thermometer,
-  security: Shield,
-  sensor: WifiHigh,
-  camera: Camera,
-  speaker: SpeakerHigh,
+  light: LightbulbIcon,
+  thermostat: ThermometerIcon,
+  security: ShieldIcon,
+  sensor: WifiIcon,
+  camera: CameraIcon,
+  speaker: SpeakerIcon,
 }
 
 const statusColors = {
@@ -311,9 +326,9 @@ export function DeviceMonitor() {
           <div className="flex items-center gap-3">
             <Switch checked={settings.alertsEnabled} onCheckedChange={toggleAlertsEnabled} />
             {settings.alertsEnabled ? (
-              <Bell size={20} className="text-primary" />
+              <BellIcon className="text-primary h-5 w-5" />
             ) : (
-              <BellSlash size={20} className="text-muted-foreground" />
+              <BellOffIcon className="text-muted-foreground h-5 w-5" />
             )}
           </div>
         </div>
@@ -323,9 +338,8 @@ export function DeviceMonitor() {
           <Alert
             className={`mb-6 ${criticalAlerts > 0 ? 'border-red-200 bg-red-50' : 'border-yellow-200 bg-yellow-50'}`}
           >
-            <Warning
-              size={16}
-              className={criticalAlerts > 0 ? 'text-red-600' : 'text-yellow-600'}
+            <AlertTriangleIcon
+              className={`h-4 w-4 ${criticalAlerts > 0 ? 'text-red-600' : 'text-yellow-600'}`}
             />
             <AlertDescription className={criticalAlerts > 0 ? 'text-red-700' : 'text-yellow-700'}>
               {criticalAlerts > 0 ? (
@@ -403,7 +417,7 @@ export function DeviceMonitor() {
                                 {device.status}
                               </Badge>
                               <span className="text-muted-foreground flex items-center gap-1 text-xs">
-                                <Clock size={12} />
+                                <ClockIcon className="h-3 w-3" />
                                 {getTimeAgo(device.lastSeen)}
                               </span>
                             </div>
@@ -421,9 +435,9 @@ export function DeviceMonitor() {
                             {device.batteryLevel !== undefined && (
                               <div className="flex items-center gap-1 text-xs">
                                 {device.batteryLevel <= 20 ? (
-                                  <BatteryWarning size={14} className="text-red-500" />
+                                  <BatteryWarningIcon className="h-3.5 w-3.5 text-red-500" />
                                 ) : (
-                                  <BatteryMedium size={14} className="text-green-500" />
+                                  <BatteryIcon className="h-3.5 w-3.5 text-green-500" />
                                 )}
                                 <span
                                   className={
@@ -439,16 +453,15 @@ export function DeviceMonitor() {
                             {device.signalStrength !== undefined && (
                               <div className="flex items-center gap-1 text-xs">
                                 {device.signalStrength > 0 ? (
-                                  <WifiHigh
-                                    size={14}
-                                    className={
+                                  <WifiIcon
+                                    className={`h-3.5 w-3.5 ${
                                       device.signalStrength > 50
                                         ? 'text-green-500'
                                         : 'text-yellow-500'
-                                    }
+                                    }`}
                                   />
                                 ) : (
-                                  <WifiSlash size={14} className="text-red-500" />
+                                  <WifiOffIcon className="h-3.5 w-3.5 text-red-500" />
                                 )}
                                 <span
                                   className={
@@ -506,7 +519,7 @@ export function DeviceMonitor() {
             <Card className="border-border/30 border-2 border-dashed">
               <CardContent className="p-8 text-center">
                 <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                  <ChartLineUp size={24} className="text-muted-foreground" />
+                  <LineChartIcon className="text-muted-foreground h-6 w-6" />
                 </div>
                 <p className="text-muted-foreground mb-2">No devices found</p>
                 <p className="text-muted-foreground text-sm">

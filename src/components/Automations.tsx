@@ -14,10 +14,10 @@ import { GeofenceBuilder } from './GeofenceBuilder'
 import { ScheduleBuilder } from './ScheduleBuilder'
 
 const automationIcons = {
-  schedule: Clock,
-  geofence: MapPin,
-  condition: CalendarBlank,
-  'device-state': FlowArrow,
+  schedule: ClockIcon,
+  geofence: MapPinIcon,
+  condition: CalendarIcon,
+  'device-state': WorkflowIcon,
 } as const
 
 export function Automations() {
@@ -72,19 +72,19 @@ export function Automations() {
 
           <TabsList className="mb-6 grid w-full grid-cols-4">
             <TabsTrigger value="overview" className="flex items-center gap-2">
-              <Gear size={16} />
+              <SettingsIcon className="h-4 w-4" />
               Overview
             </TabsTrigger>
             <TabsTrigger value="flows" className="flex items-center gap-2">
-              <FlowArrow size={16} />
+              <WorkflowIcon size={16} />
               Flows
             </TabsTrigger>
             <TabsTrigger value="schedules" className="flex items-center gap-2">
-              <Clock size={16} />
+              <ClockIcon size={16} />
               Schedules
             </TabsTrigger>
             <TabsTrigger value="geofence" className="flex items-center gap-2">
-              <MapPin size={16} />
+              <MapPinIcon size={16} />
               Geofencing
             </TabsTrigger>
           </TabsList>
@@ -128,7 +128,7 @@ export function Automations() {
                 <Card className="border-border/30 border-2 border-dashed">
                   <CardContent className="p-8 text-center">
                     <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                      <Clock size={24} className="text-muted-foreground" />
+                      <ClockIcon size={24} className="text-muted-foreground" />
                     </div>
                     <p className="text-muted-foreground mb-2">No automations yet</p>
                     <p className="text-muted-foreground mb-4 text-sm">
@@ -209,13 +209,13 @@ export function Automations() {
                                     className="h-8 w-8"
                                     onClick={() => runAutomation(automation.id)}
                                   >
-                                    <Play size={14} />
+                                    <PlayIcon size={14} />
                                   </Button>
                                 </motion.div>
 
                                 <motion.div whileTap={{ scale: 0.9 }}>
                                   <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <Pencil size={14} />
+                                    <EditIcon size={14} />
                                   </Button>
                                 </motion.div>
 

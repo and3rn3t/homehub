@@ -1,5 +1,5 @@
 import { useKV } from '@/hooks/use-kv'
-import { Star } from '@/lib/icons'
+import { StarIcon } from '@/lib/icons'
 import { motion } from 'framer-motion'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
@@ -59,10 +59,8 @@ export function FavoriteButton({
           damping: 20,
         }}
       >
-        <Star
-          size={size}
-          weight={isFavorite ? 'fill' : 'regular'}
-          className={isFavorite ? 'text-yellow-500' : 'text-muted-foreground'}
+        <StarIcon
+          className={`${isFavorite ? 'fill-yellow-500 text-yellow-500' : 'text-muted-foreground'} ${size === 20 ? 'h-5 w-5' : size === 16 ? 'h-4 w-4' : 'h-6 w-6'}`}
         />
       </motion.div>
     </motion.button>

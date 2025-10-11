@@ -4,7 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useKV } from '@/hooks/use-kv'
-import { BellIcon, LineChartIcon, CheckIcon, SettingsIcon, PlusIcon, ShieldIcon, WifiIcon } from '@/lib/icons'
+import {
+  BellIcon,
+  CheckIcon,
+  CogIcon,
+  LineChartIcon,
+  PlusIcon,
+  SettingsIcon,
+  ShieldIcon,
+  WifiIcon,
+} from '@/lib/icons'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -32,20 +41,20 @@ interface SystemSetting {
 }
 
 const integrationIcons = {
-  homekit: WifiHigh,
-  alexa: Bell,
-  google: WifiHigh,
-  matter: Check,
-  thread: ChartLineUp,
-  zigbee: ChartLineUp,
-  zwave: ChartLineUp,
+  homekit: WifiIcon,
+  alexa: BellIcon,
+  google: WifiIcon,
+  matter: CheckIcon,
+  thread: LineChartIcon,
+  zigbee: LineChartIcon,
+  zwave: LineChartIcon,
 }
 
 const categoryIcons = {
-  security: Shield,
-  notifications: Bell,
-  automation: Gear,
-  system: Gear,
+  security: ShieldIcon,
+  notifications: BellIcon,
+  automation: CogIcon,
+  system: CogIcon,
 }
 
 export function DeviceSettings() {
@@ -168,7 +177,7 @@ export function DeviceSettings() {
             <p className="text-muted-foreground">Manage your home automation</p>
           </div>
           <Button variant="outline" size="icon" className="rounded-full">
-            <Gear size={20} />
+            <SettingsIcon className="h-5 w-5" />
           </Button>
         </div>
       </div>
@@ -194,7 +203,7 @@ export function DeviceSettings() {
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <Bell size={20} className="text-muted-foreground" />
+                      <BellIcon className="text-muted-foreground h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">Push Notifications</p>
                         <p className="text-muted-foreground text-xs">Device alerts and updates</p>
@@ -205,7 +214,7 @@ export function DeviceSettings() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <WifiHigh size={20} className="text-muted-foreground" />
+                      <WifiIcon className="text-muted-foreground h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">Automatic Updates</p>
                         <p className="text-muted-foreground text-xs">Keep devices up to date</p>
@@ -216,7 +225,7 @@ export function DeviceSettings() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <WifiHigh size={20} className="text-muted-foreground" />
+                      <WifiIcon className="text-muted-foreground h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">Geofencing</p>
                         <p className="text-muted-foreground text-xs">Location-based automation</p>
@@ -232,7 +241,7 @@ export function DeviceSettings() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">Platform Integrations</CardTitle>
                     <Button variant="outline" size="sm">
-                      <Plus size={16} className="mr-2" />
+                      <PlusIcon className="mr-2 h-4 w-4" />
                       Add
                     </Button>
                   </div>
@@ -241,7 +250,7 @@ export function DeviceSettings() {
                   {integrations.length === 0 ? (
                     <div className="py-8 text-center">
                       <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                        <WifiHigh size={24} className="text-muted-foreground" />
+                        <WifiIcon className="text-muted-foreground h-6 w-6" />
                       </div>
                       <p className="text-muted-foreground mb-2">No integrations</p>
                       <p className="text-muted-foreground mb-4 text-sm">
@@ -326,7 +335,7 @@ export function DeviceSettings() {
                 {systemSettings.length === 0 ? (
                   <div className="py-8 text-center">
                     <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                      <Gear size={24} className="text-muted-foreground" />
+                      <SettingsIcon className="text-muted-foreground h-6 w-6" />
                     </div>
                     <p className="text-muted-foreground mb-2">No custom settings</p>
                     <p className="text-muted-foreground text-sm">
@@ -371,7 +380,7 @@ export function DeviceSettings() {
                 <div className="space-y-3">
                   <div className="bg-accent/10 border-accent/20 flex items-center justify-between rounded-lg border p-3">
                     <div className="flex items-center gap-3">
-                      <Check size={20} className="text-accent" />
+                      <CheckIcon size={20} className="text-accent" />
                       <div>
                         <p className="text-sm font-medium">System Health</p>
                         <p className="text-muted-foreground text-xs">All systems operational</p>
@@ -384,7 +393,7 @@ export function DeviceSettings() {
 
                   <div className="bg-secondary flex items-center justify-between rounded-lg border p-3">
                     <div className="flex items-center gap-3">
-                      <WifiHigh size={20} className="text-muted-foreground" />
+                      <WifiIcon size={20} className="text-muted-foreground" />
                       <div>
                         <p className="text-sm font-medium">Network Status</p>
                         <p className="text-muted-foreground text-xs">Connected to Wi-Fi</p>
@@ -395,7 +404,7 @@ export function DeviceSettings() {
 
                   <div className="bg-primary/10 border-primary/20 flex items-center justify-between rounded-lg border p-3">
                     <div className="flex items-center gap-3">
-                      <WifiHigh size={20} className="text-primary" />
+                      <WifiIcon size={20} className="text-primary" />
                       <div>
                         <p className="text-sm font-medium">Cloud Sync</p>
                         <p className="text-muted-foreground text-xs">Last sync: 2 minutes ago</p>

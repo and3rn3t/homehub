@@ -11,10 +11,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Progress } from '@/components/ui/progress'
 import { KV_KEYS } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
+import { CheckCircleIcon, SearchIcon, WifiIcon, XCircleIcon } from '@/lib/icons'
 import type { DiscoveredDevice } from '@/services/discovery'
 import { discoveryManager } from '@/services/discovery'
 import type { Device } from '@/types'
-import { CheckCircleIcon, MagnifyingGlass, WifiIcon, XCircleIcon } from '@/lib/icons'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -150,7 +150,7 @@ export function DeviceDiscovery({
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <MagnifyingGlass weight="bold" className="h-5 w-5" />
+            <SearchIcon className="h-5 w-5 font-bold" />
             Device Discovery
           </DialogTitle>
         </DialogHeader>
@@ -182,13 +182,13 @@ export function DeviceDiscovery({
                     <div key={scanner.protocol} className="flex items-center gap-2 text-sm">
                       <div className="flex h-5 w-5 items-center justify-center">
                         {scanner.status === 'complete' ? (
-                          <CheckCircle weight="fill" className="h-4 w-4 text-green-500" />
+                          <CheckCircleIcon className="h-4 w-4 fill-green-500 text-green-500" />
                         ) : scanner.status === 'scanning' ? (
                           <motion.div
                             animate={{ rotate: 360 }}
                             transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                           >
-                            <WifiHigh weight="bold" className="h-4 w-4 text-blue-500" />
+                            <WifiIcon className="h-4 w-4 text-blue-500" />
                           </motion.div>
                         ) : (
                           <div className="bg-muted-foreground/30 h-2 w-2 rounded-full" />
@@ -262,7 +262,7 @@ export function DeviceDiscovery({
               animate={{ opacity: 1 }}
               className="text-muted-foreground py-8 text-center"
             >
-              <XCircle className="mx-auto mb-2 h-12 w-12 opacity-50" />
+              <XCircleIcon className="mx-auto mb-2 h-12 w-12 opacity-50" />
               <p>No devices found</p>
               <p className="mt-1 text-sm">Try scanning again or check your network</p>
             </motion.div>
@@ -271,7 +271,7 @@ export function DeviceDiscovery({
           {/* Initial State */}
           {!scanning && discoveredDevices.length === 0 && progress === 0 && (
             <div className="text-muted-foreground py-8 text-center">
-              <CheckCircle className="mx-auto mb-2 h-12 w-12 opacity-50" />
+              <CheckCircleIcon className="mx-auto mb-2 h-12 w-12 opacity-50" />
               <p>Click &quot;Start Scan&quot; to discover devices</p>
               <p className="mt-1 text-sm">Scanning localhost (127.0.0.1) for testing</p>
             </div>

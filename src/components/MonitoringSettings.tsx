@@ -6,7 +6,18 @@ import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { useKV } from '@/hooks/use-kv'
-import { BatteryIcon, BellIcon, LineChartIcon, CheckCircleIcon, ClockIcon, Gear as SettingsIcon, ShieldIcon, AlertTriangleIcon, WifiIcon, XCircleIcon,  } from '@/lib/icons'
+import {
+  AlertTriangleIcon,
+  BatteryLowIcon,
+  BellIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  LineChartIcon,
+  SettingsIcon,
+  ShieldIcon,
+  WifiIcon,
+  XCircleIcon,
+} from '@/lib/icons'
 import { toast } from 'sonner'
 
 interface MonitoringSettings {
@@ -166,7 +177,7 @@ export function MonitoringSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Bell size={20} className="text-primary" />
+                <BellIcon size={20} className="text-primary" />
                 Alert Configuration
               </CardTitle>
             </CardHeader>
@@ -264,7 +275,7 @@ export function MonitoringSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Warning size={20} className="text-primary" />
+                <AlertTriangleIcon className="text-primary h-5 w-5" />
                 Notification Methods
               </CardTitle>
             </CardHeader>
@@ -330,11 +341,11 @@ export function MonitoringSettings() {
             <CardContent className="space-y-4">
               {Object.entries(settings.alertCategories).map(([category, enabled]) => {
                 const icons = {
-                  offline: XCircle,
-                  battery: BatteryMedium,
-                  signal: WifiHigh,
-                  security: Shield,
-                  maintenance: Clock,
+                  offline: XCircleIcon,
+                  battery: BatteryLowIcon,
+                  signal: WifiIcon,
+                  security: ShieldIcon,
+                  maintenance: ClockIcon,
                 }
                 const IconComponent = icons[category as keyof typeof icons]
 
@@ -374,7 +385,7 @@ export function MonitoringSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <WifiHigh size={20} className="text-primary" />
+                <WifiIcon className="text-primary h-5 w-5" />
                 Network Monitoring
               </CardTitle>
             </CardHeader>
@@ -449,7 +460,7 @@ export function MonitoringSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Shield size={20} className="text-primary" />
+                <ShieldIcon size={20} className="text-primary" />
                 Security Monitoring
               </CardTitle>
             </CardHeader>
@@ -483,18 +494,18 @@ export function MonitoringSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ChartLineUp size={20} className="text-primary" />
+                <LineChartIcon size={20} className="text-primary" />
                 System Status
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-center gap-2">
-                  <CheckCircle size={16} className="text-green-500" />
+                  <CheckCircleIcon size={16} className="text-green-500" />
                   <span className="text-sm">Monitoring Active</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle size={16} className="text-green-500" />
+                  <CheckCircleIcon size={16} className="text-green-500" />
                   <span className="text-sm">Network Connected</span>
                 </div>
                 <div className="flex items-center gap-2">

@@ -1,4 +1,4 @@
-import { ArrowClockwise, Bug, House, AlertTriangleIcon } from '@/lib/icons'
+import { AlertCircleIcon, AlertTriangleIcon, HouseIcon, RefreshIcon } from '@/lib/icons'
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { Alert, AlertDescription, AlertTitle } from './components/ui/alert'
@@ -92,7 +92,7 @@ export const ErrorFallback = ({ error, resetErrorBoundary }: ErrorFallbackProps)
           <CardHeader>
             <div className="flex items-start gap-4">
               <div className="bg-destructive/10 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full">
-                <Warning size={24} className="text-destructive" weight="fill" />
+                <AlertTriangleIcon className="text-destructive fill-destructive h-6 w-6" />
               </div>
               <div className="flex-1">
                 <CardTitle className="text-foreground mb-2 text-xl">Something Went Wrong</CardTitle>
@@ -107,7 +107,7 @@ export const ErrorFallback = ({ error, resetErrorBoundary }: ErrorFallbackProps)
             {/* Quick Actions */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Button onClick={handleRetry} className="w-full" size="lg">
-                <ArrowClockwise size={18} className="mr-2" />
+                <RefreshIcon className="mr-2 h-4.5 w-4.5" />
                 Try Again
                 {countdown !== null && countdown > 0 && (
                   <span className="ml-2 text-xs opacity-75">({countdown}s)</span>
@@ -115,12 +115,12 @@ export const ErrorFallback = ({ error, resetErrorBoundary }: ErrorFallbackProps)
               </Button>
 
               <Button onClick={handleGoHome} variant="outline" className="w-full" size="lg">
-                <House size={18} className="mr-2" />
+                <HouseIcon className="mr-2 h-4.5 w-4.5" />
                 Go Home
               </Button>
 
               <Button onClick={handleReload} variant="outline" className="w-full" size="lg">
-                <ArrowClockwise size={18} className="mr-2" />
+                <RefreshIcon className="mr-2 h-4.5 w-4.5" />
                 Reload Page
               </Button>
             </div>
@@ -144,7 +144,7 @@ export const ErrorFallback = ({ error, resetErrorBoundary }: ErrorFallbackProps)
                 className="text-muted-foreground mb-2 w-full justify-between"
               >
                 <span className="flex items-center gap-2">
-                  <Bug size={16} />
+                  <AlertCircleIcon className="h-4 w-4" />
                   Technical Details
                 </span>
                 <motion.span

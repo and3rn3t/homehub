@@ -21,8 +21,8 @@ import {
 } from '@/components/ui/select'
 import { MOCK_USERS } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
+import { ShieldCheckIcon, ShieldIcon, TrashIcon, UserIcon, UserPlusIcon } from '@/lib/icons'
 import type { User, UserPermissions } from '@/types'
-import { Crown, ShieldIcon, TrashIcon, User as UserIcon, UserPlus } from '@/lib/icons'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -98,11 +98,11 @@ export function UserManagement() {
   const getRoleIcon = (role: User['role']) => {
     switch (role) {
       case 'owner':
-        return <Crown size={16} className="text-yellow-500" />
+        return <ShieldCheckIcon className="h-4 w-4 text-yellow-500" />
       case 'admin':
-        return <Shield size={16} className="text-blue-500" />
+        return <ShieldIcon className="h-4 w-4 text-blue-500" />
       default:
-        return <UserIcon size={16} className="text-muted-foreground" />
+        return <UserIcon className="text-muted-foreground h-4 w-4" />
     }
   }
 
@@ -132,7 +132,7 @@ export function UserManagement() {
         <Dialog open={isAddingUser} onOpenChange={setIsAddingUser}>
           <DialogTrigger asChild>
             <Button>
-              <UserPlus size={18} className="mr-2" />
+              <UserPlusIcon className="mr-2 h-[18px] w-[18px]" />
               Add User
             </Button>
           </DialogTrigger>
@@ -198,13 +198,13 @@ export function UserManagement() {
         {users.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <UserIcon size={48} className="text-muted-foreground mb-4" />
+              <UserIcon className="text-muted-foreground mb-4 h-12 w-12" />
               <h3 className="mb-2 text-lg font-medium">No Users Added</h3>
               <p className="text-muted-foreground mb-6 text-center">
                 Add family members and guests to share access to your smart home
               </p>
               <Button onClick={() => setIsAddingUser(true)}>
-                <UserPlus size={18} className="mr-2" />
+                <UserPlusIcon className="mr-2 h-[18px] w-[18px]" />
                 Add First User
               </Button>
             </CardContent>
@@ -250,7 +250,7 @@ export function UserManagement() {
                       onClick={() => handleRemoveUser(user.id)}
                       className="text-destructive hover:text-destructive"
                     >
-                      <Trash size={16} />
+                      <TrashIcon className="h-4 w-4" />
                     </Button>
                   )}
                 </div>
@@ -270,14 +270,14 @@ export function UserManagement() {
             <div className="grid gap-4">
               <div className="flex items-center justify-between border-b py-2">
                 <div className="flex items-center gap-2">
-                  <Crown size={16} className="text-yellow-500" />
+                  <ShieldCheckIcon className="h-4 w-4 text-yellow-500" />
                   <span className="font-medium">Owner</span>
                 </div>
                 <span className="text-muted-foreground text-sm">Full access to everything</span>
               </div>
               <div className="flex items-center justify-between border-b py-2">
                 <div className="flex items-center gap-2">
-                  <Shield size={16} className="text-blue-500" />
+                  <ShieldIcon className="h-4 w-4 text-blue-500" />
                   <span className="font-medium">Admin</span>
                 </div>
                 <span className="text-muted-foreground text-sm">
@@ -286,14 +286,14 @@ export function UserManagement() {
               </div>
               <div className="flex items-center justify-between border-b py-2">
                 <div className="flex items-center gap-2">
-                  <UserIcon size={16} className="text-muted-foreground" />
+                  <UserIcon className="text-muted-foreground h-4 w-4" />
                   <span className="font-medium">Member</span>
                 </div>
                 <span className="text-muted-foreground text-sm">Devices and scenes only</span>
               </div>
               <div className="flex items-center justify-between py-2">
                 <div className="flex items-center gap-2">
-                  <UserIcon size={16} className="text-muted-foreground" />
+                  <UserIcon className="text-muted-foreground h-4 w-4" />
                   <span className="font-medium">Guest</span>
                 </div>
                 <span className="text-muted-foreground text-sm">Scenes only</span>

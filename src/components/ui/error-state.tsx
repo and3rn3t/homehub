@@ -1,7 +1,7 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { ArrowClockwise, AlertTriangleIcon, WifiOffIcon } from '@/lib/icons'
+import { AlertTriangleIcon, RefreshIcon, WifiOffIcon } from '@/lib/icons'
 import { motion } from 'framer-motion'
 
 interface ErrorStateProps {
@@ -69,13 +69,13 @@ export function ErrorState({
   if (variant === 'inline') {
     return (
       <Alert variant="destructive" className="my-4">
-        <Warning size={16} />
+        <AlertTriangleIcon className="h-4 w-4" />
         <AlertTitle>{title}</AlertTitle>
         <AlertDescription className="mt-2">
           {getErrorMessage()}
           {onRetry && (
             <Button variant="outline" size="sm" onClick={onRetry} className="mt-3">
-              <ArrowClockwise size={14} className="mr-2" />
+              <RefreshIcon className="mr-2 h-3.5 w-3.5" />
               Try Again
             </Button>
           )}
@@ -88,11 +88,11 @@ export function ErrorState({
   if (variant === 'minimal') {
     return (
       <div className="text-muted-foreground flex items-center gap-2 py-4 text-sm">
-        <Warning size={16} className="text-destructive" />
+        <AlertTriangleIcon className="text-destructive h-4 w-4" />
         <span>{getErrorMessage()}</span>
         {onRetry && (
           <Button variant="ghost" size="sm" onClick={onRetry} className="ml-auto">
-            <ArrowClockwise size={14} className="mr-2" />
+            <RefreshIcon className="mr-2 h-3.5 w-3.5" />
             Retry
           </Button>
         )}
@@ -136,7 +136,9 @@ export function ErrorState({
           <div
             className={`bg-destructive/10 mx-auto mb-4 flex items-center justify-center rounded-full ${iconContainerSizes[size]}`}
           >
-            <WifiSlash size={iconSizes[size]} className="text-destructive" weight="fill" />
+            <WifiOffIcon
+              className={`text-destructive ${iconSizes[size] === 48 ? 'h-12 w-12' : iconSizes[size] === 32 ? 'h-8 w-8' : 'h-6 w-6'}`}
+            />
           </div>
 
           <h3 className="text-foreground mb-2 text-lg font-semibold">{title}</h3>
@@ -145,7 +147,7 @@ export function ErrorState({
 
           {onRetry && (
             <Button onClick={onRetry} variant="outline" size={buttonSizes[size]}>
-              <ArrowClockwise size={16} className="mr-2" />
+              <RefreshIcon className="mr-2 h-4 w-4" />
               Try Again
             </Button>
           )}

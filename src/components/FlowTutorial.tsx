@@ -2,7 +2,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useKV } from '@/hooks/use-kv'
-import { ArrowRight, Cursor, LightbulbIcon, PlayIcon, XIcon } from '@/lib/icons'
+import type { LucideIcon } from '@/lib/icons'
+import { ArrowRightIcon, LightbulbIcon, NavigationIcon, PlayIcon, XIcon } from '@/lib/icons'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
 
@@ -10,7 +11,7 @@ interface TutorialStep {
   id: string
   title: string
   description: string
-  icon: any
+  icon: LucideIcon
   position: { x: number; y: number }
   highlight?: string
 }
@@ -21,7 +22,7 @@ const tutorialSteps: TutorialStep[] = [
     title: 'Welcome to Flow Designer',
     description:
       "Create powerful automation workflows with our visual drag-and-drop interface. Let's get started!",
-    icon: Lightbulb,
+    icon: LightbulbIcon,
     position: { x: 50, y: 50 },
   },
   {
@@ -29,7 +30,7 @@ const tutorialSteps: TutorialStep[] = [
     title: 'Open the Node Palette',
     description:
       'Click "Add Node" to open the palette and see all available automation building blocks.',
-    icon: Cursor,
+    icon: NavigationIcon,
     position: { x: 20, y: 20 },
     highlight: 'add-node-button',
   },
@@ -37,7 +38,7 @@ const tutorialSteps: TutorialStep[] = [
     id: 'drag',
     title: 'Drag to Create',
     description: 'Drag nodes from the palette onto the canvas to build your automation workflow.',
-    icon: ArrowRight,
+    icon: ArrowRightIcon,
     position: { x: 30, y: 60 },
   },
   {
@@ -45,7 +46,7 @@ const tutorialSteps: TutorialStep[] = [
     title: 'Connect Nodes',
     description:
       'Click "Out" on one node and "In" on another to create logical connections between steps.',
-    icon: ArrowRight,
+    icon: ArrowRightIcon,
     position: { x: 70, y: 40 },
   },
   {
@@ -53,14 +54,14 @@ const tutorialSteps: TutorialStep[] = [
     title: 'Configure Settings',
     description:
       'Click any node to configure its specific settings like times, devices, or conditions.',
-    icon: Cursor,
+    icon: NavigationIcon,
     position: { x: 80, y: 70 },
   },
   {
     id: 'test',
     title: 'Test Your Flow',
     description: 'Use the "Test" button to run your automation and see if it works as expected.',
-    icon: Play,
+    icon: PlayIcon,
     position: { x: 50, y: 30 },
   },
 ]
@@ -142,7 +143,7 @@ export function FlowTutorial({ onComplete }: FlowTutorialProps) {
                     </div>
                   </div>
                   <Button variant="ghost" size="icon" onClick={skipTutorial} className="h-8 w-8">
-                    <X size={16} />
+                    <XIcon className="h-4 w-4" />
                   </Button>
                 </div>
               </CardHeader>
@@ -166,7 +167,7 @@ export function FlowTutorial({ onComplete }: FlowTutorialProps) {
                     )}
                     <Button size="sm" onClick={nextStep} className="flex items-center gap-2">
                       {isLastStep ? 'Finish' : 'Next'}
-                      {!isLastStep && <ArrowRight size={14} />}
+                      {!isLastStep && <ArrowRightIcon className="h-3.5 w-3.5" />}
                     </Button>
                   </div>
                 </div>

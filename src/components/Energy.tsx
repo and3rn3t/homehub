@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { useKV } from '@/hooks/use-kv'
-import { Calendar, ClockIcon, Leaf, ZapIcon, TrendingUpIcon } from '@/lib/icons'
+import { BoltIcon, CalendarIcon, ClockIcon, SparklesIcon, TrendingUpIcon } from '@/lib/icons'
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 
 interface EnergyData {
@@ -60,14 +60,14 @@ export function Energy() {
             <p className="text-muted-foreground">Monitor your power usage</p>
           </div>
           <Button variant="outline" size="icon" className="rounded-full">
-            <Calendar size={20} />
+            <CalendarIcon className="h-5 w-5" />
           </Button>
         </div>
 
         <div className="mb-6 grid grid-cols-3 gap-3">
           <Card className="bg-primary/10 border-primary/20">
             <CardContent className="p-4 text-center">
-              <Lightning size={20} className="text-primary mx-auto mb-2" />
+              <BoltIcon className="text-primary mx-auto mb-2 h-5 w-5" />
               <div className="text-primary mb-1 text-lg font-bold">
                 {avgDailyConsumption.toFixed(1)} kWh
               </div>
@@ -77,7 +77,7 @@ export function Energy() {
 
           <Card className="bg-accent/10 border-accent/20">
             <CardContent className="p-4 text-center">
-              <Leaf size={20} className="text-accent mx-auto mb-2" />
+              <SparklesIcon className="text-accent mx-auto mb-2 h-5 w-5" />
               <div className="text-accent mb-1 text-lg font-bold">12.3 kg</div>
               <div className="text-muted-foreground text-xs">CO₂ Saved</div>
             </CardContent>
@@ -85,9 +85,8 @@ export function Energy() {
 
           <Card className="bg-secondary border-border/50">
             <CardContent className="p-4 text-center">
-              <TrendUp
-                size={20}
-                className={`mx-auto mb-2 ${weeklyTrend > 0 ? 'text-destructive' : 'text-accent'}`}
+              <TrendingUpIcon
+                className={`mx-auto mb-2 h-5 w-5 ${weeklyTrend > 0 ? 'text-destructive' : 'text-accent'}`}
               />
               <div
                 className={`mb-1 text-lg font-bold ${weeklyTrend > 0 ? 'text-destructive' : 'text-accent'}`}
@@ -182,14 +181,14 @@ export function Energy() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">Usage Insights</CardTitle>
-              <Clock size={16} className="text-muted-foreground" />
+              <ClockIcon className="text-muted-foreground h-4 w-4" />
             </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div className="bg-accent/10 border-accent/20 rounded-lg border p-3">
                 <div className="mb-1 flex items-center gap-2">
-                  <Leaf size={16} className="text-accent" />
+                  <SparklesIcon className="text-accent h-4 w-4" />
                   <span className="text-accent text-sm font-medium">Energy Tip</span>
                 </div>
                 <p className="text-muted-foreground text-sm">
@@ -200,7 +199,7 @@ export function Energy() {
 
               <div className="bg-primary/10 border-primary/20 rounded-lg border p-3">
                 <div className="mb-1 flex items-center gap-2">
-                  <TrendUp size={16} className="text-primary" />
+                  <TrendingUpIcon className="text-primary h-4 w-4" />
                   <span className="text-primary text-sm font-medium">Peak Usage</span>
                 </div>
                 <p className="text-muted-foreground text-sm">

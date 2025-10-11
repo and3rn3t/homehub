@@ -12,8 +12,21 @@ import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { KV_KEYS, MOCK_CAMERAS, MOCK_SECURITY_EVENTS } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
+import {
+  AlertTriangleIcon,
+  BellIcon,
+  CameraIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  EyeIcon,
+  EyeOffIcon,
+  MapPinIcon,
+  PhoneIcon,
+  PlayIcon,
+  ShieldIcon,
+  StopCircleIcon,
+} from '@/lib/icons'
 import type { Camera, SecurityEvent } from '@/types'
-import { BellIcon, Camera as CameraIcon, CheckCircleIcon, ClockIcon, EyeIcon, EyeOffIcon, MapPinIcon, PhoneIcon, PlayIcon, VideoIcon, ShieldIcon, AlertTriangleIcon,  } from '@/lib/icons'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -88,16 +101,16 @@ export function Security() {
   const getEventIcon = (type: SecurityEvent['type']) => {
     switch (type) {
       case 'motion':
-        return <Eye size={16} />
+        return <EyeIcon className="h-4 w-4" />
       case 'door':
       case 'window':
-        return <Shield size={16} />
+        return <ShieldIcon className="h-4 w-4" />
       case 'alarm':
-        return <Bell size={16} />
+        return <BellIcon className="h-4 w-4" />
       case 'camera_offline':
-        return <Warning size={16} />
+        return <AlertTriangleIcon className="h-4 w-4" />
       default:
-        return <Shield size={16} />
+        return <ShieldIcon className="h-4 w-4" />
     }
   }
 
@@ -192,7 +205,7 @@ export function Security() {
                           ) : (
                             <div className="flex h-full w-full items-center justify-center bg-gray-900">
                               <div className="text-center">
-                                <EyeSlash size={32} className="mx-auto mb-2 text-gray-500" />
+                                <EyeOffIcon className="mx-auto mb-2 h-8 w-8 text-gray-500" />
                                 <p className="text-xs text-gray-500">Camera Offline</p>
                               </div>
                             </div>
@@ -204,7 +217,7 @@ export function Security() {
                               className={`h-2 w-2 rounded-full ${getStatusColor(camera.status)}`}
                             />
                             {camera.status === 'recording' && (
-                              <Record size={12} className="text-red-500" />
+                              <StopCircleIcon className="h-3 w-3 text-red-500" />
                             )}
                           </div>
 
@@ -226,19 +239,19 @@ export function Security() {
                             <div>
                               <h3 className="text-sm font-medium">{camera.name}</h3>
                               <p className="text-muted-foreground flex items-center gap-1 text-xs">
-                                <MapPin size={10} />
+                                <MapPinIcon className="h-2.5 w-2.5" />
                                 {camera.location}
                               </p>
                             </div>
                             <div className="flex items-center gap-1">
                               {camera.nightVision && (
                                 <Badge variant="outline" className="p-1 text-xs">
-                                  <Eye size={10} />
+                                  <EyeIcon className="h-2.5 w-2.5" />
                                 </Badge>
                               )}
                               {camera.motionDetection && (
                                 <Badge variant="outline" className="p-1 text-xs">
-                                  <Bell size={10} />
+                                  <BellIcon className="h-2.5 w-2.5" />
                                 </Badge>
                               )}
                             </div>
@@ -246,7 +259,7 @@ export function Security() {
 
                           {camera.lastMotion && (
                             <div className="text-muted-foreground mt-2 flex items-center gap-1 text-xs">
-                              <Clock size={10} />
+                              <ClockIcon className="h-2.5 w-2.5" />
                               Last motion: {formatRelativeTime(camera.lastMotion)}
                             </div>
                           )}
@@ -270,7 +283,7 @@ export function Security() {
                           ) : (
                             <div className="flex h-full w-full items-center justify-center">
                               <div className="text-center text-gray-500">
-                                <EyeSlash size={48} className="mx-auto mb-4" />
+                                <EyeOffIcon className="mx-auto mb-4 h-12 w-12" />
                                 <p>Camera Offline</p>
                               </div>
                             </div>
@@ -278,10 +291,10 @@ export function Security() {
 
                           <div className="absolute bottom-4 left-4 flex items-center gap-2">
                             <Button size="sm" variant="secondary">
-                              <Play size={16} />
+                              <PlayIcon className="h-4 w-4" />
                             </Button>
                             <Button size="sm" variant="secondary">
-                              <Record size={16} />
+                              <StopCircleIcon className="h-4 w-4" />
                             </Button>
                           </div>
                         </div>
@@ -328,7 +341,7 @@ export function Security() {
             {securityEvents.length === 0 ? (
               <Card className="border-border/30 border-2 border-dashed">
                 <CardContent className="p-8 text-center">
-                  <CheckCircle size={48} className="mx-auto mb-4 text-green-500" />
+                  <CheckCircleIcon className="mx-auto mb-4 h-12 w-12 text-green-500" />
                   <p className="text-muted-foreground">No recent security events</p>
                 </CardContent>
               </Card>
@@ -358,7 +371,7 @@ export function Security() {
                           <div>
                             <p className="text-sm font-medium">{event.message}</p>
                             <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                              <MapPin size={10} />
+                              <MapPinIcon className="h-2.5 w-2.5" />
                               <span>{event.location}</span>
                               <span>•</span>
                               <span>{formatRelativeTime(event.timestamp)}</span>
@@ -368,7 +381,7 @@ export function Security() {
 
                         {event.cameraId && (
                           <Button size="sm" variant="outline">
-                            <CameraIcon size={14} />
+                            <CameraIcon className="h-3.5 w-3.5" />
                           </Button>
                         )}
                       </div>
@@ -388,7 +401,7 @@ export function Security() {
                 <div className="border-border flex items-center justify-between rounded-lg border p-4">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
-                      <Phone size={20} className="text-red-600" />
+                      <PhoneIcon className="h-5 w-5 text-red-600" />
                     </div>
                     <div>
                       <p className="font-medium">Emergency Services</p>
@@ -403,7 +416,7 @@ export function Security() {
                 <div className="border-border flex items-center justify-between rounded-lg border p-4">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                      <Phone size={20} className="text-blue-600" />
+                      <PhoneIcon className="h-5 w-5 text-blue-600" />
                     </div>
                     <div>
                       <p className="font-medium">Security Company</p>

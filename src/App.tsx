@@ -1,7 +1,14 @@
 import { Toaster } from '@/components/ui/sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useKV } from '@/hooks/use-kv'
-import { ChartLine, Cpu, House, ZapIcon, ShieldCheck, Sliders } from '@/lib/icons'
+import {
+  CogIcon,
+  HouseIcon,
+  LineChartIcon,
+  ShieldCheckIcon,
+  SlidersIconAlt,
+  ZapIcon,
+} from '@/lib/icons'
 import { Automations } from './components/Automations'
 import { BackupRecovery } from './components/BackupRecovery'
 import { Dashboard } from './components/Dashboard'
@@ -13,6 +20,7 @@ import { LoadingStatesDemo } from './components/LoadingStatesDemo'
 import { Rooms } from './components/Rooms'
 import { Scenes } from './components/Scenes'
 import { Security } from './components/Security'
+import { TestAdvancedControls } from './components/TestAdvancedControls'
 import { UserManagement } from './components/UserManagement'
 
 function App() {
@@ -114,6 +122,9 @@ function App() {
                   <TabsTrigger value="backup" className="data-[state=active]:bg-primary/10">
                     Backup
                   </TabsTrigger>
+                  <TabsTrigger value="test" className="data-[state=active]:bg-primary/10">
+                    Test Controls
+                  </TabsTrigger>
                   <TabsTrigger value="developer" className="data-[state=active]:bg-primary/10">
                     Developer
                   </TabsTrigger>
@@ -129,6 +140,9 @@ function App() {
                 <TabsContent value="backup" className="m-0 h-full p-0">
                   <BackupRecovery />
                 </TabsContent>
+                <TabsContent value="test" className="m-0 h-full overflow-y-auto p-0">
+                  <TestAdvancedControls />
+                </TabsContent>
                 <TabsContent value="developer" className="m-0 h-full p-0">
                   <LoadingStatesDemo />
                 </TabsContent>
@@ -142,7 +156,7 @@ function App() {
             value="home"
             className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary flex min-h-[44px] flex-col gap-0.5 p-1 sm:gap-1 sm:p-2"
           >
-            <House size={20} weight="regular" className="sm:h-6 sm:w-6" />
+            <HouseIcon className="h-5 w-5 sm:h-6 sm:w-6" />
             <span className="text-[10px] font-medium sm:text-xs">Home</span>
           </TabsTrigger>
 
@@ -150,7 +164,7 @@ function App() {
             value="devices"
             className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary flex min-h-[44px] flex-col gap-0.5 p-1 sm:gap-1 sm:p-2"
           >
-            <Cpu size={20} weight="regular" className="sm:h-6 sm:w-6" />
+            <CogIcon className="h-5 w-5 sm:h-6 sm:w-6" />
             <span className="text-[10px] font-medium sm:text-xs">Devices</span>
           </TabsTrigger>
 
@@ -158,7 +172,7 @@ function App() {
             value="control"
             className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary flex min-h-[44px] flex-col gap-0.5 p-1 sm:gap-1 sm:p-2"
           >
-            <Lightning size={20} weight="regular" className="sm:h-6 sm:w-6" />
+            <ZapIcon className="h-5 w-5 sm:h-6 sm:w-6" />
             <span className="text-[10px] font-medium sm:text-xs">Control</span>
           </TabsTrigger>
 
@@ -166,7 +180,7 @@ function App() {
             value="security"
             className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary flex min-h-[44px] flex-col gap-0.5 p-1 sm:gap-1 sm:p-2"
           >
-            <ShieldCheck size={20} weight="regular" className="sm:h-6 sm:w-6" />
+            <ShieldCheckIcon className="h-5 w-5 sm:h-6 sm:w-6" />
             <span className="text-[10px] font-medium sm:text-xs">Security</span>
           </TabsTrigger>
 
@@ -174,7 +188,7 @@ function App() {
             value="insights"
             className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary flex min-h-[44px] flex-col gap-0.5 p-1 sm:gap-1 sm:p-2"
           >
-            <ChartLine size={20} weight="regular" className="sm:h-6 sm:w-6" />
+            <LineChartIcon className="h-5 w-5 sm:h-6 sm:w-6" />
             <span className="text-[10px] font-medium sm:text-xs">Insights</span>
           </TabsTrigger>
 
@@ -182,7 +196,7 @@ function App() {
             value="settings"
             className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary flex min-h-[44px] flex-col gap-0.5 p-1 sm:gap-1 sm:p-2"
           >
-            <Sliders size={20} weight="regular" className="sm:h-6 sm:w-6" />
+            <SlidersIconAlt className="h-5 w-5 sm:h-6 sm:w-6" />
             <span className="text-[10px] font-medium sm:text-xs">Settings</span>
           </TabsTrigger>
         </TabsList>

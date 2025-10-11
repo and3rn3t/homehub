@@ -4,8 +4,17 @@ import { ErrorState } from '@/components/ui/error-state'
 import { SceneCardSkeleton } from '@/components/ui/skeleton'
 import { KV_KEYS, MOCK_SCENES } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
+import {
+  BedIcon,
+  HomeRoomIcon,
+  MoonIcon,
+  PlayIcon,
+  PlusIcon,
+  ShieldIcon,
+  SunRoomIcon,
+  UtensilsIcon,
+} from '@/lib/icons'
 import type { Scene } from '@/types'
-import { Bed, Coffee, House as HomeIcon, Moon, PlayIcon, PlusIcon, ShieldIcon, SunRoomIcon,  } from '@/lib/icons'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 
@@ -48,13 +57,13 @@ const sceneConfigs = {
 }
 
 const sceneIcons = {
-  sun: Sun,
-  moon: Moon,
-  home: HomeIcon,
-  shield: Shield,
-  play: Play,
-  coffee: Coffee,
-  bed: Bed,
+  sun: SunRoomIcon,
+  moon: MoonIcon,
+  home: HomeRoomIcon,
+  shield: ShieldIcon,
+  play: PlayIcon,
+  coffee: UtensilsIcon,
+  bed: BedIcon,
 }
 
 export function Scenes() {
@@ -88,7 +97,7 @@ export function Scenes() {
               <p className="text-muted-foreground">Quick actions for your home</p>
             </div>
             <Button variant="outline" size="icon" className="rounded-full">
-              <Plus size={20} />
+              <PlusIcon className="h-5 w-5" />
             </Button>
           </div>
         </div>
@@ -118,7 +127,7 @@ export function Scenes() {
               <p className="text-muted-foreground">Quick actions for your home</p>
             </div>
             <Button variant="outline" size="icon" className="rounded-full">
-              <Plus size={20} />
+              <PlusIcon className="h-5 w-5" />
             </Button>
           </div>
         </div>
@@ -147,7 +156,7 @@ export function Scenes() {
           </div>
           <motion.div whileTap={{ scale: 0.9 }} whileHover={{ scale: 1.05 }}>
             <Button variant="outline" size="icon" className="h-11 w-11 rounded-full">
-              <Plus size={20} />
+              <PlusIcon className="h-5 w-5" />
             </Button>
           </motion.div>
         </div>
@@ -159,7 +168,7 @@ export function Scenes() {
             <Card className="border-border/30 border-2 border-dashed">
               <CardContent className="p-8 text-center">
                 <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                  <Plus size={24} className="text-muted-foreground" />
+                  <PlusIcon className="text-muted-foreground h-6 w-6" />
                 </div>
                 <p className="text-muted-foreground mb-2">No scenes created</p>
                 <p className="text-muted-foreground mb-4 text-sm">
@@ -188,10 +197,10 @@ export function Scenes() {
                             className={`${config.color} relative overflow-hidden p-4 text-white`}
                           >
                             <div className="absolute top-2 right-2 opacity-20">
-                              <IconComponent size={32} weight="fill" />
+                              <IconComponent className="h-8 w-8 fill-current" />
                             </div>
                             <div className="relative z-10">
-                              <IconComponent size={24} weight="fill" className="mb-2" />
+                              <IconComponent className="mb-2 h-6 w-6 fill-current" />
                               <h4 className="text-sm font-semibold capitalize">
                                 {id.replace('-', ' ')}
                               </h4>
@@ -258,7 +267,7 @@ export function Scenes() {
                         }}
                       >
                         <div className="absolute top-2 right-2 opacity-20">
-                          <IconComponent size={40} weight="fill" />
+                          <IconComponent className="h-10 w-10 fill-current" />
                         </div>
                         <div className="relative z-10">
                           <motion.div
@@ -270,7 +279,7 @@ export function Scenes() {
                               ease: 'easeInOut',
                             }}
                           >
-                            <IconComponent size={28} weight="fill" className="mb-3" />
+                            <IconComponent className="mb-3 h-7 w-7 fill-current" />
                           </motion.div>
                           <h4 className="mb-1 text-lg font-semibold">{scene.name}</h4>
                         </div>
