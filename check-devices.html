@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Device Check - HomeHub</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica', 'Arial', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        max-width: 900px;
+        margin: 0 auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 32px;
+      }
+
+      .subtitle {
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 16px;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+      }
+
+      .stat-number {
+        font-size: 48px;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .stat-label {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+
+      .device-list {
+        max-height: 500px;
+        overflow-y: auto;
+        margin: 20px 0;
+        padding: 15px;
+        background: #f9fafb;
+        border-radius: 8px;
+      }
+
+      .device-item {
+        padding: 15px;
+        margin: 10px 0;
+        background: white;
+        border-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-left: 4px solid #667eea;
+      }
+
+      .device-item.hue {
+        border-left-color: #f59e0b;
+      }
+
+      .device-item.mqtt {
+        border-left-color: #10b981;
+      }
+
+      .device-item.http {
+        border-left-color: #3b82f6;
+      }
+
+      .device-info {
+        flex: 1;
+      }
+
+      .device-name {
+        font-weight: 600;
+        font-size: 16px;
+        color: #333;
+        margin-bottom: 5px;
+      }
+
+      .device-meta {
+        font-size: 13px;
+        color: #666;
+      }
+
+      .badge {
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-left: 10px;
+      }
+
+      .badge.online {
+        background: #dcfce7;
+        color: #166534;
+      }
+
+      .badge.offline {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .badge.on {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+
+      .badge.off {
+        background: #f3f4f6;
+        color: #6b7280;
+      }
+
+      .protocol-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        display: inline-block;
+        margin-right: 8px;
+      }
+
+      .protocol-hue {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .protocol-mqtt {
+        background: #d1fae5;
+        color: #065f46;
+      }
+
+      .protocol-http {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+      }
+
+      .empty-state h2 {
+        font-size: 24px;
+        margin-bottom: 10px;
+        color: #333;
+      }
+
+      .actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+      }
+
+      button {
+        flex: 1;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 16px 32px;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 12px;
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button.secondary {
+        background: #6b7280;
+      }
+
+      button.secondary:hover {
+        box-shadow: 0 10px 30px rgba(107, 114, 128, 0.4);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔍 Device Check</h1>
+      <p class="subtitle">Current devices in localStorage</p>
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-number" id="totalDevices">0</div>
+          <div class="stat-label">Total Devices</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="hueDevices">0</div>
+          <div class="stat-label">Hue Devices</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="onlineDevices">0</div>
+          <div class="stat-label">Online</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="enabledDevices">0</div>
+          <div class="stat-label">Powered On</div>
+        </div>
+      </div>
+
+      <div id="deviceList" class="device-list"></div>
+
+      <div class="actions">
+        <button onclick="window.location.href='/'">← Back to Dashboard</button>
+        <button class="secondary" onclick="window.location.reload()">🔄 Refresh</button>
+        <button onclick="window.location.href='/import-devices.html'">Import Hue Devices</button>
+      </div>
+    </div>
+
+    <script>
+      function loadDevices() {
+        try {
+          const stored = localStorage.getItem('devices')
+          if (!stored) {
+            showEmptyState()
+            return
+          }
+
+          const devices = JSON.parse(stored)
+
+          // Update stats
+          const hueDevices = devices.filter(d => d.protocol === 'hue')
+          const onlineDevices = devices.filter(d => d.status === 'online')
+          const enabledDevices = devices.filter(d => d.enabled)
+
+          document.getElementById('totalDevices').textContent = devices.length
+          document.getElementById('hueDevices').textContent = hueDevices.length
+          document.getElementById('onlineDevices').textContent = onlineDevices.length
+          document.getElementById('enabledDevices').textContent = enabledDevices.length
+
+          // Display devices
+          const deviceList = document.getElementById('deviceList')
+          deviceList.innerHTML = devices
+            .map(device => {
+              const protocolClass = `protocol-${device.protocol || 'unknown'}`
+              const deviceClass = device.protocol || 'unknown'
+              return `
+              <div class="device-item ${deviceClass}">
+                <div class="device-info">
+                  <div class="device-name">
+                    <span class="protocol-badge ${protocolClass}">${device.protocol || 'unknown'}</span>
+                    ${device.name}
+                  </div>
+                  <div class="device-meta">
+                    ID: ${device.id} • Room: ${device.room} • Type: ${device.type}
+                    ${device.capabilities ? ` • ${device.capabilities.join(', ')}` : ''}
+                  </div>
+                </div>
+                <div>
+                  <span class="badge ${device.status}">${device.status}</span>
+                  <span class="badge ${device.enabled ? 'on' : 'off'}">${device.enabled ? 'ON' : 'OFF'}</span>
+                  ${device.value ? `<span class="badge">${device.value}%</span>` : ''}
+                </div>
+              </div>
+            `
+            })
+            .join('')
+
+          console.log('✅ Loaded devices:', {
+            total: devices.length,
+            hue: hueDevices.length,
+            online: onlineDevices.length,
+            enabled: enabledDevices.length,
+          })
+        } catch (error) {
+          console.error('❌ Error loading devices:', error)
+          showEmptyState()
+        }
+      }
+
+      function showEmptyState() {
+        document.getElementById('totalDevices').textContent = '0'
+        document.getElementById('hueDevices').textContent = '0'
+        document.getElementById('onlineDevices').textContent = '0'
+        document.getElementById('enabledDevices').textContent = '0'
+
+        document.getElementById('deviceList').innerHTML = `
+          <div class="empty-state">
+            <h2>No devices found</h2>
+            <p>Import your Hue devices to get started</p>
+          </div>
+        `
+      }
+
+      // Load on page load
+      loadDevices()
+    </script>
+  </body>
+</html>

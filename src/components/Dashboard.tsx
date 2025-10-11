@@ -3,10 +3,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ErrorState } from '@/components/ui/error-state'
-import { ProtocolBadge } from '@/components/ui/protocol-badge'
 import { DeviceCardSkeleton, StatusCardSkeleton } from '@/components/ui/skeleton'
-import { Switch } from '@/components/ui/switch'
-import { KV_KEYS, MOCK_DEVICES } from '@/constants'
+import { KV_KEYS } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
 import { useMQTTConnection } from '@/hooks/use-mqtt-connection'
 import { useMQTTDevices } from '@/hooks/use-mqtt-devices'
@@ -17,29 +15,22 @@ import {
   ArrowsClockwise,
   CheckCircle,
   House as HomeIcon,
-  Lightbulb,
   Moon,
   Plus,
   Pulse,
   Shield,
   Sun,
-  Thermometer,
   Warning,
   WifiHigh,
   WifiSlash,
 } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { DeviceControlPanel } from './DeviceControlPanel'
 import { DeviceDiscovery } from './DeviceDiscovery'
+import { FavoriteDeviceCard } from './FavoriteDeviceCard'
 import { NotificationBell } from './NotificationCenter'
-
-const deviceIcons = {
-  light: Lightbulb,
-  thermostat: Thermometer,
-  security: Shield,
-  sensor: WifiHigh,
-}
 
 export function Dashboard() {
   // Initialize multi-protocol device registry (singleton)
@@ -47,6 +38,10 @@ export function Dashboard() {
 
   // Discovery dialog state
   const [discoveryOpen, setDiscoveryOpen] = useState(false)
+
+  // Device control panel state
+  const [controlPanelOpen, setControlPanelOpen] = useState(false)
+  const [selectedDevice, setSelectedDevice] = useState<Device | null>(null)
 
   // Try MQTT connection first
   const {
@@ -66,22 +61,21 @@ export function Dashboard() {
   // Fallback to KV store if MQTT not available
   const [kvDevices, setKvDevices, { isLoading: kvLoading, isError: kvError }] = useKV<Device[]>(
     KV_KEYS.DEVICES,
-    MOCK_DEVICES,
+    [], // Empty array as default - will use localStorage if available
     { withMeta: true }
   )
 
   // Use MQTT devices if connected, otherwise fallback to KV store
-  const devices = mqttConnected && mqttDevices.length > 0 ? mqttDevices : kvDevices
+  const devices = useMemo(
+    () => (mqttConnected && mqttDevices.length > 0 ? mqttDevices : kvDevices),
+    [mqttConnected, mqttDevices, kvDevices]
+  )
   const isLoading = mqttLoading || kvLoading
   // Only show error if KV store fails (MQTT is optional, KV is the fallback)
   const isError = kvError && devices.length === 0
 
   const [deviceAlerts] = useKV<DeviceAlert[]>('device-alerts', [])
-  const [favoriteDevices] = useKV<string[]>('favorite-devices', [
-    'living-room-lamp', // HTTP device (Shelly Plus 1)
-    'thermostat-main',
-    'bedroom-lamp', // HTTP device (TPLink)
-  ])
+  const [favoriteDevices] = useKV<string[]>('favorite-devices', [])
 
   const quickScenesData = [
     { id: 'good-morning', name: 'Good Morning', icon: 'sun' },
@@ -123,76 +117,248 @@ export function Dashboard() {
     }
   }, [devices, deviceRegistry])
 
-  const toggleDevice = async (deviceId: string) => {
-    const device = devices.find(d => d.id === deviceId)
-    if (!device) {
-      toast.error('Device not found')
-      return
-    }
-
-    console.log(`🔄 Toggling device: ${device.name} (${device.id}, protocol: ${device.protocol})`)
-
-    try {
-      // Get appropriate adapter based on device protocol
-      const adapter = deviceRegistry.getAdapter(device.protocol)
-      console.log(`🔌 Adapter for ${device.protocol}:`, adapter ? 'Found' : 'Not found')
-
-      if (!adapter) {
-        console.log('⚠️ No adapter found, using KV fallback')
-        // Fallback to KV store if no adapter registered
-        setKvDevices(currentDevices =>
-          currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-        )
-        toast.success(`${device.name} turned ${!device.enabled ? 'on' : 'off'}`)
+  const toggleDevice = useCallback(
+    async (deviceId: string) => {
+      const device = devices.find(d => d.id === deviceId)
+      if (!device) {
+        toast.error('Device not found')
         return
       }
 
-      // Check if adapter is connected
-      const isConnected = adapter.isConnected()
-      console.log(`🔗 Adapter connected:`, isConnected)
+      // For Hue devices, use HueBridgeAdapter
+      if (device.protocol === 'hue') {
+        try {
+          // Import adapter dynamically
+          const { HueBridgeAdapter } = await import('@/services/devices/HueBridgeAdapter')
 
-      if (!isConnected) {
-        toast.warning(`${device.protocol.toUpperCase()} adapter not connected`, {
-          description: 'Using fallback mode',
+          // Create adapter instance with bridge configuration
+          const adapter = new HueBridgeAdapter({
+            ip: '192.168.1.6',
+            username: 'xddEM82d6i8rZDvEy0jAdXL3rA8vxmnxTSUBIhyA',
+            timeout: 5000,
+          })
+
+          // Optimistic update
+          setKvDevices(currentDevices =>
+            currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
+          )
+
+          // Execute command
+          const result = device.enabled
+            ? await adapter.turnOff(device)
+            : await adapter.turnOn(device)
+
+          if (result.success) {
+            // Update with real state
+            setKvDevices(currentDevices =>
+              currentDevices.map(d =>
+                d.id === deviceId ? { ...d, ...result.newState, lastSeen: new Date() } : d
+              )
+            )
+            toast.success(`${device.name} turned ${result.newState?.enabled ? 'on' : 'off'}`, {
+              description: `Hue Bridge · ${result.duration}ms`,
+            })
+          } else {
+            // Rollback optimistic update
+            setKvDevices(currentDevices =>
+              currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
+            )
+            toast.error(`Failed to control ${device.name}`, {
+              description: result.error || 'Hue Bridge error',
+            })
+          }
+          return
+        } catch (err) {
+          // Rollback on exception
+          setKvDevices(currentDevices =>
+            currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
+          )
+          console.error('Hue device control error:', err)
+          toast.error(`Error controlling ${device.name}`, {
+            description: err instanceof Error ? err.message : 'Hue Bridge error',
+          })
+          return
+        }
+      }
+
+      // For HTTP devices, use direct adapter control
+      if (device.protocol === 'http' && device.ip) {
+        try {
+          // Import adapter dynamically
+          const { ShellyAdapter } = await import('@/services/devices/ShellyAdapter')
+
+          // Create adapter instance
+          const adapter = new ShellyAdapter(device.ip, device.port || 80, { debug: true })
+
+          // Optimistic update
+          setKvDevices(currentDevices =>
+            currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
+          )
+
+          // Execute command
+          const result = device.enabled
+            ? await adapter.turnOff(device)
+            : await adapter.turnOn(device)
+
+          if (result.success) {
+            // Update with real state
+            setKvDevices(currentDevices =>
+              currentDevices.map(d =>
+                d.id === deviceId ? { ...d, ...result.newState, lastSeen: new Date() } : d
+              )
+            )
+            toast.success(`${device.name} turned ${result.newState?.enabled ? 'on' : 'off'}`, {
+              description: `Response time: ${result.duration}ms`,
+            })
+          } else {
+            // Rollback optimistic update
+            setKvDevices(currentDevices =>
+              currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
+            )
+            toast.error(`Failed to control ${device.name}`, {
+              description: result.error || 'Unknown error',
+            })
+          }
+          return
+        } catch (err) {
+          // Rollback on exception
+          setKvDevices(currentDevices =>
+            currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
+          )
+          console.error('HTTP device control error:', err)
+          toast.error(`Error controlling ${device.name}`, {
+            description: err instanceof Error ? err.message : 'Unknown error',
+          })
+          return
+        }
+      }
+
+      // For MQTT devices, use existing device registry
+      try {
+        // Get appropriate adapter based on device protocol
+        const adapter = deviceRegistry.getAdapter(device.protocol)
+        console.log(`🔌 Adapter for ${device.protocol}:`, adapter ? 'Found' : 'Not found')
+
+        if (!adapter) {
+          console.log('⚠️ No adapter found, using KV fallback')
+          // Fallback to KV store if no adapter registered
+          setKvDevices(currentDevices =>
+            currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
+          )
+          toast.success(`${device.name} turned ${!device.enabled ? 'on' : 'off'}`)
+          return
+        }
+
+        // Check if adapter is connected
+        const isConnected = adapter.isConnected()
+        console.log(`🔗 Adapter connected:`, isConnected)
+
+        if (!isConnected) {
+          toast.warning(`${device.protocol.toUpperCase()} adapter not connected`, {
+            description: 'Using fallback mode',
+          })
+          // Fallback to KV store
+          setKvDevices(currentDevices =>
+            currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
+          )
+          return
+        }
+
+        // Send toggle command via adapter
+        console.log(`📤 Sending toggle command to device ${deviceId} via ${device.protocol}`)
+        await adapter.sendCommand({
+          deviceId,
+          command: 'toggle',
         })
-        // Fallback to KV store
+        console.log(`✅ Toggle command sent successfully`)
+
+        // Optimistic update in KV store
         setKvDevices(currentDevices =>
           currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
         )
-        return
+
+        toast.success(`${device.name} turned ${!device.enabled ? 'on' : 'off'}`, {
+          description: `via ${device.protocol.toUpperCase()}`,
+        })
+      } catch (err) {
+        console.error('Device control error:', err)
+        toast.error(`Failed to control ${device.name}`, {
+          description: err instanceof Error ? err.message : 'Unknown error',
+        })
       }
+    },
+    [devices, setKvDevices, deviceRegistry]
+  )
 
-      // Send toggle command via adapter
-      console.log(`📤 Sending toggle command to device ${deviceId} via ${device.protocol}`)
-      await adapter.sendCommand({
-        deviceId,
-        command: 'toggle',
-      })
-      console.log(`✅ Toggle command sent successfully`)
-
-      // Optimistic update in KV store
+  const handleDeviceUpdate = useCallback(
+    (deviceId: string, updates: Partial<Device>) => {
       setKvDevices(currentDevices =>
-        currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
+        currentDevices.map(d => (d.id === deviceId ? { ...d, ...updates } : d))
       )
+    },
+    [setKvDevices]
+  )
 
-      toast.success(`${device.name} turned ${!device.enabled ? 'on' : 'off'}`, {
-        description: `via ${device.protocol.toUpperCase()}`,
-      })
-    } catch (err) {
-      console.error('Device control error:', err)
-      toast.error(`Failed to control ${device.name}`, {
-        description: err instanceof Error ? err.message : 'Unknown error',
-      })
-    }
-  }
+  const handleDeviceDelete = useCallback(
+    (deviceId: string) => {
+      setKvDevices(currentDevices => currentDevices.filter(d => d.id !== deviceId))
+    },
+    [setKvDevices]
+  )
 
-  const activateScene = (sceneName: string) => {
+  const activateScene = useCallback((sceneName: string) => {
     toast.success(`${sceneName} activated`, {
       description: 'Adjusting devices to match scene settings',
     })
+  }, [])
+
+  // Handler for device card clicks
+  const handleDeviceCardClick = useCallback((device: Device) => {
+    setSelectedDevice(device)
+    setControlPanelOpen(true)
+  }, [])
+
+  const favoriteDeviceList = useMemo(
+    () => devices.filter(device => favoriteDevices.includes(device.id)),
+    [devices, favoriteDevices]
+  )
+
+  // Debug logging for favorites
+  console.log('🔍 Dashboard Favorites Debug:', {
+    'favoriteDevices (from useKV)': favoriteDevices,
+    'favoriteDevices type': typeof favoriteDevices,
+    'favoriteDevices isArray': Array.isArray(favoriteDevices),
+    'devices count': devices.length,
+    'device IDs (first 10)': devices.slice(0, 10).map(d => d.id),
+    'favoriteDeviceList count': favoriteDeviceList.length,
+    favoriteDeviceList: favoriteDeviceList.map(d => ({ id: d.id, name: d.name })),
+  })
+
+  // EMERGENCY: Check localStorage directly in render
+  const directCheck = localStorage.getItem('kv:favorite-devices')
+  console.log('🚨 EMERGENCY CHECK - Direct localStorage read:', directCheck)
+  if (directCheck) {
+    try {
+      const parsed = JSON.parse(directCheck)
+      console.log('🚨 Parsed favorites from localStorage:', parsed)
+      console.log(
+        '🚨 Does it match useKV value?',
+        JSON.stringify(parsed) === JSON.stringify(favoriteDevices)
+      )
+    } catch (e) {
+      console.error('🚨 Failed to parse:', e)
+    }
   }
 
-  const favoriteDeviceList = devices.filter(device => favoriteDevices.includes(device.id))
+  // Auto-fix: If we have devices and favoriteDevices but no matches, fix it
+  if (devices.length > 0 && favoriteDevices.length > 0 && favoriteDeviceList.length === 0) {
+    console.warn("⚠️ MISMATCH DETECTED: Favorite IDs don't match device IDs!")
+    console.warn('Favorite IDs:', favoriteDevices)
+    console.warn(
+      'Available device IDs:',
+      devices.slice(0, 10).map(d => d.id)
+    )
+  }
 
   // Get alert summary
   const activeAlerts = deviceAlerts.filter(alert => !alert.acknowledged)
@@ -521,100 +687,33 @@ export function Dashboard() {
             </Card>
           ) : (
             <div className="grid gap-3">
-              {favoriteDeviceList.map((device, index) => {
-                const IconComponent = deviceIcons[device.type]
-                return (
-                  <motion.div
-                    key={device.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 300,
-                      damping: 25,
-                      delay: index * 0.05,
-                    }}
-                    layout
-                  >
-                    <Card className="hover:bg-accent/5 transition-all duration-200 hover:shadow-md">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <motion.div
-                              className="bg-secondary flex h-10 w-10 items-center justify-center rounded-full"
-                              animate={{
-                                scale: device.enabled ? [1, 1.1, 1] : 1,
-                              }}
-                              transition={{
-                                duration: 0.3,
-                                ease: 'easeInOut',
-                              }}
-                            >
-                              <IconComponent
-                                size={20}
-                                className={
-                                  device.enabled ? 'text-primary' : 'text-muted-foreground'
-                                }
-                              />
-                            </motion.div>
-                            <div>
-                              <h3 className="text-sm font-medium">{device.name}</h3>
-                              <div className="flex items-center gap-2">
-                                <p className="text-muted-foreground text-xs">{device.room}</p>
-                                <ProtocolBadge protocol={device.protocol} />
-                                <Badge
-                                  variant={
-                                    device.status === 'online'
-                                      ? 'default'
-                                      : device.status === 'warning'
-                                        ? 'secondary'
-                                        : 'destructive'
-                                  }
-                                  className="h-4 text-xs"
-                                >
-                                  {device.status}
-                                </Badge>
-                                {device.batteryLevel !== undefined && device.batteryLevel <= 20 && (
-                                  <Badge variant="destructive" className="h-4 text-xs">
-                                    Low Battery
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-3">
-                            {device.value !== undefined && (
-                              <motion.span
-                                className="text-sm font-medium"
-                                key={device.value}
-                                initial={{ scale: 1.2, opacity: 0.5 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                              >
-                                {device.value}
-                                {device.unit}
-                              </motion.span>
-                            )}
-                            <motion.div whileTap={{ scale: 0.95 }}>
-                              <Switch
-                                checked={device.enabled}
-                                onCheckedChange={() => toggleDevice(device.id)}
-                                disabled={device.status === 'offline'}
-                              />
-                            </motion.div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                )
-              })}
+              {favoriteDeviceList.map((device, index) => (
+                <FavoriteDeviceCard
+                  key={device.id}
+                  device={device}
+                  index={index}
+                  onDeviceClick={handleDeviceCardClick}
+                  onToggle={toggleDevice}
+                />
+              ))}
             </div>
           )}
         </div>
       </div>
+
+      {/* Device Control Panel Dialog */}
+      {selectedDevice && (
+        <DeviceControlPanel
+          device={selectedDevice}
+          open={controlPanelOpen}
+          onOpenChange={setControlPanelOpen}
+          onUpdate={handleDeviceUpdate}
+          onDelete={handleDeviceDelete}
+        />
+      )}
+
+      {/* Device Discovery Dialog */}
+      <DeviceDiscovery open={discoveryOpen} onOpenChange={setDiscoveryOpen} />
     </div>
   )
 }

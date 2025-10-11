@@ -20,7 +20,7 @@ export class KVClient {
     this.config = {
       baseUrl: config.baseUrl.replace(/\/$/, ''), // Remove trailing slash
       authToken: config.authToken || '',
-      timeout: config.timeout || 10000,
+      timeout: config.timeout || 3000, // Reduced to 3 seconds for faster fallback
     }
   }
 

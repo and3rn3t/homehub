@@ -22,6 +22,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 // Cache for optimistic updates and offline support
 const localCache = new Map<string, unknown>()
 
+// EMERGENCY: Clear the cache on module load to force fresh reads
+// This ensures stale data from old placeholder IDs doesn't persist
+if (import.meta.hot) {
+  console.log('🔥 Hot reload detected - clearing useKV cache')
+  localCache.clear()
+}
+
 // Track pending sync operations
 const pendingSyncs = new Map<string, Promise<void>>()
 
@@ -71,16 +78,13 @@ export function useKV<T>(
 
   // Initialize state from cache or default
   const getCachedValue = useCallback((): T => {
-    // Check memory cache first
-    if (localCache.has(key)) {
-      return localCache.get(key) as T
-    }
-
-    // Check localStorage
+    // ALWAYS read from localStorage first (fresh data)
     try {
       const stored = localStorage.getItem(`kv:${key}`)
       if (stored !== null) {
         const parsed = JSON.parse(stored)
+        console.log(`📖 useKV(${key}): Read from localStorage:`, parsed)
+        // Update memory cache with fresh data
         localCache.set(key, parsed)
         return parsed as T
       }
@@ -88,11 +92,18 @@ export function useKV<T>(
       console.error(`Failed to parse localStorage for key "${key}":`, error)
     }
 
+    // Check memory cache (but localStorage takes priority)
+    if (localCache.has(key)) {
+      console.log(`💾 useKV(${key}): Using memory cache`)
+      return localCache.get(key) as T
+    }
+
+    console.log(`🆕 useKV(${key}): Using default value`)
     return defaultValue
   }, [key, defaultValue])
 
   const [value, setValue] = useState<T>(getCachedValue)
-  const [isLoading, setIsLoading] = useState(!localCache.has(key) && !skipInitialLoad)
+  const [isLoading, setIsLoading] = useState(false) // Will be set in useEffect
   const [isError, setIsError] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
 
@@ -110,6 +121,32 @@ export function useKV<T>(
 
     const loadFromKV = async () => {
       try {
+        // Check if we have data in localStorage (always read fresh from localStorage)
+        const storedValue = localStorage.getItem(`kv:${key}`)
+
+        // If localStorage has data, use it and update memory cache
+        if (storedValue !== null) {
+          try {
+            const parsedValue = JSON.parse(storedValue)
+            localCache.set(key, parsedValue)
+            setValue(parsedValue)
+            console.log(`✅ useKV(${key}): Loaded from localStorage, skipping worker fetch`)
+            setIsLoading(false)
+            return
+          } catch (e) {
+            console.error(`Failed to parse localStorage value for ${key}:`, e)
+            // Fall through to worker fetch
+          }
+        }
+
+        // Check if we have cached data in memory
+        if (localCache.has(key)) {
+          console.log(`✅ useKV(${key}): Using memory cache, skipping worker fetch`)
+          setIsLoading(false)
+          return
+        }
+
+        // Only show loading if we don't have cached data
         setIsLoading(true)
         setIsError(false)
 
@@ -124,10 +161,21 @@ export function useKV<T>(
           localStorage.setItem(`kv:${key}`, JSON.stringify(remoteValue))
           setValue(remoteValue)
         } else {
-          // Key doesn't exist in KV, initialize with default
-          await client.set(key, defaultValue)
-          localCache.set(key, defaultValue)
-          localStorage.setItem(`kv:${key}`, JSON.stringify(defaultValue))
+          // Key doesn't exist in KV
+          // Only initialize with default if we don't already have cached data
+          const currentCached = localStorage.getItem(`kv:${key}`)
+          if (currentCached) {
+            // We have cached data, restore it and don't overwrite
+            const parsed = JSON.parse(currentCached)
+            // Restore the cached data into memory and state
+            localCache.set(key, parsed)
+            setValue(parsed)
+          } else {
+            await client.set(key, defaultValue)
+            localCache.set(key, defaultValue)
+            localStorage.setItem(`kv:${key}`, JSON.stringify(defaultValue))
+            setValue(defaultValue)
+          }
         }
 
         setIsLoading(false)

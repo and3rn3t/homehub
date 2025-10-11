@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fix Favorite IDs - HomeHub</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+        padding: 40px 20px;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .container {
+        max-width: 700px;
+        width: 100%;
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      h1 {
+        font-size: 36px;
+        font-weight: 700;
+        color: #1a202c;
+        margin-bottom: 12px;
+        text-align: center;
+      }
+
+      .subtitle {
+        color: #718096;
+        margin-bottom: 40px;
+        font-size: 18px;
+        text-align: center;
+      }
+
+      .alert {
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        border-left: 4px solid;
+        font-size: 16px;
+        line-height: 1.6;
+      }
+
+      .alert-error {
+        background: #fed7d7;
+        border-color: #f56565;
+        color: #742a2a;
+      }
+
+      .alert-success {
+        background: #c6f6d5;
+        border-color: #48bb78;
+        color: #22543d;
+      }
+
+      .alert-warning {
+        background: #fef5e7;
+        border-color: #f6e05e;
+        color: #744210;
+      }
+
+      .code {
+        background: #2d3748;
+        color: #68d391;
+        padding: 16px;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        margin: 16px 0;
+        overflow-x: auto;
+        white-space: pre-wrap;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 20px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+      }
+
+      .btn-success {
+        background: #48bb78;
+        color: white;
+      }
+
+      .device-list {
+        margin: 20px 0;
+      }
+
+      .device-item {
+        padding: 12px;
+        background: #f7fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        margin-bottom: 8px;
+      }
+
+      .device-name {
+        font-weight: 600;
+        color: #2d3748;
+      }
+
+      .device-id {
+        font-size: 12px;
+        color: #718096;
+        font-family: 'Courier New', monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔧 Fix Favorite IDs</h1>
+      <p class="subtitle">Replace old favorite IDs with your actual Hue device IDs</p>
+
+      <div id="status"></div>
+
+      <button class="btn btn-primary" onclick="fixIds()">⚡ Fix Favorite IDs Now</button>
+
+      <div id="results"></div>
+    </div>
+
+    <script>
+      function showStatus() {
+        const statusDiv = document.getElementById('status')
+
+        // Get current state
+        let devices = []
+        const kvDevices = localStorage.getItem('kv:devices')
+        if (kvDevices) {
+          devices = JSON.parse(kvDevices)
+        }
+
+        let favorites = []
+        const kvFavorites = localStorage.getItem('kv:favorite-devices')
+        if (kvFavorites) {
+          favorites = JSON.parse(kvFavorites)
+        }
+
+        const matched = devices.filter(d => favorites.includes(d.id))
+
+        statusDiv.innerHTML = `
+                <div class="alert alert-warning">
+                    <strong>⚠️ ID MISMATCH DETECTED</strong><br><br>
+                    <strong>Current favorites:</strong><br>
+                    <div class="code">${JSON.stringify(favorites, null, 2)}</div>
+                    <strong>Your device IDs (first 10):</strong><br>
+                    <div class="code">${JSON.stringify(
+                      devices.slice(0, 10).map(d => d.id),
+                      null,
+                      2
+                    )}</div>
+                    <strong>Matches found:</strong> ${matched.length} / ${favorites.length}<br><br>
+                    The favorite IDs are old placeholder IDs. Click below to replace them with your actual Hue device IDs.
+                </div>
+            `
+      }
+
+      function fixIds() {
+        const statusDiv = document.getElementById('status')
+        const resultsDiv = document.getElementById('results')
+
+        statusDiv.innerHTML = `
+                <div class="alert alert-warning">
+                    <strong>⏳ Working...</strong>
+                </div>
+            `
+
+        // Get devices
+        let devices = []
+        const kvDevices = localStorage.getItem('kv:devices')
+        if (kvDevices) {
+          try {
+            devices = JSON.parse(kvDevices)
+          } catch (e) {
+            alert('❌ Failed to parse devices!')
+            showStatus()
+            return
+          }
+        }
+
+        if (devices.length === 0) {
+          statusDiv.innerHTML = `
+                    <div class="alert alert-error">
+                        <strong>❌ ERROR:</strong> No devices found in localStorage!<br><br>
+                        Run reimport-hue-devices.html first to import your devices.
+                    </div>
+                `
+          return
+        }
+
+        // Find 5 color lights
+        const colorLights = devices.filter(
+          d => d.capabilities && Array.isArray(d.capabilities) && d.capabilities.includes('color')
+        )
+
+        const selectedDevices =
+          colorLights.length >= 5
+            ? colorLights.slice(0, 5)
+            : devices.slice(0, Math.min(5, devices.length))
+
+        const newFavoriteIds = selectedDevices.map(d => d.id)
+
+        // Save to BOTH keys
+        localStorage.setItem('kv:favorite-devices', JSON.stringify(newFavoriteIds))
+        localStorage.setItem('favorite-devices', JSON.stringify(newFavoriteIds))
+
+        // Also clear any cache
+        localStorage.removeItem('kv:favorite-devices-cache')
+
+        console.log('✅ Fixed favorite IDs:', newFavoriteIds)
+
+        statusDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <strong>✅ FIXED!</strong> Favorite IDs have been updated to your actual Hue device IDs.
+                </div>
+            `
+
+        resultsDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <strong>✨ New Favorites (${selectedDevices.length}):</strong>
+                </div>
+                <div class="device-list">
+                    ${selectedDevices
+                      .map(
+                        d => `
+                        <div class="device-item">
+                            <div class="device-name">⭐ ${d.name}</div>
+                            <div class="device-id">${d.id}</div>
+                        </div>
+                    `
+                      )
+                      .join('')}
+                </div>
+                <div class="alert alert-warning">
+                    <strong>🔄 NEXT STEP - VERY IMPORTANT:</strong><br><br>
+                    Go to your Dashboard tab and press <strong>Ctrl+Shift+R</strong> to do a HARD REFRESH.<br><br>
+                    This clears React's cache and forces it to re-read from localStorage.<br><br>
+                    After the refresh, your favorites should appear!
+                </div>
+                <button class="btn btn-success" onclick="window.open('http://localhost:5173', '_blank')">
+                    🚀 Open Dashboard Now
+                </button>
+            `
+      }
+
+      // Show status on load
+      window.addEventListener('load', showStatus)
+    </script>
+  </body>
+</html>

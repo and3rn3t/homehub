@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Storage Inspector - HomeHub</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 20px;
+        background: #0a0a0a;
+        color: #fff;
+      }
+      h1 {
+        color: #4a9eff;
+      }
+      h2 {
+        color: #10b981;
+        margin-top: 30px;
+      }
+      pre {
+        background: #000;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 15px;
+        overflow-x: auto;
+        font-size: 12px;
+        line-height: 1.5;
+        max-height: 500px;
+      }
+      .section {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .status {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        margin: 10px 0;
+      }
+      .success {
+        background: #10b981;
+        color: #fff;
+      }
+      .error {
+        background: #ef4444;
+        color: #fff;
+      }
+      .warning {
+        background: #f59e0b;
+        color: #fff;
+      }
+      button {
+        background: #4a9eff;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        margin-right: 10px;
+      }
+      button:hover {
+        background: #3b8fd9;
+      }
+      .key-item {
+        background: #000;
+        border: 1px solid #333;
+        border-radius: 6px;
+        padding: 10px;
+        margin: 5px 0;
+        font-family: monospace;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔍 Storage Inspector</h1>
+
+    <div class="section">
+      <h2>All localStorage Keys</h2>
+      <div id="all-keys"></div>
+    </div>
+
+    <div class="section">
+      <h2>Raw localStorage Data</h2>
+      <div id="raw-data"></div>
+    </div>
+
+    <div class="section">
+      <h2>Parsed Device Data</h2>
+      <div id="parsed-data"></div>
+    </div>
+
+    <div class="section">
+      <h2>Actions</h2>
+      <button onclick="location.reload()">🔄 Refresh</button>
+      <button onclick="window.location.href='http://localhost:5173'">🏠 Dashboard</button>
+      <button onclick="window.location.href='http://localhost:5173/import-devices.html'">
+        📥 Import Page
+      </button>
+    </div>
+
+    <script>
+      // Show all localStorage keys
+      const allKeysDiv = document.getElementById('all-keys')
+      const keys = Object.keys(localStorage)
+
+      if (keys.length === 0) {
+        allKeysDiv.innerHTML =
+          '<div class="status error">❌ localStorage is completely empty!</div>'
+      } else {
+        allKeysDiv.innerHTML = `<div class="status success">✅ Found ${keys.length} keys in localStorage</div>`
+        keys.forEach(key => {
+          const size = localStorage.getItem(key)?.length || 0
+          const keyDiv = document.createElement('div')
+          keyDiv.className = 'key-item'
+          keyDiv.innerHTML = `<strong>${key}</strong> (${size} bytes)`
+          allKeysDiv.appendChild(keyDiv)
+        })
+      }
+
+      // Show raw data for all device-related keys
+      const rawDataDiv = document.getElementById('raw-data')
+      const deviceKeys = keys.filter(
+        k => k.includes('device') || k.includes('hue') || k === 'devices' || k.startsWith('kv:')
+      )
+
+      if (deviceKeys.length === 0) {
+        rawDataDiv.innerHTML =
+          '<div class="status warning">⚠️ No device-related keys found</div><p>Keys checked: "devices", "kv:devices", or any key containing "device" or "hue"</p>'
+      } else {
+        deviceKeys.forEach(key => {
+          const value = localStorage.getItem(key)
+          const div = document.createElement('div')
+          div.innerHTML = `
+          <h3 style="color: #10b981; margin-top: 15px;">Key: "${key}"</h3>
+          <pre>${value?.substring(0, 2000) || '(empty)'}${value && value.length > 2000 ? '\n\n... (truncated, total ' + value.length + ' bytes)' : ''}</pre>
+        `
+          rawDataDiv.appendChild(div)
+        })
+      }
+
+      // Try to parse devices
+      const parsedDataDiv = document.getElementById('parsed-data')
+      const possibleKeys = ['devices', 'kv:devices', 'kv:DEVICES']
+      let foundDevices = false
+
+      possibleKeys.forEach(key => {
+        const raw = localStorage.getItem(key)
+        if (!raw) return
+
+        try {
+          const parsed = JSON.parse(raw)
+          foundDevices = true
+
+          const div = document.createElement('div')
+          div.innerHTML = `
+          <h3 style="color: #10b981;">Key: "${key}"</h3>
+          <div class="status success">✅ Found ${Array.isArray(parsed) ? parsed.length : 'non-array'} items</div>
+        `
+
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const hueDevices = parsed.filter(d => d.protocol === 'hue')
+            div.innerHTML += `
+            <p>Total devices: ${parsed.length}</p>
+            <p>Hue devices: ${hueDevices.length}</p>
+            <h4>First 5 devices:</h4>
+            <pre>${JSON.stringify(parsed.slice(0, 5), null, 2)}</pre>
+          `
+          } else if (Array.isArray(parsed)) {
+            div.innerHTML += '<p style="color: #f59e0b;">Array is empty!</p>'
+          } else {
+            div.innerHTML += `<pre>${JSON.stringify(parsed, null, 2).substring(0, 500)}</pre>`
+          }
+
+          parsedDataDiv.appendChild(div)
+        } catch (error) {
+          const div = document.createElement('div')
+          div.innerHTML = `
+          <h3 style="color: #ef4444;">Key: "${key}"</h3>
+          <div class="status error">❌ Parse Error: ${error.message}</div>
+        `
+          parsedDataDiv.appendChild(div)
+        }
+      })
+
+      if (!foundDevices) {
+        parsedDataDiv.innerHTML = `
+        <div class="status error">❌ No device data found</div>
+        <p>Checked keys: ${possibleKeys.join(', ')}</p>
+        <p style="color: #f59e0b;">This means the import didn't work or the data was cleared.</p>
+      `
+      }
+    </script>
+  </body>
+</html>

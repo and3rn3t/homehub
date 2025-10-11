@@ -7,7 +7,7 @@
 
 export type DeviceType = 'light' | 'thermostat' | 'security' | 'sensor'
 export type DeviceStatus = 'online' | 'offline' | 'warning' | 'error'
-export type DeviceProtocol = 'mqtt' | 'http'
+export type DeviceProtocol = 'mqtt' | 'http' | 'hue'
 
 export interface Device {
   /** Unique identifier (UUID recommended) */
@@ -52,6 +52,12 @@ export interface Device {
   /** Communication endpoint (future use for real devices) */
   endpoint?: string
 
+  /** IP address for HTTP/network devices */
+  ip?: string
+
+  /** Port number for HTTP/network devices */
+  port?: number
+
   /** Protocol-specific configuration */
   config?: {
     // MQTT-specific
@@ -70,6 +76,17 @@ export interface Device {
       headers?: Record<string, string>
     }
     pollInterval?: number // Polling interval in ms
+  }
+
+  /** Device metadata (manufacturer info, model, firmware) */
+  metadata?: {
+    manufacturer?: string
+    modelId?: string
+    modelName?: string
+    firmwareVersion?: string
+    hardwareVersion?: string
+    bridgeId?: string // For Hue lights, the bridge-specific ID
+    [key: string]: unknown // Allow additional custom metadata
   }
 }
 

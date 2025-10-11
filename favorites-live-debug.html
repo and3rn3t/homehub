@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Favorites Live Debug</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        background: #0a0a0a;
+        color: #fff;
+        padding: 2rem;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      h1 {
+        color: #4a9eff;
+        margin-bottom: 1rem;
+        font-size: 2rem;
+      }
+      .status {
+        background: #1a1a1a;
+        border: 2px solid #333;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .status h2 {
+        color: #22c55e;
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+      }
+      .card {
+        background: #111;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 1rem;
+      }
+      .card h3 {
+        color: #4a9eff;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+      }
+      .value {
+        color: #f59e0b;
+        font-family: 'Courier New', monospace;
+        font-size: 0.875rem;
+        word-break: break-all;
+      }
+      .success {
+        color: #22c55e;
+      }
+      .error {
+        color: #ef4444;
+      }
+      .warning {
+        color: #f59e0b;
+      }
+      .info {
+        color: #4a9eff;
+      }
+      button {
+        background: #4a9eff;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.2s;
+      }
+      button:hover {
+        background: #3a8eef;
+        transform: translateY(-1px);
+      }
+      button.success {
+        background: #22c55e;
+      }
+      button.success:hover {
+        background: #16a34a;
+      }
+      button.danger {
+        background: #ef4444;
+      }
+      button.danger:hover {
+        background: #dc2626;
+      }
+      pre {
+        background: #000;
+        padding: 1rem;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-size: 0.75rem;
+        margin-top: 0.5rem;
+      }
+      .device-list {
+        display: grid;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+      .device-item {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 6px;
+        padding: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .device-item.favorite {
+        border-color: #f59e0b;
+        background: #1a1a0a;
+      }
+      .badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+      .badge.favorite {
+        background: #f59e0b;
+        color: #000;
+      }
+      .auto-refresh {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+      .log {
+        background: #000;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 1rem;
+        max-height: 300px;
+        overflow-y: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 0.75rem;
+      }
+      .log-entry {
+        padding: 0.25rem 0;
+        border-bottom: 1px solid #1a1a1a;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔍 Favorites Live Debug Dashboard</h1>
+
+      <div class="auto-refresh">
+        <button onclick="checkData()">🔄 Refresh Now</button>
+        <label style="color: #888">
+          <input type="checkbox" id="auto-refresh" checked /> Auto-refresh every 2s
+        </label>
+      </div>
+
+      <div class="status" id="main-status">
+        <h2>📊 Current Status</h2>
+        <div class="grid" id="status-grid"></div>
+      </div>
+
+      <div class="status">
+        <h2>🎯 Quick Actions</h2>
+        <button class="success" onclick="fixFavorites()">
+          ✨ Auto-Fix Favorites (First 4 Devices)
+        </button>
+        <button onclick="addAllToFavorites()">⭐ Add All Devices to Favorites</button>
+        <button onclick="clearFavorites()">🗑️ Clear All Favorites</button>
+        <button class="danger" onclick="resetEverything()">
+          🔄 Reset Everything (Clear All Data)
+        </button>
+      </div>
+
+      <div class="status">
+        <h2>📝 All Devices</h2>
+        <div id="devices-list"></div>
+      </div>
+
+      <div class="status">
+        <h2>⭐ Favorite Devices</h2>
+        <div id="favorites-list"></div>
+      </div>
+
+      <div class="status">
+        <h2>📋 Debug Log</h2>
+        <div class="log" id="debug-log"></div>
+      </div>
+    </div>
+
+    <script>
+      let logEntries = []
+
+      function log(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString()
+        const colors = { info: '#4a9eff', success: '#22c55e', error: '#ef4444', warning: '#f59e0b' }
+        logEntries.unshift(
+          `<div class="log-entry" style="color: ${colors[type]}">[${timestamp}] ${message}</div>`
+        )
+        if (logEntries.length > 50) logEntries = logEntries.slice(0, 50)
+        document.getElementById('debug-log').innerHTML = logEntries.join('')
+      }
+
+      function checkData() {
+        const statusGrid = document.getElementById('status-grid')
+        const devicesList = document.getElementById('devices-list')
+        const favoritesList = document.getElementById('favorites-list')
+
+        // Get data from localStorage
+        const devicesRaw = localStorage.getItem('kv:devices')
+        const favoritesRaw = localStorage.getItem('kv:favorite-devices')
+
+        let devices = []
+        let favorites = []
+        let status = []
+
+        // Parse devices
+        if (devicesRaw) {
+          try {
+            devices = JSON.parse(devicesRaw)
+            status.push({ label: 'Devices Found', value: devices.length, type: 'success' })
+            log(`Found ${devices.length} devices in localStorage`, 'success')
+          } catch (e) {
+            status.push({ label: 'Devices', value: 'Parse Error', type: 'error' })
+            log(`Error parsing devices: ${e.message}`, 'error')
+          }
+        } else {
+          status.push({ label: 'Devices', value: 'Not Found', type: 'warning' })
+          log('No devices found in localStorage', 'warning')
+        }
+
+        // Parse favorites
+        if (favoritesRaw) {
+          try {
+            favorites = JSON.parse(favoritesRaw)
+            if (Array.isArray(favorites)) {
+              status.push({
+                label: 'Favorites',
+                value: favorites.length,
+                type: favorites.length > 0 ? 'success' : 'warning',
+              })
+              log(
+                `Found ${favorites.length} favorites`,
+                favorites.length > 0 ? 'success' : 'warning'
+              )
+            } else {
+              status.push({ label: 'Favorites', value: 'Invalid Type', type: 'error' })
+              log('Favorites is not an array!', 'error')
+            }
+          } catch (e) {
+            status.push({ label: 'Favorites', value: 'Parse Error', type: 'error' })
+            log(`Error parsing favorites: ${e.message}`, 'error')
+          }
+        } else {
+          status.push({ label: 'Favorites', value: 'Not Set', type: 'warning' })
+          log('No favorites set', 'warning')
+        }
+
+        // Check matches
+        if (devices.length > 0 && Array.isArray(favorites)) {
+          const deviceIds = devices.map(d => d.id)
+          const matchingIds = favorites.filter(id => deviceIds.includes(id))
+          const nonMatchingIds = favorites.filter(id => !deviceIds.includes(id))
+
+          status.push({
+            label: 'Matching Favorites',
+            value: `${matchingIds.length} / ${favorites.length}`,
+            type: matchingIds.length === favorites.length ? 'success' : 'error',
+          })
+
+          if (nonMatchingIds.length > 0) {
+            log(
+              `⚠️ ${nonMatchingIds.length} favorite IDs don't match devices: ${nonMatchingIds.join(', ')}`,
+              'error'
+            )
+          } else if (matchingIds.length > 0) {
+            log(`✅ All ${matchingIds.length} favorites match devices`, 'success')
+          }
+        }
+
+        // Render status cards
+        statusGrid.innerHTML = status
+          .map(
+            s => `
+        <div class="card">
+          <h3>${s.label}</h3>
+          <div class="value ${s.type}">${s.value}</div>
+        </div>
+      `
+          )
+          .join('')
+
+        // Render devices
+        if (devices.length > 0) {
+          devicesList.innerHTML =
+            '<div class="device-list">' +
+            devices
+              .map(d => {
+                const isFavorite = Array.isArray(favorites) && favorites.includes(d.id)
+                return `
+            <div class="device-item ${isFavorite ? 'favorite' : ''}">
+              <div>
+                <strong>${d.name}</strong>
+                <div style="font-size: 0.75rem; color: #888;">${d.type} • ID: ${d.id}</div>
+              </div>
+              ${isFavorite ? '<span class="badge favorite">⭐ Favorite</span>' : ''}
+            </div>
+          `
+              })
+              .join('') +
+            '</div>'
+        } else {
+          devicesList.innerHTML = '<p class="warning">No devices found</p>'
+        }
+
+        // Render favorites
+        if (Array.isArray(favorites) && favorites.length > 0 && devices.length > 0) {
+          const favoriteDevices = devices.filter(d => favorites.includes(d.id))
+          if (favoriteDevices.length > 0) {
+            favoritesList.innerHTML =
+              '<div class="device-list">' +
+              favoriteDevices
+                .map(
+                  d => `
+            <div class="device-item favorite">
+              <div>
+                <strong>${d.name}</strong>
+                <div style="font-size: 0.75rem; color: #888;">${d.type} • ID: ${d.id}</div>
+              </div>
+              <span class="badge favorite">⭐</span>
+            </div>
+          `
+                )
+                .join('') +
+              '</div>'
+          } else {
+            favoritesList.innerHTML =
+              '<p class="error">⚠️ Favorite IDs don\'t match any devices!</p>'
+          }
+        } else {
+          favoritesList.innerHTML = '<p class="warning">No favorites set</p>'
+        }
+      }
+
+      function fixFavorites() {
+        const devicesRaw = localStorage.getItem('kv:devices')
+        if (!devicesRaw) {
+          log('Cannot fix: No devices found!', 'error')
+          alert('❌ No devices found to fix!')
+          return
+        }
+
+        try {
+          const devices = JSON.parse(devicesRaw)
+          const firstFour = devices.slice(0, 4).map(d => d.id)
+          localStorage.setItem('kv:favorite-devices', JSON.stringify(firstFour))
+          log(`✅ Set first 4 devices as favorites: ${firstFour.join(', ')}`, 'success')
+          alert(
+            `✅ Fixed! Set ${firstFour.length} devices as favorites.\n\nRefresh the Dashboard to see changes.`
+          )
+          checkData()
+        } catch (e) {
+          log(`Error fixing favorites: ${e.message}`, 'error')
+          alert('❌ Error: ' + e.message)
+        }
+      }
+
+      function addAllToFavorites() {
+        const devicesRaw = localStorage.getItem('kv:devices')
+        if (!devicesRaw) {
+          log('Cannot add: No devices found!', 'error')
+          alert('❌ No devices found!')
+          return
+        }
+
+        try {
+          const devices = JSON.parse(devicesRaw)
+          const allIds = devices.map(d => d.id)
+          localStorage.setItem('kv:favorite-devices', JSON.stringify(allIds))
+          log(`✅ Added all ${allIds.length} devices to favorites`, 'success')
+          alert(`✅ Added all ${allIds.length} devices to favorites!`)
+          checkData()
+        } catch (e) {
+          log(`Error: ${e.message}`, 'error')
+          alert('❌ Error: ' + e.message)
+        }
+      }
+
+      function clearFavorites() {
+        if (confirm('Clear all favorites?')) {
+          localStorage.removeItem('kv:favorite-devices')
+          log('Cleared all favorites', 'warning')
+          alert('✅ Favorites cleared!')
+          checkData()
+        }
+      }
+
+      function resetEverything() {
+        if (confirm('⚠️ This will clear ALL data (devices, favorites, etc). Are you sure?')) {
+          Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('kv:')) {
+              localStorage.removeItem(key)
+            }
+          })
+          log('🔄 Reset everything - all KV data cleared', 'warning')
+          alert('✅ All data cleared! Refresh the Dashboard to reload.')
+          checkData()
+        }
+      }
+
+      // Auto-refresh
+      setInterval(() => {
+        if (document.getElementById('auto-refresh').checked) {
+          checkData()
+        }
+      }, 2000)
+
+      // Initial check
+      log('Debug dashboard loaded', 'info')
+      checkData()
+    </script>
+  </body>
+</html>

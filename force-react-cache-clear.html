@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Force React Cache Clear - HomeHub</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        padding: 40px 20px;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .container {
+        max-width: 600px;
+        width: 100%;
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 36px;
+        font-weight: 700;
+        color: #1a202c;
+        margin-bottom: 12px;
+      }
+
+      .subtitle {
+        color: #718096;
+        margin-bottom: 40px;
+        font-size: 18px;
+      }
+
+      .alert {
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        text-align: left;
+        border-left: 4px solid;
+      }
+
+      .alert-info {
+        background: #bee3f8;
+        border-color: #4299e1;
+        color: #2c5282;
+      }
+
+      .alert-success {
+        background: #c6f6d5;
+        border-color: #48bb78;
+        color: #22543d;
+      }
+
+      .step {
+        background: #f7fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 16px;
+        text-align: left;
+      }
+
+      .step-number {
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        background: #667eea;
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 32px;
+        font-weight: 700;
+        margin-right: 12px;
+      }
+
+      .step-title {
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 18px;
+        margin-bottom: 8px;
+      }
+
+      .step-desc {
+        color: #4a5568;
+        line-height: 1.6;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 20px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 12px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+      }
+
+      .btn-success {
+        background: #48bb78;
+        color: white;
+      }
+
+      kbd {
+        background: #2d3748;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔄 Force React Cache Clear</h1>
+      <p class="subtitle">The localStorage is perfect, but React is cached</p>
+
+      <div class="alert alert-info">
+        <strong>💡 The Problem:</strong><br /><br />
+        Your localStorage has the correct favorites, but React's useKV hook has cached the old empty
+        array. We need to force React to re-read from localStorage.
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-number">1</span>
+          Open Dashboard
+        </div>
+        <div class="step-desc">Go to your Dashboard tab or click the button below to open it.</div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-number">2</span>
+          Hard Refresh to Clear React Cache
+        </div>
+        <div class="step-desc">
+          Press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> (Windows/Linux)<br />
+          Or <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> (Mac)<br /><br />
+          This clears the browser cache AND forces React to remount, which will make useKV re-read
+          from localStorage.
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-number">3</span>
+          Check Browser Console
+        </div>
+        <div class="step-desc">
+          Press <kbd>F12</kbd> to open DevTools, then look for:<br />
+          <code
+            style="
+              background: #2d3748;
+              color: #68d391;
+              padding: 4px 8px;
+              border-radius: 4px;
+              display: inline-block;
+              margin-top: 8px;
+            "
+          >
+            🔍 Dashboard Favorites Debug: {...} </code
+          ><br /><br />
+          Check if <strong>favoriteDeviceList count</strong> is now 5 (not 0).
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          <span class="step-number">4</span>
+          If Still Not Working
+        </div>
+        <div class="step-desc">
+          Click "Nuclear Clear" below to clear ALL browser caches, then hard refresh again.
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="openDashboard()">🚀 Open Dashboard Now</button>
+
+      <button class="btn btn-success" onclick="nuclearClear()">
+        💣 Nuclear Clear (Clear ALL Caches)
+      </button>
+
+      <div id="result"></div>
+    </div>
+
+    <script>
+      function openDashboard() {
+        window.open('http://localhost:5173', '_blank')
+
+        document.getElementById('result').innerHTML = `
+                <div class="alert alert-info" style="margin-top: 20px;">
+                    ✅ Dashboard opened!<br><br>
+                    Now press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> in that tab to hard refresh.
+                </div>
+            `
+      }
+
+      function nuclearClear() {
+        const result = document.getElementById('result')
+
+        result.innerHTML = `
+                <div class="alert alert-info" style="margin-top: 20px;">
+                    ⏳ Clearing caches...
+                </div>
+            `
+
+        // Clear service workers
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(registrations => {
+            registrations.forEach(registration => registration.unregister())
+          })
+        }
+
+        // Clear cache storage
+        if ('caches' in window) {
+          caches.keys().then(names => {
+            names.forEach(name => caches.delete(name))
+          })
+        }
+
+        // Clear any useKV cache markers
+        const keysToRemove = []
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i)
+          if (key && (key.includes('cache') || key.includes('meta') || key.includes('_kv_'))) {
+            keysToRemove.push(key)
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key))
+
+        setTimeout(() => {
+          result.innerHTML = `
+                    <div class="alert alert-success" style="margin-top: 20px;">
+                        ✅ Nuclear clear complete!<br><br>
+                        Cleared:<br>
+                        • Service Workers<br>
+                        • Cache Storage<br>
+                        • ${keysToRemove.length} cache keys from localStorage<br><br>
+                        <strong>Now:</strong><br>
+                        1. Close ALL browser tabs for localhost:5173<br>
+                        2. Open a fresh tab<br>
+                        3. Go to http://localhost:5173<br>
+                        4. Check if favorites appear!
+                    </div>
+                `
+        }, 1000)
+      }
+
+      // Show instructions on load
+      window.addEventListener('load', () => {
+        console.log('=== REACT CACHE CLEAR INSTRUCTIONS ===')
+        console.log('1. Open Dashboard')
+        console.log('2. Press Ctrl+Shift+R (hard refresh)')
+        console.log('3. Check console for: 🔍 Dashboard Favorites Debug')
+        console.log('4. favoriteDeviceList count should be 5')
+      })
+    </script>
+  </body>
+</html>

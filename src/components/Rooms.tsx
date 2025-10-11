@@ -25,6 +25,7 @@ import { DotsThree, Lightbulb, Plus, Shield, Thermometer, WifiHigh } from '@phos
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { DeviceControlPanel } from './DeviceControlPanel'
 
 const deviceIcons = {
   light: Lightbulb,
@@ -43,6 +44,8 @@ export function Rooms() {
   const [assignDialogOpen, setAssignDialogOpen] = useState(false)
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null)
   const [selectedRoom, setSelectedRoom] = useState<string>('')
+  const [controlPanelOpen, setControlPanelOpen] = useState(false)
+  const [controlDevice, setControlDevice] = useState<Device | null>(null)
 
   const getRoomDevices = (roomName: string) => {
     return devices.filter(device => device.room === roomName)
@@ -55,8 +58,68 @@ export function Rooms() {
   // Get unassigned devices (newly discovered devices without a room)
   const unassignedDevices = devices.filter(device => device.room === 'Unassigned')
 
-  const toggleDevice = (deviceId: string) => {
+  const toggleDevice = async (deviceId: string) => {
     const device = devices.find(d => d.id === deviceId)
+    if (!device) {
+      toast.error('Device not found')
+      return
+    }
+
+    // For Hue devices, use HueBridgeAdapter
+    if (device.protocol === 'hue') {
+      try {
+        // Import adapter dynamically
+        const { HueBridgeAdapter } = await import('@/services/devices/HueBridgeAdapter')
+
+        // Create adapter instance
+        const adapter = new HueBridgeAdapter({
+          ip: '192.168.1.6',
+          username: 'xddEM82d6i8rZDvEy0jAdXL3rA8vxmnxTSUBIhyA',
+          timeout: 5000,
+        })
+
+        // Optimistic update
+        setDevices(prevDevices =>
+          prevDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
+        )
+
+        // Execute command
+        const result = device.enabled ? await adapter.turnOff(device) : await adapter.turnOn(device)
+
+        if (result.success) {
+          // Update with real state
+          setDevices(prevDevices =>
+            prevDevices.map(d =>
+              d.id === deviceId ? { ...d, ...result.newState, lastSeen: new Date() } : d
+            )
+          )
+          toast.success(`${device.name} turned ${result.newState?.enabled ? 'on' : 'off'}`, {
+            description: `Hue Bridge · ${result.duration}ms`,
+          })
+        } else {
+          // Rollback optimistic update
+          setDevices(prevDevices =>
+            prevDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
+          )
+          toast.error(`Failed to control ${device.name}`, {
+            description: result.error || 'Hue Bridge error',
+          })
+        }
+        return
+      } catch (err) {
+        // Rollback on exception
+        setDevices(prevDevices =>
+          prevDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
+        )
+        console.error('Hue device control error:', err)
+        toast.error(`Error controlling ${device.name}`, {
+          description: err instanceof Error ? err.message : 'Hue Bridge error',
+        })
+        return
+      }
+    }
+
+    // For other devices, just update UI state
     setDevices(prevDevices =>
       prevDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
     )
@@ -84,6 +147,14 @@ export function Rooms() {
     setAssignDialogOpen(false)
     setSelectedDevice(null)
     setSelectedRoom('')
+  }
+
+  const handleDeviceUpdate = (deviceId: string, updates: Partial<Device>) => {
+    setDevices(prevDevices => prevDevices.map(d => (d.id === deviceId ? { ...d, ...updates } : d)))
+  }
+
+  const handleDeviceDelete = (deviceId: string) => {
+    setDevices(prevDevices => prevDevices.filter(d => d.id !== deviceId))
   }
 
   // Show loading state
@@ -324,7 +395,13 @@ export function Rooms() {
                                       e.stopPropagation()
                                       toggleDevice(device.id)
                                     }}
-                                    title={`Click to turn ${device.enabled ? 'off' : 'on'}`}
+                                    onContextMenu={e => {
+                                      e.preventDefault()
+                                      e.stopPropagation()
+                                      setControlDevice(device)
+                                      setControlPanelOpen(true)
+                                    }}
+                                    title={`Click to toggle • Right-click for advanced controls`}
                                   >
                                     {/* Status Indicator */}
                                     <div
@@ -427,6 +504,17 @@ export function Rooms() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Device Control Panel */}
+      {controlDevice && (
+        <DeviceControlPanel
+          device={controlDevice}
+          open={controlPanelOpen}
+          onOpenChange={setControlPanelOpen}
+          onUpdate={handleDeviceUpdate}
+          onDelete={handleDeviceDelete}
+        />
+      )}
     </div>
   )
 }

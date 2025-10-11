@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Favorites Debugger - HomeHub</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      h1 {
+        font-size: 32px;
+        font-weight: 700;
+        color: #1a202c;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .subtitle {
+        color: #718096;
+        margin-bottom: 32px;
+        font-size: 16px;
+      }
+
+      .section {
+        margin-bottom: 32px;
+        padding: 24px;
+        background: #f7fafc;
+        border-radius: 12px;
+        border: 2px solid #e2e8f0;
+      }
+
+      .section h2 {
+        font-size: 20px;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .status-success {
+        background: #c6f6d5;
+        color: #22543d;
+      }
+
+      .status-warning {
+        background: #fef5e7;
+        color: #744210;
+      }
+
+      .status-error {
+        background: #fed7d7;
+        color: #742a2a;
+      }
+
+      .data-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        background: white;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        border: 1px solid #e2e8f0;
+      }
+
+      .data-label {
+        font-weight: 600;
+        color: #4a5568;
+      }
+
+      .data-value {
+        font-family: 'Courier New', monospace;
+        color: #2d3748;
+        background: #edf2f7;
+        padding: 4px 8px;
+        border-radius: 4px;
+      }
+
+      .code-block {
+        background: #2d3748;
+        color: #68d391;
+        padding: 16px;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+
+      .device-list {
+        display: grid;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .device-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        background: white;
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+      }
+
+      .device-card.favorite {
+        border-color: #f59e0b;
+        background: #fffbeb;
+      }
+
+      .device-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+      }
+
+      .device-info {
+        flex: 1;
+      }
+
+      .device-name {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 4px;
+      }
+
+      .device-id {
+        font-size: 12px;
+        color: #718096;
+        font-family: 'Courier New', monospace;
+      }
+
+      .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-success {
+        background: #48bb78;
+        color: white;
+      }
+
+      .btn-warning {
+        background: #f59e0b;
+        color: white;
+      }
+
+      .action-bar {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .alert {
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: start;
+        gap: 12px;
+      }
+
+      .alert-info {
+        background: #bee3f8;
+        border: 1px solid #90cdf4;
+        color: #2c5282;
+      }
+
+      .alert-warning {
+        background: #fef5e7;
+        border: 1px solid #f6e05e;
+        color: #744210;
+      }
+
+      .alert-error {
+        background: #fed7d7;
+        border: 1px solid #fc8181;
+        color: #742a2a;
+      }
+
+      .alert-icon {
+        font-size: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔍 Favorites Debugger</h1>
+      <p class="subtitle">Diagnose why favorite devices aren't showing in Dashboard</p>
+
+      <div id="results"></div>
+
+      <div class="action-bar">
+        <button class="btn btn-primary" onclick="runDiagnostics()">🔄 Re-run Diagnostics</button>
+        <button class="btn btn-success" onclick="addDefaultFavorites()">
+          ⭐ Add 5 Default Favorites
+        </button>
+        <button class="btn btn-warning" onclick="clearFavorites()">🗑️ Clear All Favorites</button>
+      </div>
+    </div>
+
+    <script>
+      function runDiagnostics() {
+        const resultsDiv = document.getElementById('results')
+        resultsDiv.innerHTML = ''
+
+        // Check 1: Devices in localStorage
+        const devicesSection = document.createElement('div')
+        devicesSection.className = 'section'
+
+        const kvDevices = localStorage.getItem('kv:devices')
+        const legacyDevices = localStorage.getItem('devices')
+
+        let devices = []
+        let devicesSource = 'none'
+
+        if (kvDevices) {
+          try {
+            devices = JSON.parse(kvDevices)
+            devicesSource = 'kv:devices'
+          } catch (e) {
+            console.error('Failed to parse kv:devices', e)
+          }
+        } else if (legacyDevices) {
+          try {
+            devices = JSON.parse(legacyDevices)
+            devicesSource = 'devices'
+          } catch (e) {
+            console.error('Failed to parse devices', e)
+          }
+        }
+
+        devicesSection.innerHTML = `
+                <h2>📦 Device Storage</h2>
+                <div class="data-row">
+                    <span class="data-label">Source:</span>
+                    <span class="data-value">${devicesSource}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Total Devices:</span>
+                    <span class="data-value">${devices.length}</span>
+                </div>
+                ${
+                  devices.length === 0
+                    ? `
+                    <div class="alert alert-error">
+                        <span class="alert-icon">❌</span>
+                        <div>
+                            <strong>No devices found!</strong><br>
+                            localStorage is empty. You need to import devices first using the reimport-hue-devices.html tool.
+                        </div>
+                    </div>
+                `
+                    : ''
+                }
+            `
+        resultsDiv.appendChild(devicesSection)
+
+        // Check 2: Favorites in localStorage
+        const favoritesSection = document.createElement('div')
+        favoritesSection.className = 'section'
+
+        const kvFavorites = localStorage.getItem('kv:favorite-devices')
+        const legacyFavorites = localStorage.getItem('favorite-devices')
+
+        let favorites = []
+        let favoritesSource = 'none'
+
+        if (kvFavorites) {
+          try {
+            favorites = JSON.parse(kvFavorites)
+            favoritesSource = 'kv:favorite-devices'
+          } catch (e) {
+            console.error('Failed to parse kv:favorite-devices', e)
+          }
+        } else if (legacyFavorites) {
+          try {
+            favorites = JSON.parse(legacyFavorites)
+            favoritesSource = 'favorite-devices'
+          } catch (e) {
+            console.error('Failed to parse favorite-devices', e)
+          }
+        }
+
+        favoritesSection.innerHTML = `
+                <h2>⭐ Favorites Storage</h2>
+                <div class="data-row">
+                    <span class="data-label">Source:</span>
+                    <span class="data-value">${favoritesSource}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Total Favorites:</span>
+                    <span class="data-value">${favorites.length}</span>
+                </div>
+                ${
+                  favorites.length === 0
+                    ? `
+                    <div class="alert alert-warning">
+                        <span class="alert-icon">⚠️</span>
+                        <div>
+                            <strong>No favorites configured!</strong><br>
+                            Click "Add 5 Default Favorites" below to populate favorites automatically.
+                        </div>
+                    </div>
+                `
+                    : `
+                    <div class="code-block">${JSON.stringify(favorites, null, 2)}</div>
+                `
+                }
+            `
+        resultsDiv.appendChild(favoritesSection)
+
+        // Check 3: Match favorites to devices
+        if (devices.length > 0 && favorites.length > 0) {
+          const matchSection = document.createElement('div')
+          matchSection.className = 'section'
+
+          const matchedDevices = devices.filter(d => favorites.includes(d.id))
+          const missingFavorites = favorites.filter(fav => !devices.find(d => d.id === fav))
+
+          matchSection.innerHTML = `
+                    <h2>🎯 Matching Analysis</h2>
+                    <div class="data-row">
+                        <span class="data-label">Matched Devices:</span>
+                        <span class="data-value">${matchedDevices.length} / ${favorites.length}</span>
+                    </div>
+                    ${
+                      missingFavorites.length > 0
+                        ? `
+                        <div class="alert alert-warning">
+                            <span class="alert-icon">⚠️</span>
+                            <div>
+                                <strong>${missingFavorites.length} favorites not found in devices!</strong><br>
+                                IDs: ${missingFavorites.join(', ')}
+                            </div>
+                        </div>
+                    `
+                        : ''
+                    }
+                `
+          resultsDiv.appendChild(matchSection)
+
+          // Show matched devices
+          if (matchedDevices.length > 0) {
+            const devicesSection = document.createElement('div')
+            devicesSection.className = 'section'
+            devicesSection.innerHTML = `<h2>✅ Favorite Devices (${matchedDevices.length})</h2>`
+
+            const deviceList = document.createElement('div')
+            deviceList.className = 'device-list'
+
+            matchedDevices.forEach(device => {
+              const card = document.createElement('div')
+              card.className = 'device-card favorite'
+              card.innerHTML = `
+                            <div class="device-icon">💡</div>
+                            <div class="device-info">
+                                <div class="device-name">${device.name}</div>
+                                <div class="device-id">${device.id}</div>
+                            </div>
+                            <span class="status-badge status-success">⭐ Favorite</span>
+                        `
+              deviceList.appendChild(card)
+            })
+
+            devicesSection.appendChild(deviceList)
+            resultsDiv.appendChild(devicesSection)
+          }
+        }
+
+        // Check 4: All devices list
+        if (devices.length > 0) {
+          const allDevicesSection = document.createElement('div')
+          allDevicesSection.className = 'section'
+          allDevicesSection.innerHTML = `<h2>📱 All Devices (${devices.length})</h2>`
+
+          const deviceList = document.createElement('div')
+          deviceList.className = 'device-list'
+
+          devices.slice(0, 10).forEach(device => {
+            const isFavorite = favorites.includes(device.id)
+            const card = document.createElement('div')
+            card.className = `device-card ${isFavorite ? 'favorite' : ''}`
+            card.innerHTML = `
+                        <div class="device-icon">${device.type === 'light' ? '💡' : '🔌'}</div>
+                        <div class="device-info">
+                            <div class="device-name">${device.name}</div>
+                            <div class="device-id">${device.id}</div>
+                        </div>
+                        ${isFavorite ? '<span class="status-badge status-success">⭐</span>' : ''}
+                    `
+            deviceList.appendChild(card)
+          })
+
+          if (devices.length > 10) {
+            const more = document.createElement('div')
+            more.className = 'data-row'
+            more.innerHTML = `<span class="data-label">... and ${devices.length - 10} more devices</span>`
+            deviceList.appendChild(more)
+          }
+
+          allDevicesSection.appendChild(deviceList)
+          resultsDiv.appendChild(allDevicesSection)
+        }
+
+        // Summary
+        const summarySection = document.createElement('div')
+        summarySection.className = 'section'
+
+        let diagnosis = ''
+        let alertType = 'info'
+
+        if (devices.length === 0) {
+          diagnosis =
+            '❌ <strong>Root Cause: No devices in storage</strong><br>Open <code>reimport-hue-devices.html</code> to import devices from Hue Bridge.'
+          alertType = 'error'
+        } else if (favorites.length === 0) {
+          diagnosis =
+            '⚠️ <strong>Root Cause: No favorites configured</strong><br>Click "Add 5 Default Favorites" button below.'
+          alertType = 'warning'
+        } else if (devices.filter(d => favorites.includes(d.id)).length === 0) {
+          diagnosis =
+            '⚠️ <strong>Root Cause: Favorites don\'t match any devices</strong><br>The favorite IDs in storage don\'t match any imported device IDs. This happens when device IDs change (e.g., HTTP devices vs Hue devices). Click "Add 5 Default Favorites" to fix.'
+          alertType = 'warning'
+        } else {
+          diagnosis =
+            "✅ <strong>Everything looks good!</strong><br>Favorites are configured and match existing devices. If Dashboard still doesn't show them, refresh the app (Ctrl+R)."
+          alertType = 'info'
+        }
+
+        summarySection.innerHTML = `
+                <h2>📊 Diagnosis</h2>
+                <div class="alert alert-${alertType}">
+                    <span class="alert-icon">${alertType === 'error' ? '❌' : alertType === 'warning' ? '⚠️' : 'ℹ️'}</span>
+                    <div>${diagnosis}</div>
+                </div>
+            `
+        resultsDiv.appendChild(summarySection)
+      }
+
+      function addDefaultFavorites() {
+        // Get devices from localStorage
+        const kvDevices = localStorage.getItem('kv:devices')
+        const legacyDevices = localStorage.getItem('devices')
+
+        let devices = []
+        if (kvDevices) {
+          try {
+            devices = JSON.parse(kvDevices)
+          } catch (e) {
+            console.error('Failed to parse kv:devices', e)
+          }
+        } else if (legacyDevices) {
+          try {
+            devices = JSON.parse(legacyDevices)
+          } catch (e) {
+            console.error('Failed to parse devices', e)
+          }
+        }
+
+        if (devices.length === 0) {
+          alert('❌ No devices found! Import devices first using reimport-hue-devices.html')
+          return
+        }
+
+        // Find 5 Extended Color lights (best for testing color controls)
+        const colorLights = devices
+          .filter(d => d.capabilities && d.capabilities.includes('color'))
+          .slice(0, 5)
+
+        if (colorLights.length === 0) {
+          alert('❌ No color-capable devices found!')
+          return
+        }
+
+        const favoriteIds = colorLights.map(d => d.id)
+
+        // Save to both keys
+        localStorage.setItem('kv:favorite-devices', JSON.stringify(favoriteIds))
+        localStorage.setItem('favorite-devices', JSON.stringify(favoriteIds))
+
+        alert(
+          `✅ Added ${favoriteIds.length} devices to favorites:\n${colorLights.map(d => d.name).join('\n')}`
+        )
+
+        runDiagnostics()
+      }
+
+      function clearFavorites() {
+        if (!confirm('Are you sure you want to clear all favorites?')) {
+          return
+        }
+
+        localStorage.removeItem('kv:favorite-devices')
+        localStorage.removeItem('favorite-devices')
+
+        alert('✅ Favorites cleared!')
+        runDiagnostics()
+      }
+
+      // Run diagnostics on load
+      runDiagnostics()
+    </script>
+  </body>
+</html>

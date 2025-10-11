@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Hue Devices to Favorites</title>
+    <style>
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+      }
+      .section {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .device-list {
+        display: grid;
+        gap: 10px;
+        margin: 20px 0;
+      }
+      .device-item {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .device-item:hover {
+        border-color: #667eea;
+        background: #f0f4ff;
+      }
+      .device-item.selected {
+        border-color: #667eea;
+        background: #e0e7ff;
+      }
+      .checkbox {
+        width: 20px;
+        height: 20px;
+        margin-right: 12px;
+        cursor: pointer;
+      }
+      .device-info {
+        flex: 1;
+      }
+      .device-name {
+        font-weight: bold;
+        color: #1f2937;
+      }
+      .device-id {
+        font-size: 0.875rem;
+        color: #6b7280;
+        font-family: monospace;
+      }
+      .button {
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-right: 10px;
+      }
+      .button:hover {
+        background: #5568d3;
+        transform: translateY(-1px);
+      }
+      .button-success {
+        background: #10b981;
+      }
+      .button-success:hover {
+        background: #059669;
+      }
+      .status {
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+      }
+      .status.success {
+        background: #d1fae5;
+        border-left: 4px solid #10b981;
+        color: #065f46;
+      }
+      .status.error {
+        background: #fee2e2;
+        border-left: 4px solid #ef4444;
+        color: #991b1b;
+      }
+      .status.info {
+        background: #dbeafe;
+        border-left: 4px solid #3b82f6;
+        color: #1e40af;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>⭐ Add Devices to Favorites</h1>
+      <p>Select Hue devices to show in Dashboard favorites</p>
+    </div>
+
+    <div class="section">
+      <h3>Current Favorites</h3>
+      <div id="currentFavorites"></div>
+    </div>
+
+    <div class="section">
+      <h3>Select Devices to Add (Recommend: Extended Color devices)</h3>
+      <div class="device-list" id="deviceList">
+        <p style="color: #6b7280">Loading devices...</p>
+      </div>
+      <div style="margin-top: 20px">
+        <button class="button" onclick="selectRecommended()">
+          ✨ Select Recommended (5 devices)
+        </button>
+        <button class="button" onclick="selectAll()">☑️ Select All</button>
+        <button class="button" onclick="clearSelection()">❌ Clear</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <button
+        class="button button-success"
+        onclick="saveFavorites()"
+        style="font-size: 1.2rem; padding: 15px 30px"
+      >
+        💾 Save Favorites & Reload Dashboard
+      </button>
+    </div>
+
+    <div id="status"></div>
+
+    <script>
+      let devices = []
+      let selectedDevices = new Set()
+
+      function loadDevices() {
+        try {
+          const devicesJson = localStorage.getItem('kv:devices')
+          if (!devicesJson) {
+            showStatus(
+              'No devices found in localStorage. Please import Hue devices first.',
+              'error'
+            )
+            return
+          }
+
+          devices = JSON.parse(devicesJson)
+          const hueDevices = devices.filter(d => d.protocol === 'hue' && d.status === 'online')
+
+          if (hueDevices.length === 0) {
+            showStatus('No online Hue devices found.', 'error')
+            return
+          }
+
+          // Load current favorites
+          const favoritesJson =
+            localStorage.getItem('favorite-devices') || localStorage.getItem('kv:favorite-devices')
+          let currentFavorites = []
+          if (favoritesJson) {
+            try {
+              currentFavorites = JSON.parse(favoritesJson)
+            } catch (e) {
+              console.warn('Could not parse favorites:', e)
+            }
+          }
+
+          // Display current favorites
+          if (currentFavorites.length > 0) {
+            const currentDevices = devices.filter(d => currentFavorites.includes(d.id))
+            document.getElementById('currentFavorites').innerHTML =
+              '<div style="background: #f0f9ff; padding: 15px; border-radius: 8px; border-left: 4px solid #3b82f6;">' +
+              '<strong>Currently in Favorites:</strong><br>' +
+              currentDevices.map(d => `• ${d.name} (${d.id})`).join('<br>') +
+              '</div>'
+
+            // Pre-select current favorites
+            currentFavorites.forEach(id => selectedDevices.add(id))
+          } else {
+            document.getElementById('currentFavorites').innerHTML =
+              '<p style="color: #6b7280;">No favorites set. Recommended: Select 3-5 devices you use most.</p>'
+          }
+
+          // Render device list
+          const deviceListHtml = hueDevices
+            .map(device => {
+              const hasColor = device.capabilities?.includes('color')
+              const hasDimming = device.capabilities?.includes('dimming')
+              const hasColorTemp = device.capabilities?.includes('color-temp')
+              const isExtendedColor = hasColor && hasDimming && hasColorTemp
+              const badge = isExtendedColor
+                ? '<span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">Extended Color ⭐</span>'
+                : '<span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">Dimmable</span>'
+
+              return `
+            <div class="device-item ${selectedDevices.has(device.id) ? 'selected' : ''}"
+                 onclick="toggleDevice('${device.id}')"
+                 id="device-${device.id}">
+              <input type="checkbox"
+                     class="checkbox"
+                     ${selectedDevices.has(device.id) ? 'checked' : ''}
+                     onchange="toggleDevice('${device.id}')">
+              <div class="device-info">
+                <div class="device-name">${device.name} ${badge}</div>
+                <div class="device-id">${device.id} • ${device.room}</div>
+              </div>
+            </div>
+          `
+            })
+            .join('')
+
+          document.getElementById('deviceList').innerHTML = deviceListHtml
+        } catch (err) {
+          console.error('Error loading devices:', err)
+          showStatus('Error loading devices: ' + err.message, 'error')
+        }
+      }
+
+      function toggleDevice(deviceId) {
+        if (selectedDevices.has(deviceId)) {
+          selectedDevices.delete(deviceId)
+        } else {
+          selectedDevices.add(deviceId)
+        }
+        updateUI()
+      }
+
+      function updateUI() {
+        devices.forEach(device => {
+          const element = document.getElementById(`device-${device.id}`)
+          if (element) {
+            const checkbox = element.querySelector('.checkbox')
+            if (selectedDevices.has(device.id)) {
+              element.classList.add('selected')
+              checkbox.checked = true
+            } else {
+              element.classList.remove('selected')
+              checkbox.checked = false
+            }
+          }
+        })
+      }
+
+      function selectRecommended() {
+        selectedDevices.clear()
+
+        // Prefer Extended Color devices (all capabilities)
+        const recommended = devices
+          .filter(d => d.protocol === 'hue' && d.status === 'online')
+          .filter(
+            d =>
+              d.capabilities?.includes('color') &&
+              d.capabilities?.includes('dimming') &&
+              d.capabilities?.includes('color-temp')
+          )
+          .slice(0, 5)
+
+        recommended.forEach(d => selectedDevices.add(d.id))
+        updateUI()
+        showStatus(
+          `Selected ${recommended.length} Extended Color devices (recommended for testing)`,
+          'success'
+        )
+      }
+
+      function selectAll() {
+        selectedDevices.clear()
+        devices
+          .filter(d => d.protocol === 'hue' && d.status === 'online')
+          .forEach(d => selectedDevices.add(d.id))
+        updateUI()
+        showStatus(`Selected all ${selectedDevices.size} online Hue devices`, 'info')
+      }
+
+      function clearSelection() {
+        selectedDevices.clear()
+        updateUI()
+        showStatus('Selection cleared', 'info')
+      }
+
+      function saveFavorites() {
+        if (selectedDevices.size === 0) {
+          showStatus('Please select at least one device!', 'error')
+          return
+        }
+
+        try {
+          const favoritesArray = Array.from(selectedDevices)
+
+          // Save to both keys for compatibility
+          localStorage.setItem('favorite-devices', JSON.stringify(favoritesArray))
+          localStorage.setItem('kv:favorite-devices', JSON.stringify(favoritesArray))
+
+          showStatus(`✅ Saved ${favoritesArray.length} devices to favorites!`, 'success')
+
+          // Show which devices were saved
+          const savedDevices = devices.filter(d => favoritesArray.includes(d.id))
+          const deviceNames = savedDevices.map(d => d.name).join(', ')
+
+          setTimeout(() => {
+            if (
+              confirm(
+                `✅ Favorites saved!\n\nDevices: ${deviceNames}\n\nReload HomeHub Dashboard now?`
+              )
+            ) {
+              window.open('http://localhost:5173', '_blank')
+            }
+          }, 500)
+        } catch (err) {
+          console.error('Error saving favorites:', err)
+          showStatus('Error saving favorites: ' + err.message, 'error')
+        }
+      }
+
+      function showStatus(message, type) {
+        const statusDiv = document.getElementById('status')
+        statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`
+      }
+
+      // Load on page load
+      loadDevices()
+    </script>
+  </body>
+</html>

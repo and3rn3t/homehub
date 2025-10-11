@@ -1,0 +1,516 @@
+[
+  {
+    "id": "hue-1",
+    "name": "Ceiling Light",
+    "type": "light",
+    "room": "Other",
+    "protocol": "hue",
+    "status": "online",
+    "enabled": false,
+    "value": 100,
+    "unit": "%",
+    "capabilities": [
+      "dimming",
+      "color",
+      "color-temp"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.672Z",
+    "metadata": {
+      "bridgeId": "1",
+      "modelId": "LCT016",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue color lamp",
+      "swVersion": "1.116.8"
+    }
+  },
+  {
+    "id": "hue-2",
+    "name": "Front Door Exterior",
+    "type": "light",
+    "room": "Outdoor",
+    "protocol": "hue",
+    "status": "online",
+    "enabled": true,
+    "value": 100,
+    "unit": "%",
+    "capabilities": [
+      "dimming",
+      "color",
+      "color-temp"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.682Z",
+    "metadata": {
+      "bridgeId": "2",
+      "modelId": "LCA009",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue color lamp",
+      "swVersion": "1.122.8"
+    }
+  },
+  {
+    "id": "hue-5",
+    "name": "Silas’s Lamp",
+    "type": "light",
+    "room": "Other",
+    "protocol": "hue",
+    "status": "online",
+    "enabled": true,
+    "value": 100,
+    "unit": "%",
+    "capabilities": [
+      "dimming"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.686Z",
+    "metadata": {
+      "bridgeId": "5",
+      "modelId": "LWB006",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue white lamp",
+      "swVersion": "67.116.8"
+    }
+  },
+  {
+    "id": "hue-6",
+    "name": "Jonah’s Room Desk",
+    "type": "light",
+    "room": "Other",
+    "protocol": "hue",
+    "status": "offline",
+    "enabled": true,
+    "value": 100,
+    "unit": "%",
+    "capabilities": [
+      "dimming"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.691Z",
+    "metadata": {
+      "bridgeId": "6",
+      "modelId": "LWB006",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue white lamp",
+      "swVersion": "67.116.8"
+    }
+  },
+  {
+    "id": "hue-7",
+    "name": "Matt’s Table",
+    "type": "light",
+    "room": "Other",
+    "protocol": "hue",
+    "status": "online",
+    "enabled": true,
+    "value": 50,
+    "unit": "%",
+    "capabilities": [
+      "dimming",
+      "color",
+      "color-temp"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.702Z",
+    "metadata": {
+      "bridgeId": "7",
+      "modelId": "LCT001",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue color lamp",
+      "swVersion": "67.116.10"
+    }
+  },
+  {
+    "id": "hue-34",
+    "name": "Family Room Couch 2",
+    "type": "light",
+    "room": "Family Room",
+    "protocol": "hue",
+    "status": "offline",
+    "enabled": true,
+    "value": 50,
+    "unit": "%",
+    "capabilities": [
+      "dimming"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.706Z",
+    "metadata": {
+      "bridgeId": "34",
+      "modelId": "LWA002",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue white lamp",
+      "swVersion": "1.122.8"
+    }
+  },
+  {
+    "id": "hue-39",
+    "name": "Matt’s Table 2",
+    "type": "light",
+    "room": "Other",
+    "protocol": "hue",
+    "status": "online",
+    "enabled": true,
+    "value": 50,
+    "unit": "%",
+    "capabilities": [
+      "dimming",
+      "color",
+      "color-temp"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.707Z",
+    "metadata": {
+      "bridgeId": "39",
+      "modelId": "LCA003",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue color lamp",
+      "swVersion": "1.122.8"
+    }
+  },
+  {
+    "id": "hue-45",
+    "name": "Family Room Speaker Lamp 2",
+    "type": "light",
+    "room": "Family Room",
+    "protocol": "hue",
+    "status": "online",
+    "enabled": true,
+    "value": 100,
+    "unit": "%",
+    "capabilities": [
+      "dimming",
+      "color",
+      "color-temp"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.709Z",
+    "metadata": {
+      "bridgeId": "45",
+      "modelId": "LCA003",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue color lamp",
+      "swVersion": "1.122.8"
+    }
+  },
+  {
+    "id": "hue-47",
+    "name": "Family Room Speaker Lamp 1",
+    "type": "light",
+    "room": "Family Room",
+    "protocol": "hue",
+    "status": "online",
+    "enabled": true,
+    "value": 100,
+    "unit": "%",
+    "capabilities": [
+      "dimming",
+      "color",
+      "color-temp"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.712Z",
+    "metadata": {
+      "bridgeId": "47",
+      "modelId": "LCA003",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue color lamp",
+      "swVersion": "1.122.8"
+    }
+  },
+  {
+    "id": "hue-49",
+    "name": "Family Room Couch 1",
+    "type": "light",
+    "room": "Family Room",
+    "protocol": "hue",
+    "status": "offline",
+    "enabled": true,
+    "value": 50,
+    "unit": "%",
+    "capabilities": [
+      "dimming"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.714Z",
+    "metadata": {
+      "bridgeId": "49",
+      "modelId": "LWA002",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue white lamp",
+      "swVersion": "1.122.8"
+    }
+  },
+  {
+    "id": "hue-50",
+    "name": "Family Room Couch 3",
+    "type": "light",
+    "room": "Family Room",
+    "protocol": "hue",
+    "status": "offline",
+    "enabled": true,
+    "value": 50,
+    "unit": "%",
+    "capabilities": [
+      "dimming"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.716Z",
+    "metadata": {
+      "bridgeId": "50",
+      "modelId": "LWA002",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue white lamp",
+      "swVersion": "1.122.8"
+    }
+  },
+  {
+    "id": "hue-51",
+    "name": "Family Room Play 1",
+    "type": "light",
+    "room": "Family Room",
+    "protocol": "hue",
+    "status": "online",
+    "enabled": false,
+    "value": 50,
+    "unit": "%",
+    "capabilities": [
+      "dimming",
+      "color",
+      "color-temp"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.717Z",
+    "metadata": {
+      "bridgeId": "51",
+      "modelId": "LCT024",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue play",
+      "swVersion": "1.116.8"
+    }
+  },
+  {
+    "id": "hue-52",
+    "name": "Family Room Play 2",
+    "type": "light",
+    "room": "Family Room",
+    "protocol": "hue",
+    "status": "online",
+    "enabled": false,
+    "value": 50,
+    "unit": "%",
+    "capabilities": [
+      "dimming",
+      "color",
+      "color-temp"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.718Z",
+    "metadata": {
+      "bridgeId": "52",
+      "modelId": "LCT024",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue play",
+      "swVersion": "1.116.8"
+    }
+  },
+  {
+    "id": "hue-53",
+    "name": "Game Room Play 1",
+    "type": "light",
+    "room": "Family Room",
+    "protocol": "hue",
+    "status": "offline",
+    "enabled": true,
+    "value": 100,
+    "unit": "%",
+    "capabilities": [
+      "dimming",
+      "color",
+      "color-temp"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.725Z",
+    "metadata": {
+      "bridgeId": "53",
+      "modelId": "LCT024",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue play",
+      "swVersion": "1.116.3"
+    }
+  },
+  {
+    "id": "hue-54",
+    "name": "Game Room Play 2",
+    "type": "light",
+    "room": "Family Room",
+    "protocol": "hue",
+    "status": "offline",
+    "enabled": true,
+    "value": 100,
+    "unit": "%",
+    "capabilities": [
+      "dimming",
+      "color",
+      "color-temp"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.727Z",
+    "metadata": {
+      "bridgeId": "54",
+      "modelId": "LCT024",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue play",
+      "swVersion": "1.116.3"
+    }
+  },
+  {
+    "id": "hue-55",
+    "name": "Family Room Table",
+    "type": "light",
+    "room": "Family Room",
+    "protocol": "hue",
+    "status": "online",
+    "enabled": true,
+    "value": 50,
+    "unit": "%",
+    "capabilities": [
+      "dimming",
+      "color",
+      "color-temp"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.729Z",
+    "metadata": {
+      "bridgeId": "55",
+      "modelId": "LCT020",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue color table",
+      "swVersion": "1.116.8"
+    }
+  },
+  {
+    "id": "hue-56",
+    "name": "Sun Room Floor Lamp",
+    "type": "light",
+    "room": "Sun Room",
+    "protocol": "hue",
+    "status": "online",
+    "enabled": true,
+    "value": 50,
+    "unit": "%",
+    "capabilities": [
+      "dimming"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.731Z",
+    "metadata": {
+      "bridgeId": "56",
+      "modelId": "LWV002",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue filament bulb",
+      "swVersion": "1.122.8"
+    }
+  },
+  {
+    "id": "hue-57",
+    "name": "Sunroom Backlight",
+    "type": "light",
+    "room": "Sun Room",
+    "protocol": "hue",
+    "status": "offline",
+    "enabled": true,
+    "value": 100,
+    "unit": "%",
+    "capabilities": [
+      "dimming",
+      "color",
+      "color-temp"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.732Z",
+    "metadata": {
+      "bridgeId": "57",
+      "modelId": "LCT026",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue go",
+      "swVersion": "1.104.3"
+    }
+  },
+  {
+    "id": "hue-58",
+    "name": "Office Floor Lamp",
+    "type": "light",
+    "room": "Office",
+    "protocol": "hue",
+    "status": "online",
+    "enabled": true,
+    "value": 50,
+    "unit": "%",
+    "capabilities": [
+      "dimming",
+      "color",
+      "color-temp"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.735Z",
+    "metadata": {
+      "bridgeId": "58",
+      "modelId": "LCA003",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue color lamp",
+      "swVersion": "1.122.8"
+    }
+  },
+  {
+    "id": "hue-59",
+    "name": "Entry Interior",
+    "type": "light",
+    "room": "Entryway",
+    "protocol": "hue",
+    "status": "online",
+    "enabled": false,
+    "value": 100,
+    "unit": "%",
+    "capabilities": [
+      "dimming",
+      "color",
+      "color-temp"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.737Z",
+    "metadata": {
+      "bridgeId": "59",
+      "modelId": "LCA003",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue color lamp",
+      "swVersion": "1.122.8"
+    }
+  },
+  {
+    "id": "hue-60",
+    "name": "Stairs Lamp",
+    "type": "light",
+    "room": "Stairs",
+    "protocol": "hue",
+    "status": "online",
+    "enabled": true,
+    "value": 50,
+    "unit": "%",
+    "capabilities": [
+      "dimming"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.740Z",
+    "metadata": {
+      "bridgeId": "60",
+      "modelId": "LWB006",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue white lamp",
+      "swVersion": "67.116.8"
+    }
+  },
+  {
+    "id": "hue-61",
+    "name": "Dining Room Overhead",
+    "type": "light",
+    "room": "Dining Room",
+    "protocol": "hue",
+    "status": "online",
+    "enabled": false,
+    "value": 100,
+    "unit": "%",
+    "capabilities": [
+      "dimming",
+      "color",
+      "color-temp"
+    ],
+    "lastSeen": "2025-10-10T23:47:50.741Z",
+    "metadata": {
+      "bridgeId": "61",
+      "modelId": "LCT016",
+      "manufacturer": "Signify Netherlands B.V.",
+      "productName": "Hue color lamp",
+      "swVersion": "1.116.8"
+    }
+  }
+]

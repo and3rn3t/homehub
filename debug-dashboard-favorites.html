@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Debug Dashboard Favorites - HomeHub</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        padding: 20px;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      h1 {
+        font-size: 32px;
+        font-weight: 700;
+        color: #1a202c;
+        margin-bottom: 12px;
+      }
+
+      .subtitle {
+        color: #718096;
+        margin-bottom: 32px;
+        font-size: 16px;
+      }
+
+      .section {
+        background: #f7fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 20px;
+      }
+
+      .section h2 {
+        font-size: 20px;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 16px;
+      }
+
+      .code-block {
+        background: #2d3748;
+        color: #68d391;
+        padding: 16px;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        margin: 12px 0;
+      }
+
+      .stat-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px;
+        background: white;
+        border-radius: 8px;
+        margin-bottom: 8px;
+      }
+
+      .stat-label {
+        font-weight: 600;
+        color: #4a5568;
+      }
+
+      .stat-value {
+        font-family: 'Courier New', monospace;
+        color: #2d3748;
+      }
+
+      .alert {
+        padding: 16px;
+        border-radius: 8px;
+        margin: 16px 0;
+        border-left: 4px solid;
+      }
+
+      .alert-success {
+        background: #c6f6d5;
+        border-color: #48bb78;
+        color: #22543d;
+      }
+
+      .alert-error {
+        background: #fed7d7;
+        border-color: #f56565;
+        color: #742a2a;
+      }
+
+      .alert-warning {
+        background: #fef5e7;
+        border-color: #f6e05e;
+        color: #744210;
+      }
+
+      .btn {
+        padding: 14px 28px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-right: 8px;
+        margin-bottom: 8px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+
+      .device-card {
+        padding: 16px;
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        margin-bottom: 8px;
+      }
+
+      .device-card.favorite {
+        border-color: #f6e05e;
+        background: #fffbeb;
+      }
+
+      .device-name {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 4px;
+      }
+
+      .device-id {
+        font-size: 12px;
+        color: #718096;
+        font-family: 'Courier New', monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🐛 Debug Dashboard Favorites</h1>
+      <p class="subtitle">Let's figure out why favorites aren't showing in Dashboard</p>
+
+      <div id="results"></div>
+
+      <div style="margin-top: 32px">
+        <button class="btn btn-primary" onclick="runDebug()">🔄 Re-run Debug</button>
+        <button class="btn btn-primary" onclick="openDashboard()">🚀 Open Dashboard</button>
+      </div>
+    </div>
+
+    <script>
+      function openDashboard() {
+        window.open('http://localhost:5173', '_blank')
+      }
+
+      function runDebug() {
+        const results = document.getElementById('results')
+        results.innerHTML = ''
+
+        console.log('=== STARTING DASHBOARD FAVORITES DEBUG ===')
+
+        // Step 1: Check devices
+        let html = '<div class="section"><h2>Step 1: Check Devices in localStorage</h2>'
+
+        let devices = []
+        const kvDevices = localStorage.getItem('kv:devices')
+        const legacyDevices = localStorage.getItem('devices')
+
+        if (kvDevices) {
+          devices = JSON.parse(kvDevices)
+          html += `<div class="stat-row"><span class="stat-label">Source:</span><span class="stat-value">kv:devices</span></div>`
+        } else if (legacyDevices) {
+          devices = JSON.parse(legacyDevices)
+          html += `<div class="stat-row"><span class="stat-label">Source:</span><span class="stat-value">devices</span></div>`
+        }
+
+        html += `<div class="stat-row"><span class="stat-label">Total Devices:</span><span class="stat-value">${devices.length}</span></div>`
+
+        if (devices.length === 0) {
+          html += `<div class="alert alert-error"><strong>❌ PROBLEM FOUND:</strong> No devices in localStorage!</div>`
+        } else {
+          html += `<div class="alert alert-success"><strong>✅ GOOD:</strong> Found ${devices.length} devices</div>`
+          html += `<div class="code-block">First 5 device IDs:\n${devices
+            .slice(0, 5)
+            .map(d => d.id)
+            .join('\n')}</div>`
+        }
+        html += '</div>'
+
+        // Step 2: Check favorites
+        html += '<div class="section"><h2>Step 2: Check Favorites in localStorage</h2>'
+
+        let favorites = []
+        const kvFavorites = localStorage.getItem('kv:favorite-devices')
+        const legacyFavorites = localStorage.getItem('favorite-devices')
+
+        if (kvFavorites) {
+          favorites = JSON.parse(kvFavorites)
+          html += `<div class="stat-row"><span class="stat-label">Source:</span><span class="stat-value">kv:favorite-devices</span></div>`
+        } else if (legacyFavorites) {
+          favorites = JSON.parse(legacyFavorites)
+          html += `<div class="stat-row"><span class="stat-label">Source:</span><span class="stat-value">favorite-devices</span></div>`
+        }
+
+        html += `<div class="stat-row"><span class="stat-label">Total Favorites:</span><span class="stat-value">${favorites.length}</span></div>`
+
+        if (favorites.length === 0) {
+          html += `<div class="alert alert-error"><strong>❌ PROBLEM FOUND:</strong> No favorites configured!</div>`
+          html += `<button class="btn btn-primary" onclick="addTestFavorites()">✨ Add 5 Test Favorites</button>`
+        } else {
+          html += `<div class="alert alert-success"><strong>✅ GOOD:</strong> Found ${favorites.length} favorites</div>`
+          html += `<div class="code-block">${JSON.stringify(favorites, null, 2)}</div>`
+        }
+        html += '</div>'
+
+        // Step 3: Match favorites to devices
+        if (devices.length > 0 && favorites.length > 0) {
+          html += '<div class="section"><h2>Step 3: Match Favorites to Devices</h2>'
+
+          const favoriteDeviceList = devices.filter(device => favorites.includes(device.id))
+
+          html += `<div class="stat-row"><span class="stat-label">Matched Devices:</span><span class="stat-value">${favoriteDeviceList.length} / ${favorites.length}</span></div>`
+
+          if (favoriteDeviceList.length === 0) {
+            html += `<div class="alert alert-error"><strong>❌ PROBLEM FOUND:</strong> No favorites match any device IDs!</div>`
+            html += `<div class="code-block">Favorite IDs:\n${favorites.join('\n')}\n\nDevice IDs (first 5):\n${devices
+              .slice(0, 5)
+              .map(d => d.id)
+              .join('\n')}</div>`
+            html += `<button class="btn btn-primary" onclick="fixMismatch()">🔧 Fix ID Mismatch</button>`
+          } else {
+            html += `<div class="alert alert-success"><strong>✅ PERFECT:</strong> ${favoriteDeviceList.length} favorites match devices!</div>`
+
+            favoriteDeviceList.forEach(device => {
+              html += `
+                            <div class="device-card favorite">
+                                <div class="device-name">⭐ ${device.name}</div>
+                                <div class="device-id">${device.id}</div>
+                            </div>
+                        `
+            })
+          }
+
+          html += '</div>'
+        }
+
+        // Step 4: Dashboard check
+        html += '<div class="section"><h2>Step 4: Dashboard Status</h2>'
+
+        if (devices.length > 0 && favorites.length > 0) {
+          const favoriteDeviceList = devices.filter(device => favorites.includes(device.id))
+
+          if (favoriteDeviceList.length > 0) {
+            html += `<div class="alert alert-success"><strong>✅ READY:</strong> Everything is configured correctly!</div>`
+            html += `
+                        <div class="alert alert-warning">
+                            <strong>If Dashboard still shows "No favorite devices":</strong><br><br>
+                            1. Open Dashboard in browser<br>
+                            2. Press <strong>Ctrl+Shift+R</strong> (hard refresh)<br>
+                            3. Open browser console (F12)<br>
+                            4. Look for any errors related to "favoriteDevices" or "useKV"<br>
+                            5. Check the Console tab for log messages showing what favoriteDevices contains
+                        </div>
+                    `
+            html += `<button class="btn btn-primary" onclick="addConsoleLogging()">📝 Show Console Debugging Code</button>`
+          } else {
+            html += `<div class="alert alert-error"><strong>❌ BLOCKED:</strong> Favorites don't match devices</div>`
+          }
+        } else {
+          html += `<div class="alert alert-error"><strong>❌ BLOCKED:</strong> Missing devices or favorites</div>`
+        }
+
+        html += '</div>'
+
+        results.innerHTML = html
+      }
+
+      function addTestFavorites() {
+        const kvDevices = localStorage.getItem('kv:devices')
+        const legacyDevices = localStorage.getItem('devices')
+
+        let devices = []
+        if (kvDevices) {
+          devices = JSON.parse(kvDevices)
+        } else if (legacyDevices) {
+          devices = JSON.parse(legacyDevices)
+        }
+
+        if (devices.length === 0) {
+          alert('❌ No devices found! Import devices first.')
+          return
+        }
+
+        const colorDevices = devices.filter(d => d.capabilities && d.capabilities.includes('color'))
+        const selectedDevices =
+          colorDevices.length >= 5 ? colorDevices.slice(0, 5) : devices.slice(0, 5)
+        const favoriteIds = selectedDevices.map(d => d.id)
+
+        localStorage.setItem('kv:favorite-devices', JSON.stringify(favoriteIds))
+        localStorage.setItem('favorite-devices', JSON.stringify(favoriteIds))
+
+        alert(
+          `✅ Added ${favoriteIds.length} favorites:\n${selectedDevices.map(d => d.name).join('\n')}`
+        )
+        runDebug()
+      }
+
+      function fixMismatch() {
+        addTestFavorites()
+      }
+
+      function addConsoleLogging() {
+        const code = `// Open Dashboard and paste this in the browser console (F12):
+
+// Check favoriteDevices state
+console.log('=== FAVORITES DEBUG ===');
+console.log('localStorage kv:favorite-devices:', localStorage.getItem('kv:favorite-devices'));
+console.log('localStorage favorite-devices:', localStorage.getItem('favorite-devices'));
+
+// The Dashboard should have these variables available
+// (you'll need to add console.logs to Dashboard.tsx to see them)
+console.log('If you add this to Dashboard.tsx line 309:');
+console.log('console.log("favoriteDevices from useKV:", favoriteDevices);');
+console.log('console.log("devices:", devices);');
+console.log('console.log("favoriteDeviceList:", favoriteDeviceList);');`
+
+        alert(
+          '📋 Console debugging code copied to clipboard! (Well, shown in alert)\n\nPaste this into Dashboard.tsx after line 309 to debug:\n\nconsole.log("favoriteDevices:", favoriteDevices);\nconsole.log("devices:", devices.length);\nconsole.log("favoriteDeviceList:", favoriteDeviceList);'
+        )
+
+        console.log(code)
+      }
+
+      // Auto-run on load
+      window.addEventListener('load', runDebug)
+    </script>
+  </body>
+</html>

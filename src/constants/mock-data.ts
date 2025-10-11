@@ -113,6 +113,20 @@ export const MOCK_DEVICES: Device[] = [
     signalStrength: 58,
     capabilities: ['dimming'],
   },
+  {
+    id: 'hue-39',
+    name: "Matt's Table 2",
+    type: 'light',
+    room: 'Office',
+    status: 'online',
+    enabled: true,
+    protocol: 'hue',
+    value: 50,
+    unit: '%',
+    lastSeen: new Date(),
+    signalStrength: 100,
+    capabilities: ['dimming', 'color', 'color-temp'],
+  },
 
   // ===== THERMOSTATS =====
   {

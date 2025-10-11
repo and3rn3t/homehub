@@ -110,9 +110,27 @@ class VirtualHTTPDevice {
       })
     })
 
+    // Get switch status (POST version for RPC)
+    this.app.post('/rpc/Switch.GetStatus', (req, res) => {
+      const id = req.body.id !== undefined ? req.body.id : 0
+      res.json({
+        id,
+        source: 'http',
+        output: this.state.enabled,
+        apower: this.state.enabled ? 15.5 : 0,
+        voltage: 230.1,
+        current: this.state.enabled ? 0.067 : 0,
+        temperature: {
+          tC: 45.2,
+          tF: 113.4,
+        },
+      })
+    })
+
     // Set switch state
     this.app.post('/rpc/Switch.Set', (req, res) => {
-      const on = req.query.on === 'true'
+      // Support both query params and JSON body
+      const on = req.body.on !== undefined ? req.body.on : req.query.on === 'true'
       const was_on = this.state.enabled
 
       this.state.enabled = on

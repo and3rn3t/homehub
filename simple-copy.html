@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Copy Devices - HomeHub</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        max-width: 700px;
+        margin: 80px auto;
+        padding: 40px;
+        background: #0a0a0a;
+        color: #fff;
+        text-align: center;
+      }
+      h1 {
+        color: #4a9eff;
+        font-size: 32px;
+        margin-bottom: 30px;
+      }
+      .big-button {
+        background: #10b981;
+        color: #fff;
+        border: none;
+        padding: 24px 48px;
+        border-radius: 12px;
+        font-size: 20px;
+        font-weight: 700;
+        cursor: pointer;
+        margin: 30px 0;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        transition: all 0.2s;
+      }
+      .big-button:hover {
+        background: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+      }
+      .status {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 30px;
+        margin: 30px 0;
+      }
+      .success {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.1);
+      }
+      .error {
+        border-color: #ef4444;
+        background: rgba(239, 68, 68, 0.1);
+      }
+      pre {
+        background: #000;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: left;
+        font-size: 13px;
+        overflow-x: auto;
+        margin: 20px 0;
+      }
+      p {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔧 Fix Device Storage</h1>
+
+    <div id="before-status" class="status">
+      <p>Checking current state...</p>
+    </div>
+
+    <button id="copy-btn" class="big-button" onclick="copyDevices()">
+      📋 Copy 22 Devices to Correct Location
+    </button>
+
+    <div id="after-status"></div>
+
+    <script>
+      function checkStatus() {
+        const beforeDiv = document.getElementById('before-status')
+
+        try {
+          const sourceData = localStorage.getItem('devices')
+          const targetData = localStorage.getItem('kv:devices')
+
+          if (!sourceData) {
+            beforeDiv.innerHTML = `
+            <p style="color: #ef4444; font-size: 18px;">❌ No data at "devices" key</p>
+            <p>You may need to re-import your Hue devices.</p>
+          `
+            document.getElementById('copy-btn').disabled = true
+            return
+          }
+
+          const sourceDevices = JSON.parse(sourceData)
+          const targetDevices = targetData ? JSON.parse(targetData) : []
+
+          beforeDiv.innerHTML = `
+          <h2 style="color: #f59e0b; margin-top: 0;">⚠️ Problem Detected</h2>
+          <p style="font-size: 18px;">
+            Source "devices": <strong style="color: #10b981;">${sourceDevices.length} devices</strong>
+          </p>
+          <p style="font-size: 18px;">
+            Target "kv:devices": <strong style="color: #ef4444;">${targetDevices.length} devices</strong>
+          </p>
+          <p style="margin-top: 20px;">The Dashboard is reading from "kv:devices" which is empty!</p>
+        `
+        } catch (error) {
+          beforeDiv.innerHTML = `
+          <p style="color: #ef4444;">Error: ${error.message}</p>
+        `
+        }
+      }
+
+      function copyDevices() {
+        const afterDiv = document.getElementById('after-status')
+        const copyBtn = document.getElementById('copy-btn')
+
+        try {
+          // Get source data
+          const sourceData = localStorage.getItem('devices')
+          if (!sourceData) {
+            throw new Error('No data at "devices" key')
+          }
+
+          // Parse to validate
+          const devices = JSON.parse(sourceData)
+          if (!Array.isArray(devices)) {
+            throw new Error('Data is not an array')
+          }
+
+          if (devices.length === 0) {
+            throw new Error('Source data is empty')
+          }
+
+          console.log('📋 Copying devices...')
+          console.log('Source data:', sourceData.substring(0, 200))
+
+          // Copy the RAW string directly (no re-stringifying)
+          localStorage.setItem('kv:devices', sourceData)
+
+          // Verify
+          const verification = localStorage.getItem('kv:devices')
+          const verifiedDevices = JSON.parse(verification)
+
+          console.log('✅ Verification:', verifiedDevices.length, 'devices')
+
+          if (verifiedDevices.length !== devices.length) {
+            throw new Error(
+              `Verification failed: Expected ${devices.length} devices, got ${verifiedDevices.length}`
+            )
+          }
+
+          const hueDevices = verifiedDevices.filter(d => d.protocol === 'hue')
+
+          afterDiv.innerHTML = `
+          <div class="status success">
+            <h2 style="color: #10b981; margin-top: 0;">✅ Success!</h2>
+            <p style="font-size: 20px; margin: 20px 0;">
+              <strong>${verifiedDevices.length} devices</strong> copied to "kv:devices"
+            </p>
+            <p style="font-size: 16px;">
+              (${hueDevices.length} Hue devices)
+            </p>
+            <p style="margin-top: 30px; font-size: 18px; color: #10b981;">
+              🎉 Dashboard should now work!
+            </p>
+            <p style="margin-top: 15px;">
+              Go to the Dashboard and press <strong>Ctrl+Shift+R</strong> to hard refresh
+            </p>
+            <button onclick="window.location.href='http://localhost:5173'"
+                    style="background: #4a9eff; color: #fff; border: none; padding: 16px 32px;
+                           border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px;">
+              🏠 Open Dashboard
+            </button>
+          </div>
+        `
+
+          copyBtn.disabled = true
+          copyBtn.textContent = '✅ Copied Successfully'
+        } catch (error) {
+          console.error('❌ Copy failed:', error)
+          afterDiv.innerHTML = `
+          <div class="status error">
+            <h2 style="color: #ef4444; margin-top: 0;">❌ Copy Failed</h2>
+            <p style="color: #ef4444;">${error.message}</p>
+            <pre>${error.stack}</pre>
+          </div>
+        `
+        }
+      }
+
+      // Check on load
+      checkStatus()
+    </script>
+  </body>
+</html>
