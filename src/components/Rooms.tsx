@@ -9,6 +9,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { ErrorState } from '@/components/ui/error-state'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import {
   Select,
@@ -30,11 +32,32 @@ import {
 } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import type { Device, Room } from '@/types'
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  MouseSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  arrayMove,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { DeviceCardEnhanced } from './DeviceCardEnhanced'
 import { DeviceControlPanel } from './DeviceControlPanel'
-import { FavoriteButton } from './FavoriteButton'
+import { DeviceEditDialog } from './DeviceEditDialog'
+import { RoomEditDialog } from './RoomEditDialog'
+import { RoomStatistics } from './RoomStatistics'
 
 const deviceIcons = {
   light: LightbulbIcon,
@@ -43,20 +66,201 @@ const deviceIcons = {
   sensor: WifiIcon,
 }
 
+// Sortable Room Card Component
+interface SortableRoomCardProps {
+  room: Room
+  roomDevices: Device[]
+  activeDevices: number
+  onEditClick: (room: Room) => void
+  onDeviceToggle: (deviceId: string) => void
+  onDeviceContextMenu: (device: Device) => void
+}
+
+function SortableRoomCard({
+  room,
+  roomDevices,
+  activeDevices,
+  onEditClick,
+  onDeviceToggle,
+  onDeviceContextMenu,
+}: SortableRoomCardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: room.id,
+  })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    cursor: isDragging ? 'grabbing' : 'grab',
+  }
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      >
+        <Card className="hover:bg-accent/5 focus-within:ring-primary/50 transition-all duration-200 focus-within:ring-2 focus-within:ring-offset-2 focus-within:outline-none hover:shadow-md">
+          <div className="w-full text-left">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">{room.name}</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={e => {
+                    e.stopPropagation()
+                    onEditClick(room)
+                  }}
+                >
+                  <MoreHorizontalIcon className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-4">
+                  <span className="text-muted-foreground">
+                    {activeDevices} of {roomDevices.length} active
+                  </span>
+                  {room.temperature && (
+                    <span className="text-muted-foreground">{room.temperature}°C</span>
+                  )}
+                </div>
+                <Badge variant="secondary" className="h-5">
+                  {roomDevices.length} devices
+                </Badge>
+              </div>
+            </CardHeader>
+
+            <CardContent className="pt-0">
+              {roomDevices.length > 0 && (
+                <div className="space-y-2">
+                  <div className="text-muted-foreground mb-1 flex justify-between text-xs">
+                    <span>Device Activity</span>
+                    <span>{Math.round((activeDevices / roomDevices.length) * 100)}%</span>
+                  </div>
+                  <Progress value={(activeDevices / roomDevices.length) * 100} className="h-1.5" />
+                </div>
+              )}
+
+              <div className="mt-4 grid grid-cols-4 gap-2">
+                {roomDevices.slice(0, 4).map(device => {
+                  const IconComponent = deviceIcons[device.type]
+                  return (
+                    <motion.div
+                      key={device.id}
+                      whileTap={{ scale: 0.9 }}
+                      whileHover={{ scale: 1.05 }}
+                      className={`group relative flex cursor-pointer flex-col items-center gap-1 rounded-lg border-2 p-2 transition-all ${
+                        device.enabled
+                          ? 'border-primary/30 bg-primary/10 hover:border-primary/50 hover:bg-primary/20'
+                          : 'border-border/50 bg-secondary/50 hover:border-border hover:bg-secondary'
+                      }`}
+                      onClick={e => {
+                        e.stopPropagation()
+                        onDeviceToggle(device.id)
+                      }}
+                      onContextMenu={e => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        onDeviceContextMenu(device)
+                      }}
+                      title={`Click to toggle • Right-click for advanced controls`}
+                    >
+                      <div
+                        className={`absolute top-1 right-1 h-1.5 w-1.5 rounded-full ${
+                          device.enabled ? 'bg-primary' : 'bg-muted-foreground/30'
+                        }`}
+                      />
+                      <div
+                        className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${
+                          device.enabled
+                            ? 'bg-primary/20 group-hover:bg-primary/30'
+                            : 'bg-muted group-hover:bg-muted-foreground/20'
+                        }`}
+                      >
+                        <IconComponent
+                          className={cn(
+                            'h-4 w-4',
+                            device.enabled
+                              ? 'text-primary group-hover:text-primary/90'
+                              : 'text-muted-foreground group-hover:text-foreground'
+                          )}
+                        />
+                      </div>
+                      <span
+                        className={`text-center text-xs leading-tight font-medium transition-colors ${device.enabled ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`}
+                      >
+                        {device.name.split(' ')[0]}
+                      </span>
+                      <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/0 opacity-0 transition-all group-hover:bg-black/5 group-hover:opacity-100">
+                        <span className="text-[10px] font-medium">
+                          {device.enabled ? 'Turn Off' : 'Turn On'}
+                        </span>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+
+                {roomDevices.length > 4 && (
+                  <div className="bg-secondary/50 border-border/50 flex flex-col items-center gap-1 rounded-lg border-2 p-2">
+                    <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-full">
+                      <PlusIcon className="text-muted-foreground h-4 w-4" />
+                    </div>
+                    <span className="text-muted-foreground text-center text-xs leading-tight font-medium">
+                      +{roomDevices.length - 4}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </div>
+        </Card>
+      </motion.div>
+    </div>
+  )
+}
+
 export function Rooms() {
-  const [rooms, , { isLoading: roomsLoading, isError: roomsError }] = useKV<Room[]>(
+  const [rooms, setRooms, { isLoading: roomsLoading, isError: roomsError }] = useKV<Room[]>(
     KV_KEYS.ROOMS,
     MOCK_ROOMS,
     { withMeta: true }
   )
   const [devices, setDevices] = useKV<Device[]>(KV_KEYS.DEVICES, MOCK_DEVICES)
-  const [favoriteDevices] = useKV<string[]>('favorite-devices', [])
   const [hideUnreachable, setHideUnreachable] = useState(false)
   const [assignDialogOpen, setAssignDialogOpen] = useState(false)
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null)
   const [selectedRoom, setSelectedRoom] = useState<string>('')
   const [controlPanelOpen, setControlPanelOpen] = useState(false)
   const [controlDevice, setControlDevice] = useState<Device | null>(null)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [editDevice, setEditDevice] = useState<Device | null>(null)
+  const [createRoomDialogOpen, setCreateRoomDialogOpen] = useState(false)
+  const [newRoomName, setNewRoomName] = useState('')
+  const [roomEditDialogOpen, setRoomEditDialogOpen] = useState(false)
+  const [editRoom, setEditRoom] = useState<Room | null>(null)
+
+  // Drag and drop state
+  const [activeRoomId, setActiveRoomId] = useState<string | null>(null)
+
+  // Configure sensors for mouse and touch
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8, // 8px movement before drag starts
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200, // 200ms hold before drag starts on touch
+        tolerance: 5,
+      },
+    })
+  )
 
   const getRoomDevices = (roomName: string) => {
     return devices.filter(device => device.room === roomName)
@@ -160,12 +364,60 @@ export function Rooms() {
     setSelectedRoom('')
   }
 
+  const createRoom = () => {
+    if (!newRoomName.trim()) {
+      toast.error('Please enter a room name')
+      return
+    }
+
+    // Check if room already exists
+    if (rooms.some(r => r.name.toLowerCase() === newRoomName.trim().toLowerCase())) {
+      toast.error('A room with this name already exists')
+      return
+    }
+
+    const newRoom: Room = {
+      id: crypto.randomUUID(),
+      name: newRoomName.trim(),
+      icon: 'home', // Default icon
+      deviceIds: [],
+    }
+
+    setRooms(prevRooms => [...prevRooms, newRoom])
+    toast.success(`Created room: ${newRoom.name}`)
+    setCreateRoomDialogOpen(false)
+    setNewRoomName('')
+  }
+
   const handleDeviceUpdate = (deviceId: string, updates: Partial<Device>) => {
     setDevices(prevDevices => prevDevices.map(d => (d.id === deviceId ? { ...d, ...updates } : d)))
   }
 
   const handleDeviceDelete = (deviceId: string) => {
     setDevices(prevDevices => prevDevices.filter(d => d.id !== deviceId))
+  }
+
+  // Drag and drop handlers
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveRoomId(event.active.id as string)
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    setActiveRoomId(null)
+
+    if (!over || active.id === over.id) {
+      return
+    }
+
+    setRooms(prevRooms => {
+      const oldIndex = prevRooms.findIndex(room => room.id === active.id)
+      const newIndex = prevRooms.findIndex(room => room.id === over.id)
+
+      const newOrder = arrayMove(prevRooms, oldIndex, newIndex)
+      toast.success('Room order updated')
+      return newOrder
+    })
   }
 
   // Show loading state
@@ -178,7 +430,12 @@ export function Rooms() {
               <h1 className="text-foreground text-2xl font-bold">Rooms</h1>
               <p className="text-muted-foreground">Manage devices by location</p>
             </div>
-            <Button variant="outline" size="icon" className="rounded-full">
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-full"
+              onClick={() => setCreateRoomDialogOpen(true)}
+            >
               <PlusIcon className="h-5 w-5" />
             </Button>
           </div>
@@ -206,14 +463,19 @@ export function Rooms() {
               <h1 className="text-foreground text-2xl font-bold">Rooms</h1>
               <p className="text-muted-foreground">Manage devices by location</p>
             </div>
-            <Button variant="outline" size="icon" className="rounded-full">
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-full"
+              onClick={() => setCreateRoomDialogOpen(true)}
+            >
               <PlusIcon className="h-5 w-5" />
             </Button>
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 pb-6">
-          <RoomCardSkeleton count={4} />
+          <RoomCardSkeleton />
         </div>
       </div>
     )
@@ -228,7 +490,12 @@ export function Rooms() {
               <h1 className="text-foreground text-2xl font-bold">Rooms</h1>
               <p className="text-muted-foreground">Manage devices by location</p>
             </div>
-            <Button variant="outline" size="icon" className="rounded-full">
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-full"
+              onClick={() => setCreateRoomDialogOpen(true)}
+            >
               <PlusIcon className="h-5 w-5" />
             </Button>
           </div>
@@ -255,7 +522,12 @@ export function Rooms() {
             <p className="text-muted-foreground text-sm sm:text-base">Manage devices by location</p>
           </div>
           <motion.div whileTap={{ scale: 0.9 }} whileHover={{ scale: 1.05 }}>
-            <Button variant="outline" size="icon" className="h-11 w-11 rounded-full">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-11 w-11 rounded-full"
+              onClick={() => setCreateRoomDialogOpen(true)}
+            >
               <PlusIcon className="h-5 w-5" />
             </Button>
           </motion.div>
@@ -264,6 +536,9 @@ export function Rooms() {
 
       <div className="flex-1 overflow-y-auto px-4 pb-6 sm:px-6">
         <div className="space-y-6">
+          {/* Room Statistics */}
+          <RoomStatistics devices={devices} />
+
           {/* All Devices Section - Show everything */}
           <div>
             <div className="mb-3 flex items-center justify-between">
@@ -284,76 +559,23 @@ export function Rooms() {
                 />
               </label>
             </div>
-            <Card>
-              <CardContent className="p-4">
-                <div className="space-y-2">
-                  {devices
-                    .filter(device => !hideUnreachable || device.status !== 'offline')
-                    .map(device => {
-                      const IconComponent = deviceIcons[device.type] || WifiIcon
-                      return (
-                        <div
-                          key={device.id}
-                          className="hover:bg-accent/50 flex cursor-pointer items-center justify-between rounded-lg p-3 transition-colors"
-                          onClick={() => {
-                            setControlDevice(device)
-                            setControlPanelOpen(true)
-                          }}
-                        >
-                          <div className="flex flex-1 items-center gap-3">
-                            <div
-                              className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                                device.enabled ? 'bg-primary/10' : 'bg-secondary'
-                              }`}
-                            >
-                              <IconComponent
-                                size={20}
-                                className={
-                                  device.enabled ? 'text-primary' : 'text-muted-foreground'
-                                }
-                              />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-medium">{device.name}</p>
-                              <div className="flex items-center gap-2">
-                                <p className="text-muted-foreground text-xs">{device.room}</p>
-                                <Badge
-                                  variant={device.status === 'online' ? 'default' : 'destructive'}
-                                  className="text-xs"
-                                >
-                                  {device.status}
-                                </Badge>
-                                {device.protocol && (
-                                  <Badge variant="outline" className="text-xs">
-                                    {device.protocol.toUpperCase()}
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <FavoriteButton
-                              deviceId={device.id}
-                              deviceName={device.name}
-                              isFavorite={favoriteDevices.includes(device.id)}
-                            />
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={e => {
-                                e.stopPropagation()
-                                toggleDevice(device.id)
-                              }}
-                            >
-                              {device.enabled ? 'Turn Off' : 'Turn On'}
-                            </Button>
-                          </div>
-                        </div>
-                      )
-                    })}
-                </div>
-              </CardContent>
-            </Card>
+            <div className="space-y-3">
+              {devices
+                .filter(device => !hideUnreachable || device.status !== 'offline')
+                .map((device, index) => (
+                  <DeviceCardEnhanced
+                    key={device.id}
+                    device={device}
+                    index={index}
+                    onDeviceClick={device => {
+                      setControlDevice(device)
+                      setControlPanelOpen(true)
+                    }}
+                    onToggle={toggleDevice}
+                    showFavoriteButton={true}
+                  />
+                ))}
+            </div>
           </div>
 
           {/* Unassigned Devices Section */}
@@ -430,7 +652,7 @@ export function Rooms() {
                 <p className="text-muted-foreground mb-4 text-sm">
                   Create rooms to organize your devices by location
                 </p>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => setCreateRoomDialogOpen(true)}>
                   Add Room
                 </Button>
               </CardContent>
@@ -438,157 +660,55 @@ export function Rooms() {
           ) : (
             <div>
               <h2 className="text-foreground mb-3 text-lg font-semibold">All Rooms</h2>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                {rooms.map(room => {
-                  const roomDevices = getRoomDevices(room.name)
-                  const activeDevices = getActiveDevicesCount(roomDevices)
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={rooms.map(r => r.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {rooms.map(room => {
+                      const roomDevices = getRoomDevices(room.name)
+                      const activeDevices = getActiveDevicesCount(roomDevices)
 
-                  return (
-                    <motion.div
-                      key={room.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                    >
-                      <Card className="hover:bg-accent/5 focus-within:ring-primary/50 cursor-pointer transition-all duration-200 focus-within:ring-2 focus-within:ring-offset-2 focus-within:outline-none hover:shadow-md">
-                        <div
-                          className="w-full text-left"
-                          onClick={() => {
-                            // Room click handler
+                      return (
+                        <SortableRoomCard
+                          key={room.id}
+                          room={room}
+                          roomDevices={roomDevices}
+                          activeDevices={activeDevices}
+                          onEditClick={room => {
+                            setEditRoom(room)
+                            setRoomEditDialogOpen(true)
                           }}
-                        >
-                          <CardHeader className="pb-3">
-                            <div className="flex items-center justify-between">
-                              <CardTitle className="text-lg">{room.name}</CardTitle>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={e => e.stopPropagation()}
-                              >
-                                <MoreHorizontalIcon className="h-4 w-4" />
-                              </Button>
-                            </div>
+                          onDeviceToggle={toggleDevice}
+                          onDeviceContextMenu={device => {
+                            setControlDevice(device)
+                            setControlPanelOpen(true)
+                          }}
+                        />
+                      )
+                    })}
+                  </div>
+                </SortableContext>
 
-                            <div className="flex items-center justify-between text-sm">
-                              <div className="flex items-center gap-4">
-                                <span className="text-muted-foreground">
-                                  {activeDevices} of {roomDevices.length} active
-                                </span>
-                                {room.temperature && (
-                                  <span className="text-muted-foreground">
-                                    {room.temperature}°C
-                                  </span>
-                                )}
-                              </div>
-                              <Badge variant="secondary" className="h-5">
-                                {roomDevices.length} devices
-                              </Badge>
-                            </div>
-                          </CardHeader>
-
-                          <CardContent className="pt-0">
-                            {roomDevices.length > 0 && (
-                              <div className="space-y-2">
-                                <div className="text-muted-foreground mb-1 flex justify-between text-xs">
-                                  <span>Device Activity</span>
-                                  <span>
-                                    {Math.round((activeDevices / roomDevices.length) * 100)}%
-                                  </span>
-                                </div>
-                                <Progress
-                                  value={(activeDevices / roomDevices.length) * 100}
-                                  className="h-1.5"
-                                />
-                              </div>
-                            )}
-
-                            <div className="mt-4 grid grid-cols-4 gap-2">
-                              {roomDevices.slice(0, 4).map(device => {
-                                const IconComponent = deviceIcons[device.type]
-                                return (
-                                  <motion.div
-                                    key={device.id}
-                                    whileTap={{ scale: 0.9 }}
-                                    whileHover={{ scale: 1.05 }}
-                                    className={`group relative flex cursor-pointer flex-col items-center gap-1 rounded-lg border-2 p-2 transition-all ${
-                                      device.enabled
-                                        ? 'border-primary/30 bg-primary/10 hover:border-primary/50 hover:bg-primary/20'
-                                        : 'border-border/50 bg-secondary/50 hover:border-border hover:bg-secondary'
-                                    }`}
-                                    onClick={e => {
-                                      e.stopPropagation()
-                                      toggleDevice(device.id)
-                                    }}
-                                    onContextMenu={e => {
-                                      e.preventDefault()
-                                      e.stopPropagation()
-                                      setControlDevice(device)
-                                      setControlPanelOpen(true)
-                                    }}
-                                    title={`Click to toggle • Right-click for advanced controls`}
-                                  >
-                                    {/* Status Indicator */}
-                                    <div
-                                      className={`absolute top-1 right-1 h-1.5 w-1.5 rounded-full ${
-                                        device.enabled ? 'bg-primary' : 'bg-muted-foreground/30'
-                                      }`}
-                                    />
-
-                                    <div
-                                      className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${
-                                        device.enabled
-                                          ? 'bg-primary/20 group-hover:bg-primary/30'
-                                          : 'bg-muted group-hover:bg-muted-foreground/20'
-                                      }`}
-                                    >
-                                      <IconComponent
-                                        className={cn(
-                                          'h-4 w-4',
-                                          device.enabled
-                                            ? 'text-primary group-hover:text-primary/90'
-                                            : 'text-muted-foreground group-hover:text-foreground'
-                                        )}
-                                      />
-                                    </div>
-                                    <span
-                                      className={`text-center text-xs leading-tight font-medium transition-colors ${
-                                        device.enabled
-                                          ? 'text-primary'
-                                          : 'text-muted-foreground group-hover:text-foreground'
-                                      }`}
-                                    >
-                                      {device.name.split(' ')[0]}
-                                    </span>
-
-                                    {/* Hover hint */}
-                                    <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/0 opacity-0 transition-all group-hover:bg-black/5 group-hover:opacity-100">
-                                      <span className="text-[10px] font-medium">
-                                        {device.enabled ? 'Turn Off' : 'Turn On'}
-                                      </span>
-                                    </div>
-                                  </motion.div>
-                                )
-                              })}
-
-                              {roomDevices.length > 4 && (
-                                <div className="bg-secondary/50 border-border/50 flex flex-col items-center gap-1 rounded-lg border-2 p-2">
-                                  <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-full">
-                                    <PlusIcon className="text-muted-foreground h-4 w-4" />
-                                  </div>
-                                  <span className="text-muted-foreground text-center text-xs leading-tight font-medium">
-                                    +{roomDevices.length - 4}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </CardContent>
-                        </div>
+                {/* Drag Overlay - shows while dragging */}
+                <DragOverlay>
+                  {activeRoomId ? (
+                    <div className="opacity-50">
+                      <Card className="shadow-2xl">
+                        <CardHeader>
+                          <CardTitle>{rooms.find(r => r.id === activeRoomId)?.name}</CardTitle>
+                        </CardHeader>
                       </Card>
-                    </motion.div>
-                  )
-                })}
-              </div>
+                    </div>
+                  ) : null}
+                </DragOverlay>
+              </DndContext>
             </div>
           )}
         </div>
@@ -637,8 +757,82 @@ export function Rooms() {
           onOpenChange={setControlPanelOpen}
           onUpdate={handleDeviceUpdate}
           onDelete={handleDeviceDelete}
+          onEdit={() => {
+            setEditDevice(controlDevice)
+            setEditDialogOpen(true)
+          }}
         />
       )}
+
+      {/* Device Edit Dialog */}
+      <DeviceEditDialog
+        device={editDevice}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onDeviceUpdated={device => {
+          setDevices(prev => prev.map(d => (d.id === device.id ? device : d)))
+          toast.success('Device updated')
+        }}
+        onDeviceRemoved={deviceId => {
+          setDevices(prev => prev.filter(d => d.id !== deviceId))
+        }}
+      />
+
+      {/* Create Room Dialog */}
+      <Dialog open={createRoomDialogOpen} onOpenChange={setCreateRoomDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Room</DialogTitle>
+            <DialogDescription>Add a new room to organize your devices</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="room-name">Room Name</Label>
+              <Input
+                id="room-name"
+                placeholder="e.g., Living Room, Bedroom, Kitchen"
+                value={newRoomName}
+                onChange={e => setNewRoomName(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    createRoom()
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setCreateRoomDialogOpen(false)
+                setNewRoomName('')
+              }}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button onClick={createRoom} className="flex-1">
+              Create Room
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Room Edit Dialog */}
+      <RoomEditDialog
+        room={editRoom}
+        open={roomEditDialogOpen}
+        onOpenChange={setRoomEditDialogOpen}
+        onRoomUpdated={room => {
+          setRooms(prev => prev.map(r => (r.id === room.id ? room : r)))
+          toast.success('Room updated')
+        }}
+        onRoomDeleted={roomId => {
+          setRooms(prev => prev.filter(r => r.id !== roomId))
+          toast.success('Room deleted')
+        }}
+      />
     </div>
   )
 }

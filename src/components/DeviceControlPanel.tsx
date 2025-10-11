@@ -37,6 +37,7 @@ interface DeviceControlPanelProps {
   readonly onOpenChange: (open: boolean) => void
   readonly onUpdate: (deviceId: string, updates: Partial<Device>) => void
   readonly onDelete?: (deviceId: string) => void
+  readonly onEdit?: () => void
 }
 
 export function DeviceControlPanel({
@@ -45,6 +46,7 @@ export function DeviceControlPanel({
   onOpenChange,
   onUpdate,
   onDelete,
+  onEdit,
 }: DeviceControlPanelProps) {
   const [brightness, setBrightness] = useState(device.value || 100)
   const [colorHex, setColorHex] = useState('#FFFFFF')
@@ -543,6 +545,20 @@ export function DeviceControlPanel({
 
             {/* Action Buttons */}
             <div className="space-y-2 pt-4">
+              {onEdit && (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    onEdit()
+                    onOpenChange(false) // Close control panel when opening edit
+                  }}
+                >
+                  <EditIcon className="mr-2 h-4 w-4" />
+                  Edit Device
+                </Button>
+              )}
+
               <Button
                 variant="outline"
                 className="w-full justify-start"

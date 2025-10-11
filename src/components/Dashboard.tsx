@@ -39,9 +39,10 @@ import type { Device, DeviceAlert, Room, Scene } from '@/types'
 import { motion } from 'framer-motion'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { DeviceCardEnhanced } from './DeviceCardEnhanced'
 import { DeviceControlPanel } from './DeviceControlPanel'
 import { DeviceDiscovery } from './DeviceDiscovery'
-import { FavoriteDeviceCard } from './FavoriteDeviceCard'
+import { DeviceEditDialog } from './DeviceEditDialog'
 import { NotificationBell } from './NotificationCenter'
 
 export function Dashboard() {
@@ -54,6 +55,10 @@ export function Dashboard() {
   // Device control panel state
   const [controlPanelOpen, setControlPanelOpen] = useState(false)
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null)
+
+  // Device edit dialog state
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [editDevice, setEditDevice] = useState<Device | null>(null)
 
   // Try MQTT connection first
   const {
@@ -748,12 +753,13 @@ export function Dashboard() {
           ) : (
             <div className="grid gap-3">
               {favoriteDeviceList.map((device, index) => (
-                <FavoriteDeviceCard
+                <DeviceCardEnhanced
                   key={device.id}
                   device={device}
                   index={index}
                   onDeviceClick={handleDeviceCardClick}
                   onToggle={toggleDevice}
+                  showFavoriteButton={true}
                 />
               ))}
             </div>
@@ -851,8 +857,26 @@ export function Dashboard() {
           onOpenChange={setControlPanelOpen}
           onUpdate={handleDeviceUpdate}
           onDelete={handleDeviceDelete}
+          onEdit={() => {
+            setEditDevice(selectedDevice)
+            setEditDialogOpen(true)
+          }}
         />
       )}
+
+      {/* Device Edit Dialog */}
+      <DeviceEditDialog
+        device={editDevice}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onDeviceUpdated={device => {
+          setKvDevices(prev => prev.map(d => (d.id === device.id ? device : d)))
+          toast.success('Device updated')
+        }}
+        onDeviceRemoved={deviceId => {
+          setKvDevices(prev => prev.filter(d => d.id !== deviceId))
+        }}
+      />
 
       {/* Device Discovery Dialog */}
       <DeviceDiscovery
