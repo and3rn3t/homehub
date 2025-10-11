@@ -108,8 +108,8 @@ const sensors = useSensors(
   }),
   useSensor(TouchSensor, {
     activationConstraint: {
-      delay: 200,      // 200ms hold before drag starts
-      tolerance: 5,    // 5px movement tolerance
+      delay: 200, // 200ms hold before drag starts
+      tolerance: 5, // 5px movement tolerance
     },
   })
 )
@@ -171,10 +171,7 @@ const handleDragEnd = (event: DragEndEvent) => {
   onDragStart={handleDragStart}
   onDragEnd={handleDragEnd}
 >
-  <SortableContext
-    items={rooms.map(r => r.id)}
-    strategy={verticalListSortingStrategy}
-  >
+  <SortableContext items={rooms.map(r => r.id)} strategy={verticalListSortingStrategy}>
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       {rooms.map(room => (
         <SortableRoomCard
@@ -196,9 +193,7 @@ const handleDragEnd = (event: DragEndEvent) => {
       <div className="opacity-50">
         <Card className="shadow-2xl">
           <CardHeader>
-            <CardTitle>
-              {rooms.find(r => r.id === activeRoomId)?.name}
-            </CardTitle>
+            <CardTitle>{rooms.find(r => r.id === activeRoomId)?.name}</CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -225,8 +220,8 @@ const handleDragEnd = (event: DragEndEvent) => {
 ### 1. Cursor Changes
 
 ```css
-cursor: grab;          /* Default state */
-cursor: grabbing;      /* While dragging */
+cursor: grab; /* Default state */
+cursor: grabbing; /* While dragging */
 ```
 
 **UX Impact**: Indicates draggable elements clearly
@@ -234,8 +229,8 @@ cursor: grabbing;      /* While dragging */
 ### 2. Opacity During Drag
 
 ```css
-opacity: 0.5;         /* Dragged item */
-opacity: 1;           /* Other items */
+opacity: 0.5; /* Dragged item */
+opacity: 1; /* Other items */
 ```
 
 **UX Impact**: Shows which item is being moved
@@ -263,11 +258,7 @@ transition: transform 200ms ease;
 
 ```typescript
 // Room order is stored in KV automatically via useKV hook
-const [rooms, setRooms] = useKV<Room[]>(
-  KV_KEYS.ROOMS,
-  MOCK_ROOMS,
-  { withMeta: true }
-)
+const [rooms, setRooms] = useKV<Room[]>(KV_KEYS.ROOMS, MOCK_ROOMS, { withMeta: true })
 
 // On drag end, setRooms triggers KV sync
 setRooms(newOrder) // → Saves to Cloudflare KV

@@ -48,14 +48,17 @@ docs/
 │   └── MIGRATION_COMPLETE.md           # Migration summary (historical)
 │
 ├── development/                        # Active development
-│   ├── MILESTONE_2.2.3_DISCOVERY_COMPLETE.md  # Current milestone
+│   ├── NEXT_STEPS_UPDATED.md           # Current roadmap (Phase 3 planning)
+│   ├── PHASE_2_POLISH_SESSION_3_DRAG_DROP.md  # Drag & drop complete guide
+│   ├── MILESTONE_2.2.3_DISCOVERY_COMPLETE.md  # Discovery milestone
 │   ├── DISCOVERY_TEST_PLAN.md          # Test plan (10 phases)
 │   ├── DISCOVERY_TEST_RESULTS.md       # Test results (82%)
+│   ├── ADVANCED_HUE_FEATURES.md        # Hue integration guide
 │   ├── DEVICE_ACCESSIBILITY_FIX.md     # Device UI improvements
 │   ├── ROOMS_DEVICE_CONTROL.md         # Enhanced controls
 │   ├── TESTING_HTTP_DEVICES.md         # HTTP device testing
 │   ├── VIRTUAL_HTTP_DEVICE_TEST_RESULTS.md  # Test results
-│   ├── NEXT_STEPS.md                   # Roadmap
+│   ├── NEXT_STEPS.md                   # Legacy roadmap (archived)
 │   └── REFACTOR_PLAN.md                # Code improvements
 │
 ├── history/                            # Completed work
