@@ -21,8 +21,10 @@ import { motion } from 'framer-motion'
 interface BrightnessSliderProps {
   /** Current brightness value (0-100) */
   value: number
-  /** Callback when brightness changes */
+  /** Callback when brightness changes (fires continuously during drag) */
   onChange: (value: number) => void
+  /** Callback when user finishes changing brightness (fires on release) */
+  onValueCommit?: (value: number) => void
   /** Whether the slider is disabled */
   disabled?: boolean
   /** Whether the control is updating (shows loading state) */
@@ -34,6 +36,7 @@ interface BrightnessSliderProps {
 export function BrightnessSlider({
   value,
   onChange,
+  onValueCommit,
   disabled,
   isUpdating,
   className,
@@ -70,6 +73,7 @@ export function BrightnessSlider({
         <Slider
           value={[value]}
           onValueChange={values => onChange(values[0] ?? value)}
+          onValueCommit={onValueCommit ? values => onValueCommit(values[0] ?? value) : undefined}
           min={0}
           max={100}
           step={1}

@@ -62,6 +62,7 @@ const sceneIcons = {
   home: HomeRoomIcon,
   shield: ShieldIcon,
   play: PlayIcon,
+  filmslate: PlayIcon, // Movie Time scene uses FilmSlate icon
   coffee: UtensilsIcon,
   bed: BedIcon,
 }
@@ -184,7 +185,8 @@ export function Scenes() {
               <h3 className="mb-4 text-base font-semibold sm:text-lg">Popular Scenes</h3>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {Object.entries(sceneConfigs).map(([id, config]) => {
-                  const IconComponent = sceneIcons[config.icon as keyof typeof sceneIcons]
+                  const IconComponent =
+                    sceneIcons[config.icon as keyof typeof sceneIcons] || SunRoomIcon
                   return (
                     <motion.div
                       key={id}
@@ -222,7 +224,8 @@ export function Scenes() {
             {scenes.map((scene, index) => {
               const config = sceneConfigs[scene.id as keyof typeof sceneConfigs]
               const iconName = scene.icon || config?.icon || 'sun'
-              const IconComponent = sceneIcons[iconName as keyof typeof sceneIcons]
+              const IconComponent =
+                sceneIcons[iconName.toLowerCase() as keyof typeof sceneIcons] || SunRoomIcon
               const bgColor = config?.color || 'bg-gradient-to-br from-blue-400 to-purple-500'
 
               return (

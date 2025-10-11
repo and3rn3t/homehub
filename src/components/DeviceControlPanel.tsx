@@ -1,5 +1,8 @@
 import { Badge } from '@/components/ui/badge'
+import { BrightnessSlider } from '@/components/ui/brightness-slider'
 import { Button } from '@/components/ui/button'
+import { ColorTemperatureSlider } from '@/components/ui/color-temperature-slider'
+import { ColorWheelPicker } from '@/components/ui/color-wheel'
 import {
   Dialog,
   DialogContent,
@@ -9,16 +12,14 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useKV } from '@/hooks/use-kv'
 import {
   BatteryIcon,
   EditIcon,
+  PowerIcon,
   RefreshIcon,
-  SunRoomIcon,
-  ThermometerIcon,
   TrashIcon,
   WifiIcon,
   XIcon,
@@ -64,10 +65,12 @@ export function DeviceControlPanel({
   const hasColor = device.capabilities?.includes('color') ?? false
   const hasColorTemp = device.capabilities?.includes('color-temp') ?? false
 
-  const handleBrightnessChange = async (value: number[]) => {
-    const newBrightness = value[0] ?? brightness
-    setBrightness(newBrightness)
+  const handleBrightnessChange = (value: number) => {
+    // Update local state immediately for smooth UI
+    setBrightness(value)
+  }
 
+  const handleBrightnessCommit = async (value: number) => {
     if (device.protocol === 'hue') {
       try {
         setIsUpdating(true)
@@ -78,11 +81,11 @@ export function DeviceControlPanel({
           timeout: 5000,
         })
 
-        const result = await adapter.setBrightness(device, newBrightness)
+        const result = await adapter.setBrightness(device, value)
 
         if (result.success) {
-          onUpdate(device.id, { value: newBrightness, ...result.newState })
-          toast.success(`Brightness set to ${newBrightness}%`, {
+          onUpdate(device.id, { value: value, ...result.newState })
+          toast.success(`Brightness set to ${value}%`, {
             description: `Hue Bridge · ${result.duration}ms`,
           })
         } else {
@@ -101,9 +104,12 @@ export function DeviceControlPanel({
     }
   }
 
-  const handleColorChange = async (hex: string) => {
+  const handleColorChange = (hex: string) => {
+    // Update local state immediately for smooth UI
     setColorHex(hex)
+  }
 
+  const handleColorCommit = async (hex: string) => {
     // Only update if valid hex color
     if (!/^#[0-9A-F]{6}$/i.test(hex)) return
 
@@ -140,10 +146,12 @@ export function DeviceControlPanel({
     }
   }
 
-  const handleColorTempChange = async (value: number[]) => {
-    const newTemp = value[0] ?? colorTemp
-    setColorTemp(newTemp)
+  const handleColorTempChange = (value: number) => {
+    // Update local state immediately for smooth UI
+    setColorTemp(value)
+  }
 
+  const handleColorTempCommit = async (value: number) => {
     if (device.protocol === 'hue' && hasColorTemp) {
       try {
         setIsUpdating(true)
@@ -154,11 +162,11 @@ export function DeviceControlPanel({
           timeout: 5000,
         })
 
-        const result = await adapter.setColorTemperature(device, newTemp)
+        const result = await adapter.setColorTemperature(device, value)
 
         if (result.success) {
           onUpdate(device.id, result.newState ?? {})
-          toast.success(`Color temperature set to ${newTemp}K`, {
+          toast.success(`Color temperature set to ${value}K`, {
             description: `Hue Bridge · ${result.duration}ms`,
           })
         } else {
@@ -295,7 +303,7 @@ export function DeviceControlPanel({
             {/* Power Toggle */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <SunRoomIcon className="h-5 w-5" />
+                <PowerIcon className="h-5 w-5" />
                 <Label htmlFor="power-toggle" className="text-base">
                   Power
                 </Label>
@@ -310,28 +318,13 @@ export function DeviceControlPanel({
 
             {/* Brightness Control */}
             {hasBrightness && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-3"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <SunRoomIcon className="h-5 w-5" />
-                    <Label className="text-base">Brightness</Label>
-                  </div>
-                  <span className="text-muted-foreground text-sm font-medium">{brightness}%</span>
-                </div>
-                <Slider
-                  value={[brightness]}
-                  onValueChange={handleBrightnessChange}
-                  min={0}
-                  max={100}
-                  step={1}
-                  disabled={!device.enabled || device.status === 'offline' || isUpdating}
-                  className="cursor-pointer"
-                />
-              </motion.div>
+              <BrightnessSlider
+                value={brightness}
+                onChange={handleBrightnessChange}
+                onValueCommit={handleBrightnessCommit}
+                isUpdating={isUpdating}
+                disabled={!device.enabled || device.status === 'offline'}
+              />
             )}
 
             {/* Color Control */}
@@ -346,95 +339,99 @@ export function DeviceControlPanel({
                   <Palette className="h-5 w-5" />
                   <Label className="text-base">Color</Label>
                 </div>
-                <div className="flex gap-3">
-                  <div className="relative flex-1">
-                    <Input
-                      type="text"
+
+                {/* Color Selection Tabs */}
+                <Tabs defaultValue="wheel" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="wheel">Color Wheel</TabsTrigger>
+                    <TabsTrigger value="picker">Hex Input</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="wheel" className="mt-4">
+                    <ColorWheelPicker
                       value={colorHex}
-                      onChange={e => setColorHex(e.target.value.toUpperCase())}
-                      onBlur={() => handleColorChange(colorHex)}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') handleColorChange(colorHex)
-                      }}
-                      placeholder="#FFFFFF"
-                      maxLength={7}
-                      disabled={!device.enabled || device.status === 'offline' || isUpdating}
-                      className="pr-12 font-mono"
+                      onChange={handleColorChange}
+                      onValueCommit={handleColorCommit}
+                      disabled={!device.enabled || device.status === 'offline'}
                     />
-                    <div
-                      className="border-border absolute top-1/2 right-2 h-8 w-8 -translate-y-1/2 rounded border-2"
-                      style={{ backgroundColor: colorHex }}
-                      aria-label="Current color preview"
-                    />
-                  </div>
-                  <Input
-                    type="color"
-                    value={colorHex}
-                    onChange={e => {
-                      setColorHex(e.target.value.toUpperCase())
-                      handleColorChange(e.target.value.toUpperCase())
-                    }}
-                    disabled={!device.enabled || device.status === 'offline' || isUpdating}
-                    className="h-10 w-16 cursor-pointer p-1"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  {[
-                    '#FF0000',
-                    '#FF8800',
-                    '#FFFF00',
-                    '#00FF00',
-                    '#0088FF',
-                    '#4400FF',
-                    '#FF00FF',
-                  ].map(color => (
-                    <button
-                      key={color}
-                      type="button"
-                      onClick={() => {
-                        setColorHex(color)
-                        handleColorChange(color)
-                      }}
-                      disabled={!device.enabled || device.status === 'offline' || isUpdating}
-                      className="ring-border hover:ring-primary h-8 w-8 rounded-full ring-2 transition-all hover:scale-110 hover:ring-offset-2 disabled:opacity-50 disabled:hover:scale-100"
-                      style={{ backgroundColor: color }}
-                      title={color}
-                      aria-label={`Set color to ${color}`}
-                    />
-                  ))}
-                </div>
+                  </TabsContent>
+
+                  <TabsContent value="picker" className="mt-4 space-y-3">
+                    <div className="flex gap-3">
+                      <div className="relative flex-1">
+                        <Input
+                          type="text"
+                          value={colorHex}
+                          onChange={e => {
+                            const newValue = e.target.value.toUpperCase()
+                            handleColorChange(newValue)
+                          }}
+                          onBlur={() => handleColorCommit(colorHex)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') handleColorCommit(colorHex)
+                          }}
+                          placeholder="#FFFFFF"
+                          maxLength={7}
+                          disabled={!device.enabled || device.status === 'offline' || isUpdating}
+                          className="pr-12 font-mono"
+                        />
+                        <div
+                          className="border-border absolute top-1/2 right-2 h-8 w-8 -translate-y-1/2 rounded border-2"
+                          style={{ backgroundColor: colorHex }}
+                          aria-label="Current color preview"
+                        />
+                      </div>
+                      <Input
+                        type="color"
+                        value={colorHex}
+                        onChange={e => {
+                          const newValue = e.target.value.toUpperCase()
+                          handleColorChange(newValue)
+                          handleColorCommit(newValue)
+                        }}
+                        disabled={!device.enabled || device.status === 'offline' || isUpdating}
+                        className="h-10 w-16 cursor-pointer p-1"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      {[
+                        '#FF0000',
+                        '#FF8800',
+                        '#FFFF00',
+                        '#00FF00',
+                        '#0088FF',
+                        '#4400FF',
+                        '#FF00FF',
+                      ].map(color => (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => {
+                            handleColorChange(color)
+                            handleColorCommit(color)
+                          }}
+                          disabled={!device.enabled || device.status === 'offline' || isUpdating}
+                          className="ring-border hover:ring-primary h-8 w-8 rounded-full ring-2 transition-all hover:scale-110 hover:ring-offset-2 disabled:opacity-50 disabled:hover:scale-100"
+                          style={{ backgroundColor: color }}
+                          title={color}
+                          aria-label={`Set color to ${color}`}
+                        />
+                      ))}
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </motion.div>
             )}
 
             {/* Color Temperature Control */}
             {hasColorTemp && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="space-y-3"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <ThermometerIcon className="h-5 w-5" />
-                    <Label className="text-base">Color Temperature</Label>
-                  </div>
-                  <span className="text-muted-foreground text-sm font-medium">{colorTemp}K</span>
-                </div>
-                <Slider
-                  value={[colorTemp]}
-                  onValueChange={handleColorTempChange}
-                  min={2000}
-                  max={6500}
-                  step={100}
-                  disabled={!device.enabled || device.status === 'offline' || isUpdating}
-                  className="cursor-pointer"
-                />
-                <div className="text-muted-foreground flex justify-between text-xs">
-                  <span>Warm (2000K)</span>
-                  <span>Cool (6500K)</span>
-                </div>
-              </motion.div>
+              <ColorTemperatureSlider
+                value={colorTemp}
+                onChange={handleColorTempChange}
+                onValueCommit={handleColorTempCommit}
+                isUpdating={isUpdating}
+                disabled={!device.enabled || device.status === 'offline'}
+              />
             )}
 
             {/* No capabilities message */}

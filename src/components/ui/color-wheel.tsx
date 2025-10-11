@@ -24,8 +24,10 @@ import { useEffect, useRef, useState } from 'react'
 interface ColorWheelPickerProps {
   /** Current color value in hex format */
   value: string
-  /** Callback when color changes */
+  /** Callback when color changes (fires continuously during drag) */
   onChange: (hex: string) => void
+  /** Callback when user finishes changing color (fires on release) */
+  onValueCommit?: (hex: string) => void
   /** Whether the picker is disabled */
   disabled?: boolean
   /** Additional CSS classes */
@@ -119,7 +121,13 @@ function hexToHsv(hex: string): HSV {
   return { h: Math.round(h), s: Math.round(s), v: Math.round(v) }
 }
 
-export function ColorWheelPicker({ value, onChange, disabled, className }: ColorWheelPickerProps) {
+export function ColorWheelPicker({
+  value,
+  onChange,
+  onValueCommit,
+  disabled,
+  className,
+}: ColorWheelPickerProps) {
   const [hsv, setHsv] = useState<HSV>(hexToHsv(value))
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const isDragging = useRef(false)
@@ -169,15 +177,24 @@ export function ColorWheelPicker({ value, onChange, disabled, className }: Color
     ctx.fill()
   }, [])
 
-  const handleColorSelect = (event: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleColorSelect = (
+    event: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
+  ) => {
     if (disabled) return
 
     const canvas = canvasRef.current
     if (!canvas) return
 
     const rect = canvas.getBoundingClientRect()
-    const x = event.clientX - rect.left
-    const y = event.clientY - rect.top
+
+    // Handle both mouse and touch events
+    const clientX = 'touches' in event ? event.touches[0]?.clientX : event.clientX
+    const clientY = 'touches' in event ? event.touches[0]?.clientY : event.clientY
+
+    if (!clientX || !clientY) return
+
+    const x = clientX - rect.left
+    const y = clientY - rect.top
 
     const centerX = canvas.width / 2
     const centerY = canvas.height / 2
@@ -220,34 +237,60 @@ export function ColorWheelPicker({ value, onChange, disabled, className }: Color
   return (
     <div className={cn('space-y-4', className)}>
       {/* Color Wheel Canvas */}
-      <div className="relative flex items-center justify-center">
-        <motion.canvas
+      <div className="relative mx-auto h-[240px] w-[240px]">
+        <canvas
           ref={canvasRef}
           width={240}
           height={240}
           onClick={handleColorSelect}
           onMouseDown={() => {
-            isDragging.current = true
+            if (!disabled) isDragging.current = true
           }}
           onMouseUp={() => {
+            if (isDragging.current && onValueCommit) {
+              const { r, g, b } = hsvToRgb(hsv.h, hsv.s, hsv.v)
+              onValueCommit(rgbToHex(r, g, b))
+            }
             isDragging.current = false
           }}
           onMouseMove={event => {
-            if (isDragging.current) {
+            if (isDragging.current && !disabled) {
               handleColorSelect(event)
             }
           }}
           onMouseLeave={() => {
+            if (isDragging.current && onValueCommit) {
+              const { r, g, b } = hsvToRgb(hsv.h, hsv.s, hsv.v)
+              onValueCommit(rgbToHex(r, g, b))
+            }
             isDragging.current = false
           }}
-          whileHover={{ scale: disabled ? 1 : 1.02 }}
-          whileTap={{ scale: disabled ? 1 : 0.98 }}
+          onTouchStart={e => {
+            if (!disabled) {
+              isDragging.current = true
+              handleColorSelect(e)
+            }
+          }}
+          onTouchMove={e => {
+            if (isDragging.current && !disabled) {
+              e.preventDefault()
+              handleColorSelect(e)
+            }
+          }}
+          onTouchEnd={() => {
+            if (isDragging.current && onValueCommit) {
+              const { r, g, b } = hsvToRgb(hsv.h, hsv.s, hsv.v)
+              onValueCommit(rgbToHex(r, g, b))
+            }
+            isDragging.current = false
+          }}
           className={cn(
-            'cursor-pointer rounded-full shadow-lg transition-shadow hover:shadow-xl',
-            disabled && 'cursor-not-allowed opacity-50'
+            'rounded-full shadow-lg transition-all hover:shadow-xl',
+            disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:scale-[1.02]'
           )}
           style={{
             touchAction: 'none',
+            userSelect: 'none',
           }}
         />
 
@@ -256,8 +299,10 @@ export function ColorWheelPicker({ value, onChange, disabled, className }: Color
           className="pointer-events-none absolute"
           initial={false}
           animate={{
-            left: `${50 + (hsv.s / 100) * 40 * Math.cos((hsv.h * Math.PI) / 180)}%`,
-            top: `${50 + (hsv.s / 100) * 40 * Math.sin((hsv.h * Math.PI) / 180)}%`,
+            // Canvas is 240x240, center at 120px, radius is 110px
+            // Calculate position in pixels from canvas top-left
+            left: 120 + (hsv.s / 100) * 110 * Math.cos((hsv.h * Math.PI) / 180),
+            top: 120 + (hsv.s / 100) * 110 * Math.sin((hsv.h * Math.PI) / 180),
           }}
           transition={{
             type: 'spring',
@@ -281,6 +326,9 @@ export function ColorWheelPicker({ value, onChange, disabled, className }: Color
             onClick={() => {
               if (!disabled) {
                 onChange(color)
+                if (onValueCommit) {
+                  onValueCommit(color)
+                }
               }
             }}
             disabled={disabled}

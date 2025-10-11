@@ -21,8 +21,10 @@ import { motion } from 'framer-motion'
 interface ColorTemperatureSliderProps {
   /** Current color temperature in Kelvin (2000-6500) */
   value: number
-  /** Callback when temperature changes */
+  /** Callback when temperature changes (fires continuously during drag) */
   onChange: (kelvin: number) => void
+  /** Callback when user finishes changing temperature (fires on release) */
+  onValueCommit?: (kelvin: number) => void
   /** Whether the slider is disabled */
   disabled?: boolean
   /** Whether the control is updating (shows loading state) */
@@ -34,6 +36,7 @@ interface ColorTemperatureSliderProps {
 export function ColorTemperatureSlider({
   value,
   onChange,
+  onValueCommit,
   disabled,
   isUpdating,
   className,
@@ -71,6 +74,7 @@ export function ColorTemperatureSlider({
         <Slider
           value={[value]}
           onValueChange={values => onChange(values[0] ?? value)}
+          onValueCommit={onValueCommit ? values => onValueCommit(values[0] ?? value) : undefined}
           min={2000}
           max={6500}
           step={100}

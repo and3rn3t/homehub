@@ -26,6 +26,9 @@ export function TestAdvancedControls() {
 
   const handleColorChange = (newColor: string) => {
     setColor(newColor)
+  }
+
+  const handleColorCommit = (newColor: string) => {
     toast.success('Color changed', {
       description: newColor,
     })
@@ -33,6 +36,9 @@ export function TestAdvancedControls() {
 
   const handleBrightnessChange = (newBrightness: number) => {
     setBrightness(newBrightness)
+  }
+
+  const handleBrightnessCommit = (newBrightness: number) => {
     if (newBrightness === 0 || newBrightness === 100) {
       toast.info(`Brightness at ${newBrightness}%`)
     }
@@ -40,6 +46,9 @@ export function TestAdvancedControls() {
 
   const handleColorTempChange = (newTemp: number) => {
     setColorTemp(newTemp)
+  }
+
+  const handleColorTempCommit = (newTemp: number) => {
     if (newTemp === 2000 || newTemp === 6500) {
       toast.info(`Color temperature at ${newTemp}K`)
     }
@@ -142,7 +151,12 @@ export function TestAdvancedControls() {
             <CardDescription>Interactive HSV color selection with presets</CardDescription>
           </CardHeader>
           <CardContent>
-            <ColorWheelPicker value={color} onChange={handleColorChange} disabled={isDisabled} />
+            <ColorWheelPicker
+              value={color}
+              onChange={handleColorChange}
+              onValueCommit={handleColorCommit}
+              disabled={isDisabled}
+            />
           </CardContent>
         </Card>
 
@@ -158,6 +172,7 @@ export function TestAdvancedControls() {
               <BrightnessSlider
                 value={brightness}
                 onChange={handleBrightnessChange}
+                onValueCommit={handleBrightnessCommit}
                 isUpdating={isUpdating}
                 disabled={isDisabled}
               />
@@ -176,6 +191,7 @@ export function TestAdvancedControls() {
               <ColorTemperatureSlider
                 value={colorTemp}
                 onChange={handleColorTempChange}
+                onValueCommit={handleColorTempCommit}
                 isUpdating={isUpdating}
                 disabled={isDisabled}
               />
