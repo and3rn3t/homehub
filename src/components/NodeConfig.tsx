@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
 import { Textarea } from '@/components/ui/textarea'
-import { X } from '@phosphor-icons/react'
+import { XIcon } from '@/lib/icons'
 import { useState } from 'react'
 
 interface FlowNode {

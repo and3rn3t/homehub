@@ -2,7 +2,7 @@
 
 /**
  * Test Hue Bridge Control
- * 
+ *
  * Quick test to verify we can control Hue lights
  */
 
@@ -18,14 +18,14 @@ async function testControl() {
     // Step 1: Get list of lights
     console.log('Step 1: Getting lights list...')
     const lightsResponse = await fetch(`http://${BRIDGE_IP}/api/${API_KEY}/lights`)
-    
+
     if (!lightsResponse.ok) {
       console.error('❌ Failed to get lights:', lightsResponse.status)
       return
     }
 
     const lights = await lightsResponse.json()
-    
+
     if (lights[0]?.error) {
       console.error('❌ API Error:', lights[0].error)
       return
@@ -33,7 +33,7 @@ async function testControl() {
 
     const lightIds = Object.keys(lights)
     console.log(`✅ Found ${lightIds.length} lights`)
-    
+
     if (lightIds.length === 0) {
       console.log('No lights to test')
       return
@@ -44,7 +44,9 @@ async function testControl() {
     const testLight = lights[testLightId]
     console.log(`\n🔦 Testing with: ${testLight.name} (ID: ${testLightId})`)
     console.log(`   Current state: ${testLight.state.on ? 'ON' : 'OFF'}`)
-    console.log(`   Brightness: ${testLight.state.bri} (${Math.round((testLight.state.bri / 254) * 100)}%)`)
+    console.log(
+      `   Brightness: ${testLight.state.bri} (${Math.round((testLight.state.bri / 254) * 100)}%)`
+    )
     console.log(`   Reachable: ${testLight.state.reachable ? '✅' : '❌'}\n`)
 
     if (!testLight.state.reachable) {
@@ -119,11 +121,15 @@ async function testControl() {
 
     // Step 5: Verify state
     console.log('\nStep 5: Verifying final state...')
-    const finalStateResponse = await fetch(`http://${BRIDGE_IP}/api/${API_KEY}/lights/${testLightId}`)
+    const finalStateResponse = await fetch(
+      `http://${BRIDGE_IP}/api/${API_KEY}/lights/${testLightId}`
+    )
     const finalState = await finalStateResponse.json()
 
     console.log(`Final state: ${finalState.state.on ? 'ON' : 'OFF'}`)
-    console.log(`Brightness: ${finalState.state.bri} (${Math.round((finalState.state.bri / 254) * 100)}%)`)
+    console.log(
+      `Brightness: ${finalState.state.bri} (${Math.round((finalState.state.bri / 254) * 100)}%)`
+    )
 
     console.log('\n✅ All tests passed!')
     console.log('\n📊 Summary:')
@@ -132,7 +138,6 @@ async function testControl() {
     console.log('   ✅ Can turn lights on/off')
     console.log('   ✅ Can adjust brightness')
     console.log('\n💡 Your Hue integration is working correctly!')
-
   } catch (error) {
     console.error('\n❌ Test failed:', error.message)
     console.error('\nPossible issues:')

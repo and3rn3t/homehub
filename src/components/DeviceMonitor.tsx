@@ -6,22 +6,7 @@ import { Switch } from '@/components/ui/switch'
 import { KV_KEYS, MOCK_DEVICES } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
 import type { Device } from '@/types'
-import {
-  BatteryMedium,
-  BatteryWarning,
-  Bell,
-  BellSlash,
-  Camera,
-  ChartLineUp,
-  Clock,
-  Lightbulb,
-  Shield,
-  SpeakerHigh,
-  Thermometer,
-  Warning,
-  WifiHigh,
-  WifiSlash,
-} from '@phosphor-icons/react'
+import { BatteryIcon, BatteryWarningIcon, BellIcon, BellOffIcon, CameraIcon, LineChartIcon, ClockIcon, LightbulbIcon, ShieldIcon, SpeakerIcon, ThermometerIcon, AlertTriangleIcon, WifiIcon, WifiOffIcon,  } from '@/lib/icons'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'

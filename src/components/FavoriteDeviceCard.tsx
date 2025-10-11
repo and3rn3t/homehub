@@ -2,16 +2,31 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { ProtocolBadge } from '@/components/ui/protocol-badge'
 import { Switch } from '@/components/ui/switch'
+import { useKV } from '@/hooks/use-kv'
+import { ClockIcon, LightbulbIcon, ShieldIcon, ThermometerIcon, WifiIcon } from '@/lib/icons'
 import type { Device } from '@/types'
-import { Lightbulb, Shield, Thermometer, WifiHigh } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
 import { memo, useCallback } from 'react'
+import { FavoriteButton } from './FavoriteButton'
+
+// Time ago helper
+const getTimeAgo = (date: Date | string | undefined) => {
+  if (!date) return null
+  const dateObj = typeof date === 'string' ? new Date(date) : date
+  const minutes = Math.floor((Date.now() - dateObj.getTime()) / 60000)
+  if (minutes < 1) return 'Just now'
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  return `${days}d ago`
+}
 
 const deviceIcons = {
-  light: Lightbulb,
-  thermostat: Thermometer,
-  security: Shield,
-  sensor: WifiHigh,
+  light: LightbulbIcon,
+  thermostat: ThermometerIcon,
+  security: ShieldIcon,
+  sensor: WifiIcon,
 }
 
 interface FavoriteDeviceCardProps {
@@ -24,6 +39,7 @@ interface FavoriteDeviceCardProps {
 export const FavoriteDeviceCard = memo(
   function FavoriteDeviceCard({ device, index, onDeviceClick, onToggle }: FavoriteDeviceCardProps) {
     const IconComponent = deviceIcons[device.type]
+    const [favoriteDevices] = useKV<string[]>('favorite-devices', [])
 
     // Create stable handlers using just the device ID
     const handleToggle = useCallback(() => {
@@ -88,6 +104,12 @@ export const FavoriteDeviceCard = memo(
                         {device.status}
                       </Badge>
                     </div>
+                    {device.lastSeen && getTimeAgo(device.lastSeen) && (
+                      <div className="text-muted-foreground mt-1 flex items-center gap-1 text-xs">
+                        <ClockIcon className="h-3 w-3" />
+                        <span>{getTimeAgo(device.lastSeen)}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -104,6 +126,12 @@ export const FavoriteDeviceCard = memo(
                       {device.unit}
                     </motion.span>
                   )}
+                  <FavoriteButton
+                    deviceId={device.id}
+                    deviceName={device.name}
+                    isFavorite={favoriteDevices.includes(device.id)}
+                    size={18}
+                  />
                   <div onClick={e => e.stopPropagation()}>
                     <Switch
                       checked={device.enabled}

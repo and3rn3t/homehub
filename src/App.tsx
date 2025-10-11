@@ -1,7 +1,7 @@
 import { Toaster } from '@/components/ui/sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useKV } from '@/hooks/use-kv'
-import { ChartLine, Cpu, House, Lightning, ShieldCheck, Sliders } from '@phosphor-icons/react'
+import { ChartLine, Cpu, House, ZapIcon, ShieldCheck, Sliders } from '@/lib/icons'
 import { Automations } from './components/Automations'
 import { BackupRecovery } from './components/BackupRecovery'
 import { Dashboard } from './components/Dashboard'

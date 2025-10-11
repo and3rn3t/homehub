@@ -2,7 +2,7 @@
 
 /**
  * Check Hue Light Status
- * 
+ *
  * Shows which lights are reachable/unreachable
  */
 
@@ -14,14 +14,14 @@ console.log('🔍 Checking Hue Light Status\n')
 async function checkLights() {
   try {
     const response = await fetch(`http://${BRIDGE_IP}/api/${API_KEY}/lights`)
-    
+
     if (!response.ok) {
       console.error('❌ Failed to get lights:', response.status)
       return
     }
 
     const lights = await response.json()
-    
+
     if (lights[0]?.error) {
       console.error('❌ API Error:', lights[0].error)
       return
@@ -54,7 +54,7 @@ async function checkLights() {
       unreachable.forEach(light => {
         console.log(`  ${light.id.padStart(2)}. ${light.name}`)
       })
-      
+
       console.log('\n💡 Unreachable lights are:')
       console.log('   • Physically disconnected or powered off')
       console.log('   • Out of range from the Hue bridge')
@@ -63,7 +63,6 @@ async function checkLights() {
     } else {
       console.log('\n✅ All lights are reachable!')
     }
-
   } catch (error) {
     console.error('❌ Error:', error.message)
   }

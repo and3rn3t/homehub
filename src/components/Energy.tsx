@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { useKV } from '@/hooks/use-kv'
-import { Calendar, Clock, Leaf, Lightning, TrendUp } from '@phosphor-icons/react'
+import { Calendar, ClockIcon, Leaf, ZapIcon, TrendingUpIcon } from '@/lib/icons'
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 
 interface EnergyData {

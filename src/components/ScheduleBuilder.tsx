@@ -20,7 +20,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { useKV } from '@/hooks/use-kv'
-import { Clock, Plus, Sun, X } from '@phosphor-icons/react'
+import { ClockIcon, PlusIcon, SunRoomIcon, XIcon } from '@/lib/icons'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { toast } from 'sonner'

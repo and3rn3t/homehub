@@ -12,21 +12,13 @@ import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useKV } from '@/hooks/use-kv'
 import type { Device } from '@/types'
-import {
-  ArrowsClockwise,
-  BatteryFull,
-  Palette,
-  Pencil,
-  Sun,
-  Thermometer,
-  Trash,
-  WifiHigh,
-  X,
-} from '@phosphor-icons/react'
+import { RefreshIcon, BatteryIcon, PaletteIcon, EditIcon, SunRoomIcon, ThermometerIcon, TrashIcon, WifiIcon, XIcon,  } from '@/lib/icons'
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { FavoriteButton } from './FavoriteButton'
 
 interface DeviceControlPanelProps {
   device: Device
@@ -49,6 +41,7 @@ export function DeviceControlPanel({
   const [isUpdating, setIsUpdating] = useState(false)
   const [deviceName, setDeviceName] = useState(device.name)
   const [isRenaming, setIsRenaming] = useState(false)
+  const [favoriteDevices] = useKV<string[]>('favorite-devices', [])
 
   // Sync state when device changes
   useEffect(() => {
@@ -242,6 +235,12 @@ export function DeviceControlPanel({
               ) : (
                 <div className="flex items-center gap-2">
                   <DialogTitle className="text-xl">{device.name}</DialogTitle>
+                  <FavoriteButton
+                    deviceId={device.id}
+                    deviceName={device.name}
+                    isFavorite={favoriteDevices.includes(device.id)}
+                    size={18}
+                  />
                   <Button
                     size="icon"
                     variant="ghost"

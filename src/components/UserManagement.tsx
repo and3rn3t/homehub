@@ -22,7 +22,7 @@ import {
 import { MOCK_USERS } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
 import type { User, UserPermissions } from '@/types'
-import { Crown, Shield, Trash, User as UserIcon, UserPlus } from '@phosphor-icons/react'
+import { Crown, ShieldIcon, TrashIcon, User as UserIcon, UserPlus } from '@/lib/icons'
 import { useState } from 'react'
 import { toast } from 'sonner'
 

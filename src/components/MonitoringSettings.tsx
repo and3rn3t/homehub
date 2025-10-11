@@ -6,18 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { useKV } from '@/hooks/use-kv'
-import {
-  BatteryMedium,
-  Bell,
-  ChartLineUp,
-  CheckCircle,
-  Clock,
-  Gear as SettingsIcon,
-  Shield,
-  Warning,
-  WifiHigh,
-  XCircle,
-} from '@phosphor-icons/react'
+import { BatteryIcon, BellIcon, LineChartIcon, CheckCircleIcon, ClockIcon, Gear as SettingsIcon, ShieldIcon, AlertTriangleIcon, WifiIcon, XCircleIcon,  } from '@/lib/icons'
 import { toast } from 'sonner'
 
 interface MonitoringSettings {

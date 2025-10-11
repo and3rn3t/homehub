@@ -1,7 +1,7 @@
 # HomeHub Documentation Index
 
-**Last Updated**: October 10, 2025
-**Total Documents**: 60+ files
+**Last Updated**: October 11, 2025
+**Total Documents**: 62+ files
 **Status**: 🚧 Consolidation planned (see `DOCUMENTATION_CONSOLIDATION.md`)
 
 ---
@@ -10,10 +10,11 @@
 
 **New to HomeHub?** Start here:
 
-1. 📖 [Setup Quickstart](SETUP_QUICKSTART.md) - Get running in 15 minutes
-2. 🏗️ [Architecture Overview](ARCHITECTURE.md) - Understand the system
-3. 💻 [Best Practices](BEST_PRACTICES.md) - Coding standards and patterns
-4. 🧪 [Discovery Test Plan](DISCOVERY_TEST_PLAN.md) - Testing guide
+1. 📖 [Setup Quickstart](guides/SETUP_QUICKSTART.md) - Get running in 15 minutes
+2. 🏗️ [Architecture Overview](guides/ARCHITECTURE.md) - Understand the system
+3. 💻 [Best Practices](guides/BEST_PRACTICES.md) - Coding standards and patterns
+4. 🎨 [Icon Usage Guide](guides/ICON_USAGE_GUIDE.md) - Lucide React icon system
+5. 🧪 [Discovery Test Plan](development/DISCOVERY_TEST_PLAN.md) - Testing guide
 
 ---
 
@@ -23,13 +24,14 @@
 
 **Must-read documentation for all contributors:**
 
-| Document                                   | Description                                | Status     |
-| ------------------------------------------ | ------------------------------------------ | ---------- |
-| [ARCHITECTURE.md](ARCHITECTURE.md)         | System design, data flow, Mermaid diagrams | ✅ Current |
-| [BEST_PRACTICES.md](BEST_PRACTICES.md)     | Coding standards, component patterns       | ✅ Current |
-| [SETUP_QUICKSTART.md](SETUP_QUICKSTART.md) | Getting started guide                      | ✅ Current |
-| [SECURITY.md](SECURITY.md)                 | Security guidelines and best practices     | ✅ Current |
-| [NEXT_STEPS.md](NEXT_STEPS.md)             | Roadmap and priorities                     | ✅ Current |
+| Document                                          | Description                                | Status     |
+| ------------------------------------------------- | ------------------------------------------ | ---------- |
+| [ARCHITECTURE.md](guides/ARCHITECTURE.md)         | System design, data flow, Mermaid diagrams | ✅ Current |
+| [BEST_PRACTICES.md](guides/BEST_PRACTICES.md)     | Coding standards, component patterns       | ✅ Current |
+| [ICON_USAGE_GUIDE.md](guides/ICON_USAGE_GUIDE.md) | **NEW** - Lucide React icon system guide   | ✅ Current |
+| [SETUP_QUICKSTART.md](guides/SETUP_QUICKSTART.md) | Getting started guide                      | ✅ Current |
+| [SECURITY.md](deployment/SECURITY.md)             | Security guidelines and best practices     | ✅ Current |
+| [NEXT_STEPS.md](development/NEXT_STEPS.md)        | Roadmap and priorities                     | ✅ Current |
 
 ---
 
@@ -54,20 +56,22 @@
 
 **UI/UX framework, state management, design system:**
 
-| Document                                                           | Description                      | Status         |
-| ------------------------------------------------------------------ | -------------------------------- | -------------- |
-| [PHASE_1_COMPLETE.md](PHASE_1_COMPLETE.md)                         | Phase 1 summary and achievements | ✅ Current     |
-| [PHASE_1_TESTING_GUIDE.md](PHASE_1_TESTING_GUIDE.md)               | Phase 1 testing procedures       | ✅ Current     |
-| [PHASE_1.3_SUMMARY.md](PHASE_1.3_SUMMARY.md)                       | Phase 1.3 polish overview        | 🟡 Consolidate |
-| [PHASE_1.3_ANIMATIONS.md](PHASE_1.3_ANIMATIONS.md)                 | Spring animation patterns        | ✅ Current     |
-| [PHASE_1.3_LOADING_STATES.md](PHASE_1.3_LOADING_STATES.md)         | Skeleton loaders and spinners    | ✅ Current     |
-| [PHASE_1.3_INTEGRATION.md](PHASE_1.3_INTEGRATION.md)               | Integration patterns             | 🟡 Consolidate |
-| [PHASE_1.3.4_ERROR_BOUNDARIES.md](PHASE_1.3.4_ERROR_BOUNDARIES.md) | Error handling patterns          | ✅ Current     |
-| [PHASE_1.3.5_RESPONSIVE.md](PHASE_1.3.5_RESPONSIVE.md)             | Responsive design guide          | ✅ Current     |
-| [PHASE_1.3.5_CHANGES.md](PHASE_1.3.5_CHANGES.md)                   | Phase 1.3.5 changelog            | 🟡 Consolidate |
-| [PHASE_1.3.5_COMPLETE.md](PHASE_1.3.5_COMPLETE.md)                 | Phase 1.3.5 completion           | 🟡 Consolidate |
-| [PHASE_1.3.5_TEST_RESULTS.md](PHASE_1.3.5_TEST_RESULTS.md)         | Phase 1.3.5 test results         | 🟡 Consolidate |
-| [PHASE_1.3.6_FINAL_POLISH.md](PHASE_1.3.6_FINAL_POLISH.md)         | Final polish pass                | ✅ Current     |
+| Document                                                                   | Description                                | Status         |
+| -------------------------------------------------------------------------- | ------------------------------------------ | -------------- |
+| [PHASE_1_COMPLETE.md](history/PHASE_1_COMPLETE.md)                         | Phase 1 summary and achievements           | ✅ Current     |
+| [LUCIDE_MIGRATION_COMPLETE.md](development/LUCIDE_MIGRATION_COMPLETE.md)   | **NEW** - Icon system migration (Oct 2025) | ✅ Current     |
+| [TODO_6_LUCIDE_MIGRATION.md](development/TODO_6_LUCIDE_MIGRATION.md)       | Icon migration planning doc                | ✅ Current     |
+| [PHASE_1_TESTING_GUIDE.md](history/PHASE_1_TESTING_GUIDE.md)               | Phase 1 testing procedures                 | ✅ Current     |
+| [PHASE_1.3_SUMMARY.md](history/PHASE_1.3_SUMMARY.md)                       | Phase 1.3 polish overview                  | 🟡 Consolidate |
+| [PHASE_1.3_ANIMATIONS.md](history/PHASE_1.3_ANIMATIONS.md)                 | Spring animation patterns                  | ✅ Current     |
+| [PHASE_1.3_LOADING_STATES.md](history/PHASE_1.3_LOADING_STATES.md)         | Skeleton loaders and spinners              | ✅ Current     |
+| [PHASE_1.3_INTEGRATION.md](history/PHASE_1.3_INTEGRATION.md)               | Integration patterns                       | 🟡 Consolidate |
+| [PHASE_1.3.4_ERROR_BOUNDARIES.md](history/PHASE_1.3.4_ERROR_BOUNDARIES.md) | Error handling patterns                    | ✅ Current     |
+| [PHASE_1.3.5_RESPONSIVE.md](history/PHASE_1.3.5_RESPONSIVE.md)             | Responsive design guide                    | ✅ Current     |
+| [PHASE_1.3.5_CHANGES.md](history/PHASE_1.3.5_CHANGES.md)                   | Phase 1.3.5 changelog                      | 🟡 Consolidate |
+| [PHASE_1.3.5_COMPLETE.md](history/PHASE_1.3.5_COMPLETE.md)                 | Phase 1.3.5 completion                     | 🟡 Consolidate |
+| [PHASE_1.3.5_TEST_RESULTS.md](history/PHASE_1.3.5_TEST_RESULTS.md)         | Phase 1.3.5 test results                   | 🟡 Consolidate |
+| [PHASE_1.3.6_FINAL_POLISH.md](history/PHASE_1.3.6_FINAL_POLISH.md)         | Final polish pass                          | ✅ Current     |
 
 ---
 

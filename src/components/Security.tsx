@@ -13,20 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { KV_KEYS, MOCK_CAMERAS, MOCK_SECURITY_EVENTS } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
 import type { Camera, SecurityEvent } from '@/types'
-import {
-  Bell,
-  Camera as CameraIcon,
-  CheckCircle,
-  Clock,
-  Eye,
-  EyeSlash,
-  MapPin,
-  Phone,
-  Play,
-  Record,
-  Shield,
-  Warning,
-} from '@phosphor-icons/react'
+import { BellIcon, Camera as CameraIcon, CheckCircleIcon, ClockIcon, EyeIcon, EyeOffIcon, MapPinIcon, PhoneIcon, PlayIcon, VideoIcon, ShieldIcon, AlertTriangleIcon,  } from '@/lib/icons'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { toast } from 'sonner'

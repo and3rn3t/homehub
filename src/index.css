@@ -196,3 +196,48 @@
 .activity-bar-level-20 {
   height: 60px;
 }
+
+/* iOS Style Utilities */
+@layer utilities {
+  /* Hide scrollbars while maintaining scroll functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  /* Enhanced backdrop blur for glass materials */
+  .backdrop-blur-glass {
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+  }
+
+  /* iOS-style frosted glass effect */
+  .glass-card {
+    background: oklch(0.99 0.002 264 / 0.72);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid oklch(0.88 0.01 264 / 0.3);
+  }
+
+  .dark .glass-card {
+    background: oklch(0.2 0.01 264 / 0.72);
+    border: 1px solid oklch(0.3 0.01 264 / 0.3);
+  }
+
+  /* Elevated card with iOS shadow */
+  .card-elevated {
+    box-shadow:
+      0 8px 32px oklch(0 0 0 / 0.08),
+      0 2px 8px oklch(0 0 0 / 0.04);
+  }
+
+  .dark .card-elevated {
+    box-shadow:
+      0 8px 32px oklch(0 0 0 / 0.24),
+      0 2px 8px oklch(0 0 0 / 0.12);
+  }
+}

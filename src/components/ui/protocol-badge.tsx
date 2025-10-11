@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge'
 import type { DeviceProtocol } from '@/types'
-import { CloudArrowUp, Lightbulb, WifiHigh } from '@phosphor-icons/react'
+import { CloudArrowUp, LightbulbIcon, WifiIcon } from '@/lib/icons'
 
 interface ProtocolBadgeProps {
   protocol: DeviceProtocol

@@ -2,28 +2,40 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { ControlTile } from '@/components/ui/control-tile'
 import { ErrorState } from '@/components/ui/error-state'
 import { DeviceCardSkeleton, StatusCardSkeleton } from '@/components/ui/skeleton'
 import { KV_KEYS } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
 import { useMQTTConnection } from '@/hooks/use-mqtt-connection'
 import { useMQTTDevices } from '@/hooks/use-mqtt-devices'
+import {
+  ActivityIcon,
+  AlertTriangleIcon,
+  BriefcaseIcon,
+  CheckCircleIcon,
+  ChevronRightIcon,
+  HouseIcon,
+  LightbulbIcon,
+  LockIcon,
+  MoonIcon,
+  PlayIcon,
+  PlusIcon,
+  RefreshIcon,
+  ShieldIcon,
+  SofaIcon,
+  SunRoomIcon,
+  ThermometerIcon,
+  TreeIcon,
+  UsersIcon,
+  UtensilsIcon,
+  WifiIcon,
+  WifiOffIcon,
+} from '@/lib/icons'
+import { cn } from '@/lib/utils'
 import { DeviceRegistry } from '@/services/device'
 import { HTTPDeviceAdapter } from '@/services/device/HTTPDeviceAdapter'
-import type { Device, DeviceAlert } from '@/types'
-import {
-  ArrowsClockwise,
-  CheckCircle,
-  House as HomeIcon,
-  Moon,
-  Plus,
-  Pulse,
-  Shield,
-  Sun,
-  Warning,
-  WifiHigh,
-  WifiSlash,
-} from '@phosphor-icons/react'
+import type { Device, DeviceAlert, Room, Scene } from '@/types'
 import { motion } from 'framer-motion'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -76,6 +88,40 @@ export function Dashboard() {
 
   const [deviceAlerts] = useKV<DeviceAlert[]>('device-alerts', [])
   const [favoriteDevices] = useKV<string[]>('favorite-devices', [])
+  const [scenes] = useKV<Scene[]>(KV_KEYS.SCENES, [])
+  const [rooms] = useKV<Room[]>(KV_KEYS.ROOMS, [])
+
+  // Helper to get icon component for device type
+  const getDeviceIcon = (device: Device) => {
+    switch (device.type) {
+      case 'light':
+        return LightbulbIcon
+      case 'thermostat':
+        return ThermometerIcon
+      case 'security':
+        return LockIcon
+      case 'sensor':
+        return ShieldIcon
+      default:
+        return HouseIcon
+    }
+  }
+
+  // Helper to get tint color for device type
+  const getDeviceTint = (device: Device): string => {
+    switch (device.type) {
+      case 'light':
+        return 'yellow'
+      case 'thermostat':
+        return 'orange'
+      case 'security':
+        return 'red'
+      case 'sensor':
+        return 'blue'
+      default:
+        return 'primary'
+    }
+  }
 
   const quickScenesData = [
     { id: 'good-morning', name: 'Good Morning', icon: 'sun' },
@@ -85,10 +131,12 @@ export function Dashboard() {
   ]
 
   const sceneIcons = {
-    sun: Sun,
-    moon: Moon,
-    home: HomeIcon,
-    shield: Shield,
+    sun: SunRoomIcon,
+    moon: MoonIcon,
+    home: HouseIcon,
+    shield: ShieldIcon,
+    play: PlayIcon,
+    coffee: SofaIcon,
   }
 
   // Initialize HTTP device connections and monitoring
@@ -355,7 +403,7 @@ export function Dashboard() {
             <div className="flex items-center gap-3">
               <NotificationBell />
               <Button variant="outline" size="icon" className="rounded-full">
-                <Plus size={20} />
+                <PlusIcon className="h-5 w-5" />
               </Button>
             </div>
           </div>
@@ -402,7 +450,7 @@ export function Dashboard() {
             <div className="flex items-center gap-3">
               <NotificationBell />
               <Button variant="outline" size="icon" className="rounded-full">
-                <Plus size={20} />
+                <PlusIcon className="h-5 w-5" />
               </Button>
             </div>
           </div>
@@ -421,9 +469,10 @@ export function Dashboard() {
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="p-4 pb-3 sm:p-6 sm:pb-4">
-        <div className="mb-6 flex items-center justify-between">
+    <div className="bg-background flex h-full flex-col">
+      {/* Header */}
+      <div className="p-4 pb-0 sm:p-6 sm:pb-0">
+        <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div>
               <h1 className="text-foreground text-xl font-bold sm:text-2xl">Good Morning</h1>
@@ -438,16 +487,16 @@ export function Dashboard() {
               >
                 {mqttConnected ? (
                   <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
-                    <WifiHigh size={14} className="mr-1" />
-                    MQTT Connected
+                    <WifiIcon className="mr-1 h-3.5 w-3.5" />
+                    MQTT
                   </Badge>
                 ) : connectionState === 'reconnecting' ? (
                   <Badge
                     variant="outline"
                     className="border-yellow-200 bg-yellow-50 text-yellow-700"
                   >
-                    <ArrowsClockwise size={14} className="mr-1 animate-spin" />
-                    Reconnecting...
+                    <RefreshIcon className="mr-1 h-3.5 w-3.5 animate-spin" />
+                    Reconnecting
                   </Badge>
                 ) : connectionState === 'error' ? (
                   <Button
@@ -462,23 +511,23 @@ export function Dashboard() {
                       })
                     }}
                   >
-                    <WifiSlash size={14} className="mr-1" />
+                    <WifiOffIcon className="mr-1 h-3.5 w-3.5" />
                     Reconnect
                   </Button>
                 ) : null}
               </motion.div>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <NotificationBell />
             <motion.div whileTap={{ scale: 0.9 }} whileHover={{ scale: 1.05 }}>
               <Button
                 variant="outline"
                 size="icon"
-                className="h-11 w-11 rounded-full"
+                className="h-10 w-10 rounded-full"
                 onClick={() => setDiscoveryOpen(true)}
               >
-                <Plus size={20} />
+                <PlusIcon className="h-5 w-5" />
               </Button>
             </motion.div>
           </div>
@@ -488,11 +537,11 @@ export function Dashboard() {
         {(criticalAlerts.length > 0 ||
           offlineDevices.length > 0 ||
           lowBatteryDevices.length > 0) && (
-          <Alert className="mb-6 border-red-200 bg-red-50">
-            <Warning size={16} className="text-red-600" />
+          <Alert className="mb-4 border-red-200 bg-red-50">
+            <AlertTriangleIcon className="h-4 w-4 text-red-600" />
             <AlertDescription className="text-red-700">
               <div className="flex items-center justify-between">
-                <div>
+                <div className="text-sm">
                   {criticalAlerts.length > 0 && (
                     <span>
                       {criticalAlerts.length} critical alert{criticalAlerts.length > 1 ? 's' : ''}
@@ -510,114 +559,165 @@ export function Dashboard() {
                     </span>
                   )}
                 </div>
-                <Button variant="ghost" size="sm" className="h-6 text-red-700">
-                  View Details
-                </Button>
               </div>
             </AlertDescription>
           </Alert>
         )}
-
-        {/* System Status */}
-        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.1 }}
-          >
-            <Card className="border-green-200 bg-green-50">
-              <CardContent className="p-3 text-center">
-                <CheckCircle size={20} className="mx-auto mb-1 text-green-600" />
-                <div className="text-lg font-semibold text-green-800">
-                  {devices.filter(d => d.status === 'online').length}
-                </div>
-                <div className="text-xs text-green-700">Online</div>
-              </CardContent>
-            </Card>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.2 }}
-          >
-            <Card className="border-red-200 bg-red-50">
-              <CardContent className="p-3 text-center">
-                <Warning size={20} className="mx-auto mb-1 text-red-600" />
-                <div className="text-lg font-semibold text-red-800">{offlineDevices.length}</div>
-                <div className="text-xs text-red-700">Offline</div>
-              </CardContent>
-            </Card>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.3 }}
-          >
-            <Card className="border-blue-200 bg-blue-50">
-              <CardContent className="p-3 text-center">
-                <Pulse size={20} className="mx-auto mb-1 text-blue-600" />
-                <div className="text-lg font-semibold text-blue-800">{activeAlerts.length}</div>
-                <div className="text-xs text-blue-700">Alerts</div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
-
-        <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {quickScenesData.map((scene, index) => {
-            const IconComponent = sceneIcons[scene.icon as keyof typeof sceneIcons]
-            return (
-              <motion.div
-                key={scene.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 300,
-                  damping: 20,
-                  delay: 0.4 + index * 0.1,
-                }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Card
-                  role="button"
-                  tabIndex={0}
-                  className="hover:bg-accent/5 focus-visible:ring-primary/50 border-border/50 cursor-pointer transition-all duration-200 hover:shadow-md focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-                  onClick={() => activateScene(scene.name)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      activateScene(scene.name)
-                    }
-                  }}
-                >
-                  <CardContent className="flex items-center gap-3 p-4">
-                    <motion.div
-                      className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full"
-                      whileTap={{ rotate: 15 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 10 }}
-                    >
-                      <IconComponent size={20} className="text-primary" />
-                    </motion.div>
-                    <span className="text-sm font-medium">{scene.name}</span>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )
-          })}
-        </div>
       </div>
 
+      {/* Sectioned Content - iOS Home Style */}
       <div className="flex-1 overflow-y-auto px-4 pb-6 sm:px-6">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
+        {/* Section 1: Status Summary */}
+        <div className="mb-6">
+          <div className="grid grid-cols-3 gap-3">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                type: 'spring',
+                stiffness: 400,
+                damping: 30,
+                mass: 0.8,
+              }}
+            >
+              <Card variant="glass" className="border-green-200/50 bg-green-50/50">
+                <CardContent className="p-3 text-center">
+                  <CheckCircleIcon className="mx-auto mb-1 h-5 w-5 text-green-600" />
+                  <div className="text-lg font-semibold text-green-800 tabular-nums">
+                    {devices.filter(d => d.status === 'online').length}
+                  </div>
+                  <div className="text-xs text-green-700">Online</div>
+                </CardContent>
+              </Card>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                type: 'spring',
+                stiffness: 400,
+                damping: 30,
+                mass: 0.8,
+                delay: 0.05,
+              }}
+            >
+              <Card variant="glass" className="border-red-200/50 bg-red-50/50">
+                <CardContent className="p-3 text-center">
+                  <AlertTriangleIcon className="mx-auto mb-1 h-5 w-5 text-red-600" />
+                  <div className="text-lg font-semibold text-red-800 tabular-nums">
+                    {offlineDevices.length}
+                  </div>
+                  <div className="text-xs text-red-700">Offline</div>
+                </CardContent>
+              </Card>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                type: 'spring',
+                stiffness: 400,
+                damping: 30,
+                mass: 0.8,
+                delay: 0.1,
+              }}
+            >
+              <Card variant="glass" className="border-blue-200/50 bg-blue-50/50">
+                <CardContent className="p-3 text-center">
+                  <ActivityIcon className="mx-auto mb-1 h-5 w-5 text-blue-600" />
+                  <div className="text-lg font-semibold text-blue-800 tabular-nums">
+                    {activeAlerts.length}
+                  </div>
+                  <div className="text-xs text-blue-700">Alerts</div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Section 2: Quick Controls (Control Tiles) */}
+        <div className="mb-6">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-base font-semibold sm:text-lg">Quick Controls</h2>
+            <Button variant="ghost" size="sm" className="text-primary h-auto py-1 text-sm">
+              <span>See All</span>
+              <ChevronRightIcon className="ml-1 h-4 w-4" />
+            </Button>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {favoriteDeviceList.slice(0, 4).map((device, index) => (
+              <ControlTile
+                key={device.id}
+                device={device}
+                icon={getDeviceIcon(device)}
+                onTap={toggleDevice}
+                onLongPress={handleDeviceCardClick}
+                tint={getDeviceTint(device)}
+                size="medium"
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Section 3: Scenes (Horizontal Scroll) */}
+        {scenes.length > 0 && (
+          <div className="mb-6">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-base font-semibold sm:text-lg">Scenes</h2>
+              <Button variant="ghost" size="sm" className="text-primary h-auto py-1 text-sm">
+                <span>See All</span>
+                <ChevronRightIcon className="ml-1 h-4 w-4" />
+              </Button>
+            </div>
+            <div className="scrollbar-hide flex gap-3 overflow-x-auto pb-2">
+              {scenes.slice(0, 6).map((scene, index) => {
+                const IconComponent = sceneIcons[scene.icon as keyof typeof sceneIcons] || HouseIcon
+                return (
+                  <motion.div
+                    key={scene.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 400,
+                      damping: 30,
+                      mass: 0.8,
+                      delay: index * 0.05,
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex-shrink-0"
+                  >
+                    <Card
+                      variant="glass"
+                      role="button"
+                      tabIndex={0}
+                      className="hover:bg-accent/5 w-[140px] cursor-pointer transition-all duration-200 hover:shadow-md"
+                      onClick={() => activateScene(scene.name)}
+                    >
+                      <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
+                        <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
+                          <IconComponent className="text-primary h-6 w-6" />
+                        </div>
+                        <span className="line-clamp-2 text-sm font-medium">{scene.name}</span>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Section 4: Favorite Devices (Full Cards) */}
+        <div className="mb-6">
+          <div className="mb-3 flex items-center justify-between">
             <h2 className="text-base font-semibold sm:text-lg">Favorite Devices</h2>
             <div className="flex items-center gap-2">
               {mqttConnected && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-primary"
+                  className="text-primary h-auto py-1 text-sm"
                   onClick={() => {
                     toast.promise(discoverDevices(), {
                       loading: 'Discovering devices...',
@@ -626,21 +726,18 @@ export function Dashboard() {
                     })
                   }}
                 >
-                  <ArrowsClockwise size={16} className="mr-1" />
+                  <RefreshIcon className="mr-1 h-4 w-4" />
                   Discover
                 </Button>
               )}
-              <Button variant="ghost" size="sm" className="text-primary">
-                Edit
-              </Button>
             </div>
           </div>
 
           {favoriteDeviceList.length === 0 ? (
-            <Card className="border-border/30 border-2 border-dashed">
+            <Card variant="glass" className="border-2 border-dashed">
               <CardContent className="p-8 text-center">
                 <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                  <Plus size={24} className="text-muted-foreground" />
+                  <PlusIcon className="text-muted-foreground h-6 w-6" />
                 </div>
                 <p className="text-muted-foreground mb-2">No favorite devices</p>
                 <p className="text-muted-foreground text-sm">
@@ -662,6 +759,88 @@ export function Dashboard() {
             </div>
           )}
         </div>
+
+        {/* Section 5: Rooms (Compact List) */}
+        {rooms.length > 0 && (
+          <div className="mb-6">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-base font-semibold sm:text-lg">Rooms</h2>
+              <Button variant="ghost" size="sm" className="text-primary h-auto py-1 text-sm">
+                <span>See All</span>
+                <ChevronRightIcon className="ml-1 h-4 w-4" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {rooms.slice(0, 6).map((room, index) => {
+                const roomDevices = devices.filter(d => room.deviceIds?.includes(d.id))
+                const activeCount = roomDevices.filter(
+                  d => d.enabled && d.status === 'online'
+                ).length
+
+                // Icon mapping for room types (PascalCase from data)
+                const iconMap: Record<string, typeof UsersIcon> = {
+                  UtensilsIcon: UtensilsIcon,
+                  UsersIcon: UsersIcon,
+                  House: HouseIcon,
+                  BriefcaseIcon: BriefcaseIcon,
+                  TreeIcon: TreeIcon,
+                  HouseIcon: HouseIcon,
+                  SunRoomIcon: SunRoomIcon,
+                }
+                const RoomIcon = iconMap[room.icon || ''] || HouseIcon
+
+                // Room-specific color tinting (if room has a color defined)
+                const roomColorClass = room.color
+                  ? `bg-${room.color}-50/30 border-${room.color}-200/50`
+                  : ''
+
+                return (
+                  <motion.div
+                    key={room.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 400,
+                      damping: 30,
+                      mass: 0.8,
+                      delay: index * 0.05,
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Card
+                      variant="glass"
+                      className={cn(
+                        'cursor-pointer transition-all duration-200 hover:shadow-md',
+                        roomColorClass
+                      )}
+                    >
+                      <CardContent className="flex items-center gap-3 p-3">
+                        <div
+                          className={cn(
+                            'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full',
+                            room.color ? `bg-${room.color}-500/20` : 'bg-primary/10'
+                          )}
+                        >
+                          <RoomIcon
+                            size={20}
+                            className={room.color ? `text-${room.color}-600` : 'text-primary'}
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm font-medium">{room.name}</div>
+                          <div className="text-muted-foreground text-xs">
+                            {activeCount > 0 ? `${activeCount} active` : 'All off'}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Device Control Panel Dialog */}

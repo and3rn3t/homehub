@@ -5,16 +5,7 @@ import { SceneCardSkeleton } from '@/components/ui/skeleton'
 import { KV_KEYS, MOCK_SCENES } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
 import type { Scene } from '@/types'
-import {
-  Bed,
-  Coffee,
-  House as HomeIcon,
-  Moon,
-  Play,
-  Plus,
-  Shield,
-  Sun,
-} from '@phosphor-icons/react'
+import { Bed, Coffee, House as HomeIcon, Moon, PlayIcon, PlusIcon, ShieldIcon, SunRoomIcon,  } from '@/lib/icons'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 

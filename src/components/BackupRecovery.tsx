@@ -9,16 +9,7 @@ import { Progress } from "@/components/ui/progress"
 import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { 
-  CloudArrowUp, 
-  HardDrives, 
-  DownloadSimple,
-  ArrowClockwise,
-  CheckCircle,
-  Clock,
-  Warning,
-  Trash
-} from "@phosphor-icons/react"
+import { CloudArrowUp, HardDrives, DownloadSimple, ArrowClockwise, CheckCircleIcon, ClockIcon, AlertTriangleIcon, TrashIcon } from '@/lib/icons'
 import { toast } from "sonner"
 
 interface Backup {

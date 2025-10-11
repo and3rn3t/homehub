@@ -20,18 +20,27 @@ import {
 import { RoomCardSkeleton } from '@/components/ui/skeleton'
 import { KV_KEYS, MOCK_DEVICES, MOCK_ROOMS } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
+import {
+  LightbulbIcon,
+  MoreHorizontalIcon,
+  PlusIcon,
+  ShieldIcon,
+  ThermometerIcon,
+  WifiIcon,
+} from '@/lib/icons'
+import { cn } from '@/lib/utils'
 import type { Device, Room } from '@/types'
-import { DotsThree, Lightbulb, Plus, Shield, Thermometer, WifiHigh } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { DeviceControlPanel } from './DeviceControlPanel'
+import { FavoriteButton } from './FavoriteButton'
 
 const deviceIcons = {
-  light: Lightbulb,
-  thermostat: Thermometer,
-  security: Shield,
-  sensor: WifiHigh,
+  light: LightbulbIcon,
+  thermostat: ThermometerIcon,
+  security: ShieldIcon,
+  sensor: WifiIcon,
 }
 
 export function Rooms() {
@@ -41,6 +50,8 @@ export function Rooms() {
     { withMeta: true }
   )
   const [devices, setDevices] = useKV<Device[]>(KV_KEYS.DEVICES, MOCK_DEVICES)
+  const [favoriteDevices] = useKV<string[]>('favorite-devices', [])
+  const [hideUnreachable, setHideUnreachable] = useState(false)
   const [assignDialogOpen, setAssignDialogOpen] = useState(false)
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null)
   const [selectedRoom, setSelectedRoom] = useState<string>('')
@@ -168,7 +179,7 @@ export function Rooms() {
               <p className="text-muted-foreground">Manage devices by location</p>
             </div>
             <Button variant="outline" size="icon" className="rounded-full">
-              <Plus size={20} />
+              <PlusIcon className="h-5 w-5" />
             </Button>
           </div>
         </div>
@@ -196,7 +207,29 @@ export function Rooms() {
               <p className="text-muted-foreground">Manage devices by location</p>
             </div>
             <Button variant="outline" size="icon" className="rounded-full">
-              <Plus size={20} />
+              <PlusIcon className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-6 pb-6">
+          <RoomCardSkeleton count={4} />
+        </div>
+      </div>
+    )
+  }
+
+  if (roomsError) {
+    return (
+      <div className="flex h-full flex-col">
+        <div className="p-6 pb-4">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h1 className="text-foreground text-2xl font-bold">Rooms</h1>
+              <p className="text-muted-foreground">Manage devices by location</p>
+            </div>
+            <Button variant="outline" size="icon" className="rounded-full">
+              <PlusIcon className="h-5 w-5" />
             </Button>
           </div>
         </div>
@@ -223,7 +256,7 @@ export function Rooms() {
           </div>
           <motion.div whileTap={{ scale: 0.9 }} whileHover={{ scale: 1.05 }}>
             <Button variant="outline" size="icon" className="h-11 w-11 rounded-full">
-              <Plus size={20} />
+              <PlusIcon className="h-5 w-5" />
             </Button>
           </motion.div>
         </div>
@@ -233,65 +266,91 @@ export function Rooms() {
         <div className="space-y-6">
           {/* All Devices Section - Show everything */}
           <div>
-            <h2 className="text-foreground mb-3 text-lg font-semibold">
-              All Devices ({devices.length})
-            </h2>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-foreground text-lg font-semibold">
+                All Devices (
+                {hideUnreachable
+                  ? devices.filter(d => d.status !== 'offline').length
+                  : devices.length}
+                )
+              </h2>
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Hide unreachable</span>
+                <input
+                  type="checkbox"
+                  checked={hideUnreachable}
+                  onChange={e => setHideUnreachable(e.target.checked)}
+                  className="text-primary focus:ring-primary h-4 w-4 rounded border-gray-300 focus:ring-2"
+                />
+              </label>
+            </div>
             <Card>
               <CardContent className="p-4">
                 <div className="space-y-2">
-                  {devices.map(device => {
-                    const IconComponent = deviceIcons[device.type] || WifiHigh
-                    return (
-                      <div
-                        key={device.id}
-                        className="hover:bg-accent/50 flex cursor-pointer items-center justify-between rounded-lg p-3 transition-colors"
-                        onClick={() => {
-                          setControlDevice(device)
-                          setControlPanelOpen(true)
-                        }}
-                      >
-                        <div className="flex flex-1 items-center gap-3">
-                          <div
-                            className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                              device.enabled ? 'bg-primary/10' : 'bg-secondary'
-                            }`}
-                          >
-                            <IconComponent
-                              size={20}
-                              className={device.enabled ? 'text-primary' : 'text-muted-foreground'}
-                            />
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-sm font-medium">{device.name}</p>
-                            <div className="flex items-center gap-2">
-                              <p className="text-muted-foreground text-xs">{device.room}</p>
-                              <Badge
-                                variant={device.status === 'online' ? 'default' : 'destructive'}
-                                className="text-xs"
-                              >
-                                {device.status}
-                              </Badge>
-                              {device.protocol && (
-                                <Badge variant="outline" className="text-xs">
-                                  {device.protocol.toUpperCase()}
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={e => {
-                            e.stopPropagation()
-                            toggleDevice(device.id)
+                  {devices
+                    .filter(device => !hideUnreachable || device.status !== 'offline')
+                    .map(device => {
+                      const IconComponent = deviceIcons[device.type] || WifiIcon
+                      return (
+                        <div
+                          key={device.id}
+                          className="hover:bg-accent/50 flex cursor-pointer items-center justify-between rounded-lg p-3 transition-colors"
+                          onClick={() => {
+                            setControlDevice(device)
+                            setControlPanelOpen(true)
                           }}
                         >
-                          {device.enabled ? 'Turn Off' : 'Turn On'}
-                        </Button>
-                      </div>
-                    )
-                  })}
+                          <div className="flex flex-1 items-center gap-3">
+                            <div
+                              className={`flex h-10 w-10 items-center justify-center rounded-full ${
+                                device.enabled ? 'bg-primary/10' : 'bg-secondary'
+                              }`}
+                            >
+                              <IconComponent
+                                size={20}
+                                className={
+                                  device.enabled ? 'text-primary' : 'text-muted-foreground'
+                                }
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium">{device.name}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="text-muted-foreground text-xs">{device.room}</p>
+                                <Badge
+                                  variant={device.status === 'online' ? 'default' : 'destructive'}
+                                  className="text-xs"
+                                >
+                                  {device.status}
+                                </Badge>
+                                {device.protocol && (
+                                  <Badge variant="outline" className="text-xs">
+                                    {device.protocol.toUpperCase()}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <FavoriteButton
+                              deviceId={device.id}
+                              deviceName={device.name}
+                              isFavorite={favoriteDevices.includes(device.id)}
+                            />
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={e => {
+                                e.stopPropagation()
+                                toggleDevice(device.id)
+                              }}
+                            >
+                              {device.enabled ? 'Turn Off' : 'Turn On'}
+                            </Button>
+                          </div>
+                        </div>
+                      )
+                    })}
                 </div>
               </CardContent>
             </Card>
@@ -365,7 +424,7 @@ export function Rooms() {
             <Card className="border-border/30 border-2 border-dashed">
               <CardContent className="p-8 text-center">
                 <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                  <Plus size={24} className="text-muted-foreground" />
+                  <PlusIcon className="text-muted-foreground h-6 w-6" />
                 </div>
                 <p className="text-muted-foreground mb-2">No rooms configured</p>
                 <p className="text-muted-foreground mb-4 text-sm">
@@ -407,7 +466,7 @@ export function Rooms() {
                                 className="h-8 w-8"
                                 onClick={e => e.stopPropagation()}
                               >
-                                <DotsThree size={16} />
+                                <MoreHorizontalIcon className="h-4 w-4" />
                               </Button>
                             </div>
 
@@ -484,13 +543,12 @@ export function Rooms() {
                                       }`}
                                     >
                                       <IconComponent
-                                        size={16}
-                                        weight={device.enabled ? 'fill' : 'regular'}
-                                        className={
+                                        className={cn(
+                                          'h-4 w-4',
                                           device.enabled
                                             ? 'text-primary group-hover:text-primary/90'
                                             : 'text-muted-foreground group-hover:text-foreground'
-                                        }
+                                        )}
                                       />
                                     </div>
                                     <span
@@ -516,7 +574,7 @@ export function Rooms() {
                               {roomDevices.length > 4 && (
                                 <div className="bg-secondary/50 border-border/50 flex flex-col items-center gap-1 rounded-lg border-2 p-2">
                                   <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-full">
-                                    <Plus size={16} className="text-muted-foreground" />
+                                    <PlusIcon className="text-muted-foreground h-4 w-4" />
                                   </div>
                                   <span className="text-muted-foreground text-center text-xs leading-tight font-medium">
                                     +{roomDevices.length - 4}

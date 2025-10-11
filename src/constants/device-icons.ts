@@ -1,48 +1,57 @@
 /**
  * Device Icon Mappings
  *
- * Maps device types to Phosphor icon components.
+ * Maps device types to Lucide icon components from centralized icon library.
+ * All icons are tree-shakeable and optimized for iOS design.
  */
 
 import {
-  Camera,
-  Drop,
-  Fan,
-  Lightbulb,
-  Lightning,
-  Lock,
-  Shield,
-  SpeakerHigh,
-  Television,
-  Thermometer,
-  WifiHigh,
-} from '@phosphor-icons/react'
+  BathIcon,
+  BedIcon,
+  BoltIcon,
+  BriefcaseIcon,
+  CameraIcon,
+  ClockIcon,
+  DropletIcon,
+  FanIcon,
+  LightbulbIcon,
+  LockIcon,
+  MapPinIcon,
+  ShieldIcon,
+  SofaIcon,
+  SpeakerIcon,
+  ThermometerIcon,
+  TvIcon,
+  UtensilsIcon,
+  WarehouseIcon,
+  WifiIcon,
+} from '@/lib/icons'
 
 export const DEVICE_ICONS = {
-  light: Lightbulb,
-  thermostat: Thermometer,
-  security: Shield,
-  sensor: WifiHigh,
-  camera: Camera,
-  lock: Lock,
-  fan: Fan,
-  tv: Television,
-  speaker: SpeakerHigh,
-  switch: Lightning,
-  valve: Drop,
+  light: LightbulbIcon,
+  thermostat: ThermometerIcon,
+  security: ShieldIcon,
+  sensor: WifiIcon,
+  camera: CameraIcon,
+  lock: LockIcon,
+  fan: FanIcon,
+  tv: TvIcon,
+  speaker: SpeakerIcon,
+  switch: BoltIcon,
+  valve: DropletIcon,
 } as const
 
 export const AUTOMATION_ICONS = {
-  schedule: import('@phosphor-icons/react').then(m => m.Clock),
-  geofence: import('@phosphor-icons/react').then(m => m.MapPin),
-  condition: import('@phosphor-icons/react').then(m => m.CalendarBlank),
+  schedule: ClockIcon,
+  geofence: MapPinIcon,
+  condition: ClockIcon, // CalendarBlank → Clock (close equivalent)
 } as const
 
 export const ROOM_ICONS = {
-  'living-room': import('@phosphor-icons/react').then(m => m.Couch),
-  bedroom: import('@phosphor-icons/react').then(m => m.Bed),
-  kitchen: import('@phosphor-icons/react').then(m => m.ForkKnife),
-  bathroom: import('@phosphor-icons/react').then(m => m.Bathtub),
-  office: import('@phosphor-icons/react').then(m => m.Desk),
-  garage: import('@phosphor-icons/react').then(m => m.Garage),
+  'living-room': SofaIcon,
+  bedroom: BedIcon,
+  kitchen: UtensilsIcon,
+  bathroom: BathIcon,
+  office: BriefcaseIcon,
+  garage: WarehouseIcon,
 } as const

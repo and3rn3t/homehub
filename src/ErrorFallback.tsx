@@ -1,4 +1,4 @@
-import { ArrowClockwise, Bug, House, Warning } from '@phosphor-icons/react'
+import { ArrowClockwise, Bug, House, AlertTriangleIcon } from '@/lib/icons'
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { Alert, AlertDescription, AlertTitle } from './components/ui/alert'

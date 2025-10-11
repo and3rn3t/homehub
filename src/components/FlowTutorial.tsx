@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useKV } from '@/hooks/use-kv'
-import { ArrowRight, Cursor, Lightbulb, Play, X } from '@phosphor-icons/react'
+import { ArrowRight, Cursor, LightbulbIcon, PlayIcon, XIcon } from '@/lib/icons'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
 

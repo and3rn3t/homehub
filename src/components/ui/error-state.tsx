@@ -1,7 +1,7 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { ArrowClockwise, Warning, WifiSlash } from '@phosphor-icons/react'
+import { ArrowClockwise, AlertTriangleIcon, WifiOffIcon } from '@/lib/icons'
 import { motion } from 'framer-motion'
 
 interface ErrorStateProps {

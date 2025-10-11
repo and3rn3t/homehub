@@ -21,17 +21,7 @@ import { Separator } from '@/components/ui/separator'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { useKV } from '@/hooks/use-kv'
-import {
-  Buildings,
-  CircleDashed,
-  House,
-  MapPin,
-  NavigationArrow,
-  Plus,
-  ShoppingBag,
-  Target,
-  X,
-} from '@phosphor-icons/react'
+import { Buildings, CircleDashed, House, MapPinIcon, NavigationArrow, PlusIcon, ShoppingBag, Target, XIcon,  } from '@/lib/icons'
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'

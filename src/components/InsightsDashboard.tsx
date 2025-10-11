@@ -5,18 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useKV } from '@/hooks/use-kv'
-import {
-  BatteryMedium,
-  ChartLineUp,
-  CheckCircle,
-  Clock,
-  Lightning,
-  Shield,
-  TrendDown,
-  TrendUp,
-  Warning,
-  WifiHigh,
-} from '@phosphor-icons/react'
+import { BatteryIcon, LineChartIcon, CheckCircleIcon, ClockIcon, ZapIcon, ShieldIcon, TrendingDownIcon, TrendingUpIcon, AlertTriangleIcon, WifiIcon,  } from '@/lib/icons'
 
 interface DeviceHealth {
   id: string
