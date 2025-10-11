@@ -34,6 +34,18 @@ export class FlowExecutor {
   private flows: Flow[] = []
   private activeExecutions: Map<string, ExecutionContext> = new Map()
 
+  // Helper to format temperature based on user preferences
+  private formatTemperature(value: number): string {
+    const prefs = localStorage.getItem('unit-preferences')
+    const preferences = prefs ? JSON.parse(prefs) : { temperature: 'fahrenheit' }
+
+    if (preferences.temperature === 'celsius') {
+      const celsius = Math.round(((value - 32) * 5) / 9)
+      return `${celsius}°C`
+    }
+    return `${value}°F`
+  }
+
   static getInstance(): FlowExecutor {
     if (!FlowExecutor.instance) {
       FlowExecutor.instance = new FlowExecutor()
@@ -264,7 +276,8 @@ export class FlowExecutor {
   private async controlThermostat(data: any): Promise<boolean> {
     const { mode, targetTemp } = data
 
-    const message = `Thermostat: Set to ${mode || 'auto'} mode at ${targetTemp || 72}°F`
+    const formattedTemp = this.formatTemperature(targetTemp || 72)
+    const message = `Thermostat: Set to ${mode || 'auto'} mode at ${formattedTemp}`
     toast.info(message)
     return true
   }

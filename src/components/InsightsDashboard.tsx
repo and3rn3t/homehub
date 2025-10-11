@@ -17,6 +17,7 @@ import {
   TrendingUpIcon,
   WifiIcon,
 } from '@/lib/icons'
+import { ThemeToggle } from './ThemeToggle'
 
 interface DeviceHealth {
   id: string
@@ -165,11 +166,14 @@ export function InsightsDashboard() {
 
   return (
     <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold">Insights & Analytics</h1>
-        <p className="text-muted-foreground">
-          Monitor your smart home health and optimize performance
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Insights & Analytics</h1>
+          <p className="text-muted-foreground">
+            Monitor your smart home health and optimize performance
+          </p>
+        </div>
+        <ThemeToggle />
       </div>
 
       {/* Overview Cards */}

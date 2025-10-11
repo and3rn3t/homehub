@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
 import { Textarea } from '@/components/ui/textarea'
+import { useUnits } from '@/hooks/use-units'
 import { XIcon } from '@/lib/icons'
 import { useState } from 'react'
 
@@ -34,6 +35,7 @@ interface NodeConfigProps {
 
 export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
   const [nodeData, setNodeData] = useState(node.data || {})
+  const { formatTemperature, preferences } = useUnits()
 
   const updateNodeData = (key: string, value: any) => {
     const newData = { ...nodeData, [key]: value }
@@ -206,7 +208,9 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
               </Select>
             </div>
             <div>
-              <Label htmlFor="temperature">Temperature (°F)</Label>
+              <Label htmlFor="temperature">
+                Temperature ({preferences.temperature === 'fahrenheit' ? '°F' : '°C'})
+              </Label>
               <Slider
                 value={[nodeData.temperature || 70]}
                 onValueChange={([value]) => updateNodeData('temperature', value)}
@@ -216,7 +220,7 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
                 className="mt-2"
               />
               <div className="text-muted-foreground mt-1 text-sm">
-                {nodeData.temperature || 70}°F
+                {formatTemperature(nodeData.temperature || 70)}
               </div>
             </div>
           </div>
@@ -365,7 +369,9 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
               </Select>
             </div>
             <div>
-              <Label htmlFor="target-temp">Target Temperature (°F)</Label>
+              <Label htmlFor="target-temp">
+                Target Temperature ({preferences.temperature === 'fahrenheit' ? '°F' : '°C'})
+              </Label>
               <Slider
                 value={[nodeData.targetTemp || 72]}
                 onValueChange={([value]) => updateNodeData('targetTemp', value)}
@@ -375,7 +381,7 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
                 className="mt-2"
               />
               <div className="text-muted-foreground mt-1 text-sm">
-                {nodeData.targetTemp || 72}°F
+                {formatTemperature(nodeData.targetTemp || 72)}
               </div>
             </div>
           </div>
@@ -483,7 +489,7 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
             </div>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
-            <X size={16} />
+            <XIcon size={16} />
           </Button>
         </div>
       </CardHeader>

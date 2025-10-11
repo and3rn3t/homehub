@@ -30,6 +30,7 @@ import type { Camera, SecurityEvent } from '@/types'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { ThemeToggle } from './ThemeToggle'
 
 const mockStreamUrl =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjI0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxyZWN0IHdpZHRoPSIzMjAiIGhlaWdodD0iMjQwIiBmaWxsPSIjMWUyMDI0Ii8+CiAgICA8Y2lyY2xlIGN4PSIxNjAiIGN5PSIxMjAiIHI9IjQwIiBmaWxsPSIjMzc0MTUxIi8+CiAgICA8Y2lyY2xlIGN4PSIxNjAiIGN5PSIxMjAiIHI9IjIwIiBmaWxsPSIjNjM2NjcxIi8+CiAgICA8Y2lyY2xlIGN4PSIxNjAiIGN5PSIxMjAiIHI9IjgiIGZpbGw9IiM5NzkyOTkiLz4KICAgIDx0ZXh0IHg9IjE2MCIgeT0iMjAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjM2NjcxIiBmb250LXNpemU9IjE0IiBmb250LWZhbWlseT0iLWFwcGxlLXN5c3RlbSwgc2Fucy1zZXJpZiI+TGl2ZSBGZWVkPC90ZXh0Pgo8L3N2Zz4='
@@ -142,6 +143,7 @@ export function Security() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Badge variant={armedMode ? 'destructive' : 'secondary'} className="px-3 py-1">
               {armedMode ? 'Armed' : 'Disarmed'}
             </Badge>

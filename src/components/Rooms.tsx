@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { EmptyState } from '@/components/ui/empty-state'
 import { ErrorState } from '@/components/ui/error-state'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -572,6 +573,14 @@ export function Rooms() {
                       setControlPanelOpen(true)
                     }}
                     onToggle={toggleDevice}
+                    onEdit={device => {
+                      setEditDevice(device)
+                      setEditDialogOpen(true)
+                    }}
+                    onDelete={deviceId => {
+                      handleDeviceDelete(deviceId)
+                      toast.success('Device removed')
+                    }}
                     showFavoriteButton={true}
                   />
                 ))}
@@ -643,20 +652,7 @@ export function Rooms() {
 
           {/* Rooms Grid */}
           {rooms.length === 0 ? (
-            <Card className="border-border/30 border-2 border-dashed">
-              <CardContent className="p-8 text-center">
-                <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                  <PlusIcon className="text-muted-foreground h-6 w-6" />
-                </div>
-                <p className="text-muted-foreground mb-2">No rooms configured</p>
-                <p className="text-muted-foreground mb-4 text-sm">
-                  Create rooms to organize your devices by location
-                </p>
-                <Button variant="outline" size="sm" onClick={() => setCreateRoomDialogOpen(true)}>
-                  Add Room
-                </Button>
-              </CardContent>
-            </Card>
+            <EmptyState type="rooms" onAction={() => setCreateRoomDialogOpen(true)} />
           ) : (
             <div>
               <h2 className="text-foreground mb-3 text-lg font-semibold">All Rooms</h2>

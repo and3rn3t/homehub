@@ -3,9 +3,12 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ControlTile } from '@/components/ui/control-tile'
+import { EmptyState } from '@/components/ui/empty-state'
 import { ErrorState } from '@/components/ui/error-state'
+import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { DeviceCardSkeleton, StatusCardSkeleton } from '@/components/ui/skeleton'
 import { KV_KEYS } from '@/constants'
+import { useHaptic } from '@/hooks/use-haptic'
 import { useKV } from '@/hooks/use-kv'
 import { useMQTTConnection } from '@/hooks/use-mqtt-connection'
 import { useMQTTDevices } from '@/hooks/use-mqtt-devices'
@@ -44,6 +47,7 @@ import { DeviceControlPanel } from './DeviceControlPanel'
 import { DeviceDiscovery } from './DeviceDiscovery'
 import { DeviceEditDialog } from './DeviceEditDialog'
 import { NotificationBell } from './NotificationCenter'
+import { ThemeToggle } from './ThemeToggle'
 
 export function Dashboard() {
   // Initialize multi-protocol device registry (singleton)
@@ -95,6 +99,31 @@ export function Dashboard() {
   const [favoriteDevices] = useKV<string[]>('favorite-devices', [])
   const [scenes] = useKV<Scene[]>(KV_KEYS.SCENES, [])
   const [rooms] = useKV<Room[]>(KV_KEYS.ROOMS, [])
+  const haptic = useHaptic()
+
+  // Pull-to-refresh handler
+  const handleRefresh = useCallback(async () => {
+    haptic.medium() // Haptic feedback on refresh
+
+    try {
+      // Reconnect MQTT if needed
+      if (connectionState !== 'connected') {
+        await reconnectMQTT()
+      }
+
+      // Discover new devices
+      await discoverDevices()
+
+      toast.success('Dashboard refreshed', {
+        description: 'Devices and connections updated',
+      })
+    } catch (error) {
+      console.error('Refresh error:', error)
+      toast.error('Refresh failed', {
+        description: 'Could not update dashboard',
+      })
+    }
+  }, [connectionState, reconnectMQTT, discoverDevices, haptic])
 
   // Helper to get icon component for device type
   const getDeviceIcon = (device: Device) => {
@@ -395,8 +424,12 @@ export function Dashboard() {
     device => device.batteryLevel !== undefined && device.batteryLevel <= 20
   )
 
-  // Show loading state
-  if (isLoading) {
+  // Smart loading state: Only show skeletons on initial load with no data
+  // After first load, use optimistic updates for instant feedback
+  const showSkeleton = isLoading && devices.length === 0
+
+  // Show skeleton state (initial load only)
+  if (showSkeleton) {
     return (
       <div className="flex h-full flex-col">
         <div className="p-6 pb-4">
@@ -524,6 +557,7 @@ export function Dashboard() {
             )}
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <NotificationBell />
             <motion.div whileTap={{ scale: 0.9 }} whileHover={{ scale: 1.05 }}>
               <Button
@@ -539,6 +573,26 @@ export function Dashboard() {
         </div>
 
         {/* Alert Summary */}
+        {isLoading && devices.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="mb-3"
+          >
+            <div className="border-primary/20 bg-primary/5 flex items-center gap-2 rounded-lg border px-3 py-2">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
+              >
+                <div className="border-primary h-4 w-4 rounded-full border-2 border-t-transparent" />
+              </motion.div>
+              <span className="text-muted-foreground text-sm">Refreshing data...</span>
+            </div>
+          </motion.div>
+        )}
+
         {(criticalAlerts.length > 0 ||
           offlineDevices.length > 0 ||
           lowBatteryDevices.length > 0) && (
@@ -570,8 +624,8 @@ export function Dashboard() {
         )}
       </div>
 
-      {/* Sectioned Content - iOS Home Style */}
-      <div className="flex-1 overflow-y-auto px-4 pb-6 sm:px-6">
+      {/* Sectioned Content - iOS Home Style - Wrapped with Pull-to-Refresh */}
+      <PullToRefresh onRefresh={handleRefresh} className="flex-1 px-4 pb-6 sm:px-6">
         {/* Section 1: Status Summary */}
         <div className="mb-6">
           <div className="grid grid-cols-3 gap-3">
@@ -739,17 +793,13 @@ export function Dashboard() {
           </div>
 
           {favoriteDeviceList.length === 0 ? (
-            <Card variant="glass" className="border-2 border-dashed">
-              <CardContent className="p-8 text-center">
-                <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                  <PlusIcon className="text-muted-foreground h-6 w-6" />
-                </div>
-                <p className="text-muted-foreground mb-2">No favorite devices</p>
-                <p className="text-muted-foreground text-sm">
-                  Add devices to favorites to control them quickly
-                </p>
-              </CardContent>
-            </Card>
+            <EmptyState
+              type="favorites"
+              onAction={() => {
+                // Scroll to devices section or open device browser
+                toast.info('Browse your devices below to add favorites')
+              }}
+            />
           ) : (
             <div className="grid gap-3">
               {favoriteDeviceList.map((device, index) => (
@@ -759,6 +809,14 @@ export function Dashboard() {
                   index={index}
                   onDeviceClick={handleDeviceCardClick}
                   onToggle={toggleDevice}
+                  onEdit={device => {
+                    setEditDevice(device)
+                    setEditDialogOpen(true)
+                  }}
+                  onDelete={deviceId => {
+                    handleDeviceDelete(deviceId)
+                    toast.success('Device removed')
+                  }}
                   showFavoriteButton={true}
                 />
               ))}
@@ -847,7 +905,7 @@ export function Dashboard() {
             </div>
           </div>
         )}
-      </div>
+      </PullToRefresh>
 
       {/* Device Control Panel Dialog */}
       {selectedDevice && (

@@ -1,8 +1,11 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { EmptyState } from '@/components/ui/empty-state'
 import { ErrorState } from '@/components/ui/error-state'
 import { SceneCardSkeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { KV_KEYS, MOCK_SCENES } from '@/constants'
+import { useHaptic } from '@/hooks/use-haptic'
 import { useKV } from '@/hooks/use-kv'
 import {
   BedIcon,
@@ -72,8 +75,10 @@ export function Scenes() {
     withMeta: true,
   })
   const [activeScene, setActiveScene] = useKV<string | null>(KV_KEYS.ACTIVE_SCENE, null)
+  const haptic = useHaptic()
 
   const activateScene = (sceneId: string) => {
+    haptic.success() // Success haptic for scene activation
     setActiveScene(sceneId)
 
     const scene = scenes.find(s => s.id === sceneId)
@@ -87,8 +92,11 @@ export function Scenes() {
     }, 2000)
   }
 
-  // Show loading state
-  if (isLoading) {
+  // Smart loading state: Only show skeletons on initial load with no data
+  const showSkeleton = isLoading && scenes.length === 0
+
+  // Show loading state (initial load only)
+  if (showSkeleton) {
     return (
       <div className="flex h-full flex-col">
         <div className="p-6 pb-4">
@@ -166,20 +174,13 @@ export function Scenes() {
       <div className="flex-1 overflow-y-auto px-4 pb-6 sm:px-6">
         {scenes.length === 0 ? (
           <div className="space-y-6">
-            <Card className="border-border/30 border-2 border-dashed">
-              <CardContent className="p-8 text-center">
-                <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                  <PlusIcon className="text-muted-foreground h-6 w-6" />
-                </div>
-                <p className="text-muted-foreground mb-2">No scenes created</p>
-                <p className="text-muted-foreground mb-4 text-sm">
-                  Create scenes to control multiple devices at once
-                </p>
-                <Button variant="outline" size="sm">
-                  Create Scene
-                </Button>
-              </CardContent>
-            </Card>
+            <EmptyState
+              type="scenes"
+              onAction={() => {
+                // TODO: Open scene creation dialog
+                toast.info('Scene creation coming soon!')
+              }}
+            />
 
             <div>
               <h3 className="mb-4 text-base font-semibold sm:text-lg">Popular Scenes</h3>
@@ -191,9 +192,30 @@ export function Scenes() {
                     <motion.div
                       key={id}
                       whileTap={{ scale: 0.95 }}
+                      whileHover={{
+                        y: -4,
+                        transition: {
+                          type: 'spring',
+                          stiffness: 400,
+                          damping: 20,
+                        },
+                      }}
                       transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                      style={{
+                        willChange: 'transform',
+                      }}
                     >
-                      <Card className="cursor-pointer overflow-hidden transition-all duration-200 hover:shadow-lg">
+                      <Card className="group hover:shadow-primary/10 cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-xl">
+                        {/* Border glow on hover */}
+                        <motion.div
+                          className="pointer-events-none absolute -inset-[1px] rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                          style={{
+                            background:
+                              'linear-gradient(135deg, rgba(var(--primary-rgb), 0.3) 0%, rgba(var(--primary-rgb), 0) 50%, rgba(var(--primary-rgb), 0.3) 100%)',
+                            filter: 'blur(8px)',
+                          }}
+                        />
+
                         <CardContent className="p-0">
                           <div
                             className={`${config.color} relative overflow-hidden p-4 text-white`}
@@ -240,15 +262,26 @@ export function Scenes() {
                     delay: index * 0.05,
                   }}
                   whileTap={{ scale: 0.95 }}
-                  whileHover={{ y: -4 }}
+                  whileHover={{
+                    y: -6,
+                    transition: {
+                      type: 'spring',
+                      stiffness: 400,
+                      damping: 20,
+                    },
+                  }}
+                  style={{
+                    // GPU-accelerated transforms
+                    willChange: 'transform',
+                  }}
                 >
                   <Card
                     role="button"
                     tabIndex={0}
-                    className={`cursor-pointer overflow-hidden transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none ${
+                    className={`group relative cursor-pointer overflow-hidden transition-all duration-300 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none ${
                       scene.id === activeScene
-                        ? 'ring-primary shadow-lg ring-2'
-                        : 'focus-visible:ring-primary/50 hover:shadow-lg'
+                        ? 'ring-primary shadow-primary/20 shadow-2xl ring-2'
+                        : 'focus-visible:ring-primary/50 hover:shadow-primary/10 hover:shadow-2xl'
                     }`}
                     onClick={() => activateScene(scene.id)}
                     onKeyDown={e => {
@@ -258,6 +291,18 @@ export function Scenes() {
                       }
                     }}
                   >
+                    {/* Animated border glow on hover (non-active scenes) */}
+                    {scene.id !== activeScene && (
+                      <motion.div
+                        className="pointer-events-none absolute -inset-[1px] rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                        style={{
+                          background:
+                            'linear-gradient(135deg, rgba(var(--primary-rgb), 0.4) 0%, rgba(var(--primary-rgb), 0) 50%, rgba(var(--primary-rgb), 0.4) 100%)',
+                          filter: 'blur(12px)',
+                        }}
+                      />
+                    )}
+
                     <CardContent className="p-0">
                       <motion.div
                         className={`${bgColor} relative overflow-hidden p-6 text-white`}
@@ -269,6 +314,23 @@ export function Scenes() {
                           ease: 'easeInOut',
                         }}
                       >
+                        {/* Shimmer effect on hover */}
+                        <motion.div
+                          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                          style={{
+                            background:
+                              'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
+                          }}
+                          animate={{
+                            x: ['-100%', '200%'],
+                          }}
+                          transition={{
+                            duration: 1.5,
+                            repeat: Number.POSITIVE_INFINITY,
+                            ease: 'linear',
+                          }}
+                        />
+
                         <div className="absolute top-2 right-2 opacity-20">
                           <IconComponent className="h-10 w-10 fill-current" />
                         </div>
@@ -301,9 +363,18 @@ export function Scenes() {
                       <div className="p-4">
                         <p className="text-muted-foreground mb-3 text-sm">{scene.description}</p>
                         <div className="flex items-center justify-between">
-                          <span className="text-muted-foreground text-xs">
-                            {scene.deviceStates?.length || 0} devices
-                          </span>
+                          <Tooltip delayDuration={500}>
+                            <TooltipTrigger asChild>
+                              <span className="text-muted-foreground cursor-help text-xs">
+                                {scene.deviceStates?.length || 0} devices
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                This scene controls {scene.deviceStates?.length || 0} smart devices
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
                           {scene.id === activeScene && (
                             <motion.div
                               initial={{ opacity: 0, x: -10 }}

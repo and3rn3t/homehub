@@ -1,22 +1,38 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu'
 import { ProtocolBadge } from '@/components/ui/protocol-badge'
 import { Switch } from '@/components/ui/switch'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useHaptic } from '@/hooks/use-haptic'
 import { useKV } from '@/hooks/use-kv'
+import { useLongPress } from '@/hooks/use-long-press'
+import { useUnits } from '@/hooks/use-units'
 import {
   BatteryIcon,
   BatteryLowIcon,
   BatteryWarningIcon,
   ClockIcon,
+  EditIcon,
+  HomeRoomIcon,
   LightbulbIcon,
   ShieldIcon,
+  StarIcon,
   ThermometerIcon,
+  TrashIcon,
   WifiIcon,
   WifiOffIcon,
 } from '@/lib/icons'
 import type { Device } from '@/types'
 import { motion } from 'framer-motion'
-import { memo, useCallback } from 'react'
+import { memo, useCallback, useState } from 'react'
+import { toast } from 'sonner'
 import { FavoriteButton } from './FavoriteButton'
 
 // Time ago helper
@@ -72,7 +88,10 @@ interface DeviceCardEnhancedProps {
   index: number
   onDeviceClick: (device: Device) => void
   onToggle: (deviceId: string) => void
+  onEdit?: (device: Device) => void
+  onDelete?: (deviceId: string) => void
   showFavoriteButton?: boolean
+  showContextMenu?: boolean
 }
 
 export const DeviceCardEnhanced = memo(
@@ -81,10 +100,16 @@ export const DeviceCardEnhanced = memo(
     index,
     onDeviceClick,
     onToggle,
+    onEdit,
+    onDelete,
     showFavoriteButton = true,
+    showContextMenu = true,
   }: DeviceCardEnhancedProps) {
     const IconComponent = deviceIcons[device.type]
-    const [favoriteDevices] = useKV<string[]>('favorite-devices', [])
+    const [favoriteDevices, setFavoriteDevices] = useKV<string[]>('favorite-devices', [])
+    const [contextMenuOpen, setContextMenuOpen] = useState(false)
+    const { formatTemperature } = useUnits()
+    const haptic = useHaptic()
 
     const SignalIcon = getSignalIcon(device.signalStrength)
     const signalColor = getSignalColor(device.signalStrength)
@@ -92,17 +117,55 @@ export const DeviceCardEnhanced = memo(
     const BatteryIcon = getBatteryIcon(device.batteryLevel)
     const batteryColor = getBatteryColor(device.batteryLevel)
 
+    const isFavorite = favoriteDevices.includes(device.id)
+
     // Create stable handlers using just the device ID
     const handleToggle = useCallback(() => {
+      haptic.light() // Haptic feedback on toggle
       onToggle(device.id)
-    }, [device.id, onToggle])
+    }, [device.id, onToggle, haptic])
 
     const handleClick = useCallback(() => {
-      onDeviceClick(device)
-    }, [device, onDeviceClick])
+      if (!contextMenuOpen) {
+        haptic.medium() // Haptic feedback on card click
+        onDeviceClick(device)
+      }
+    }, [device, onDeviceClick, haptic, contextMenuOpen])
 
-    return (
+    // Context menu handlers
+    const handleToggleFavorite = useCallback(() => {
+      haptic.light()
+      if (isFavorite) {
+        setFavoriteDevices(prev => prev.filter(id => id !== device.id))
+        toast.success('Removed from favorites')
+      } else {
+        setFavoriteDevices(prev => [...prev, device.id])
+        toast.success('Added to favorites')
+      }
+    }, [device.id, isFavorite, setFavoriteDevices, haptic])
+
+    const handleEdit = useCallback(() => {
+      haptic.medium()
+      onEdit?.(device)
+    }, [device, onEdit, haptic])
+
+    const handleDelete = useCallback(() => {
+      haptic.heavy()
+      onDelete?.(device.id)
+    }, [device.id, onDelete, haptic])
+
+    // Long press detection
+    const longPressHandlers = useLongPress({
+      onLongPress: () => {
+        haptic.medium()
+        setContextMenuOpen(true)
+      },
+      delay: 500,
+    })
+
+    const cardContent = (
       <motion.div
+        {...longPressHandlers}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
@@ -114,19 +177,34 @@ export const DeviceCardEnhanced = memo(
         }}
         whileHover={{
           scale: 1.02,
+          y: -4,
           transition: {
             type: 'spring',
             stiffness: 400,
             damping: 25,
           },
         }}
-        whileTap={{ scale: 0.98 }}
+        whileTap={{ scale: 0.98, y: 0 }}
+        style={{
+          // GPU-accelerated transforms
+          willChange: 'transform',
+        }}
       >
-        <Card className="hover:shadow-primary/5 relative transition-all duration-200 hover:shadow-lg">
+        <Card className="group hover:shadow-primary/10 relative overflow-hidden transition-all duration-300 hover:shadow-2xl">
+          {/* Animated border glow on hover */}
+          <motion.div
+            className="pointer-events-none absolute -inset-[1px] rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(var(--primary-rgb), 0.3) 0%, rgba(var(--primary-rgb), 0) 50%, rgba(var(--primary-rgb), 0.3) 100%)',
+              filter: 'blur(8px)',
+            }}
+          />
+
           {/* Animated pulse ring for online devices */}
           {device.enabled && device.status === 'online' && (
             <motion.div
-              className="bg-primary/20 absolute -inset-0.5 rounded-lg blur-sm"
+              className="bg-primary/20 pointer-events-none absolute -inset-0.5 rounded-lg blur-sm"
               animate={{
                 opacity: [0.3, 0.6, 0.3],
               }}
@@ -213,26 +291,48 @@ export const DeviceCardEnhanced = memo(
                         </div>
                       )}
 
-                      {/* Signal strength */}
+                      {/* Signal strength with tooltip */}
                       {device.signalStrength !== undefined && (
-                        <div
-                          className={`flex items-center gap-1 text-xs ${signalColor}`}
-                          title={`Signal: ${device.signalStrength}%`}
-                        >
-                          <SignalIcon className="h-3 w-3" />
-                          <span className="tabular-nums">{device.signalStrength}%</span>
-                        </div>
+                        <Tooltip delayDuration={500}>
+                          <TooltipTrigger asChild>
+                            <div className={`flex items-center gap-1 text-xs ${signalColor}`}>
+                              <SignalIcon className="h-3 w-3" />
+                              <span className="tabular-nums">{device.signalStrength}%</span>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              Signal Strength: {device.signalStrength}%
+                              {device.signalStrength < 30 && ' (Weak)'}
+                              {device.signalStrength >= 30 &&
+                                device.signalStrength < 60 &&
+                                ' (Fair)'}
+                              {device.signalStrength >= 60 && ' (Good)'}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
                       )}
 
-                      {/* Battery level */}
+                      {/* Battery level with tooltip */}
                       {device.batteryLevel !== undefined && BatteryIcon && (
-                        <div
-                          className={`flex items-center gap-1 text-xs ${batteryColor}`}
-                          title={`Battery: ${device.batteryLevel}%`}
-                        >
-                          <BatteryIcon className="h-3 w-3" />
-                          <span className="tabular-nums">{device.batteryLevel}%</span>
-                        </div>
+                        <Tooltip delayDuration={500}>
+                          <TooltipTrigger asChild>
+                            <div className={`flex items-center gap-1 text-xs ${batteryColor}`}>
+                              <BatteryIcon className="h-3 w-3" />
+                              <span className="tabular-nums">{device.batteryLevel}%</span>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              Battery Level: {device.batteryLevel}%
+                              {device.batteryLevel < 20 && ' (Critical - Replace soon)'}
+                              {device.batteryLevel >= 20 &&
+                                device.batteryLevel < 50 &&
+                                ' (Low - Monitor)'}
+                              {device.batteryLevel >= 50 && ' (Good)'}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
                       )}
                     </div>
                   </div>
@@ -247,8 +347,9 @@ export const DeviceCardEnhanced = memo(
                       animate={{ scale: 1, opacity: 1 }}
                       transition={{ type: 'spring', stiffness: 500, damping: 25 }}
                     >
-                      {device.value}
-                      {device.unit}
+                      {device.type === 'thermostat' && device.unit === '°F'
+                        ? formatTemperature(device.value)
+                        : `${device.value}${device.unit}`}
                     </motion.span>
                   )}
                   {showFavoriteButton && (
@@ -272,6 +373,46 @@ export const DeviceCardEnhanced = memo(
           </CardContent>
         </Card>
       </motion.div>
+    )
+
+    if (!showContextMenu) {
+      return cardContent
+    }
+
+    return (
+      <ContextMenu onOpenChange={setContextMenuOpen}>
+        <ContextMenuTrigger asChild>{cardContent}</ContextMenuTrigger>
+        <ContextMenuContent className="w-56">
+          {onEdit && (
+            <ContextMenuItem onClick={handleEdit}>
+              <EditIcon className="mr-2 h-4 w-4" />
+              <span>Edit Device</span>
+            </ContextMenuItem>
+          )}
+          <ContextMenuItem onClick={handleToggleFavorite}>
+            <StarIcon className="mr-2 h-4 w-4" />
+            <span>{isFavorite ? 'Remove from' : 'Add to'} Favorites</span>
+          </ContextMenuItem>
+          <ContextMenuItem
+            onClick={() => {
+              haptic.light()
+              toast.info('Room selector coming soon')
+            }}
+          >
+            <HomeRoomIcon className="mr-2 h-4 w-4" />
+            <span>Change Room</span>
+          </ContextMenuItem>
+          {onDelete && (
+            <>
+              <ContextMenuSeparator />
+              <ContextMenuItem onClick={handleDelete} className="text-red-600">
+                <TrashIcon className="mr-2 h-4 w-4" />
+                <span>Delete Device</span>
+              </ContextMenuItem>
+            </>
+          )}
+        </ContextMenuContent>
+      </ContextMenu>
     )
   },
   // Custom comparison function - only re-render if these specific props change

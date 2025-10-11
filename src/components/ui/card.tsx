@@ -6,11 +6,11 @@ import { cn } from '@/lib/utils'
 const cardVariants = cva('flex flex-col gap-6 rounded-xl border py-6 shadow-sm', {
   variants: {
     variant: {
-      default: 'bg-card text-card-foreground',
-      glass: 'bg-card/80 text-card-foreground backdrop-blur-xl border-border/50',
+      default: 'bg-card text-card-foreground shadow-md',
+      glass: 'bg-card/90 text-card-foreground backdrop-blur-xl border-border/60 shadow-md',
       elevated: 'bg-card text-card-foreground shadow-lg',
       'glass-elevated':
-        'bg-card/80 text-card-foreground backdrop-blur-xl border-border/50 shadow-lg',
+        'bg-card/90 text-card-foreground backdrop-blur-xl border-border/60 shadow-lg',
     },
   },
   defaultVariants: {

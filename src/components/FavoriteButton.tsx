@@ -1,3 +1,4 @@
+import { useHaptic } from '@/hooks/use-haptic'
 import { useKV } from '@/hooks/use-kv'
 import { StarIcon } from '@/lib/icons'
 import { motion } from 'framer-motion'
@@ -20,10 +21,18 @@ export function FavoriteButton({
   className = '',
 }: FavoriteButtonProps) {
   const [, setFavoriteDevices] = useKV<string[]>('favorite-devices', [])
+  const haptic = useHaptic()
 
   const toggleFavorite = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation() // Prevent triggering parent onClick
+
+      // Haptic feedback - light for add, medium for remove
+      if (isFavorite) {
+        haptic.medium()
+      } else {
+        haptic.light()
+      }
 
       if (isFavorite) {
         // Remove from favorites
@@ -39,7 +48,7 @@ export function FavoriteButton({
         })
       }
     },
-    [deviceId, deviceName, isFavorite, setFavoriteDevices]
+    [deviceId, deviceName, isFavorite, setFavoriteDevices, haptic]
   )
 
   return (

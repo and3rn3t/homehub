@@ -20,6 +20,7 @@ import { toast } from 'sonner'
 import { AdaptiveLighting } from './AdaptiveLighting'
 import { Intercom } from './Intercom'
 import { MonitoringSettings } from './MonitoringSettings'
+import { UnitSettings } from './UnitSettings'
 
 interface Integration {
   id: string
@@ -185,8 +186,9 @@ export function DeviceSettings() {
       <div className="flex-1 overflow-hidden">
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="flex h-full flex-col">
           <div className="px-6">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="integrations">Integrations</TabsTrigger>
+              <TabsTrigger value="units">Units</TabsTrigger>
               <TabsTrigger value="system">System</TabsTrigger>
               <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
               <TabsTrigger value="adaptive">Adaptive</TabsTrigger>
@@ -324,6 +326,10 @@ export function DeviceSettings() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="units" className="mt-6 flex-1 overflow-y-auto px-6 pb-6">
+            <UnitSettings />
           </TabsContent>
 
           <TabsContent value="system" className="mt-6 flex-1 overflow-y-auto px-6 pb-6">
