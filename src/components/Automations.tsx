@@ -4,9 +4,19 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { KV_KEYS, MOCK_AUTOMATIONS } from '@/constants'
+import { useConditionEvaluator } from '@/hooks/use-condition-evaluator'
 import { useKV } from '@/hooks/use-kv'
+import { useScheduler } from '@/hooks/use-scheduler'
+import {
+  CalendarIcon,
+  ClockIcon,
+  EditIcon,
+  MapPinIcon,
+  PlayIcon,
+  SettingsIcon,
+  WorkflowIcon,
+} from '@/lib/icons'
 import type { Automation } from '@/types'
-import { CalendarIcon, ClockIcon, WorkflowIcon, SettingsIcon, MapPinIcon, EditIcon, PlayIcon } from '@/lib/icons'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { FlowDesigner } from './FlowDesigner'
@@ -22,8 +32,13 @@ const automationIcons = {
 
 export function Automations() {
   const [automations, setAutomations] = useKV<Automation[]>(KV_KEYS.AUTOMATIONS, MOCK_AUTOMATIONS)
-
   const [currentTab, setCurrentTab] = useKV('automations-tab', 'overview')
+
+  // Initialize scheduler (triggers in background)
+  const { triggerAutomation } = useScheduler()
+
+  // Initialize condition evaluator (monitors device states)
+  useConditionEvaluator()
 
   const toggleAutomation = (automationId: string) => {
     setAutomations(currentAutomations =>
@@ -36,10 +51,11 @@ export function Automations() {
     toast.success('Automation updated')
   }
 
-  const runAutomation = (automationId: string) => {
+  const runAutomation = async (automationId: string) => {
     const automation = automations.find(a => a.id === automationId)
     if (automation) {
-      toast.success(`Running "${automation.name}"`)
+      toast.info(`Running "${automation.name}"...`)
+      await triggerAutomation(automationId)
     }
   }
 

@@ -21,6 +21,7 @@ import { Dashboard } from './components/Dashboard'
 import { DeviceMonitor } from './components/DeviceMonitor'
 import { DeviceSettings } from './components/DeviceSettings'
 import { Energy } from './components/Energy'
+import { GeofenceTest } from './components/GeofenceTest'
 import { InsightsDashboard } from './components/InsightsDashboard'
 import { LoadingStatesDemo } from './components/LoadingStatesDemo'
 import { Rooms } from './components/Rooms'
@@ -300,6 +301,9 @@ function App() {
                   <TabsTrigger value="test" className="data-[state=active]:bg-primary/15">
                     Test Controls
                   </TabsTrigger>
+                  <TabsTrigger value="geofence-test" className="data-[state=active]:bg-primary/15">
+                    Geofence Test
+                  </TabsTrigger>
                   <TabsTrigger value="developer" className="data-[state=active]:bg-primary/15">
                     Developer
                   </TabsTrigger>
@@ -320,6 +324,9 @@ function App() {
                 </TabsContent>
                 <TabsContent value="test" className="m-0 h-full overflow-y-auto p-0">
                   <TestAdvancedControls />
+                </TabsContent>
+                <TabsContent value="geofence-test" className="m-0 h-full overflow-y-auto p-0">
+                  <GeofenceTest />
                 </TabsContent>
                 <TabsContent value="developer" className="m-0 h-full p-0">
                   <LoadingStatesDemo />

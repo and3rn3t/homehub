@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { useFlowInterpreter } from '@/hooks/use-flow-interpreter'
 import { useKV } from '@/hooks/use-kv'
 import {
   type LucideIcon,
@@ -22,7 +23,6 @@ import {
 import { motion } from 'framer-motion'
 import { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { useFlowExecutor } from './FlowExecutor'
 import { FlowMiniMap } from './FlowMiniMap'
 import { FlowTutorial } from './FlowTutorial'
 import { NodeConfig } from './NodeConfig'
@@ -83,7 +83,7 @@ export function FlowDesigner() {
   const [selectedNode, setSelectedNode] = useState<FlowNode | null>(null)
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
-  const { testFlow } = useFlowExecutor()
+  const { executeFlow, validateFlow } = useFlowInterpreter()
 
   const createNewFlow = () => {
     const newFlow: Flow = {
@@ -144,7 +144,14 @@ export function FlowDesigner() {
   const onDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault()
-      if (!draggedNode || !canvasRef.current) return
+      console.log('[FlowDesigner] onDrop triggered', { draggedNode })
+      if (!draggedNode || !canvasRef.current) {
+        console.warn('[FlowDesigner] onDrop aborted:', {
+          hasDraggedNode: !!draggedNode,
+          hasCanvasRef: !!canvasRef.current,
+        })
+        return
+      }
 
       const rect = canvasRef.current.getBoundingClientRect()
       const position = {
@@ -152,6 +159,7 @@ export function FlowDesigner() {
         y: e.clientY - rect.top - 50,
       }
 
+      console.log('[FlowDesigner] Adding node to canvas', { nodeType: draggedNode.type, position })
       addNodeToCanvas(draggedNode, position)
       setDraggedNode(null)
     },
@@ -220,13 +228,39 @@ export function FlowDesigner() {
   const testCurrentFlow = async () => {
     if (!selectedFlow) return
 
-    toast.info('Testing flow...')
-    const success = await testFlow(selectedFlow)
+    // Validate first
+    const validation = validateFlow(selectedFlow.id)
+    if (!validation.valid) {
+      toast.error('Flow validation failed', {
+        description: validation.errors[0] || 'Check console for details',
+      })
+      return
+    }
 
-    if (success) {
-      toast.success('Flow test completed successfully')
+    if (validation.warnings.length > 0) {
+      toast.warning('Flow has warnings', {
+        description: validation.warnings[0] || 'Check console',
+      })
+    }
+
+    // Execute the flow
+    toast.info('🧪 Testing flow...', {
+      description: 'Executing all nodes in sequence',
+    })
+
+    const result = await executeFlow(selectedFlow.id, {
+      testMode: true,
+      triggeredAt: new Date().toISOString(),
+    })
+
+    if (result?.success) {
+      toast.success(`✅ Flow test completed`, {
+        description: `${result.executedNodes.length} nodes executed in ${result.executionTime}ms`,
+      })
     } else {
-      toast.error('Flow test failed')
+      toast.error(`❌ Flow test failed`, {
+        description: result?.error || 'Unknown error',
+      })
     }
   }
 
@@ -362,7 +396,7 @@ export function FlowDesigner() {
     <div className="flex h-full">
       {/* Node Palette */}
       <div
-        className={`bg-card border-border w-80 border-r transition-transform ${showNodePalette ? 'translate-x-0' : '-translate-x-full'} absolute z-10 h-full overflow-y-auto`}
+        className={`bg-card border-border w-80 border-r transition-transform ${showNodePalette ? 'translate-x-0' : '-translate-x-full'} ${showNodePalette ? '' : 'pointer-events-none'} absolute z-10 h-full overflow-y-auto`}
       >
         <div className="p-4">
           <div className="mb-4 flex items-center justify-between">
@@ -392,22 +426,28 @@ export function FlowDesigner() {
           </div>
 
           <ul className="list-none space-y-2">
-            {nodeTypes[selectedNodeType].map(nodeType => (
-              <li
-                key={nodeType.type}
-                draggable
-                aria-roledescription="draggable node"
-                onDragStart={() => setDraggedNode(nodeType)}
-                className="border-border hover:bg-accent/5 flex cursor-grab items-center gap-3 rounded-lg border p-3 transition-colors active:cursor-grabbing"
-              >
-                <div
-                  className={`h-8 w-8 rounded-lg ${nodeType.color} flex items-center justify-center`}
+            {nodeTypes[selectedNodeType].map(nodeType => {
+              const IconComponent = nodeType.icon
+              return (
+                <li
+                  key={nodeType.type}
+                  draggable
+                  aria-roledescription="draggable node"
+                  onDragStart={() => {
+                    console.log('[FlowDesigner] Drag started', { nodeType: nodeType.type })
+                    setDraggedNode(nodeType)
+                  }}
+                  className="border-border hover:bg-accent/5 flex cursor-grab items-center gap-3 rounded-lg border p-3 transition-colors active:cursor-grabbing"
                 >
-                  <nodeType.icon size={16} className="text-white" />
-                </div>
-                <span className="text-sm font-medium">{nodeType.label}</span>
-              </li>
-            ))}
+                  <div
+                    className={`h-8 w-8 rounded-lg ${nodeType.color} flex items-center justify-center`}
+                  >
+                    <IconComponent className="h-4 w-4 text-white" />
+                  </div>
+                  <span className="text-sm font-medium">{nodeType.label}</span>
+                </li>
+              )
+            })}
           </ul>
         </div>
       </div>
@@ -555,7 +595,10 @@ export function FlowDesigner() {
                         <div
                           className={`h-6 w-6 rounded ${nodeTypes[node.type].find(t => t.type === node.subtype)?.color} flex items-center justify-center`}
                         >
-                          <node.icon size={12} className="text-white" />
+                          {(() => {
+                            const IconComponent = node.icon
+                            return <IconComponent className="h-3 w-3 text-white" />
+                          })()}
                         </div>
                         <Badge variant="outline" className="text-xs capitalize">
                           {node.type}

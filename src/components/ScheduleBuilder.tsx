@@ -20,7 +20,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { useKV } from '@/hooks/use-kv'
-import { ClockIcon, PlusIcon, SunRoomIcon, XIcon } from '@/lib/icons'
+import { ClockIcon, PlayIcon, PlusIcon, XIcon } from '@/lib/icons'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -254,7 +254,7 @@ export function ScheduleBuilder() {
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button className="rounded-full">
-                <Plus size={20} className="mr-2" />
+                <PlusIcon className="mr-2 h-5 w-5" />
                 New Schedule
               </Button>
             </DialogTrigger>
@@ -497,7 +497,7 @@ export function ScheduleBuilder() {
           <Card className="border-border/30 border-2 border-dashed">
             <CardContent className="p-8 text-center">
               <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                <Clock size={24} className="text-muted-foreground" />
+                <ClockIcon className="text-muted-foreground h-6 w-6" />
               </div>
               <p className="text-muted-foreground mb-2">No schedules created yet</p>
               <p className="text-muted-foreground mb-4 text-sm">
@@ -522,9 +522,8 @@ export function ScheduleBuilder() {
                     <div className="mb-3 flex items-start justify-between">
                       <div className="flex flex-1 items-start gap-3">
                         <div className="bg-secondary mt-0.5 flex h-10 w-10 items-center justify-center rounded-full">
-                          <Clock
-                            size={20}
-                            className={schedule.enabled ? 'text-primary' : 'text-muted-foreground'}
+                          <ClockIcon
+                            className={`h-5 w-5 ${schedule.enabled ? 'text-primary' : 'text-muted-foreground'}`}
                           />
                         </div>
 
@@ -569,7 +568,7 @@ export function ScheduleBuilder() {
                           className="h-8 w-8"
                           onClick={() => runScheduleNow(schedule.id)}
                         >
-                          <Sun size={14} />
+                          <PlayIcon className="h-3.5 w-3.5" />
                         </Button>
 
                         <Button
@@ -578,7 +577,7 @@ export function ScheduleBuilder() {
                           className="text-destructive hover:text-destructive h-8 w-8"
                           onClick={() => deleteSchedule(schedule.id)}
                         >
-                          <X size={14} />
+                          <XIcon className="h-3.5 w-3.5" />
                         </Button>
 
                         <Switch
