@@ -165,7 +165,7 @@ async function importHueDevices() {
     }
 
     // Step 3: Write to JSON file
-    const outputFile = 'hue-devices.json'
+    const outputFile = 'data/hue-devices.json'
     writeFileSync(outputFile, JSON.stringify(hueDevices, null, 2))
 
     console.log('📊 Device Summary')
@@ -189,7 +189,7 @@ async function importHueDevices() {
     console.log('   2. Open DevTools Console (F12)')
     console.log('   3. Run this command to import:')
     console.log(
-      `      fetch('/hue-devices.json').then(r=>r.json()).then(devices=>localStorage.setItem('devices',JSON.stringify(devices)))`
+      `      fetch('/data/hue-devices.json').then(r=>r.json()).then(devices=>localStorage.setItem('devices',JSON.stringify(devices)))`
     )
     console.log('   4. Refresh the page to see your devices')
   } catch (error) {
