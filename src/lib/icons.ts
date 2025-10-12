@@ -92,6 +92,7 @@ import {
   Map,
   // Location Icons
   MapPin,
+  Maximize2,
   MessageSquare,
   Mic,
   MicOff,
@@ -256,6 +257,7 @@ export {
   Map as MapIcon,
   // Location Icons
   MapPin as MapPinIcon,
+  Maximize2 as MaximizeIcon,
   MessageSquare as MessageIcon,
   Mic as MicIcon,
   MicOff as MicOffIcon,
@@ -275,6 +277,7 @@ export {
   Plus as PlusIcon,
   Power as PowerIcon,
   Radio as RadioIcon,
+  RefreshCw as RefreshCwIcon,
   RefreshCw as RefreshIcon,
   Save as SaveIcon,
   School as SchoolIcon,

@@ -1,7 +1,7 @@
 # HomeHub Documentation Index
 
-**Last Updated**: October 11, 2025
-**Total Documents**: 62+ files
+**Last Updated**: October 12, 2025
+**Total Documents**: 65+ files
 **Status**: 🚧 Consolidation planned (see `DOCUMENTATION_CONSOLIDATION.md`)
 
 ---
@@ -75,40 +75,102 @@
 
 ---
 
-### 🔌 Phase 2: Device Integration (🚧 In Progress)
+### 🔌 Phase 2: Device Integration (✅ Complete)
 
 **HTTP/MQTT device discovery, control, and monitoring:**
 
 #### Phase 2.1: MQTT Setup (✅ Complete)
 
-| Document                                           | Description                 | Status     |
-| -------------------------------------------------- | --------------------------- | ---------- |
-| [PHASE_2.1_COMPLETE.md](PHASE_2.1_COMPLETE.md)     | Phase 2.1 summary           | 📚 Archive |
-| [PHASE_2.1_MQTT_SETUP.md](PHASE_2.1_MQTT_SETUP.md) | MQTT broker setup guide     | 📚 Archive |
-| [PHASE_2.1_PROGRESS.md](PHASE_2.1_PROGRESS.md)     | Phase 2.1 progress tracking | 📚 Archive |
-| [PHASE_2.1.1_COMPLETE.md](PHASE_2.1.1_COMPLETE.md) | Milestone 2.1.1 completion  | 📚 Archive |
-| [PHASE_2.1.2_COMPLETE.md](PHASE_2.1.2_COMPLETE.md) | Milestone 2.1.2 completion  | 📚 Archive |
-| [PHASE_2.1.3_COMPLETE.md](PHASE_2.1.3_COMPLETE.md) | Milestone 2.1.3 completion  | 📚 Archive |
+| Document                                                      | Description                 | Status     |
+| ------------------------------------------------------------- | --------------------------- | ---------- |
+| [PHASE_2.1_COMPLETE.md](deployment/PHASE_2.1_COMPLETE.md)     | Phase 2.1 summary           | 📚 Archive |
+| [PHASE_2.1_MQTT_SETUP.md](deployment/PHASE_2.1_MQTT_SETUP.md) | MQTT broker setup guide     | 📚 Archive |
+| [PHASE_2.1_PROGRESS.md](development/PHASE_2.1_PROGRESS.md)    | Phase 2.1 progress tracking | 📚 Archive |
+| [PHASE_2.1.1_COMPLETE.md](history/PHASE_2.1.1_COMPLETE.md)    | Milestone 2.1.1 completion  | 📚 Archive |
+| [PHASE_2.1.2_COMPLETE.md](history/PHASE_2.1.2_COMPLETE.md)    | Milestone 2.1.2 completion  | 📚 Archive |
+| [PHASE_2.1.3_COMPLETE.md](history/PHASE_2.1.3_COMPLETE.md)    | Milestone 2.1.3 completion  | 📚 Archive |
 
 #### Phase 2.2: HTTP Integration (✅ Milestone 2.2.3 Complete)
 
-| Document                                                                                   | Description                              | Status         |
-| ------------------------------------------------------------------------------------------ | ---------------------------------------- | -------------- |
-| [MILESTONE_2.2.3_DISCOVERY_COMPLETE.md](MILESTONE_2.2.3_DISCOVERY_COMPLETE.md)             | **Current milestone** - Device discovery | ✅ Current     |
-| [DISCOVERY_TEST_PLAN.md](DISCOVERY_TEST_PLAN.md)                                           | Comprehensive testing guide (10 phases)  | ✅ Current     |
-| [DISCOVERY_TEST_RESULTS.md](DISCOVERY_TEST_RESULTS.md)                                     | Test results (82% complete, 36/44 tests) | ✅ Current     |
-| [DEVICE_ACCESSIBILITY_FIX.md](DEVICE_ACCESSIBILITY_FIX.md)                                 | Device visibility improvements           | ✅ Current     |
-| [ROOMS_DEVICE_CONTROL.md](ROOMS_DEVICE_CONTROL.md)                                         | Enhanced device control UI               | ✅ Current     |
-| [HTTP_ADAPTER_QUICKSTART.md](HTTP_ADAPTER_QUICKSTART.md)                                   | HTTP integration quick start             | ✅ Current     |
-| [TESTING_HTTP_DEVICES.md](TESTING_HTTP_DEVICES.md)                                         | HTTP device testing guide                | ✅ Current     |
-| [VIRTUAL_HTTP_DEVICE_TEST_RESULTS.md](VIRTUAL_HTTP_DEVICE_TEST_RESULTS.md)                 | Virtual device test results              | ✅ Current     |
-| [MILESTONE_2.2.2_COMPLETE.md](MILESTONE_2.2.2_COMPLETE.md)                                 | HTTP adapter implementation              | 🟡 Consolidate |
-| [MILESTONE_2.2.2_HTTP_INTEGRATION_SUCCESS.md](MILESTONE_2.2.2_HTTP_INTEGRATION_SUCCESS.md) | HTTP integration success                 | 🟡 Consolidate |
-| [MILESTONE_2.2.2_PROGRESS.md](MILESTONE_2.2.2_PROGRESS.md)                                 | Milestone 2.2.2 progress                 | 📚 Archive     |
-| [MILESTONE_2.2.2_TESTING.md](MILESTONE_2.2.2_TESTING.md)                                   | Milestone 2.2.2 testing                  | 📚 Archive     |
-| [MILESTONE_2.2.2_PLAN.md](MILESTONE_2.2.2_PLAN.md)                                         | Milestone 2.2.2 planning                 | 📚 Archive     |
-| [MILESTONE_2.2.3_DISCOVERY_PLAN.md](MILESTONE_2.2.3_DISCOVERY_PLAN.md)                     | Discovery planning doc                   | 📚 Archive     |
-| [PHASE_2.2_PLAN.md](PHASE_2.2_PLAN.md)                                                     | Phase 2.2 planning                       | 📚 Archive     |
+| Document                                                                                           | Description                              | Status         |
+| -------------------------------------------------------------------------------------------------- | ---------------------------------------- | -------------- |
+| [MILESTONE_2.2.3_DISCOVERY_COMPLETE.md](development/MILESTONE_2.2.3_DISCOVERY_COMPLETE.md)         | **Current milestone** - Device discovery | ✅ Current     |
+| [DISCOVERY_TEST_PLAN.md](development/DISCOVERY_TEST_PLAN.md)                                       | Comprehensive testing guide (10 phases)  | ✅ Current     |
+| [DISCOVERY_TEST_RESULTS.md](development/DISCOVERY_TEST_RESULTS.md)                                 | Test results (82% complete, 36/44 tests) | ✅ Current     |
+| [DEVICE_ACCESSIBILITY_FIX.md](development/DEVICE_ACCESSIBILITY_FIX.md)                             | Device visibility improvements           | ✅ Current     |
+| [ROOMS_DEVICE_CONTROL.md](development/ROOMS_DEVICE_CONTROL.md)                                     | Enhanced device control UI               | ✅ Current     |
+| [HTTP_ADAPTER_QUICKSTART.md](guides/HTTP_ADAPTER_QUICKSTART.md)                                    | HTTP integration quick start             | ✅ Current     |
+| [TESTING_HTTP_DEVICES.md](development/TESTING_HTTP_DEVICES.md)                                     | HTTP device testing guide                | ✅ Current     |
+| [VIRTUAL_HTTP_DEVICE_TEST_RESULTS.md](development/VIRTUAL_HTTP_DEVICE_TEST_RESULTS.md)             | Virtual device test results              | ✅ Current     |
+| [MILESTONE_2.2.2_COMPLETE.md](history/MILESTONE_2.2.2_COMPLETE.md)                                 | HTTP adapter implementation              | 🟡 Consolidate |
+| [MILESTONE_2.2.2_HTTP_INTEGRATION_SUCCESS.md](history/MILESTONE_2.2.2_HTTP_INTEGRATION_SUCCESS.md) | HTTP integration success                 | 🟡 Consolidate |
+| [MILESTONE_2.2.2_PROGRESS.md](archive/MILESTONE_2.2.2_PROGRESS.md)                                 | Milestone 2.2.2 progress                 | 📚 Archive     |
+| [MILESTONE_2.2.2_TESTING.md](archive/MILESTONE_2.2.2_TESTING.md)                                   | Milestone 2.2.2 testing                  | 📚 Archive     |
+| [MILESTONE_2.2.2_PLAN.md](archive/MILESTONE_2.2.2_PLAN.md)                                         | Milestone 2.2.2 planning                 | 📚 Archive     |
+| [MILESTONE_2.2.3_DISCOVERY_PLAN.md](archive/MILESTONE_2.2.3_DISCOVERY_PLAN.md)                     | Discovery planning doc                   | 📚 Archive     |
+| [PHASE_2.2_PLAN.md](archive/PHASE_2.2_PLAN.md)                                                     | Phase 2.2 planning                       | 📚 Archive     |
+
+---
+
+### 🤖 Phase 3: Automation Engine (✅ Complete)
+
+**Time/condition-based automation with visual flow designer:**
+
+| Document                                                         | Description                                 | Status     |
+| ---------------------------------------------------------------- | ------------------------------------------- | ---------- |
+| [PHASE_3_COMPLETE.md](development/PHASE_3_COMPLETE.md)           | **Phase 3 summary** - All 5 milestones done | ✅ Current |
+| [PHASE_3_MILESTONE_3.4.md](development/PHASE_3_MILESTONE_3.4.md) | Flow Interpreter implementation             | ✅ Current |
+| [PHASE_3_MILESTONE_3.5.md](development/PHASE_3_MILESTONE_3.5.md) | Geofencing implementation                   | ✅ Current |
+
+**Key Features**:
+
+- ⏰ Scheduler Service (360 lines) - Time-based + sunrise/sunset
+- 📊 Condition Evaluator (300 lines) - Threshold monitoring with hysteresis
+- ⚡ Action Executor (360 lines) - 6 action types, retry logic, rollback
+- 🔀 Flow Interpreter (640 lines) - Visual automation graphs
+- 📍 Geofencing (497 lines) - GPS-based location triggers
+
+**Performance**: 5-12x faster than targets (device control <150ms, geofence <10ms)
+
+---
+
+### 🔐 Phase 5: Security & Surveillance (� Active - Your Setup)
+
+**IP cameras, smart locks, and security system:**
+
+| Document                                                                   | Description                                        | Status     |
+| -------------------------------------------------------------------------- | -------------------------------------------------- | ---------- |
+| [PHASE_5_SECURITY_PLAN.md](development/PHASE_5_SECURITY_PLAN.md)           | **Master plan** - 5 milestones, 10 weeks           | ✅ Current |
+| [PHASE_5_QUICK_START.md](development/PHASE_5_QUICK_START.md)               | **Quick start guide** - Hardware & setup           | ✅ Current |
+| [PHASE_5_YOUR_HARDWARE.md](development/PHASE_5_YOUR_HARDWARE.md)           | **YOUR SETUP** - 2 Eufy PTZ + 3 Arlo cameras       | 🆕 NEW     |
+| [PHASE_5_YOUR_SETUP_SUMMARY.md](development/PHASE_5_YOUR_SETUP_SUMMARY.md) | **Quick reference** - Your 5-camera implementation | 🆕 NEW     |
+
+**Your Hardware** (Already Owned):
+
+- 2x Eufy PTZ cameras (Pan-Tilt-Zoom)
+- 3x Arlo cameras
+- **Total**: 5 cameras (~$500-800 value)
+- **Cost**: $0 (hardware owned!) + $60-100 (storage)
+
+**Your Implementation Path**:
+
+1. 🏠 Home Assistant Bridge (recommended)
+2. 🔌 Eufy Security WS integration (HACS)
+3. 📷 Arlo built-in integration
+4. 🌐 WebRTC/HLS streaming proxy
+5. 🎨 HomeHub 5-camera grid view
+
+**Timeline**: 3-4 weeks (26-36 hours)
+
+**Original Milestones** (Generic):
+
+1. 📷 Camera Integration (20-30h) - RTSP/ONVIF, live streaming
+2. 💾 Video Storage (12-20h) - 7-day NVR, event recording
+3. 🔔 Smart Notifications (15-25h) - Person detection, push alerts
+4. 🔐 Access Control (20-30h) - Smart locks, door sensors
+5. 🚨 Emergency Response (10-15h) - Panic mode, automated alerts
+
+**Hardware**: $290-470 (4 cameras, POE switch, storage, smart locks)
 
 ---
 
@@ -187,25 +249,29 @@
 
 ### By Task
 
-**"I want to..."**
+#### "I want to..."
 
-- **Get started** → [SETUP_QUICKSTART.md](SETUP_QUICKSTART.md)
-- **Understand the architecture** → [ARCHITECTURE.md](ARCHITECTURE.md)
-- **Deploy to production** → [CLOUDFLARE_DEPLOYMENT.md](CLOUDFLARE_DEPLOYMENT.md)
-- **Configure the app** → [CONFIGURATION_QUICKREF.md](CONFIGURATION_QUICKREF.md)
-- **Test device discovery** → [DISCOVERY_TEST_PLAN.md](DISCOVERY_TEST_PLAN.md)
-- **Add a new device** → [HTTP_ADAPTER_QUICKSTART.md](HTTP_ADAPTER_QUICKSTART.md)
-- **Test with virtual devices** → [VIRTUAL_DEVICES_QUICKREF.md](VIRTUAL_DEVICES_QUICKREF.md)
-- **Improve UI/UX** → [BEST_PRACTICES.md](BEST_PRACTICES.md)
-- **Add animations** → [PHASE_1.3_ANIMATIONS.md](PHASE_1.3_ANIMATIONS.md)
-- **Handle errors** → [PHASE_1.3.4_ERROR_BOUNDARIES.md](PHASE_1.3.4_ERROR_BOUNDARIES.md)
-- **Make it responsive** → [PHASE_1.3.5_RESPONSIVE.md](PHASE_1.3.5_RESPONSIVE.md)
+- **Get started** → [SETUP_QUICKSTART.md](guides/SETUP_QUICKSTART.md)
+- **Understand the architecture** → [ARCHITECTURE.md](guides/ARCHITECTURE.md)
+- **Deploy to production** → [CLOUDFLARE_DEPLOYMENT.md](deployment/CLOUDFLARE_DEPLOYMENT.md)
+- **Configure the app** → [CONFIGURATION_QUICKREF.md](guides/CONFIGURATION_QUICKREF.md)
+- **Test device discovery** → [DISCOVERY_TEST_PLAN.md](development/DISCOVERY_TEST_PLAN.md)
+- **Add a new device** → [HTTP_ADAPTER_QUICKSTART.md](guides/HTTP_ADAPTER_QUICKSTART.md)
+- **Test with virtual devices** → [VIRTUAL_DEVICES_QUICKREF.md](guides/VIRTUAL_DEVICES_QUICKREF.md)
+- **Improve UI/UX** → [BEST_PRACTICES.md](guides/BEST_PRACTICES.md)
+- **Add animations** → [PHASE_1.3_ANIMATIONS.md](history/PHASE_1.3_ANIMATIONS.md)
+- **Handle errors** → [PHASE_1.3.4_ERROR_BOUNDARIES.md](history/PHASE_1.3.4_ERROR_BOUNDARIES.md)
+- **Make it responsive** → [PHASE_1.3.5_RESPONSIVE.md](history/PHASE_1.3.5_RESPONSIVE.md)
+- **Build automations** → [PHASE_3_COMPLETE.md](development/PHASE_3_COMPLETE.md)
+- **Add security cameras** → [PHASE_5_QUICK_START.md](development/PHASE_5_QUICK_START.md)
 
 ### By Phase
 
-- **Phase 1 (Foundation)** → [PHASE_1_COMPLETE.md](PHASE_1_COMPLETE.md)
-- **Phase 2.1 (MQTT)** → [PHASE_2.1_COMPLETE.md](PHASE_2.1_COMPLETE.md)
-- **Phase 2.2 (HTTP)** → [MILESTONE_2.2.3_DISCOVERY_COMPLETE.md](MILESTONE_2.2.3_DISCOVERY_COMPLETE.md)
+- **Phase 1 (Foundation)** → [PHASE_1_COMPLETE.md](history/PHASE_1_COMPLETE.md)
+- **Phase 2.1 (MQTT)** → [PHASE_2.1_COMPLETE.md](deployment/PHASE_2.1_COMPLETE.md)
+- **Phase 2.2 (HTTP)** → [MILESTONE_2.2.3_DISCOVERY_COMPLETE.md](development/MILESTONE_2.2.3_DISCOVERY_COMPLETE.md)
+- **Phase 3 (Automation)** → [PHASE_3_COMPLETE.md](development/PHASE_3_COMPLETE.md)
+- **Phase 5 (Security)** → [PHASE_5_SECURITY_PLAN.md](development/PHASE_5_SECURITY_PLAN.md) + [PHASE_5_QUICK_START.md](development/PHASE_5_QUICK_START.md)
 
 ### By Status
 
@@ -221,16 +287,23 @@
 
 **Current State**:
 
-- Total Documents: **60+ files**
-- Active/Current: **16 files** (27%)
-- To Consolidate: **12 files** (20%)
-- To Archive: **20+ files** (33%)
+- Total Documents: **65+ files**
+- Active/Current: **18 files** (28%)
+- To Consolidate: **12 files** (18%)
+- To Archive: **25+ files** (38%)
 - Duplicates: **3 files** (5%)
+
+**Phase Coverage**:
+
+- ✅ Phase 1 (Foundation): 10+ docs
+- ✅ Phase 2 (Device Integration): 15+ docs
+- ✅ Phase 3 (Automation): 3 docs
+- 📋 Phase 5 (Security): 2 docs (planning)
 
 **After Consolidation** (Planned):
 
-- Active Documents: **~30 files** (50% reduction)
-- Archived Documents: **20+ files** (preserved for history)
+- Active Documents: **~35 files** (includes Phase 3 & 5)
+- Archived Documents: **25+ files** (preserved for history)
 - Consolidated Guides: **5 unified documents**
 - Clear Directory Structure: ✅
 
@@ -242,12 +315,18 @@ See [DOCUMENTATION_CONSOLIDATION.md](DOCUMENTATION_CONSOLIDATION.md) for detaile
 
 ### For New Contributors
 
-1. [SETUP_QUICKSTART.md](SETUP_QUICKSTART.md) - Get running (15 min)
-2. [ARCHITECTURE.md](ARCHITECTURE.md) - Understand system (30 min)
-3. [BEST_PRACTICES.md](BEST_PRACTICES.md) - Learn patterns (20 min)
-4. [MILESTONE_2.2.3_DISCOVERY_COMPLETE.md](MILESTONE_2.2.3_DISCOVERY_COMPLETE.md) - Current state (15 min)
+1. [SETUP_QUICKSTART.md](guides/SETUP_QUICKSTART.md) - Get running (15 min)
+2. [ARCHITECTURE.md](guides/ARCHITECTURE.md) - Understand system (30 min)
+3. [BEST_PRACTICES.md](guides/BEST_PRACTICES.md) - Learn patterns (20 min)
+4. [PHASE_3_COMPLETE.md](development/PHASE_3_COMPLETE.md) - Current capabilities (15 min)
 
 **Total Time**: ~80 minutes to full productivity
+
+### For Phase 5 (Security) Development
+
+1. [PHASE_5_QUICK_START.md](development/PHASE_5_QUICK_START.md) - Hardware selection & setup (1-2 days)
+2. [PHASE_5_SECURITY_PLAN.md](development/PHASE_5_SECURITY_PLAN.md) - Complete implementation plan (10 weeks)
+3. [PHASE_3_COMPLETE.md](development/PHASE_3_COMPLETE.md) - Learn from automation patterns
 
 ### For Testing
 
@@ -277,9 +356,10 @@ See [DOCUMENTATION_CONSOLIDATION.md](DOCUMENTATION_CONSOLIDATION.md) for detaile
 
 ## 📝 Document Maintenance
 
-**Last Major Update**: October 10, 2025
+**Last Major Update**: October 12, 2025
+**Recent Additions**: Phase 3 Complete, Phase 5 Planning
 **Consolidation Status**: 📋 Planning phase
-**Next Review**: After Phase 2.2.4 completion
+**Next Review**: After Phase 5.1 completion
 
 **To Add New Documentation**:
 
