@@ -4,11 +4,11 @@
 
 🚀 **Live Production App**: [homehub.andernet.dev](https://homehub.andernet.dev)
 
-![Status](https://img.shields.io/badge/status-active%20development-brightgreen)
-
-![Platform](https://img.shields.io/badge/platform-Cloudflare-orange)🚀 What's Inside?
-
-![License](https://img.shields.io/badge/license-MIT-blue)- A clean, minimal Spark environment
+![Version](https://img.shields.io/github/v/release/and3rn3t/homehub?label=version)
+![Status](https://img.shields.io/badge/status-production-brightgreen)
+![Platform](https://img.shields.io/badge/platform-Cloudflare-orange)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Tests](https://img.shields.io/badge/tests-passing-brightgreen)
 
 - Pre-configured for local development
 
@@ -16,7 +16,7 @@
 
 ## 🎯 What is HomeHub?🧠 What Can You Do?
 
-HomeHub is a **proof-of-concept framework** for DIY home automation. Currently powered by mock data, it's being built as the foundation for a production-ready personal home automation system.Right now, this is just a starting point — the perfect place to begin building and testing your Spark applications.
+HomeHub is a **proof-of-concept framework** for DIY home automation. Currently powered by mock data, it's being built as the foundation for a production-ready personal home automation system. Right now, this is just a starting point — and the perfect place to begin building.
 
 ### ✨ Key Features🧹 Just Exploring?
 
@@ -33,8 +33,6 @@ No problem! If you were just checking things out and don’t need to keep this c
 - **Offline-First**: localStorage cache for instant reads, optimistic UI updates📄 License For Spark Template Resources
 
 - **Type-Safe**: Full TypeScript with JSDoc documentation
-
-The Spark Template files and resources from GitHub are licensed under the terms of the MIT license, Copyright GitHub, Inc.
 
 ---
 
@@ -368,8 +366,8 @@ The Spark Template files and resources from GitHub are licensed under the terms 
 
 ## 📞 Contact
 
-- **Issues**: <https://github.com/yourusername/homehub/issues>
-- **Discussions**: <https://github.com/yourusername/homehub/discussions>
+- **Issues**: <https://github.com/and3rn3t/homehub/issues>
+- **Discussions**: <https://github.com/and3rn3t/homehub/discussions>
 
 ---
 
