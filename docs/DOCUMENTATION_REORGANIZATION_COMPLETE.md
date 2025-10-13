@@ -281,14 +281,14 @@ docs/
 
 ## Success Metrics
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| Active dev docs | 98 files | 6 files | **93% reduction** |
-| Time to find doc | ~5 min | ~30 sec | **90% faster** |
-| Broken links | Unknown | 0 | **100% reliable** |
-| Directory READMEs | 0 | 2 | **New feature** |
-| Clear structure | ❌ | ✅ | **Achieved** |
-| Git history | ✅ | ✅ | **Preserved** |
+| Metric            | Before   | After   | Improvement       |
+| ----------------- | -------- | ------- | ----------------- |
+| Active dev docs   | 98 files | 6 files | **93% reduction** |
+| Time to find doc  | ~5 min   | ~30 sec | **90% faster**    |
+| Broken links      | Unknown  | 0       | **100% reliable** |
+| Directory READMEs | 0        | 2       | **New feature**   |
+| Clear structure   | ❌       | ✅      | **Achieved**      |
+| Git history       | ✅       | ✅      | **Preserved**     |
 
 ---
 

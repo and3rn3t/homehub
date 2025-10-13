@@ -46,15 +46,15 @@ docs/
 
 **Must-read documentation for all contributors:**
 
-| Document                                                 | Description                                | Status     |
-| -------------------------------------------------------- | ------------------------------------------ | ---------- |
-| [ARCHITECTURE.md](guides/ARCHITECTURE.md)                | System design, data flow, Mermaid diagrams | ✅ Current |
-| [BEST_PRACTICES.md](guides/BEST_PRACTICES.md)            | Coding standards, component patterns       | ✅ Current |
-| [CONFIGURATION.md](guides/CONFIGURATION.md)              | Complete configuration reference           | ✅ Current |
-| [NEXT_STEPS.md](development/NEXT_STEPS.md)               | Current roadmap and priorities (Phase 3)   | ✅ Current |
-| [SECURITY.md](deployment/SECURITY.md)                    | Security guidelines and best practices     | ✅ Current |
-| [guides/README.md](guides/README.md)                     | **NEW** - Guides navigation               | 🆕 NEW     |
-| [development/README.md](development/README.md)           | **NEW** - Development docs navigation     | 🆕 NEW     |
+| Document                                       | Description                                | Status     |
+| ---------------------------------------------- | ------------------------------------------ | ---------- |
+| [ARCHITECTURE.md](guides/ARCHITECTURE.md)      | System design, data flow, Mermaid diagrams | ✅ Current |
+| [BEST_PRACTICES.md](guides/BEST_PRACTICES.md)  | Coding standards, component patterns       | ✅ Current |
+| [CONFIGURATION.md](guides/CONFIGURATION.md)    | Complete configuration reference           | ✅ Current |
+| [NEXT_STEPS.md](development/NEXT_STEPS.md)     | Current roadmap and priorities (Phase 3)   | ✅ Current |
+| [SECURITY.md](deployment/SECURITY.md)          | Security guidelines and best practices     | ✅ Current |
+| [guides/README.md](guides/README.md)           | **NEW** - Guides navigation                | 🆕 NEW     |
+| [development/README.md](development/README.md) | **NEW** - Development docs navigation      | 🆕 NEW     |
 
 ---
 
@@ -62,21 +62,21 @@ docs/
 
 **Getting started with HomeHub:**
 
-| Document                                                     | Description                       | Status     |
-| ------------------------------------------------------------ | --------------------------------- | ---------- |
+| Document                                                    | Description                       | Status     |
+| ----------------------------------------------------------- | --------------------------------- | ---------- |
 | [SETUP_QUICKSTART.md](guides/setup/SETUP_QUICKSTART.md)     | Complete setup guide (15 minutes) | ✅ Current |
-| [EXTENSIONS_GUIDE.md](guides/setup/EXTENSIONS_GUIDE.md)      | VS Code extensions                | ✅ Current |
-| [GITHUB_TOKEN_SETUP.md](guides/setup/GITHUB_TOKEN_SETUP.md)  | GitHub authentication            | ✅ Current |
-| [CI_CD_SETUP.md](guides/setup/CI_CD_SETUP.md)                | CI/CD configuration              | ✅ Current |
-| [CI_MONITORING.md](guides/setup/CI_MONITORING.md)            | CI monitoring and badges         | ✅ Current |
+| [EXTENSIONS_GUIDE.md](guides/setup/EXTENSIONS_GUIDE.md)     | VS Code extensions                | ✅ Current |
+| [GITHUB_TOKEN_SETUP.md](guides/setup/GITHUB_TOKEN_SETUP.md) | GitHub authentication             | ✅ Current |
+| [CI_CD_SETUP.md](guides/setup/CI_CD_SETUP.md)               | CI/CD configuration               | ✅ Current |
+| [CI_MONITORING.md](guides/setup/CI_MONITORING.md)           | CI monitoring and badges          | ✅ Current |
 
 **Configuration references:**
 
-| Document                                                     | Description                       | Status     |
-| ------------------------------------------------------------ | --------------------------------- | ---------- |
-| [CONFIGURATION.md](guides/CONFIGURATION.md)                  | Complete configuration guide      | ✅ Current |
-| [CONFIGURATION_SYNC.md](guides/CONFIGURATION_SYNC.md)        | Config synchronization patterns   | ✅ Current |
-| [CONFIGURATION_QUICKREF.md](guides/reference/CONFIGURATION_QUICKREF.md) | Quick config lookup      | ✅ Current |
+| Document                                                                | Description                     | Status     |
+| ----------------------------------------------------------------------- | ------------------------------- | ---------- |
+| [CONFIGURATION.md](guides/CONFIGURATION.md)                             | Complete configuration guide    | ✅ Current |
+| [CONFIGURATION_SYNC.md](guides/CONFIGURATION_SYNC.md)                   | Config synchronization patterns | ✅ Current |
+| [CONFIGURATION_QUICKREF.md](guides/reference/CONFIGURATION_QUICKREF.md) | Quick config lookup             | ✅ Current |
 
 ---
 
@@ -84,11 +84,11 @@ docs/
 
 **Connecting smart home devices:**
 
-| Document                                                                 | Description                  | Status     |
-| ------------------------------------------------------------------------ | ---------------------------- | ---------- |
-| [HTTP_ADAPTER_QUICKSTART.md](guides/integration/HTTP_ADAPTER_QUICKSTART.md) | HTTP device integration   | ✅ Current |
-| [MQTT_INTEGRATION_QUICKREF.md](guides/integration/MQTT_INTEGRATION_QUICKREF.md) | MQTT quick reference  | ✅ Current |
-| [MQTT_QUICKREF.md](guides/integration/MQTT_QUICKREF.md)                  | MQTT commands and patterns   | ✅ Current |
+| Document                                                                        | Description                | Status     |
+| ------------------------------------------------------------------------------- | -------------------------- | ---------- |
+| [HTTP_ADAPTER_QUICKSTART.md](guides/integration/HTTP_ADAPTER_QUICKSTART.md)     | HTTP device integration    | ✅ Current |
+| [MQTT_INTEGRATION_QUICKREF.md](guides/integration/MQTT_INTEGRATION_QUICKREF.md) | MQTT quick reference       | ✅ Current |
+| [MQTT_QUICKREF.md](guides/integration/MQTT_QUICKREF.md)                         | MQTT commands and patterns | ✅ Current |
 
 ---
 
@@ -96,13 +96,13 @@ docs/
 
 **Cheat sheets and fast lookups:**
 
-| Document                                                                 | Description                  | Status     |
-| ------------------------------------------------------------------------ | ---------------------------- | ---------- |
-| [CONFIGURATION_QUICKREF.md](guides/reference/CONFIGURATION_QUICKREF.md)  | Config quick lookup          | ✅ Current |
-| [EXTENSIONS_QUICKREF.md](guides/reference/EXTENSIONS_QUICKREF.md)        | Extensions cheat sheet       | ✅ Current |
+| Document                                                                    | Description                  | Status     |
+| --------------------------------------------------------------------------- | ---------------------------- | ---------- |
+| [CONFIGURATION_QUICKREF.md](guides/reference/CONFIGURATION_QUICKREF.md)     | Config quick lookup          | ✅ Current |
+| [EXTENSIONS_QUICKREF.md](guides/reference/EXTENSIONS_QUICKREF.md)           | Extensions cheat sheet       | ✅ Current |
 | [VIRTUAL_DEVICES_QUICKREF.md](guides/reference/VIRTUAL_DEVICES_QUICKREF.md) | Testing with virtual devices | ✅ Current |
-| [ICON_USAGE_GUIDE.md](guides/reference/ICON_USAGE_GUIDE.md)              | Lucide icon system           | ✅ Current |
-| [iOS_DESIGN_ENHANCEMENTS.md](guides/reference/iOS_DESIGN_ENHANCEMENTS.md) | iOS design patterns         | ✅ Current |
+| [ICON_USAGE_GUIDE.md](guides/reference/ICON_USAGE_GUIDE.md)                 | Lucide icon system           | ✅ Current |
+| [iOS_DESIGN_ENHANCEMENTS.md](guides/reference/iOS_DESIGN_ENHANCEMENTS.md)   | iOS design patterns          | ✅ Current |
 
 ---
 
@@ -110,10 +110,10 @@ docs/
 
 **Production deployment and CI/CD:**
 
-| Document                                               | Description                          | Status     |
-| ------------------------------------------------------ | ------------------------------------ | ---------- |
+| Document                                                        | Description                    | Status     |
+| --------------------------------------------------------------- | ------------------------------ | ---------- |
 | [CLOUDFLARE_DEPLOYMENT.md](deployment/CLOUDFLARE_DEPLOYMENT.md) | Complete Cloudflare deployment | ✅ Current |
-| [SECURITY.md](deployment/SECURITY.md)                  | Security guidelines                  | ✅ Current |
+| [SECURITY.md](deployment/SECURITY.md)                           | Security guidelines            | ✅ Current |
 
 ---
 
@@ -121,13 +121,13 @@ docs/
 
 **Active Phase 3 validation documentation:**
 
-| Document                                                         | Description                                 | Status     |
-| ---------------------------------------------------------------- | ------------------------------------------- | ---------- |
-| [NEXT_STEPS.md](development/NEXT_STEPS.md)                       | Current roadmap and priorities              | ✅ Current |
-| [PHASE_3_PRODUCTION_VALIDATION.md](development/PHASE_3_PRODUCTION_VALIDATION.md) | Validation plan | 🔄 In Progress |
-| [PHASE_3_VALIDATION_STATUS.md](development/PHASE_3_VALIDATION_STATUS.md) | Current status | � In Progress |
-| [TEST_SUITE_QUICKSTART.md](development/TEST_SUITE_QUICKSTART.md) | Testing quick reference | ✅ Current |
-| [START_HERE_VALIDATION.md](development/START_HERE_VALIDATION.md) | Validation entry point | ✅ Current |
+| Document                                                                         | Description                    | Status         |
+| -------------------------------------------------------------------------------- | ------------------------------ | -------------- |
+| [NEXT_STEPS.md](development/NEXT_STEPS.md)                                       | Current roadmap and priorities | ✅ Current     |
+| [PHASE_3_PRODUCTION_VALIDATION.md](development/PHASE_3_PRODUCTION_VALIDATION.md) | Validation plan                | 🔄 In Progress |
+| [PHASE_3_VALIDATION_STATUS.md](development/PHASE_3_VALIDATION_STATUS.md)         | Current status                 | � In Progress  |
+| [TEST_SUITE_QUICKSTART.md](development/TEST_SUITE_QUICKSTART.md)                 | Testing quick reference        | ✅ Current     |
+| [START_HERE_VALIDATION.md](development/START_HERE_VALIDATION.md)                 | Validation entry point         | ✅ Current     |
 
 ---
 
@@ -137,58 +137,58 @@ docs/
 
 **Completed milestones and phase summaries:**
 
-| Document                                                         | Phase  | Description                    | Status     |
-| ---------------------------------------------------------------- | ------ | ------------------------------ | ---------- |
-| [PHASE_3_COMPLETE.md](development/milestones/PHASE_3_COMPLETE.md) | Phase 3 | Automation engine complete   | ✅ Complete |
-| [MILESTONE_3.1_SCHEDULER_COMPLETE.md](development/milestones/MILESTONE_3.1_SCHEDULER_COMPLETE.md) | 3.1 | Time-based scheduling | ✅ Complete |
-| [MILESTONE_3.2_CONDITION_EVALUATOR_COMPLETE.md](development/milestones/MILESTONE_3.2_CONDITION_EVALUATOR_COMPLETE.md) | 3.2 | Threshold monitoring | ✅ Complete |
-| [MILESTONE_3.3_ACTION_EXECUTOR_COMPLETE.md](development/milestones/MILESTONE_3.3_ACTION_EXECUTOR_COMPLETE.md) | 3.3 | Device control actions | ✅ Complete |
-| [MILESTONE_3.4_FLOW_INTERPRETER_COMPLETE.md](development/milestones/MILESTONE_3.4_FLOW_INTERPRETER_COMPLETE.md) | 3.4 | Visual flow interpreter | ✅ Complete |
-| [PHASE_2_COMPLETE_SUMMARY.md](development/milestones/PHASE_2_COMPLETE_SUMMARY.md) | Phase 2 | Device integration complete | ✅ Complete |
-| [MILESTONE_2.2.3_DISCOVERY_COMPLETE.md](development/milestones/MILESTONE_2.2.3_DISCOVERY_COMPLETE.md) | 2.2.3 | Device discovery | ✅ Complete |
-| [MILESTONE_2.2.4_COMPLETE.md](development/milestones/MILESTONE_2.2.4_COMPLETE.md) | 2.2.4 | HTTP device control | ✅ Complete |
-| [MILESTONE_2.2.5_COMPLETE.md](development/milestones/MILESTONE_2.2.5_COMPLETE.md) | 2.2.5 | Advanced discovery | ✅ Complete |
+| Document                                                                                                              | Phase   | Description                 | Status      |
+| --------------------------------------------------------------------------------------------------------------------- | ------- | --------------------------- | ----------- |
+| [PHASE_3_COMPLETE.md](development/milestones/PHASE_3_COMPLETE.md)                                                     | Phase 3 | Automation engine complete  | ✅ Complete |
+| [MILESTONE_3.1_SCHEDULER_COMPLETE.md](development/milestones/MILESTONE_3.1_SCHEDULER_COMPLETE.md)                     | 3.1     | Time-based scheduling       | ✅ Complete |
+| [MILESTONE_3.2_CONDITION_EVALUATOR_COMPLETE.md](development/milestones/MILESTONE_3.2_CONDITION_EVALUATOR_COMPLETE.md) | 3.2     | Threshold monitoring        | ✅ Complete |
+| [MILESTONE_3.3_ACTION_EXECUTOR_COMPLETE.md](development/milestones/MILESTONE_3.3_ACTION_EXECUTOR_COMPLETE.md)         | 3.3     | Device control actions      | ✅ Complete |
+| [MILESTONE_3.4_FLOW_INTERPRETER_COMPLETE.md](development/milestones/MILESTONE_3.4_FLOW_INTERPRETER_COMPLETE.md)       | 3.4     | Visual flow interpreter     | ✅ Complete |
+| [PHASE_2_COMPLETE_SUMMARY.md](development/milestones/PHASE_2_COMPLETE_SUMMARY.md)                                     | Phase 2 | Device integration complete | ✅ Complete |
+| [MILESTONE_2.2.3_DISCOVERY_COMPLETE.md](development/milestones/MILESTONE_2.2.3_DISCOVERY_COMPLETE.md)                 | 2.2.3   | Device discovery            | ✅ Complete |
+| [MILESTONE_2.2.4_COMPLETE.md](development/milestones/MILESTONE_2.2.4_COMPLETE.md)                                     | 2.2.4   | HTTP device control         | ✅ Complete |
+| [MILESTONE_2.2.5_COMPLETE.md](development/milestones/MILESTONE_2.2.5_COMPLETE.md)                                     | 2.2.5   | Advanced discovery          | ✅ Complete |
 
-*See [development/milestones/](development/milestones/) for all milestone documentation*
+_See [development/milestones/](development/milestones/) for all milestone documentation_
 
 ### Features Implemented
 
 **Major feature implementations:**
 
-| Document                                                         | Feature | Status     |
-| ---------------------------------------------------------------- | ------- | ---------- |
-| [ADVANCED_HUE_FEATURES.md](development/features/ADVANCED_HUE_FEATURES.md) | Hue integration | ✅ Complete |
-| [COLOR_CONTROLS_COMPLETE.md](development/features/COLOR_CONTROLS_COMPLETE.md) | Color picker | ✅ Complete |
-| [DARK_MODE_IMPLEMENTATION_OCT_2025.md](development/features/DARK_MODE_IMPLEMENTATION_OCT_2025.md) | Dark mode | ✅ Complete |
-| [LUCIDE_MIGRATION_COMPLETE.md](development/features/LUCIDE_MIGRATION_COMPLETE.md) | Icon system | ✅ Complete |
-| [CI_CD_INTEGRATION_COMPLETE.md](development/features/CI_CD_INTEGRATION_COMPLETE.md) | CI/CD pipeline | ✅ Complete |
+| Document                                                                                            | Feature             | Status      |
+| --------------------------------------------------------------------------------------------------- | ------------------- | ----------- |
+| [ADVANCED_HUE_FEATURES.md](development/features/ADVANCED_HUE_FEATURES.md)                           | Hue integration     | ✅ Complete |
+| [COLOR_CONTROLS_COMPLETE.md](development/features/COLOR_CONTROLS_COMPLETE.md)                       | Color picker        | ✅ Complete |
+| [DARK_MODE_IMPLEMENTATION_OCT_2025.md](development/features/DARK_MODE_IMPLEMENTATION_OCT_2025.md)   | Dark mode           | ✅ Complete |
+| [LUCIDE_MIGRATION_COMPLETE.md](development/features/LUCIDE_MIGRATION_COMPLETE.md)                   | Icon system         | ✅ Complete |
+| [CI_CD_INTEGRATION_COMPLETE.md](development/features/CI_CD_INTEGRATION_COMPLETE.md)                 | CI/CD pipeline      | ✅ Complete |
 | [VALIDATION_INFRASTRUCTURE_COMPLETE.md](development/features/VALIDATION_INFRASTRUCTURE_COMPLETE.md) | Test infrastructure | ✅ Complete |
 
-*See [development/features/](development/features/) for all feature documentation*
+_See [development/features/](development/features/) for all feature documentation_
 
 ### Development Sessions
 
 **Session notes and test results:**
 
-| Document                                                         | Type | Status     |
-| ---------------------------------------------------------------- | ---- | ---------- |
-| [PHASE_2_POLISH_SESSION_3_DRAG_DROP.md](development/sessions/PHASE_2_POLISH_SESSION_3_DRAG_DROP.md) | Polish | ✅ Complete |
-| [DISCOVERY_TEST_RESULTS.md](development/sessions/DISCOVERY_TEST_RESULTS.md) | Testing | ✅ Complete |
-| [HUE_ADAPTER_TEST_RESULTS.md](development/sessions/HUE_ADAPTER_TEST_RESULTS.md) | Testing | ✅ Complete |
+| Document                                                                                            | Type    | Status      |
+| --------------------------------------------------------------------------------------------------- | ------- | ----------- |
+| [PHASE_2_POLISH_SESSION_3_DRAG_DROP.md](development/sessions/PHASE_2_POLISH_SESSION_3_DRAG_DROP.md) | Polish  | ✅ Complete |
+| [DISCOVERY_TEST_RESULTS.md](development/sessions/DISCOVERY_TEST_RESULTS.md)                         | Testing | ✅ Complete |
+| [HUE_ADAPTER_TEST_RESULTS.md](development/sessions/HUE_ADAPTER_TEST_RESULTS.md)                     | Testing | ✅ Complete |
 
-*See [development/sessions/](development/sessions/) for all session documentation*
+_See [development/sessions/](development/sessions/) for all session documentation_
 
 ### Bug Fixes
 
 **Bug fixes and patches:**
 
-| Document                                                         | Fix | Status     |
-| ---------------------------------------------------------------- | --- | ---------- |
-| [INFINITE_LOOP_FIX_FINAL.md](development/fixes/INFINITE_LOOP_FIX_FINAL.md) | Infinite loop | ✅ Fixed |
+| Document                                                                     | Fix               | Status   |
+| ---------------------------------------------------------------------------- | ----------------- | -------- |
+| [INFINITE_LOOP_FIX_FINAL.md](development/fixes/INFINITE_LOOP_FIX_FINAL.md)   | Infinite loop     | ✅ Fixed |
 | [DEVICE_ACCESSIBILITY_FIX.md](development/fixes/DEVICE_ACCESSIBILITY_FIX.md) | Device visibility | ✅ Fixed |
-| [TYPESCRIPT_ERRORS_FIXED.md](development/fixes/TYPESCRIPT_ERRORS_FIXED.md) | TypeScript | ✅ Fixed |
+| [TYPESCRIPT_ERRORS_FIXED.md](development/fixes/TYPESCRIPT_ERRORS_FIXED.md)   | TypeScript        | ✅ Fixed |
 
-*See [development/fixes/](development/fixes/) for all bug fix documentation*
+_See [development/fixes/](development/fixes/) for all bug fix documentation_
 
 ---
 
@@ -227,27 +227,27 @@ docs/
 **Original Milestones** (Generic):
 
 1. 📷 Camera Integration (20-30h) - RTSP/ONVIF, live streaming
-**Phase 1 foundation documentation:**
+   **Phase 1 foundation documentation:**
 
-| Document                                                                   | Description                  | Status         |
-| -------------------------------------------------------------------------- | ---------------------------- | -------------- |
-| [PHASE_1_COMPLETE.md](history/PHASE_1_COMPLETE.md)                         | Phase 1 summary              | ✅ Complete    |
-| [PHASE_1.3_ANIMATIONS.md](history/PHASE_1.3_ANIMATIONS.md)                 | Spring animation patterns    | ✅ Reference   |
-| [PHASE_1.3_LOADING_STATES.md](history/PHASE_1.3_LOADING_STATES.md)         | Skeleton loaders & spinners  | ✅ Reference   |
-| [PHASE_1.3.4_ERROR_BOUNDARIES.md](history/PHASE_1.3.4_ERROR_BOUNDARIES.md) | Error handling patterns      | ✅ Reference   |
-| [PHASE_1.3.5_RESPONSIVE.md](history/PHASE_1.3.5_RESPONSIVE.md)             | Responsive design guide      | ✅ Reference   |
+| Document                                                                   | Description                 | Status       |
+| -------------------------------------------------------------------------- | --------------------------- | ------------ |
+| [PHASE_1_COMPLETE.md](history/PHASE_1_COMPLETE.md)                         | Phase 1 summary             | ✅ Complete  |
+| [PHASE_1.3_ANIMATIONS.md](history/PHASE_1.3_ANIMATIONS.md)                 | Spring animation patterns   | ✅ Reference |
+| [PHASE_1.3_LOADING_STATES.md](history/PHASE_1.3_LOADING_STATES.md)         | Skeleton loaders & spinners | ✅ Reference |
+| [PHASE_1.3.4_ERROR_BOUNDARIES.md](history/PHASE_1.3.4_ERROR_BOUNDARIES.md) | Error handling patterns     | ✅ Reference |
+| [PHASE_1.3.5_RESPONSIVE.md](history/PHASE_1.3.5_RESPONSIVE.md)             | Responsive design guide     | ✅ Reference |
 
-*See [history/](history/) for complete Phase 1 documentation*
+_See [history/](history/) for complete Phase 1 documentation_
 
 ### Phase 2: Device Integration (✅ Complete)
 
 **Phase 2 historical documentation:**
 
-| Document                                                      | Description                 | Status         |
-| ------------------------------------------------------------- | --------------------------- | -------------- |
+| Document                                                                          | Description     | Status      |
+| --------------------------------------------------------------------------------- | --------------- | ----------- |
 | [PHASE_2_COMPLETE_SUMMARY.md](development/milestones/PHASE_2_COMPLETE_SUMMARY.md) | Phase 2 summary | ✅ Complete |
 
-*See [archive/development/phase-2/](archive/development/phase-2/) for detailed Phase 2 work*
+_See [archive/development/phase-2/](archive/development/phase-2/) for detailed Phase 2 work_
 
 ---
 
@@ -305,6 +305,7 @@ docs/
 ## 🔄 Recent Updates
 
 ### October 13, 2025
+
 - ✅ **Phase 3 Reorganization**: Major directory restructuring
   - Created subdirectories: milestones/, features/, sessions/, fixes/
   - Archived Phase 2 completed work
@@ -313,10 +314,12 @@ docs/
 - ✅ **Phase 1 Archive**: Moved old planning docs to archive/
 
 ### October 12, 2025
+
 - ✅ **CI/CD Complete**: Coverage badges, automated testing
 - ✅ **Markdownlint Setup**: Linting with auto-fix
 
 ### October 11-13, 2025
+
 - ✅ **Phase 3 Automation Engine**: All 5 milestones complete
 - ✅ **Production Validation**: Test infrastructure established
 
@@ -332,7 +335,7 @@ docs/
 
 ---
 
-*For the complete documentation catalog, see the directory READMEs in [guides/](guides/) and [development/](development/)*
+_For the complete documentation catalog, see the directory READMEs in [guides/](guides/) and [development/](development/)_
 
 **Future work and consolidation plans:**
 
@@ -363,17 +366,20 @@ docs/
 ### By Role
 
 **New Contributors**:
+
 1. [SETUP_QUICKSTART.md](guides/setup/SETUP_QUICKSTART.md) - 15 min setup
 2. [ARCHITECTURE.md](guides/ARCHITECTURE.md) - 30 min system overview
 3. [BEST_PRACTICES.md](guides/BEST_PRACTICES.md) - 20 min patterns
 4. [NEXT_STEPS.md](development/NEXT_STEPS.md) - Current priorities
 
 **Testers**:
+
 1. [TEST_SUITE_QUICKSTART.md](development/TEST_SUITE_QUICKSTART.md) - Testing overview
 2. [VIRTUAL_DEVICES_QUICKREF.md](guides/reference/VIRTUAL_DEVICES_QUICKREF.md) - Test helpers
 3. [development/sessions/](development/sessions/) - Test results
 
 **Deployers**:
+
 1. [CLOUDFLARE_DEPLOYMENT.md](deployment/CLOUDFLARE_DEPLOYMENT.md) - Full deployment guide
 2. [SECURITY.md](deployment/SECURITY.md) - Security checklist
 
@@ -414,6 +420,7 @@ docs/
 4. Preserve git history (use `git mv`)
 
 **After Reorganization**:
+
 - Documentation is now organized by purpose
 - Each directory has navigation README
 - Essential docs listed in this index
