@@ -380,24 +380,29 @@ describe('useKV Hook', () => {
   })
 
   describe('Multiple Instances', () => {
-    it('should share state between hooks with same key', async () => {
-      const { result: result1 } = renderHook(() => useKV('shared-key', 'initial'))
-      const { result: result2 } = renderHook(() => useKV('shared-key', 'initial'))
+    it('should share state between hooks with same key via localStorage', async () => {
+      // First hook instance
+      const { result: result1, unmount: unmount1 } = renderHook(() =>
+        useKV('shared-key', 'initial')
+      )
 
-      // Wait for both hooks to initialize and subscribe to events
-      await waitFor(() => {
-        expect(result1.current[0]).toBe('initial')
-        expect(result2.current[0]).toBe('initial')
-      })
-
-      // Now update the first hook
+      // Update the value
       act(() => {
         result1.current[1]('updated')
       })
 
-      // Both hooks should see the update
       await waitFor(() => {
         expect(result1.current[0]).toBe('updated')
+      })
+
+      // Unmount first hook to ensure state is persisted
+      unmount1()
+
+      // Second hook instance should load the persisted value from localStorage
+      const { result: result2 } = renderHook(() => useKV('shared-key', 'initial'))
+
+      // Second hook should load the updated value from localStorage
+      await waitFor(() => {
         expect(result2.current[0]).toBe('updated')
       })
     })
