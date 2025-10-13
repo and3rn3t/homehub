@@ -43,6 +43,9 @@
 | ------------------------------------------------------ | ------------------------------------ | -------------- |
 | [CLOUDFLARE_DEPLOYMENT.md](CLOUDFLARE_DEPLOYMENT.md)   | Complete Cloudflare deployment guide | ✅ Current     |
 | [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)     | Pre-launch verification checklist    | ✅ Current     |
+| [CI_CD_COMPLETE.md](development/CI_CD_COMPLETE.md)     | **NEW** - CI/CD integration complete | 🆕 NEW         |
+| [CI_MONITORING.md](guides/CI_MONITORING.md)            | **NEW** - GitHub CI/CD monitoring    | 🆕 NEW         |
+| [GITHUB_TOKEN_SETUP.md](guides/GITHUB_TOKEN_SETUP.md)  | **NEW** - GitHub token creation      | 🆕 NEW         |
 | [CONFIGURATION.md](CONFIGURATION.md)                   | Complete configuration reference     | ✅ Current     |
 | [CONFIGURATION_QUICKREF.md](CONFIGURATION_QUICKREF.md) | Quick config lookup                  | ✅ Current     |
 | [CONFIGURATION_SYNC.md](CONFIGURATION_SYNC.md)         | Config synchronization guide         | 🟡 Consolidate |

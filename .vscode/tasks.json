@@ -1,0 +1,147 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "CI: Check Status",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "ci:check"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true,
+        "showReuseMessage": false
+      },
+      "icon": {
+        "id": "cloud",
+        "color": "terminal.ansiBlue"
+      }
+    },
+    {
+      "label": "CI: Check All Runs",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "ci:check:all"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true,
+        "showReuseMessage": false
+      },
+      "icon": {
+        "id": "list-tree",
+        "color": "terminal.ansiCyan"
+      }
+    },
+    {
+      "label": "CI: Watch Until Complete",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "ci:watch"],
+      "problemMatcher": [],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true,
+        "showReuseMessage": false
+      },
+      "icon": {
+        "id": "eye-watch",
+        "color": "terminal.ansiYellow"
+      }
+    },
+    {
+      "label": "CI: Watch with Notifications (PowerShell)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": ["-File", "scripts/check-ci.ps1", "-Watch", "-Notify"],
+      "problemMatcher": [],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true,
+        "showReuseMessage": false
+      },
+      "icon": {
+        "id": "bell",
+        "color": "terminal.ansiMagenta"
+      }
+    },
+    {
+      "label": "CI: Open in Browser",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "ci:open"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "icon": {
+        "id": "link-external",
+        "color": "terminal.ansiGreen"
+      }
+    },
+    {
+      "label": "Run All Tests",
+      "type": "shell",
+      "command": "npm",
+      "args": ["test", "--", "--run"],
+      "problemMatcher": [],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "icon": {
+        "id": "beaker",
+        "color": "terminal.ansiGreen"
+      }
+    },
+    {
+      "label": "Run Tests with Coverage",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "test:coverage"],
+      "problemMatcher": [],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "icon": {
+        "id": "graph",
+        "color": "terminal.ansiCyan"
+      }
+    },
+    {
+      "label": "Full Validation (Type + Lint + Format)",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "validate"],
+      "problemMatcher": ["$tsc", "$eslint-stylish"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "icon": {
+        "id": "check-all",
+        "color": "terminal.ansiGreen"
+      }
+    }
+  ]
+}
