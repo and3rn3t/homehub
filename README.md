@@ -1,10 +1,8 @@
-# 🏠 HomeHub - Smart Home Automation Dashboard# ✨ Welcome to Your Spark Template
-
-You've just launched your brand-new Spark Template Codespace — everything’s fired up and ready for you to explore, build, and create with Spark!
+# 🏠 HomeHub - Smart Home Automation Dashboard
 
 **iOS-inspired home automation control center** built with React 19 and Cloudflare infrastructure. Beautiful, fast, and ready for real device integration.
 
-This template is your blank canvas. It comes with a minimal setup to help you get started quickly with Spark development.
+🚀 **Live Production App**: [homehub.andernet.dev](https://homehub.andernet.dev)
 
 ![Status](https://img.shields.io/badge/status-active%20development-brightgreen)
 
