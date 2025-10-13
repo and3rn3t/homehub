@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Test Cloudflare Logging Integration
- * 
+ *
  * Tests the complete logging flow:
  * 1. Send a test error/warning to worker
  * 2. Verify it was stored in LOGS_KV
@@ -45,7 +45,7 @@ async function testLogging() {
     }
 
     const result = await response.json()
-    
+
     if (result.success) {
       console.log('✅ Error sent successfully')
       console.log(`   Response: ${JSON.stringify(result)}`)
@@ -95,7 +95,7 @@ async function testLogging() {
     }
 
     const result = await response.json()
-    
+
     if (result.success) {
       console.log('✅ Warning sent successfully')
       console.log(`   Response: ${JSON.stringify(result)}`)
@@ -129,10 +129,10 @@ async function testLogging() {
     }
 
     const result = await response.json()
-    
+
     console.log('✅ Retrieved recent errors')
     console.log(`   Count: ${result.count}`)
-    
+
     if (result.errors && result.errors.length > 0) {
       console.log(`   Latest error:`)
       const latest = result.errors[0]
@@ -140,12 +140,12 @@ async function testLogging() {
       console.log(`     - Message: ${latest.message}`)
       console.log(`     - Timestamp: ${latest.timestamp}`)
       console.log(`     - App Version: ${latest.appVersion}`)
-      
+
       // Check if our test error is in the list
-      const hasTestError = result.errors.some(e => 
-        e.context?.type === 'smoke-test' && e.level === 'error'
+      const hasTestError = result.errors.some(
+        e => e.context?.type === 'smoke-test' && e.level === 'error'
       )
-      
+
       if (hasTestError) {
         console.log('   ✅ Test error found in recent errors list')
         passed++
