@@ -235,6 +235,7 @@ graph LR
    - Click "Install" on all recommended extensions
 
 4. **Verify Setup**:
+
    ```bash
    npm run validate  # Runs type-check + lint + format:check
    ```

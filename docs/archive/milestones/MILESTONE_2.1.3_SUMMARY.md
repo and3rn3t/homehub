@@ -255,6 +255,6 @@ The service layer is fully validated and ready for UI integration. All infrastru
 
 ---
 
-_Generated: January 2025_
-_Milestone: 2.1.3 Virtual Device Testing_
-_HomeHub Phase 2.1 - MQTT Integration_
+*Generated: January 2025*
+*Milestone: 2.1.3 Virtual Device Testing*
+*HomeHub Phase 2.1 - MQTT Integration*

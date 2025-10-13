@@ -637,7 +637,7 @@ Then decide if you want to:
 
 ---
 
-_Last Updated: January 11, 2025_
-_Author: GitHub Copilot_
-_Project: HomeHub - DIY Home Automation Framework_
-_Phase: 3 - Automation Engine (60% Complete)_
+*Last Updated: January 11, 2025*
+*Author: GitHub Copilot*
+*Project: HomeHub - DIY Home Automation Framework*
+*Phase: 3 - Automation Engine (60% Complete)*

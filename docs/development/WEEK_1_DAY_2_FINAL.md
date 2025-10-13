@@ -380,7 +380,7 @@ const [flows, setFlows] = useKV<Flow[]>('flows', []) // ✅ 90.55% tested
 
 ---
 
-_Generated: October 13, 2025_
-_Engineer: AI Coding Assistant_
-_Project: HomeHub v1.0.0 - Phase 3 Production Validation_
-_Achievement Unlocked: 🏆 90%+ Critical Path Coverage_
+*Generated: October 13, 2025*
+*Engineer: AI Coding Assistant*
+*Project: HomeHub v1.0.0 - Phase 3 Production Validation*
+*Achievement Unlocked: 🏆 90%+ Critical Path Coverage*

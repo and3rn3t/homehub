@@ -463,7 +463,7 @@
 
 ---
 
-_Checklist Version: 1.0_
-_Created: October 12, 2025_
-_Cameras: 2x Eufy E30, 1x Arlo Doorbell, 2x Arlo Pro 4, 2x Arlo Essential Indoor_
-_Timeline: 4 weeks (26-36 hours)_
+*Checklist Version: 1.0*
+*Created: October 12, 2025*
+*Cameras: 2x Eufy E30, 1x Arlo Doorbell, 2x Arlo Pro 4, 2x Arlo Essential Indoor*
+*Timeline: 4 weeks (26-36 hours)*

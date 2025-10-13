@@ -146,6 +146,7 @@ wrangler pages deploy dist --project-name=homehub
    - HTTPS automatically enabled
 
 5. **Verify**:
+
    ```powershell
    # Should load your app with HTTPS
    curl https://homehub.andernet.dev
@@ -282,9 +283,11 @@ Now let's set up `homehub-worker.andernet.dev`:
 2. **Click your worker** (`homehub-kv-worker`)
 3. **Settings** → **Triggers** → **Custom Domains**
 4. **Add Custom Domain**:
+
    ```
    Domain: homehub-worker.andernet.dev
    ```
+
 5. **Cloudflare auto-creates DNS** (CNAME to workers.dev)
 6. **Wait for SSL** (~5-10 minutes)
 
@@ -349,11 +352,14 @@ VITE_APP_VERSION=1.0.0
 1. **Go to Pages Dashboard** → `homehub` project
 2. **Settings** → **Environment variables**
 3. **Add variable** (Production):
+
    ```
    Name:  VITE_KV_API_URL
    Value: https://homehub-worker.andernet.dev
    ```
+
 4. **Add variable** (Production):
+
    ```
    Name:  VITE_APP_VERSION
    Value: 1.0.0
@@ -558,7 +564,7 @@ console.log(import.meta.env.VITE_KV_API_URL)
 
 ---
 
-## 🎉 Deployment Complete!
+## 🎉 Deployment Complete
 
 ### Your Live URLs
 

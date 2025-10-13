@@ -415,7 +415,7 @@ Follow the implementation plan in `PHASE_5_SECURITY_PLAN.md` â†’ Milestone 5.1 â
 
 ---
 
-_Created: October 12, 2025_
-_Author: GitHub Copilot_
-_Project: HomeHub - Phase 5 Quick Start_
-_Estimated Time to First Stream: 1-2 days_
+*Created: October 12, 2025*
+*Author: GitHub Copilot*
+*Project: HomeHub - Phase 5 Quick Start*
+*Estimated Time to First Stream: 1-2 days*

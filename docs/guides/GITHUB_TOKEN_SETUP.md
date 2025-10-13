@@ -7,10 +7,12 @@ Quick guide to create a GitHub token for CI monitoring scripts and API access.
 ## 🎯 Why You Need a Token
 
 Without a token:
+
 - **Rate Limit**: 60 API requests per hour
 - **Public data only**: Can't access private repositories
 
 With a token:
+
 - **Rate Limit**: 5,000 API requests per hour
 - **Full access**: Private repos, workflow runs, detailed logs
 - **Better for**: Frequent CI checks, automation scripts, development workflows
@@ -22,11 +24,13 @@ With a token:
 ### Step 1: Go to GitHub Settings
 
 Open this URL in your browser:
+
 ```
 https://github.com/settings/tokens
 ```
 
 Or navigate manually:
+
 1. Click your profile picture (top-right corner)
 2. Select **Settings**
 3. Scroll to bottom of sidebar → **Developer settings**
@@ -40,11 +44,13 @@ Or navigate manually:
 ### Step 3: Configure Token Settings
 
 **Note/Name**: Give it a descriptive name
+
 ```
 HomeHub CI Monitoring
 ```
 
 **Expiration**: Choose how long the token should work
+
 - **30 days** - Most secure (recommended for testing)
 - **60 days** - Good for active development
 - **90 days** - For longer projects
@@ -53,13 +59,16 @@ HomeHub CI Monitoring
 **Select scopes**: Check these boxes
 
 ✅ **repo** (Full control of private repositories)
+
 - Includes: `repo:status`, `repo_deployment`, `public_repo`, `repo:invite`, `security_events`
 - Needed for: Accessing workflow runs, reading repository data
 
 ✅ **workflow** (Update GitHub Action workflows)
+
 - Needed for: Viewing workflow runs, checking CI status
 
 **Optional** (not needed for CI monitoring):
+
 - ⬜ `admin:org` - Organization management
 - ⬜ `admin:repo_hook` - Repository webhooks
 - ⬜ `delete_repo` - Delete repositories
@@ -68,9 +77,11 @@ HomeHub CI Monitoring
 
 1. Scroll to bottom and click **"Generate token"**
 2. **IMPORTANT**: Copy the token immediately!
+
    ```
    ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    ```
+
 3. ⚠️ **You cannot see this token again!** Store it securely.
 
 ---
@@ -80,21 +91,25 @@ HomeHub CI Monitoring
 ### Option 1: Environment Variable (Temporary - This Session Only)
 
 **Windows PowerShell**:
+
 ```powershell
 $env:GITHUB_TOKEN = "ghp_your_token_here"
 ```
 
 **Windows CMD**:
+
 ```cmd
 set GITHUB_TOKEN=ghp_your_token_here
 ```
 
 **macOS/Linux (Bash/Zsh)**:
+
 ```bash
 export GITHUB_TOKEN="ghp_your_token_here"
 ```
 
 **Verify it's set**:
+
 ```powershell
 # PowerShell
 echo $env:GITHUB_TOKEN
@@ -106,16 +121,19 @@ echo $GITHUB_TOKEN
 ### Option 2: PowerShell Profile (Permanent - Every PowerShell Session)
 
 **Find your profile location**:
+
 ```powershell
 $PROFILE
 ```
 
 Example output:
+
 ```
 C:\Users\YourName\Documents\PowerShell\Microsoft.PowerShell_profile.ps1
 ```
 
 **Create/edit the profile**:
+
 ```powershell
 # Create profile if it doesn't exist
 if (!(Test-Path -Path $PROFILE)) {
@@ -127,12 +145,14 @@ code $PROFILE
 ```
 
 **Add this line**:
+
 ```powershell
 # GitHub Personal Access Token for CI monitoring
 $env:GITHUB_TOKEN = "ghp_your_token_here"
 ```
 
 **Reload profile**:
+
 ```powershell
 . $PROFILE
 ```
@@ -140,6 +160,7 @@ $env:GITHUB_TOKEN = "ghp_your_token_here"
 ### Option 3: Bash/Zsh Profile (macOS/Linux)
 
 **Edit your shell profile**:
+
 ```bash
 # For Bash
 nano ~/.bashrc
@@ -149,12 +170,14 @@ nano ~/.zshrc
 ```
 
 **Add this line**:
+
 ```bash
 # GitHub Personal Access Token
 export GITHUB_TOKEN="ghp_your_token_here"
 ```
 
 **Reload profile**:
+
 ```bash
 # For Bash
 source ~/.bashrc
@@ -185,6 +208,7 @@ npm run ci:check
 ```
 
 **Expected output** (with token):
+
 ```
 Checking CI/CD status for and3rn3t/homehub...
 
@@ -195,6 +219,7 @@ Commit: ...
 ```
 
 **Without token** (rate limited):
+
 ```
 Checking CI/CD status for and3rn3t/homehub...
 (Works but limited to 60 requests/hour)
@@ -243,6 +268,7 @@ Should return your GitHub user information.
 ### DON'T ❌
 
 1. **Don't commit tokens to Git**
+
    ```bash
    # BAD - Token visible in repository
    const token = "ghp_xxxxx"
@@ -286,14 +312,14 @@ Should return your GitHub user information.
 
 For CI monitoring, you need:
 
-| Scope | Permission | Required? |
-|-------|------------|-----------|
-| `repo` | Full repository access | ✅ Yes |
-| `repo:status` | Commit status access | ✅ Yes (included in repo) |
-| `workflow` | GitHub Actions workflows | ✅ Yes |
-| `read:org` | Organization data | ⬜ No |
-| `user` | User profile data | ⬜ No |
-| `admin:repo_hook` | Repository webhooks | ⬜ No |
+| Scope             | Permission               | Required?                 |
+| ----------------- | ------------------------ | ------------------------- |
+| `repo`            | Full repository access   | ✅ Yes                    |
+| `repo:status`     | Commit status access     | ✅ Yes (included in repo) |
+| `workflow`        | GitHub Actions workflows | ✅ Yes                    |
+| `read:org`        | Organization data        | ⬜ No                     |
+| `user`            | User profile data        | ⬜ No                     |
+| `admin:repo_hook` | Repository webhooks      | ⬜ No                     |
 
 ---
 
@@ -304,6 +330,7 @@ For CI monitoring, you need:
 **Problem**: Token is invalid or expired
 
 **Solution**:
+
 1. Check token format: `ghp_` followed by 36 characters
 2. Verify token hasn't expired
 3. Regenerate token if needed
@@ -313,6 +340,7 @@ For CI monitoring, you need:
 **Problem**: Token doesn't have required permissions
 
 **Solution**:
+
 1. Check token scopes include `repo` and `workflow`
 2. Regenerate with correct permissions
 
@@ -321,6 +349,7 @@ For CI monitoring, you need:
 **Problem**: Token not being used
 
 **Solution**:
+
 ```powershell
 # Verify token is set
 echo $env:GITHUB_TOKEN
@@ -334,6 +363,7 @@ echo $env:GITHUB_TOKEN
 **Problem**: Environment variable resets after closing terminal
 
 **Solution**:
+
 - Add to PowerShell profile (see Option 2 above)
 - Or set system environment variable:
   1. Windows Search → "Environment Variables"
@@ -346,22 +376,26 @@ echo $env:GITHUB_TOKEN
 ## 🎯 Quick Reference
 
 ### Create Token
+
 ```
 https://github.com/settings/tokens → Generate new token (classic)
 Scopes: repo, workflow
 ```
 
 ### Set Token (PowerShell)
+
 ```powershell
 $env:GITHUB_TOKEN = "ghp_your_token_here"
 ```
 
 ### Test Token
+
 ```bash
 npm run ci:check
 ```
 
 ### Permanent Setup (PowerShell)
+
 ```powershell
 Add-Content $PROFILE "`n`$env:GITHUB_TOKEN = 'ghp_your_token_here'"
 ```

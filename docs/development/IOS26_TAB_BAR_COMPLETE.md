@@ -313,7 +313,7 @@ This floating tab bar represents the pinnacle of modern web UI design:
 - Production-tested and documented
 - Zero performance penalty
 
-It transforms navigation from a utilitarian necessity into a delightful piece of interactive art. Users will _feel_ the quality with every tap. 🎨✨
+It transforms navigation from a utilitarian necessity into a delightful piece of interactive art. Users will *feel* the quality with every tap. 🎨✨
 
 ---
 

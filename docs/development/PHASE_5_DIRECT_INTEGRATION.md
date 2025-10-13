@@ -848,7 +848,7 @@ This is going to be **way cooler** than using Home Assistant! 🎥🚀
 
 ---
 
-_Document Version: 1.0 - Direct Integration_
-_Created: October 12, 2025_
-_Approach: DIY All The Way!_
-_Dependencies: Just npm packages (like any Node project)_
+*Document Version: 1.0 - Direct Integration*
+*Created: October 12, 2025*
+*Approach: DIY All The Way!*
+*Dependencies: Just npm packages (like any Node project)*

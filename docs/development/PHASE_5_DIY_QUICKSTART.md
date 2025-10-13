@@ -511,8 +511,8 @@ choco install ffmpeg -y
 
 ---
 
-_Quick Start Guide_
-_Created: October 12, 2025_
-_Approach: DIY Direct Integration_
-_Time to First Stream: 4-6 hours_
-_Coolness Factor: 💯_
+*Quick Start Guide*
+*Created: October 12, 2025*
+*Approach: DIY Direct Integration*
+*Time to First Stream: 4-6 hours*
+*Coolness Factor: 💯*

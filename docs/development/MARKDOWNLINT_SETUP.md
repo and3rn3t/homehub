@@ -23,26 +23,26 @@ documentation. The linter is now operational and ready for the documentation cle
 
 Main configuration file with project-specific rules:
 
-```jsonc
+````jsonc
 {
   "ignores": [
     "node_modules/**",
     "workers/node_modules/**",
     "**/node_modules/**",
-    ".markdownlintignore"
+    ".markdownlintignore",
   ],
   "default": true,
   "MD013": {
     "line_length": 120,
     "code_blocks": false,
-    "tables": false
+    "tables": false,
   },
   "MD033": false, // Allow inline HTML (for badges)
   "MD034": false, // Allow bare URLs
   "MD041": false, // First line need not be H1
   "MD046": { "style": "fenced" }, // Use ``` for code blocks
   "MD049": { "style": "asterisk" }, // Use * for emphasis
-  "MD050": { "style": "asterisk" } // Use ** for strong
+  "MD050": { "style": "asterisk" }, // Use ** for strong
 }
 ````
 

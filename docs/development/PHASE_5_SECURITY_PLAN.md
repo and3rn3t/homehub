@@ -899,8 +899,8 @@ export class PersonDetectionService {
 
 ---
 
-_Created: October 12, 2025_
-_Author: GitHub Copilot + and3rn3t_
-_Project: HomeHub - DIY Home Automation Framework_
-_Phase: 5 - Security & Surveillance (Planning)_
-_Estimated Completion: December 2025_
+*Created: October 12, 2025*
+*Author: GitHub Copilot + and3rn3t*
+*Project: HomeHub - DIY Home Automation Framework*
+*Phase: 5 - Security & Surveillance (Planning)*
+*Estimated Completion: December 2025*

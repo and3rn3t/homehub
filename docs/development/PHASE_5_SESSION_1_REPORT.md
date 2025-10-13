@@ -107,7 +107,7 @@
 
 ## 🎯 Recommended Path Forward
 
-### Immediate (This Weekend):
+### Immediate (This Weekend)
 
 1. **Verify Camera Setup**
    - Open Eufy Security app → confirm cameras visible
@@ -124,7 +124,7 @@
    - Should discover 2 Eufy cameras
    - For Arlo: Implement chosen option
 
-### Week 1 (Next Week):
+### Week 1 (Next Week)
 
 1. **Eufy Integration** (2-3 hours)
    - Build `EufyCameraService` with discovered devices
@@ -249,7 +249,7 @@ Since camera discovery is blocked, we can proceed with UI development:
 
 ## 🎯 Next Session Checklist
 
-### If Pursuing Real Cameras:
+### If Pursuing Real Cameras
 
 - [ ] Open Eufy Security app, verify camera registration
 - [ ] Open Arlo app, confirm 4 cameras online
@@ -258,7 +258,7 @@ Since camera discovery is blocked, we can proceed with UI development:
 - [ ] Rerun discovery: `node scripts/eufy-login-2fa.cjs`
 - [ ] Implement chosen Arlo solution
 
-### If Pursuing Mock-First:
+### If Pursuing Mock-First
 
 - [ ] Create `src/constants/mock-cameras.ts`
 - [ ] Build `src/components/VideoPlayer.tsx`
@@ -316,5 +316,5 @@ Since camera discovery is blocked, we can proceed with UI development:
 
 ---
 
-_Session Report Generated: October 12, 2025, 3:30 PM_
-_Next Steps: Awaiting user decision on path forward_
+*Session Report Generated: October 12, 2025, 3:30 PM*
+*Next Steps: Awaiting user decision on path forward*

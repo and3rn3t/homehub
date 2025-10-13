@@ -221,7 +221,7 @@ private canTrigger(automationId: string): boolean {
 
 ### 3. State Change Detection
 
-**Problem**: Conditions should only trigger when they _become_ true, not while they _stay_ true
+**Problem**: Conditions should only trigger when they *become* true, not while they *stay* true
 
 **Example**:
 
@@ -655,7 +655,7 @@ Then adjust your thermostat above 72° and watch it trigger!
 
 1. ✅ Completes the execution pipeline (trigger → evaluate → **execute**)
 2. ✅ You can test with your 22 real Hue lights!
-3. ✅ High-value feature (automations actually _do_ something)
+3. ✅ High-value feature (automations actually *do* something)
 4. ✅ Keeps momentum going (1020 lines in 3 hours!)
 5. ✅ Boolean logic can wait (nice-to-have, not critical)
 

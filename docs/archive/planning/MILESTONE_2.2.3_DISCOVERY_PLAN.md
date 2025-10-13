@@ -364,7 +364,7 @@ const handleAddDevice = async (discovered: DiscoveredDevice) => {
 
 Browsers cannot send UDP packets for security reasons.
 
-### Solutions:
+### Solutions
 
 #### Option 1: HTTP Scanner Only (Simplest)
 

@@ -478,8 +478,8 @@ After validation of Milestone 2.1.4, proceed with:
 **Tester**: ******\_\_\_******
 **Environment**: Dev server + Docker Mosquitto
 
-**Tests Completed**: **_/ 8
-**Tests Passed**:_** / 8
+**Tests Completed**: ***/ 8
+**Tests Passed**:*** / 8
 **Tests Failed**: \_\_\_ / 8
 
 **Issues Found**:

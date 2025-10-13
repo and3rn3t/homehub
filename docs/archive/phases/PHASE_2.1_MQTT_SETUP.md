@@ -102,12 +102,15 @@ sequenceDiagram
 
 1. **Install Mosquitto Broker**
    - **Option A - Windows Native** (Recommended for dev):
+
      ```powershell
      # Download from: https://mosquitto.org/download/
      # Or use Chocolatey:
      choco install mosquitto
      ```
+
    - **Option B - Docker** (Better for production):
+
      ```powershell
      # Create docker-compose.yml in project root
      docker-compose up -d mosquitto
@@ -130,6 +133,7 @@ sequenceDiagram
    ```
 
 4. **Install Node.js MQTT Library**
+
    ```powershell
    cd c:\git\homehub
    npm install mqtt --save

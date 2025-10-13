@@ -899,6 +899,6 @@ Let me know when you're ready to begin! 🎥🔐
 
 ---
 
-_Document Version: 2.0 - Model-Specific_
-_Last Updated: October 12, 2025_
-_Cameras: 2x Eufy E30 + 1x Arlo Doorbell + 2x Arlo Pro 4 + 2x Arlo Essential Indoor_
+*Document Version: 2.0 - Model-Specific*
+*Last Updated: October 12, 2025*
+*Cameras: 2x Eufy E30 + 1x Arlo Doorbell + 2x Arlo Pro 4 + 2x Arlo Essential Indoor*

@@ -669,7 +669,7 @@ graph LR
 
 ## Success Criteria
 
-### Phase 3 Complete When:
+### Phase 3 Complete When
 
 - ✅ 10+ automations running simultaneously
 - ✅ <5 second trigger-to-execution latency

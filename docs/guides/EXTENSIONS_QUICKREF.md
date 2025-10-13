@@ -55,7 +55,7 @@ When you open this project, click **"Install All"** when prompted!
 
 ## 🎨 What You Get
 
-### With ESLint + Prettier:
+### With ESLint + Prettier
 
 ```tsx
 // Save file → Auto-formats + fixes issues
@@ -63,19 +63,19 @@ const example = { name: 'test' } // Becomes:
 const example = { name: 'test' }
 ```
 
-### With Tailwind IntelliSense:
+### With Tailwind IntelliSense
 
 ```tsx
 <div className="bg-|">  // Shows all bg- classes with color preview
 ```
 
-### With Error Lens:
+### With Error Lens
 
 ```tsx
 const x: number = 'hello' // ERROR shown right here in red!
 ```
 
-### With React Snippets:
+### With React Snippets
 
 ```
 Type: rafce + Tab

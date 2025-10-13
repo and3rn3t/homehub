@@ -284,14 +284,14 @@ const RoomIcon = iconMap[room.icon || ''] || HomeIcon
 
 ## 🎨 Visual Results
 
-### Before:
+### Before
 
 - Solid background cards
 - No color differentiation between rooms
 - Standard opacity
 - Basic shadows
 
-### After:
+### After
 
 - ✨ **Frosted glass cards** with 80% opacity + 20px blur
 - 🎨 **Room-specific color tinting** (8 unique colors)

@@ -1007,7 +1007,7 @@ In just **~2 hours**, you built a **visual programming engine** for home automat
 
 ---
 
-_Last Updated: October 11, 2025_
-_Author: GitHub Copilot_
-_Project: HomeHub - DIY Home Automation Framework_
-_Phase: 3 - Automation Engine (80% Complete)_
+*Last Updated: October 11, 2025*
+*Author: GitHub Copilot*
+*Project: HomeHub - DIY Home Automation Framework*
+*Phase: 3 - Automation Engine (80% Complete)*

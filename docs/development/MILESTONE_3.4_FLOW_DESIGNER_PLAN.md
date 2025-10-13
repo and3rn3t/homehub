@@ -874,6 +874,6 @@ return (
 
 ---
 
-_Last Updated: October 11, 2025_
-_Author: GitHub Copilot_
-_Project: HomeHub - DIY Home Automation Framework_
+*Last Updated: October 11, 2025*
+*Author: GitHub Copilot*
+*Project: HomeHub - DIY Home Automation Framework*

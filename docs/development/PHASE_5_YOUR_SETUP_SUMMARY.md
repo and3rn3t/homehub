@@ -226,8 +226,8 @@ After Week 1:
 
 ---
 
-_Document: Quick Reference for Your 5-Camera Setup_
-_Created: October 12, 2025_
-_Hardware: 2 Eufy PTZ + 3 Arlo (owned)_
-_Cost: $60-175 (storage only)_
-_Timeline: 3-4 weeks_
+*Document: Quick Reference for Your 5-Camera Setup*
+*Created: October 12, 2025*
+*Hardware: 2 Eufy PTZ + 3 Arlo (owned)*
+*Cost: $60-175 (storage only)*
+*Timeline: 3-4 weeks*

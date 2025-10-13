@@ -515,7 +515,7 @@ This proves the mDNS scanner **works with real devices** out of the box!
 
 ---
 
-## 🎉 Milestone Complete!
+## 🎉 Milestone Complete
 
 **Phase 2.2.5 Status**: ✅ **COMPLETE**
 

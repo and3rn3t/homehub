@@ -152,7 +152,7 @@ import { LightbulbIcon, AlertTriangleIcon, PlusIcon } from '@/lib/icons'
 | `DotsThree`           | `MoreHorizontalIcon` | Menu icon               |
 | `FloppyDisk`          | `SaveIcon`           | Action equivalent       |
 | `Stop`                | `StopCircleIcon`     | Circular variant        |
-| _(57 total mappings)_ |                      | See `simple-migrate.js` |
+| *(57 total mappings)* |                      | See `simple-migrate.js` |
 
 ---
 
