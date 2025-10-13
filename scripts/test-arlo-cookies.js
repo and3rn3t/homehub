@@ -31,7 +31,7 @@ async function testArloWithCookies() {
     console.log(`✅ Extracted at: ${authData.extractedAt}\n`)
 
     // Format cookies for HTTP header
-    const cookieHeader = authData.cookies.map((c) => `${c.name}=${c.value}`).join('; ')
+    const cookieHeader = authData.cookies.map(c => `${c.name}=${c.value}`).join('; ')
 
     console.log('🔑 Cookie header prepared (truncated):')
     console.log(`   ${cookieHeader.substring(0, 100)}...\n`)
