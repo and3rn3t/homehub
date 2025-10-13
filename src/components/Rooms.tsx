@@ -9,6 +9,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { IOS26EmptyState, IOS26Error } from '@/components/ui/ios26-error'
+import { IOS26Shimmer } from '@/components/ui/ios26-loading'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import {
@@ -502,10 +504,10 @@ export function Rooms() {
 
         <div className="flex-1 overflow-y-auto px-6 pb-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <iOS26Shimmer className="h-48 rounded-2xl" />
-            <iOS26Shimmer className="h-48 rounded-2xl" />
-            <iOS26Shimmer className="h-48 rounded-2xl" />
-            <iOS26Shimmer className="h-48 rounded-2xl" />
+            <IOS26Shimmer className="h-48 rounded-2xl" />
+            <IOS26Shimmer className="h-48 rounded-2xl" />
+            <IOS26Shimmer className="h-48 rounded-2xl" />
+            <IOS26Shimmer className="h-48 rounded-2xl" />
           </div>
         </div>
       </div>
@@ -534,7 +536,7 @@ export function Rooms() {
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 pb-6">
-          <RoomCardSkeleton />
+          <IOS26Shimmer className="h-48 rounded-2xl" />
         </div>
       </div>
     )
@@ -561,7 +563,7 @@ export function Rooms() {
         </div>
 
         <div className="flex flex-1 items-center justify-center px-6 pb-6">
-          <iOS26Error
+          <IOS26Error
             variant="error"
             title="Unable to Load Rooms"
             message="There was a problem loading your rooms. Please check your connection and try again."
@@ -713,7 +715,7 @@ export function Rooms() {
 
           {/* Rooms Grid */}
           {rooms.length === 0 ? (
-            <iOS26EmptyState
+            <IOS26EmptyState
               icon={<PlusIcon className="h-16 w-16" />}
               title="No Rooms Created"
               message="Create rooms to organize your devices by location. Start with common areas like Living Room or Bedroom."

@@ -22,11 +22,11 @@ interface iOS26StatusBadgeProps {
 }
 
 /**
- * iOS 26 Status Badge
+ * IOS26 Status Badge
  *
  * Elegant status indicator with optional pulse animation
  */
-export function iOS26StatusBadge({
+export function IOS26StatusBadge({
   status,
   label,
   showPulse = true,

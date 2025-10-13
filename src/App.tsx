@@ -47,6 +47,9 @@ const MonitoringSettings = lazy(() =>
   import('./components/MonitoringSettings').then(m => ({ default: m.MonitoringSettings }))
 )
 const Intercom = lazy(() => import('./components/Intercom').then(m => ({ default: m.Intercom })))
+const AutomationMonitor = lazy(() =>
+  import('./components/AutomationMonitor').then(m => ({ default: m.AutomationMonitor }))
+)
 
 // Small components can be loaded normally
 import { GeofenceTest } from './components/GeofenceTest'
@@ -310,6 +313,9 @@ function App() {
                   <TabsTrigger value="automations" className="data-[state=active]:bg-primary/15">
                     Automations
                   </TabsTrigger>
+                  <TabsTrigger value="monitor" className="data-[state=active]:bg-primary/15">
+                    Monitor
+                  </TabsTrigger>
                 </TabsList>
                 <div className="px-4">
                   <ThemeToggle />
@@ -324,6 +330,11 @@ function App() {
                 <TabsContent value="automations" className="m-0 h-full p-0">
                   <Suspense fallback={<TabContentLoader />}>
                     <Automations />
+                  </Suspense>
+                </TabsContent>
+                <TabsContent value="monitor" className="m-0 h-full p-0">
+                  <Suspense fallback={<TabContentLoader />}>
+                    <AutomationMonitor />
                   </Suspense>
                 </TabsContent>
               </div>

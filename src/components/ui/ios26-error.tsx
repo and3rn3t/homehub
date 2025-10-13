@@ -31,11 +31,11 @@ interface iOS26ErrorProps {
 }
 
 /**
- * iOS 26 Error Card
+ * IOS26 Error Card
  *
  * Primary error state component with glass morphism
  */
-export function iOS26Error({
+export function IOS26Error({
   title,
   message,
   variant = 'error',
@@ -213,7 +213,7 @@ interface iOS26EmptyStateProps {
   className?: string
 }
 
-export function iOS26EmptyState({ icon, title, message, action, className }: iOS26EmptyStateProps) {
+export function IOS26EmptyState({ icon, title, message, action, className }: iOS26EmptyStateProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -286,7 +286,7 @@ interface iOS26ReconnectingProps {
   className?: string
 }
 
-export function iOS26Reconnecting({
+export function IOS26Reconnecting({
   message = 'Connection lost',
   onRetry,
   className,

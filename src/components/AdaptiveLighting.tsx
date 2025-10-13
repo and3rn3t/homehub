@@ -100,9 +100,11 @@ export function AdaptiveLighting() {
     const now = new Date()
     const hour = now.getHours()
 
-    if (hour >= 5 && hour < 9) return { phase: 'Morning', icon: SunRoomIcon, color: 'text-orange-500' }
+    if (hour >= 5 && hour < 9)
+      return { phase: 'Morning', icon: SunRoomIcon, color: 'text-orange-500' }
     if (hour >= 9 && hour < 17) return { phase: 'Day', icon: SunRoomIcon, color: 'text-yellow-500' }
-    if (hour >= 17 && hour < 21) return { phase: 'Evening', icon: SunRoomIcon, color: 'text-orange-600' }
+    if (hour >= 17 && hour < 21)
+      return { phase: 'Evening', icon: SunRoomIcon, color: 'text-orange-600' }
     return { phase: 'Night', icon: MoonIcon, color: 'text-blue-500' }
   }
 

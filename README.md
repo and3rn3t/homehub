@@ -9,6 +9,9 @@
 ![Platform](https://img.shields.io/badge/platform-Cloudflare-orange)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Tests](https://img.shields.io/badge/tests-passing-brightgreen)
+![Coverage: Statements](https://img.shields.io/badge/coverage-94.1%25-green)
+![Coverage: Branches](https://img.shields.io/badge/branches-89.1%25-yellowgreen)
+![Coverage: Functions](https://img.shields.io/badge/functions-100.0%25-brightgreen)
 
 - Pre-configured for local development
 

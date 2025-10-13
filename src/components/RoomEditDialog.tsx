@@ -86,7 +86,7 @@ export function RoomEditDialog({
   // Form state
   const [name, setName] = useState(room?.name || '')
   const [icon, setIcon] = useState(room?.icon || 'home')
-  const [color, setColor] = useState(room?.color || ROOM_COLORS[0].value)
+  const [color, setColor] = useState(room?.color || ROOM_COLORS[0]?.value || '#3b82f6')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [reassignRoomId, setReassignRoomId] = useState<string>('')
@@ -96,7 +96,7 @@ export function RoomEditDialog({
     if (room) {
       setName(room.name)
       setIcon(room.icon || 'home')
-      setColor(room.color || ROOM_COLORS[0].value)
+      setColor(room.color || ROOM_COLORS[0]?.value || '#3b82f6')
       setShowDeleteConfirm(false)
       setReassignRoomId('')
     }
@@ -166,7 +166,7 @@ export function RoomEditDialog({
 
         // Reassign all devices
         setDevices(prevDevices =>
-          prevDevices.map(d => (d.room === room.name ? { ...d, room: targetRoom } : d))
+          prevDevices.map(d => (d.room === room.name ? { ...d, room: targetRoom as string } : d))
         )
 
         toast.success(

@@ -2,7 +2,17 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useKV } from '@/hooks/use-kv'
-import { BatteryIcon, BellIcon, CheckCircleIcon, InfoIcon, AlertTriangleIcon, WifiOffIcon, WrenchIcon, XIcon, XCircleIcon,  } from '@/lib/icons'
+import {
+  BatteryIcon,
+  BellIcon,
+  CheckCircleIcon,
+  InfoIcon,
+  AlertTriangleIcon,
+  WifiOffIcon,
+  WrenchIcon,
+  XIcon,
+  XCircleIcon,
+} from '@/lib/icons'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'

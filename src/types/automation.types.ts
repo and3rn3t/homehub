@@ -1,6 +1,6 @@
 /**
  * Automation & Flow Type Definitions
- * 
+ *
  * Time/condition-based rules and visual automation flows.
  */
 
@@ -11,27 +11,27 @@ export type ComparisonOperator = '<' | '>' | '==' | '!='
 export interface AutomationTrigger {
   /** Trigger category */
   type: TriggerType
-  
+
   /** Trigger-specific value/config */
   value?: string
-  
+
   // Time-based triggers
   /** Time in HH:MM format */
   time?: string
-  
+
   /** Days of week for schedule */
   days?: string[]
-  
+
   // Condition-based triggers
   /** Device to monitor */
   deviceId?: string
-  
+
   /** Comparison operation */
   operator?: ComparisonOperator
-  
+
   /** Threshold value for comparison */
   threshold?: number
-  
+
   // Geofence triggers
   /** Geographic location */
   location?: {
@@ -44,13 +44,13 @@ export interface AutomationTrigger {
 export interface AutomationAction {
   /** Target device ID (optional for non-device actions) */
   deviceId?: string
-  
+
   /** Action to perform */
   action: string
-  
+
   /** Action-specific value */
   value?: any
-  
+
   /** Desired power state */
   enabled?: boolean
 }
@@ -58,28 +58,28 @@ export interface AutomationAction {
 export interface Automation {
   /** Unique identifier */
   id: string
-  
+
   /** Display name */
   name: string
-  
+
   /** Optional description */
   description?: string
-  
+
   /** Automation category */
   type: AutomationType
-  
+
   /** Master enable/disable switch */
   enabled: boolean
-  
+
   /** Trigger conditions */
   triggers: AutomationTrigger[]
-  
+
   /** Actions to execute when triggered */
   actions: AutomationAction[]
-  
+
   /** Timestamp of last execution */
   lastRun?: string
-  
+
   /** Predicted next execution time */
   nextRun?: string
 }
@@ -92,28 +92,28 @@ export type FlowNodeType = 'trigger' | 'condition' | 'action' | 'delay'
 export interface FlowNode {
   /** Unique node identifier */
   id: string
-  
+
   /** Node category */
   type: FlowNodeType
-  
+
   /** Specific node variant */
   subtype: string
-  
+
   /** Display label in designer */
   label: string
-  
+
   /** Phosphor icon component */
   icon: any
-  
+
   /** Canvas coordinates */
   position: {
     x: number
     y: number
   }
-  
+
   /** Node-specific configuration data */
   data: any
-  
+
   /** Connected node IDs (outgoing connections) */
   connections: string[]
 }
@@ -121,19 +121,19 @@ export interface FlowNode {
 export interface Flow {
   /** Unique identifier */
   id: string
-  
+
   /** Display name */
   name: string
-  
+
   /** Optional description */
   description?: string
-  
+
   /** All nodes in the flow */
   nodes: FlowNode[]
-  
+
   /** Flow execution toggle */
   enabled: boolean
-  
+
   /** Creation timestamp (ISO string) */
   created: string
 }

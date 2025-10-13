@@ -21,11 +21,11 @@ interface iOS26LoadingProps {
 }
 
 /**
- * iOS 26 Spinner
+ * IOS26 Spinner
  *
  * The classic iOS spinner with refined motion and glass morphism
  */
-export function iOS26Spinner({
+export function IOS26Spinner({
   message = 'Loading',
   submessage,
   size = 'md',
@@ -93,11 +93,11 @@ export function iOS26Spinner({
 }
 
 /**
- * iOS 26 Dots
+ * IOS26 Dots
  *
- * Three animated dots with elastic bounce (iOS 26 style)
+ * Three-dot loading animation with spring physics
  */
-export function iOS26Dots({
+export function IOS26Dots({
   message,
   submessage,
   className,
@@ -146,11 +146,11 @@ export function iOS26Dots({
 }
 
 /**
- * iOS 26 Pulse
+ * IOS26 Pulse
  *
- * Pulsing concentric circles (used for live indicators)
+ * Pulsing circle loader with scale animation
  */
-export function iOS26Pulse({
+export function IOS26Pulse({
   message,
   className,
 }: Omit<iOS26LoadingProps, 'size' | 'variant' | 'submessage'>) {
@@ -209,11 +209,11 @@ export function iOS26Pulse({
 }
 
 /**
- * iOS 26 Shimmer
+ * IOS26 Shimmer
  *
  * Elegant shimmer loading for content placeholders
  */
-export function iOS26Shimmer({ className }: { className?: string }) {
+export function IOS26Shimmer({ className }: { className?: string }) {
   return (
     <div className={cn('relative overflow-hidden rounded-xl', className)}>
       {/* Base gradient */}

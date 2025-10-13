@@ -2,6 +2,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { IOS26StatusBadge } from '@/components/ui/ios26-status'
 import { Switch } from '@/components/ui/switch'
 import { KV_KEYS, MOCK_DEVICES } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
@@ -410,7 +411,7 @@ export function DeviceMonitor() {
                             <h3 className="text-foreground font-semibold">{device.name}</h3>
                             <p className="text-muted-foreground text-sm">{device.room}</p>
                             <div className="mt-1 flex items-center gap-2">
-                              <iOS26StatusBadge
+                              <IOS26StatusBadge
                                 status={
                                   device.status === 'online'
                                     ? 'idle'

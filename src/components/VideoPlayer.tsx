@@ -13,6 +13,8 @@
  * - Auto-reconnect on disconnect
  */
 
+import { IOS26Error, IOS26Reconnecting } from '@/components/ui/ios26-error'
+import { IOS26Spinner } from '@/components/ui/ios26-loading'
 import type { Camera } from '@/constants/mock-cameras'
 import { MaximizeIcon, PauseIcon, PlayIcon, RefreshCwIcon } from '@/lib/icons'
 import { cn } from '@/lib/utils'
@@ -210,7 +212,7 @@ export const VideoPlayer = memo(function VideoPlayer({
           className
         )}
       >
-        <iOS26Error
+        <IOS26Error
           variant="offline"
           title="Camera Offline"
           message={`${camera.name} is currently unavailable`}
@@ -236,7 +238,7 @@ export const VideoPlayer = memo(function VideoPlayer({
             exit={{ opacity: 0 }}
             className="absolute inset-0 z-10 flex items-center justify-center bg-black/90"
           >
-            <iOS26Spinner message="Loading Stream" submessage={camera.name} size="md" />
+            <IOS26Spinner message="Loading Stream" submessage={camera.name} size="md" />
           </motion.div>
         )}
       </AnimatePresence>
@@ -250,7 +252,7 @@ export const VideoPlayer = memo(function VideoPlayer({
             exit={{ opacity: 0 }}
             className="absolute inset-0 z-20 flex items-center justify-center bg-black/95 p-6"
           >
-            <iOS26Reconnecting
+            <IOS26Reconnecting
               message={error}
               onRetry={() => {
                 setError(null)

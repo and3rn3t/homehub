@@ -188,7 +188,7 @@ export class SSDPScanner implements DiscoveryScanner {
       const xmlText = await response.text()
       return this.parseDeviceDescriptionXML(xmlText)
     } catch (error) {
-      logger.error('Failed to fetch device description', { error, url: descriptionUrl })
+      logger.error('Failed to fetch device description', { error, url: locationURL })
       return null
     }
   }

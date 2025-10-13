@@ -1,5 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { IOS26EmptyState, IOS26Error } from '@/components/ui/ios26-error'
+import { IOS26Shimmer } from '@/components/ui/ios26-loading'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { KV_KEYS, MOCK_SCENES } from '@/constants'
 import { useHaptic } from '@/hooks/use-haptic'
@@ -121,12 +123,12 @@ export function Scenes() {
 
         <div className="flex-1 overflow-y-auto px-6 pb-6">
           <div className="grid grid-cols-2 gap-4">
-            <iOS26Shimmer className="h-40 rounded-2xl" />
-            <iOS26Shimmer className="h-40 rounded-2xl" />
-            <iOS26Shimmer className="h-40 rounded-2xl" />
-            <iOS26Shimmer className="h-40 rounded-2xl" />
-            <iOS26Shimmer className="h-40 rounded-2xl" />
-            <iOS26Shimmer className="h-40 rounded-2xl" />
+            <IOS26Shimmer className="h-40 rounded-2xl" />
+            <IOS26Shimmer className="h-40 rounded-2xl" />
+            <IOS26Shimmer className="h-40 rounded-2xl" />
+            <IOS26Shimmer className="h-40 rounded-2xl" />
+            <IOS26Shimmer className="h-40 rounded-2xl" />
+            <IOS26Shimmer className="h-40 rounded-2xl" />
           </div>
         </div>
       </div>
@@ -150,7 +152,7 @@ export function Scenes() {
         </div>
 
         <div className="flex flex-1 items-center justify-center px-6 pb-6">
-          <iOS26Error
+          <IOS26Error
             variant="error"
             title="Unable to Load Scenes"
             message="There was a problem loading your scenes. Please check your connection and try again."
@@ -185,7 +187,7 @@ export function Scenes() {
       <div className="flex-1 overflow-y-auto px-4 pb-6 sm:px-6">
         {scenes.length === 0 ? (
           <div className="space-y-6">
-            <iOS26EmptyState
+            <IOS26EmptyState
               icon={<PlayIcon className="h-16 w-16" />}
               title="No Scenes Created"
               message="Create scenes to control multiple devices with a single tap. Perfect for routines like 'Movie Time' or 'Good Morning'."

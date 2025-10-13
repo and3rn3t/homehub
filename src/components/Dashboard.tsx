@@ -2,6 +2,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ControlTile } from '@/components/ui/control-tile'
+import { IOS26EmptyState, IOS26Error } from '@/components/ui/ios26-error'
+import { IOS26Shimmer } from '@/components/ui/ios26-loading'
+import { IOS26StatusBadge } from '@/components/ui/ios26-status'
 import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { KV_KEYS } from '@/constants'
 import { useHaptic } from '@/hooks/use-haptic'
@@ -439,25 +442,25 @@ export function Dashboard() {
 
         <div className="flex-1 overflow-y-auto px-6 pb-6">
           <div className="mb-6 grid grid-cols-3 gap-3">
-            <iOS26Shimmer className="h-24 rounded-2xl" />
-            <iOS26Shimmer className="h-24 rounded-2xl" />
-            <iOS26Shimmer className="h-24 rounded-2xl" />
+            <IOS26Shimmer className="h-24 rounded-2xl" />
+            <IOS26Shimmer className="h-24 rounded-2xl" />
+            <IOS26Shimmer className="h-24 rounded-2xl" />
           </div>
 
           <div className="mb-6 grid grid-cols-2 gap-3">
-            <iOS26Shimmer className="h-24 rounded-2xl" />
-            <iOS26Shimmer className="h-24 rounded-2xl" />
-            <iOS26Shimmer className="h-24 rounded-2xl" />
-            <iOS26Shimmer className="h-24 rounded-2xl" />
+            <IOS26Shimmer className="h-24 rounded-2xl" />
+            <IOS26Shimmer className="h-24 rounded-2xl" />
+            <IOS26Shimmer className="h-24 rounded-2xl" />
+            <IOS26Shimmer className="h-24 rounded-2xl" />
           </div>
 
           <div className="mb-6">
             <h2 className="text-foreground mb-3 text-lg font-semibold">Favorite Devices</h2>
             <div className="grid grid-cols-2 gap-3">
-              <iOS26Shimmer className="h-32 rounded-2xl" />
-              <iOS26Shimmer className="h-32 rounded-2xl" />
-              <iOS26Shimmer className="h-32 rounded-2xl" />
-              <iOS26Shimmer className="h-32 rounded-2xl" />
+              <IOS26Shimmer className="h-32 rounded-2xl" />
+              <IOS26Shimmer className="h-32 rounded-2xl" />
+              <IOS26Shimmer className="h-32 rounded-2xl" />
+              <IOS26Shimmer className="h-32 rounded-2xl" />
             </div>
           </div>
         </div>
@@ -479,7 +482,7 @@ export function Dashboard() {
         </div>
 
         <div className="flex flex-1 items-center justify-center px-6 pb-6">
-          <iOS26Error
+          <IOS26Error
             variant="error"
             title="Unable to Load Devices"
             message="There was a problem loading your devices. Please check your connection and try again."
@@ -515,9 +518,9 @@ export function Dashboard() {
                 className="flex items-center gap-2"
               >
                 {mqttConnected ? (
-                  <iOS26StatusBadge status="idle" label="MQTT" showPulse={true} />
+                  <IOS26StatusBadge status="idle" label="MQTT" showPulse={true} />
                 ) : connectionState === 'reconnecting' ? (
-                  <iOS26StatusBadge status="alert" label="Reconnecting" showPulse={true} />
+                  <IOS26StatusBadge status="alert" label="Reconnecting" showPulse={true} />
                 ) : connectionState === 'error' ? (
                   <Button
                     variant="outline"
@@ -775,7 +778,7 @@ export function Dashboard() {
           </div>
 
           {favoriteDeviceList.length === 0 ? (
-            <iOS26EmptyState
+            <IOS26EmptyState
               icon={<StarIcon className="h-16 w-16" />}
               title="No Favorites Yet"
               message="Star your most-used devices to access them quickly here."

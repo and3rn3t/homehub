@@ -21,7 +21,8 @@ import { logger } from '@/lib/logger'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 // Cache for optimistic updates and offline support
-const localCache = new Map<string, unknown>()
+// Exported for testing purposes (to clear between tests)
+export const localCache = new Map<string, unknown>()
 
 // EMERGENCY: Clear the cache on module load to force fresh reads
 // This ensures stale data from old placeholder IDs doesn't persist

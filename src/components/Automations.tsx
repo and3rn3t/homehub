@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { IOS26EmptyState } from '@/components/ui/ios26-error'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { KV_KEYS, MOCK_AUTOMATIONS } from '@/constants'
@@ -161,7 +162,7 @@ export function Automations() {
 
             <div className="flex-1 overflow-y-auto px-6 pb-6">
               {automations.length === 0 ? (
-                <iOS26EmptyState
+                <IOS26EmptyState
                   icon={<ClockIcon className="h-16 w-16" />}
                   title="No Automations Yet"
                   message="Create smart rules to automate your home devices based on time, location, or conditions."
