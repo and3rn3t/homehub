@@ -5,7 +5,9 @@
  * Supports daily schedules, day-of-week patterns, and sunrise/sunset calculations.
  */
 
+import { logger } from '@/lib/logger'
 import type { Automation } from '@/types'
+import { toast } from 'sonner'
 import type {
   ExecutionResult,
   ScheduledTask,
@@ -92,7 +94,9 @@ export class SchedulerService {
         this.tasks.set(automation.id, task)
         this.log(`Scheduled "${automation.name}" for ${nextRun.toLocaleString()}`)
       } catch (error) {
-        console.error(`Failed to schedule automation ${automation.name}:`, error)
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        logger.error(`Failed to schedule automation ${automation.name}`, error as Error)
+        toast.error(`Failed to schedule "${automation.name}": ${message}`)
       }
     })
   }
@@ -212,7 +216,8 @@ export class SchedulerService {
     } catch (error) {
       result.success = false
       result.error = error instanceof Error ? error.message : 'Unknown error'
-      console.error(`Automation execution failed: ${automation.name}`, error)
+      logger.error(`Automation execution failed: ${automation.name}`, error as Error)
+      toast.error(`Automation "${automation.name}" failed: ${result.error}`)
     }
 
     result.duration = Date.now() - startTime

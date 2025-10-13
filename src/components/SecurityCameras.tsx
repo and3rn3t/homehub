@@ -10,9 +10,9 @@ import { MOCK_CAMERAS } from '@/constants/mock-cameras'
 import { BellIcon, ShieldIcon, VideoIcon, WifiOffIcon } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 
-export function SecurityCameras() {
+export const SecurityCameras = memo(function SecurityCameras() {
   const [expandedCamera, setExpandedCamera] = useState<string | null>(null)
 
   const onlineCameras = MOCK_CAMERAS.filter(c => c.status !== 'offline')
@@ -68,23 +68,64 @@ export function SecurityCameras() {
                 expandedCamera === camera.id && 'col-span-full'
               )}
             >
-              {/* Video Player */}
-              <div
-                onClick={() => {
-                  if (expandedCamera === camera.id) {
-                    setExpandedCamera(null)
-                  } else {
-                    setExpandedCamera(camera.id)
-                  }
-                }}
-                className="cursor-pointer"
-              >
+              {/* Video Player - Note: VideoPlayer contains interactive buttons, so we use a div wrapper */}
+              <div className="relative">
                 <VideoPlayer
                   camera={camera}
                   autoplay={camera.status === 'online'}
                   muted={true}
-                  className={expandedCamera === camera.id ? 'aspect-video' : 'aspect-video'}
+                  className="aspect-video"
                 />
+                {/* Expand/Collapse button overlay - positioned to not interfere with video controls */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (expandedCamera === camera.id) {
+                      setExpandedCamera(null)
+                    } else {
+                      setExpandedCamera(camera.id)
+                    }
+                  }}
+                  className="absolute top-2 right-2 rounded-lg bg-black/50 p-2 text-white backdrop-blur-sm transition-all hover:bg-black/70"
+                  aria-label={`${expandedCamera === camera.id ? 'Collapse' : 'Expand'} ${camera.name}`}
+                  title={expandedCamera === camera.id ? 'Collapse' : 'Expand fullscreen'}
+                >
+                  {expandedCamera === camera.id ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M8 3v3a2 2 0 0 1-2 2H3" />
+                      <path d="M21 8h-3a2 2 0 0 1-2-2V3" />
+                      <path d="M3 16h3a2 2 0 0 1 2 2v3" />
+                      <path d="M16 21v-3a2 2 0 0 1 2-2h3" />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M15 3h6v6" />
+                      <path d="M9 21H3v-6" />
+                      <path d="M21 3l-7 7" />
+                      <path d="M3 21l7-7" />
+                    </svg>
+                  )}
+                </button>
               </div>
 
               {/* Camera Details */}
@@ -140,7 +181,7 @@ export function SecurityCameras() {
                       <div className="flex gap-0.5">
                         {[...Array(4)].map((_, i) => (
                           <div
-                            key={i}
+                            key={`signal-bar-${camera.id}-${i}`}
                             className={cn(
                               'h-3 w-1 rounded-sm',
                               camera.signalStrength > (i + 1) * 25 ? 'bg-green-500' : 'bg-muted'
@@ -216,7 +257,7 @@ export function SecurityCameras() {
       </motion.div>
     </div>
   )
-}
+})
 
 /**
  * Helper to format relative time

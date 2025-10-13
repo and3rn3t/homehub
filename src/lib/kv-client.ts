@@ -4,6 +4,8 @@
  * Client for communicating with Cloudflare Worker KV API.
  */
 
+import { logger } from './logger'
+
 export interface KVClientConfig {
   /** Base URL of Cloudflare Worker API */
   baseUrl: string
@@ -55,11 +57,11 @@ export class KVClient {
 
       // Ignore abort errors - these are expected during component cleanup
       if (error instanceof Error && error.name === 'AbortError') {
-        console.debug(`KV get aborted for key "${key}" (component cleanup)`)
+        logger.debug(`KV get aborted for key "${key}" (component cleanup)`)
         return null
       }
 
-      console.error(`KV get error for key "${key}":`, error)
+      logger.error(`KV get error for key "${key}"`, error as Error)
       throw error
     }
   }
@@ -85,7 +87,7 @@ export class KVClient {
         throw new Error(`KV SET failed: ${response.statusText}`)
       }
     } catch (error) {
-      console.error(`KV set error for key "${key}":`, error)
+      logger.warn(`KV set failed for "${key}"`, error as Error)
       throw error
     }
   }
@@ -110,7 +112,7 @@ export class KVClient {
         throw new Error(`KV DELETE failed: ${response.statusText}`)
       }
     } catch (error) {
-      console.error(`KV delete error for key "${key}":`, error)
+      logger.error(`KV delete error for key "${key}"`, error as Error)
       throw error
     }
   }
@@ -138,7 +140,7 @@ export class KVClient {
       const data = await response.json()
       return data.keys || []
     } catch (error) {
-      console.error('KV list keys error:', error)
+      logger.error('KV list keys error', error as Error)
       throw error
     }
   }

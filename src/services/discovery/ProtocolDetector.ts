@@ -5,6 +5,7 @@
  * Probes common API endpoints to determine device protocol and capabilities.
  */
 
+import { logger } from '@/lib/logger'
 import type { DeviceProtocol } from '@/types'
 import type { DeviceCapability } from './types'
 
@@ -104,21 +105,19 @@ export class ProtocolDetector {
    * Detect device protocol by probing HTTP endpoints
    */
   async detect(ip: string, port: number = 80): Promise<ProtocolDetectionResult> {
-    console.log(`[ProtocolDetector] Detecting protocol for ${ip}:${port}...`)
+    logger.debug(`Detecting protocol for ${ip}:${port}...`)
 
     // Try each fingerprint pattern
     for (const fingerprint of PROTOCOL_FINGERPRINTS) {
       const result = await this.testFingerprint(ip, port, fingerprint)
       if (result.confidence > 0.5) {
-        console.log(
-          `[ProtocolDetector] Detected ${fingerprint.preset} (confidence: ${result.confidence.toFixed(2)})`
-        )
+        logger.debug(`Detected ${fingerprint.preset} (confidence: ${result.confidence.toFixed(2)})`)
         return result
       }
     }
 
     // No match found - return generic HTTP
-    console.log('[ProtocolDetector] No specific protocol detected, defaulting to generic HTTP')
+    logger.debug('No specific protocol detected, defaulting to generic HTTP')
     return {
       protocol: 'http',
       preset: 'generic',

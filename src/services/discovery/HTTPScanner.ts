@@ -5,6 +5,7 @@
  * Checks for known device API endpoints (Shelly, TP-Link, etc.)
  */
 
+import { logger } from '@/lib/logger'
 import type { DiscoveredDevice, DiscoveryScanner, DiscoveryScanOptions } from './types'
 
 export class HTTPScanner implements DiscoveryScanner {
@@ -25,7 +26,7 @@ export class HTTPScanner implements DiscoveryScanner {
     const devices: DiscoveredDevice[] = []
     const ips = this.expandIPRange(ipRange)
 
-    console.log(`[HTTPScanner] Scanning ${ips.length} IPs on ports ${ports.join(', ')}`)
+    logger.debug(`Scanning ${ips.length} IPs on ports ${ports.join(', ')}`)
 
     // Scan in batches to avoid overwhelming the network
     for (let i = 0; i < ips.length; i += maxConcurrent) {
@@ -44,12 +45,12 @@ export class HTTPScanner implements DiscoveryScanner {
 
       devices.push(...foundDevices)
 
-      console.log(
-        `[HTTPScanner] Progress: ${i + batch.length}/${ips.length} IPs scanned, ${devices.length} devices found`
+      logger.debug(
+        `Progress: ${i + batch.length}/${ips.length} IPs scanned, ${devices.length} devices found`
       )
     }
 
-    console.log(`[HTTPScanner] Scan complete: ${devices.length} devices found`)
+    logger.debug(`Scan complete: ${devices.length} devices found`)
     return devices
   }
 
@@ -263,7 +264,7 @@ export class HTTPScanner implements DiscoveryScanner {
     const prefixStr = parts[1]
 
     if (!baseIP || !prefixStr) {
-      console.warn(`[HTTPScanner] Invalid CIDR notation: ${cidr}`)
+      logger.warn(`Invalid CIDR notation: ${cidr}`)
       return []
     }
 
@@ -287,7 +288,7 @@ export class HTTPScanner implements DiscoveryScanner {
 
     // For now, only support /24 and /32 networks
     // Future: Add support for other CIDR ranges
-    console.warn(`[HTTPScanner] Only /24 and /32 networks supported, got /${prefix}`)
+    logger.warn(`Only /24 and /32 networks supported, got /${prefix}`)
     return []
   }
 

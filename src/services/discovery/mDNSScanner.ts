@@ -8,6 +8,7 @@
  * For full functionality, consider running a local discovery service or Node.js backend.
  */
 
+import { logger } from '@/lib/logger'
 import type {
   DeviceCapability,
   DiscoveredDevice,
@@ -29,10 +30,8 @@ export class MDNSScanner implements DiscoveryScanner {
    * - This implementation provides a placeholder structure
    */
   async scan(options?: DiscoveryScanOptions): Promise<DiscoveredDevice[]> {
-    console.log('[mDNSScanner] Starting mDNS discovery...')
-    console.warn(
-      '[mDNSScanner] Browser-based mDNS has limited support. Consider using a local discovery service.'
-    )
+    logger.debug('Starting mDNS discovery...')
+    logger.warn('Browser-based mDNS has limited support. Consider using a local discovery service.')
 
     const devices: DiscoveredDevice[] = []
 
@@ -49,7 +48,7 @@ export class MDNSScanner implements DiscoveryScanner {
       devices.push(...knownDevices)
     }
 
-    console.log(`[mDNSScanner] Discovery complete: ${devices.length} devices found`)
+    logger.debug(`mDNS discovery complete: ${devices.length} devices found`)
     return devices
   }
 
@@ -87,7 +86,7 @@ export class MDNSScanner implements DiscoveryScanner {
       const data = await response.json()
       return this.parseMDNSServices(data.services || [])
     } catch (error) {
-      console.error('[mDNSScanner] Backend API error:', error)
+      logger.error('mDNS backend API error', { error })
       return []
     }
   }
@@ -117,7 +116,7 @@ export class MDNSScanner implements DiscoveryScanner {
    * Discover Philips Hue bridge via UPnP description
    */
   private async discoverPhilipsHue(): Promise<DiscoveredDevice | null> {
-    console.log('[mDNSScanner] Attempting Philips Hue bridge discovery...')
+    logger.debug('Attempting Philips Hue bridge discovery...')
 
     // Philips Hue bridge advertises on mDNS as _hue._tcp
     // We can try common IP patterns or use the Hue discovery API
@@ -173,7 +172,7 @@ export class MDNSScanner implements DiscoveryScanner {
         },
       }
     } catch (error) {
-      console.error('[mDNSScanner] Hue discovery error:', error)
+      logger.error('Hue discovery error', { error })
       return null
     }
   }

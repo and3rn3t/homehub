@@ -3,7 +3,17 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useKV } from '@/hooks/use-kv'
-import { UserIcon, MicIcon, PhoneIcon, PhoneOffIcon, SpeakerIcon, TvIcon, UserIcon, UsersIcon, VideoIcon,  } from '@/lib/icons'
+import {
+  MicIcon,
+  PhoneIcon,
+  PhoneOffIcon,
+  SpeakerIcon,
+  TvIcon,
+  UserIcon,
+  UsersIcon,
+  VideoIcon,
+} from '@/lib/icons'
+import { logger } from '@/lib/logger'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -92,79 +102,103 @@ export function Intercom() {
   const getDeviceIcon = (type: string) => {
     switch (type) {
       case 'homepod':
-        return SpeakerHigh
+        return SpeakerIcon
       case 'display':
-        return Television
+        return TvIcon
       case 'mobile':
-        return DeviceMobile
+        return PhoneIcon
       case 'tv':
-        return Television
+        return TvIcon
       default:
-        return SpeakerHigh
+        return SpeakerIcon
     }
   }
 
   const startCall = (fromDeviceId: string, toDeviceId: string, withVideo: boolean) => {
-    const fromDevice = devices.find(d => d.id === fromDeviceId)
-    const toDevice = devices.find(d => d.id === toDeviceId)
+    try {
+      const fromDevice = devices.find(d => d.id === fromDeviceId)
+      const toDevice = devices.find(d => d.id === toDeviceId)
 
-    if (!fromDevice || !toDevice) return
+      if (!fromDevice || !toDevice) {
+        toast.error('Device not found')
+        return
+      }
 
-    if (toDevice.status !== 'available') {
-      toast.error(`${toDevice.name} is ${toDevice.status}`)
-      return
-    }
+      if (toDevice.status !== 'available') {
+        toast.error(`${toDevice.name} is ${toDevice.status}`)
+        return
+      }
 
-    const call: ActiveCall = {
-      id: `call-${Date.now()}`,
-      fromDevice: fromDevice.name,
-      toDevice: toDevice.name,
-      startTime: new Date(),
-      hasVideo: withVideo && fromDevice.hasVideo && toDevice.hasVideo,
-    }
+      const call: ActiveCall = {
+        id: `call-${Date.now()}`,
+        fromDevice: fromDevice.name,
+        toDevice: toDevice.name,
+        startTime: new Date(),
+        hasVideo: withVideo && fromDevice.hasVideo && toDevice.hasVideo,
+      }
 
-    setActiveCall(call)
+      setActiveCall(call)
 
-    // Update device statuses
-    setDevices(
-      devices.map(d => {
-        if (d.id === fromDeviceId || d.id === toDeviceId) {
-          return { ...d, status: 'busy' }
-        }
-        return d
+      // Update device statuses
+      setDevices(
+        devices.map(d => {
+          if (d.id === fromDeviceId || d.id === toDeviceId) {
+            return { ...d, status: 'busy' }
+          }
+          return d
+        })
+      )
+
+      toast.success(`Calling ${toDevice.name}...`)
+    } catch (error) {
+      logger.error('Failed to start intercom call', error as Error)
+      toast.error('Failed to start call', {
+        description: error instanceof Error ? error.message : 'Unknown error',
       })
-    )
-
-    toast.success(`Calling ${toDevice.name}...`)
+    }
   }
 
   const endCall = () => {
-    if (!activeCall) return
+    try {
+      if (!activeCall) return
 
-    setActiveCall(null)
+      setActiveCall(null)
 
-    // Reset device statuses
-    setDevices(
-      devices.map(d => {
-        if (d.status === 'busy') {
-          return { ...d, status: 'available' }
-        }
-        return d
+      // Reset device statuses
+      setDevices(
+        devices.map(d => {
+          if (d.status === 'busy') {
+            return { ...d, status: 'available' }
+          }
+          return d
+        })
+      )
+
+      toast.success('Call ended')
+    } catch (error) {
+      logger.error('Failed to end intercom call', error as Error)
+      toast.error('Failed to end call', {
+        description: error instanceof Error ? error.message : 'Unknown error',
       })
-    )
-
-    toast.success('Call ended')
+    }
   }
 
   const broadcastToAll = () => {
-    const availableDevices = devices.filter(d => d.status === 'available')
+    try {
+      const availableDevices = devices.filter(d => d.status === 'available')
 
-    if (availableDevices.length === 0) {
-      toast.error('No devices available for broadcast')
-      return
+      if (availableDevices.length === 0) {
+        toast.error('No devices available for broadcast')
+        return
+      }
+
+      toast.success(`Broadcasting to ${availableDevices.length} devices`)
+    } catch (error) {
+      logger.error('Failed to broadcast to devices', error as Error)
+      toast.error('Failed to broadcast', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      })
     }
-
-    toast.success(`Broadcasting to ${availableDevices.length} devices`)
   }
 
   return (
@@ -200,23 +234,23 @@ export function Intercom() {
                       <div className="flex items-center justify-center gap-4">
                         <div className="flex flex-col items-center">
                           <div className="bg-primary/10 mb-2 flex h-16 w-16 items-center justify-center rounded-full">
-                            <User size={32} className="text-primary" />
+                            <UserIcon className="text-primary h-8 w-8" />
                           </div>
                           <p className="font-medium">{activeCall.fromDevice}</p>
                         </div>
 
                         <div className="flex items-center gap-2">
                           {activeCall.hasVideo ? (
-                            <Video size={24} className="text-primary" />
+                            <VideoIcon className="text-primary h-6 w-6" />
                           ) : (
-                            <Microphone size={24} className="text-primary" />
+                            <MicIcon className="text-primary h-6 w-6" />
                           )}
                           <div className="bg-primary h-1 w-8 animate-pulse" />
                         </div>
 
                         <div className="flex flex-col items-center">
                           <div className="bg-primary/10 mb-2 flex h-16 w-16 items-center justify-center rounded-full">
-                            <User size={32} className="text-primary" />
+                            <UserIcon className="text-primary h-8 w-8" />
                           </div>
                           <p className="font-medium">{activeCall.toDevice}</p>
                         </div>
@@ -224,7 +258,7 @@ export function Intercom() {
 
                       <div className="flex justify-center gap-3">
                         <Button variant="destructive" onClick={endCall}>
-                          <PhoneDisconnect size={20} className="mr-2" />
+                          <PhoneOffIcon className="mr-2 h-5 w-5" />
                           End Call
                         </Button>
                       </div>
@@ -289,7 +323,7 @@ export function Intercom() {
                                 startCall(selectedDevice, device.id, device.hasVideo)
                               }}
                             >
-                              <Phone size={16} className="mr-1" />
+                              <PhoneIcon className="mr-1 h-4 w-4" />
                               Call
                             </Button>
                           )}
@@ -313,7 +347,7 @@ export function Intercom() {
                   className="h-auto w-full justify-start py-4"
                   onClick={broadcastToAll}
                 >
-                  <Users size={20} className="mr-3" />
+                  <UsersIcon className="mr-3 h-5 w-5" />
                   <div className="text-left">
                     <p className="font-medium">Broadcast to All Rooms</p>
                     <p className="text-muted-foreground text-sm">Send message to all devices</p>
@@ -333,7 +367,7 @@ export function Intercom() {
                     }
                   }}
                 >
-                  <Microphone size={20} className="mr-3" />
+                  <MicIcon className="mr-3 h-5 w-5" />
                   <div className="text-left">
                     <p className="font-medium">Family Announcement</p>
                     <p className="text-muted-foreground text-sm">Call everyone for dinner, etc.</p>
@@ -345,7 +379,7 @@ export function Intercom() {
                   className="h-auto w-full justify-start py-4"
                   onClick={() => toast.info('Setting up bedtime routine...')}
                 >
-                  <Phone size={20} className="mr-3" />
+                  <PhoneIcon className="mr-3 h-5 w-5" />
                   <div className="text-left">
                     <p className="font-medium">Bedtime Check-in</p>
                     <p className="text-muted-foreground text-sm">Call kids' rooms for goodnight</p>

@@ -16,13 +16,13 @@ import {
   SettingsIcon,
   WorkflowIcon,
 } from '@/lib/icons'
+import { logger } from '@/lib/logger'
 import type { Automation } from '@/types'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { FlowDesigner } from './FlowDesigner'
 import { GeofenceBuilder } from './GeofenceBuilder'
 import { ScheduleBuilder } from './ScheduleBuilder'
-
 const automationIcons = {
   schedule: ClockIcon,
   geofence: MapPinIcon,
@@ -41,21 +41,41 @@ export function Automations() {
   useConditionEvaluator()
 
   const toggleAutomation = (automationId: string) => {
-    setAutomations(currentAutomations =>
-      currentAutomations.map(automation =>
-        automation.id === automationId
-          ? { ...automation, enabled: !automation.enabled }
-          : automation
+    try {
+      setAutomations(currentAutomations =>
+        currentAutomations.map(automation =>
+          automation.id === automationId
+            ? { ...automation, enabled: !automation.enabled }
+            : automation
+        )
       )
-    )
-    toast.success('Automation updated')
+      toast.success('Automation updated')
+    } catch (error) {
+      logger.error('Failed to toggle automation', {
+        error,
+        automationId,
+      })
+      toast.error('Failed to toggle automation', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
   }
 
   const runAutomation = async (automationId: string) => {
-    const automation = automations.find(a => a.id === automationId)
-    if (automation) {
-      toast.info(`Running "${automation.name}"...`)
-      await triggerAutomation(automationId)
+    try {
+      const automation = automations.find(a => a.id === automationId)
+      if (automation) {
+        toast.info(`Running "${automation.name}"...`)
+        await triggerAutomation(automationId)
+      }
+    } catch (error) {
+      logger.error('Failed to run automation', {
+        error,
+        automationId,
+      })
+      toast.error('Failed to run automation', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      })
     }
   }
 
@@ -70,7 +90,7 @@ export function Automations() {
         hour12: true,
       }).format(date)
     } catch (error) {
-      console.error('Date formatting error:', error)
+      logger.error('Date formatting error', { error, dateString })
       return 'Invalid date'
     }
   }
@@ -141,32 +161,15 @@ export function Automations() {
 
             <div className="flex-1 overflow-y-auto px-6 pb-6">
               {automations.length === 0 ? (
-                <Card className="border-border/30 border-2 border-dashed">
-                  <CardContent className="p-8 text-center">
-                    <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                      <ClockIcon size={24} className="text-muted-foreground" />
-                    </div>
-                    <p className="text-muted-foreground mb-2">No automations yet</p>
-                    <p className="text-muted-foreground mb-4 text-sm">
-                      Create smart rules to automate your home devices
-                    </p>
-                    <div className="flex justify-center gap-2">
-                      <Button variant="outline" size="sm" onClick={() => setCurrentTab('flows')}>
-                        Create Flow
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentTab('schedules')}
-                      >
-                        Create Schedule
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => setCurrentTab('geofence')}>
-                        Create Geofence
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                <iOS26EmptyState
+                  icon={<ClockIcon className="h-16 w-16" />}
+                  title="No Automations Yet"
+                  message="Create smart rules to automate your home devices based on time, location, or conditions."
+                  action={{
+                    label: 'Create Flow',
+                    onClick: () => setCurrentTab('flows'),
+                  }}
+                />
               ) : (
                 <div className="space-y-3">
                   {automations.map(automation => {

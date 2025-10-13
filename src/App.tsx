@@ -1,4 +1,5 @@
 import { CommandPalette, useKeyboardShortcut } from '@/components/ui/command-palette'
+import { IOS26TabBar } from '@/components/ui/ios26-tab-bar'
 import { Toaster } from '@/components/ui/sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useKV } from '@/hooks/use-kv'
@@ -15,21 +16,55 @@ import {
   UsersIcon,
   ZapIcon,
 } from '@/lib/icons'
-import { Automations } from './components/Automations'
-import { BackupRecovery } from './components/BackupRecovery'
-import { Dashboard } from './components/Dashboard'
-import { DeviceMonitor } from './components/DeviceMonitor'
-import { DeviceSettings } from './components/DeviceSettings'
-import { Energy } from './components/Energy'
+import { lazy, Suspense } from 'react'
+import { Spinner } from './components/ui/spinner'
+
+// Lazy load heavy components for better performance
+const Dashboard = lazy(() => import('./components/Dashboard').then(m => ({ default: m.Dashboard })))
+const Rooms = lazy(() => import('./components/Rooms').then(m => ({ default: m.Rooms })))
+const DeviceMonitor = lazy(() =>
+  import('./components/DeviceMonitor').then(m => ({ default: m.DeviceMonitor }))
+)
+const Scenes = lazy(() => import('./components/Scenes').then(m => ({ default: m.Scenes })))
+const Automations = lazy(() =>
+  import('./components/Automations').then(m => ({ default: m.Automations }))
+)
+const Energy = lazy(() => import('./components/Energy').then(m => ({ default: m.Energy })))
+const Security = lazy(() => import('./components/Security').then(m => ({ default: m.Security })))
+const InsightsDashboard = lazy(() =>
+  import('./components/InsightsDashboard').then(m => ({ default: m.InsightsDashboard }))
+)
+const UserManagement = lazy(() =>
+  import('./components/UserManagement').then(m => ({ default: m.UserManagement }))
+)
+const BackupRecovery = lazy(() =>
+  import('./components/BackupRecovery').then(m => ({ default: m.BackupRecovery }))
+)
+const DeviceSettings = lazy(() =>
+  import('./components/DeviceSettings').then(m => ({ default: m.DeviceSettings }))
+)
+const MonitoringSettings = lazy(() =>
+  import('./components/MonitoringSettings').then(m => ({ default: m.MonitoringSettings }))
+)
+const Intercom = lazy(() => import('./components/Intercom').then(m => ({ default: m.Intercom })))
+
+// Small components can be loaded normally
 import { GeofenceTest } from './components/GeofenceTest'
-import { InsightsDashboard } from './components/InsightsDashboard'
 import { LoadingStatesDemo } from './components/LoadingStatesDemo'
-import { Rooms } from './components/Rooms'
-import { Scenes } from './components/Scenes'
-import { Security } from './components/Security'
 import { TestAdvancedControls } from './components/TestAdvancedControls'
 import { ThemeToggle } from './components/ThemeToggle'
-import { UserManagement } from './components/UserManagement'
+
+// Loading fallback component
+function TabContentLoader() {
+  return (
+    <div className="flex h-full items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <Spinner size="lg" />
+        <p className="text-muted-foreground text-sm">Loading...</p>
+      </div>
+    </div>
+  )
+}
 
 function App() {
   const [currentTab, setCurrentTab] = useKV('current-tab', 'home')
@@ -194,17 +229,29 @@ function App() {
     { meta: true }
   )
 
+  // Tab bar items configuration
+  const mainTabItems = [
+    { id: 'home', label: 'Home', icon: HouseIcon },
+    { id: 'devices', label: 'Devices', icon: CogIcon },
+    { id: 'control', label: 'Control', icon: ZapIcon },
+    { id: 'security', label: 'Security', icon: ShieldCheckIcon },
+    { id: 'insights', label: 'Insights', icon: LineChartIcon },
+    { id: 'settings', label: 'Settings', icon: SlidersIconAlt },
+  ]
+
   return (
-    <div className="from-background via-background to-muted/30 relative min-h-screen bg-gradient-to-br">
-      {/* Command Palette - Add to top level */}
-      <div className="fixed top-4 right-4 z-50">
+    <div className="from-background via-background to-muted/30 fixed inset-0 bg-gradient-to-br">
+      {/* Command Palette - Centered at top to avoid all overlaps */}
+      <div className="fixed top-4 left-1/2 z-50 -translate-x-1/2">
         <CommandPalette actions={commandActions} />
       </div>
 
-      <Tabs value={currentTab} onValueChange={setCurrentTab} className="flex h-screen flex-col">
+      <Tabs value={currentTab} onValueChange={setCurrentTab} className="flex h-full flex-col">
         <div className="flex-1 overflow-hidden">
           <TabsContent value="home" className="m-0 h-full p-0">
-            <Dashboard />
+            <Suspense fallback={<TabContentLoader />}>
+              <Dashboard />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="devices" className="m-0 h-full p-0">
@@ -231,13 +278,19 @@ function App() {
               </div>
               <div className="flex-1 overflow-hidden">
                 <TabsContent value="rooms" className="m-0 h-full p-0">
-                  <Rooms />
+                  <Suspense fallback={<TabContentLoader />}>
+                    <Rooms />
+                  </Suspense>
                 </TabsContent>
                 <TabsContent value="monitor" className="m-0 h-full p-0">
-                  <DeviceMonitor />
+                  <Suspense fallback={<TabContentLoader />}>
+                    <DeviceMonitor />
+                  </Suspense>
                 </TabsContent>
                 <TabsContent value="energy" className="m-0 h-full p-0">
-                  <Energy />
+                  <Suspense fallback={<TabContentLoader />}>
+                    <Energy />
+                  </Suspense>
                 </TabsContent>
               </div>
             </Tabs>
@@ -264,21 +317,29 @@ function App() {
               </div>
               <div className="flex-1 overflow-hidden">
                 <TabsContent value="scenes" className="m-0 h-full p-0">
-                  <Scenes />
+                  <Suspense fallback={<TabContentLoader />}>
+                    <Scenes />
+                  </Suspense>
                 </TabsContent>
                 <TabsContent value="automations" className="m-0 h-full p-0">
-                  <Automations />
+                  <Suspense fallback={<TabContentLoader />}>
+                    <Automations />
+                  </Suspense>
                 </TabsContent>
               </div>
             </Tabs>
           </TabsContent>
 
           <TabsContent value="security" className="m-0 h-full p-0">
-            <Security />
+            <Suspense fallback={<TabContentLoader />}>
+              <Security />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="insights" className="m-0 h-full p-0">
-            <InsightsDashboard />
+            <Suspense fallback={<TabContentLoader />}>
+              <InsightsDashboard />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="settings" className="m-0 h-full p-0">
@@ -294,6 +355,12 @@ function App() {
                   </TabsTrigger>
                   <TabsTrigger value="users" className="data-[state=active]:bg-primary/15">
                     Users
+                  </TabsTrigger>
+                  <TabsTrigger value="monitoring" className="data-[state=active]:bg-primary/15">
+                    Monitoring
+                  </TabsTrigger>
+                  <TabsTrigger value="intercom" className="data-[state=active]:bg-primary/15">
+                    Intercom
                   </TabsTrigger>
                   <TabsTrigger value="backup" className="data-[state=active]:bg-primary/15">
                     Backup
@@ -314,13 +381,29 @@ function App() {
               </div>
               <div className="flex-1 overflow-hidden">
                 <TabsContent value="settings" className="m-0 h-full p-0">
-                  <DeviceSettings />
+                  <Suspense fallback={<TabContentLoader />}>
+                    <DeviceSettings />
+                  </Suspense>
                 </TabsContent>
                 <TabsContent value="users" className="m-0 h-full p-0">
-                  <UserManagement />
+                  <Suspense fallback={<TabContentLoader />}>
+                    <UserManagement />
+                  </Suspense>
+                </TabsContent>
+                <TabsContent value="monitoring" className="m-0 h-full p-0">
+                  <Suspense fallback={<TabContentLoader />}>
+                    <MonitoringSettings />
+                  </Suspense>
+                </TabsContent>
+                <TabsContent value="intercom" className="m-0 h-full p-0">
+                  <Suspense fallback={<TabContentLoader />}>
+                    <Intercom />
+                  </Suspense>
                 </TabsContent>
                 <TabsContent value="backup" className="m-0 h-full p-0">
-                  <BackupRecovery />
+                  <Suspense fallback={<TabContentLoader />}>
+                    <BackupRecovery />
+                  </Suspense>
                 </TabsContent>
                 <TabsContent value="test" className="m-0 h-full overflow-y-auto p-0">
                   <TestAdvancedControls />
@@ -335,57 +418,10 @@ function App() {
             </Tabs>
           </TabsContent>
         </div>
-
-        <TabsList className="border-border bg-card/95 grid h-16 w-full grid-cols-6 rounded-none border-t p-1 shadow-lg backdrop-blur-xl sm:h-20 sm:p-2">
-          <TabsTrigger
-            value="home"
-            className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary flex min-h-[44px] flex-col gap-0.5 p-1 sm:gap-1 sm:p-2"
-          >
-            <HouseIcon className="h-5 w-5 sm:h-6 sm:w-6" />
-            <span className="text-[10px] font-medium sm:text-xs">Home</span>
-          </TabsTrigger>
-
-          <TabsTrigger
-            value="devices"
-            className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary flex min-h-[44px] flex-col gap-0.5 p-1 sm:gap-1 sm:p-2"
-          >
-            <CogIcon className="h-5 w-5 sm:h-6 sm:w-6" />
-            <span className="text-[10px] font-medium sm:text-xs">Devices</span>
-          </TabsTrigger>
-
-          <TabsTrigger
-            value="control"
-            className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary flex min-h-[44px] flex-col gap-0.5 p-1 sm:gap-1 sm:p-2"
-          >
-            <ZapIcon className="h-5 w-5 sm:h-6 sm:w-6" />
-            <span className="text-[10px] font-medium sm:text-xs">Control</span>
-          </TabsTrigger>
-
-          <TabsTrigger
-            value="security"
-            className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary flex min-h-[44px] flex-col gap-0.5 p-1 sm:gap-1 sm:p-2"
-          >
-            <ShieldCheckIcon className="h-5 w-5 sm:h-6 sm:w-6" />
-            <span className="text-[10px] font-medium sm:text-xs">Security</span>
-          </TabsTrigger>
-
-          <TabsTrigger
-            value="insights"
-            className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary flex min-h-[44px] flex-col gap-0.5 p-1 sm:gap-1 sm:p-2"
-          >
-            <LineChartIcon className="h-5 w-5 sm:h-6 sm:w-6" />
-            <span className="text-[10px] font-medium sm:text-xs">Insights</span>
-          </TabsTrigger>
-
-          <TabsTrigger
-            value="settings"
-            className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary flex min-h-[44px] flex-col gap-0.5 p-1 sm:gap-1 sm:p-2"
-          >
-            <SlidersIconAlt className="h-5 w-5 sm:h-6 sm:w-6" />
-            <span className="text-[10px] font-medium sm:text-xs">Settings</span>
-          </TabsTrigger>
-        </TabsList>
       </Tabs>
+
+      {/* iOS 26 Dynamic Floating Tab Bar - Outside Tabs for proper z-index */}
+      <IOS26TabBar items={mainTabItems} value={currentTab} onValueChange={setCurrentTab} />
 
       <Toaster />
     </div>

@@ -59,7 +59,7 @@ export const MOCK_CAMERAS: Camera[] = [
     model: 'Indoor Cam E30 (T8414)',
     status: 'online',
     location: 'Living Room',
-    streamUrl: TEST_STREAMS.bigBuckBunny,
+    streamUrl: TEST_STREAMS.muxTest, // Use CORS-enabled stream
     snapshotUrl: TEST_STREAMS.placeholder('Living Room'),
     capabilities: {
       ptz: true, // 360° pan, 96° tilt

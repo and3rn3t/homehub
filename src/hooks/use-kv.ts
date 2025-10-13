@@ -17,6 +17,7 @@
  */
 
 import { getKVClient } from '@/lib/kv-client'
+import { logger } from '@/lib/logger'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 // Cache for optimistic updates and offline support
@@ -25,7 +26,7 @@ const localCache = new Map<string, unknown>()
 // EMERGENCY: Clear the cache on module load to force fresh reads
 // This ensures stale data from old placeholder IDs doesn't persist
 if (import.meta.hot) {
-  console.log('🔥 Hot reload detected - clearing useKV cache')
+  logger.debug('Hot reload detected - clearing useKV cache')
   localCache.clear()
 }
 
@@ -83,22 +84,22 @@ export function useKV<T>(
       const stored = localStorage.getItem(`kv:${key}`)
       if (stored !== null) {
         const parsed = JSON.parse(stored)
-        console.log(`📖 useKV(${key}): Read from localStorage:`, parsed)
+        logger.debug(`useKV(${key}): Read from localStorage`, { value: parsed })
         // Update memory cache with fresh data
         localCache.set(key, parsed)
         return parsed as T
       }
     } catch (error) {
-      console.error(`Failed to parse localStorage for key "${key}":`, error)
+      logger.error(`Failed to parse localStorage for key "${key}"`, error as Error)
     }
 
     // Check memory cache (but localStorage takes priority)
     if (localCache.has(key)) {
-      console.log(`💾 useKV(${key}): Using memory cache`)
+      logger.debug(`useKV(${key}): Using memory cache`)
       return localCache.get(key) as T
     }
 
-    console.log(`🆕 useKV(${key}): Using default value`)
+    logger.debug(`useKV(${key}): Using default value`)
     return defaultValue
   }, [key, defaultValue])
 
@@ -135,24 +136,24 @@ export function useKV<T>(
             setValue(currentValue => {
               // If this is the first load (still has default value structure), update it
               if (JSON.stringify(currentValue) !== JSON.stringify(parsedValue)) {
-                console.log(`✅ useKV(${key}): Loaded from localStorage, updating state`)
+                logger.debug(`useKV(${key}): Loaded from localStorage, updating state`)
                 return parsedValue
               }
-              console.log(`✅ useKV(${key}): Loaded from localStorage, state already up-to-date`)
+              logger.debug(`useKV(${key}): Loaded from localStorage, state already up-to-date`)
               return currentValue
             })
 
             setIsLoading(false)
             return
           } catch (e) {
-            console.error(`Failed to parse localStorage value for ${key}:`, e)
+            logger.error(`Failed to parse localStorage value for ${key}`, e as Error)
             // Fall through to worker fetch
           }
         }
 
         // Check if we have cached data in memory
         if (localCache.has(key)) {
-          console.log(`✅ useKV(${key}): Using memory cache, skipping worker fetch`)
+          logger.debug(`useKV(${key}): Using memory cache, skipping worker fetch`)
           setIsLoading(false)
           return
         }
@@ -193,12 +194,12 @@ export function useKV<T>(
       } catch (error) {
         // Ignore abort errors - these happen during component cleanup or hot reload
         if (error instanceof Error && error.name === 'AbortError') {
-          console.debug(`KV load aborted for key "${key}" (component cleanup)`)
+          logger.debug(`KV load aborted for key "${key}" (component cleanup)`)
           setIsLoading(false)
           return
         }
 
-        console.error(`Failed to load KV value for key "${key}":`, error)
+        logger.error(`Failed to load KV value for key "${key}"`, error as Error)
         setIsError(true)
         setIsLoading(false)
         // Fall back to cached/default value on error
@@ -235,7 +236,7 @@ export function useKV<T>(
         try {
           localStorage.setItem(`kv:${key}`, JSON.stringify(nextValue))
         } catch (error) {
-          console.error(`Failed to save to localStorage for key "${key}":`, error)
+          logger.error(`Failed to save to localStorage for key "${key}"`, error as Error)
         }
 
         // Debounce sync to Cloudflare KV (500ms)
@@ -280,9 +281,10 @@ async function syncToKV(key: string, value: unknown): Promise<void> {
       const client = getKVClient()
       await client.set(key, value)
     } catch (error) {
-      console.error(`Failed to sync to KV for key "${key}":`, error)
-      // Retry logic can be added here in the future
-      // For now, errors are logged and the update remains in localStorage
+      // Only log KV sync errors in development mode
+      // In production, localStorage keeps the data safe
+      logger.warn(`KV sync failed for "${key}" (using localStorage fallback)`, error as Error)
+      // Data is already saved to localStorage, so this is non-critical
     } finally {
       pendingSyncs.delete(key)
     }

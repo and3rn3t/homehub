@@ -24,6 +24,7 @@ import {
   WifiIcon,
   XIcon,
 } from '@/lib/icons'
+import { logger } from '@/lib/logger'
 import type { Device } from '@/types'
 import { motion } from 'framer-motion'
 import { Palette } from 'lucide-react'
@@ -96,7 +97,11 @@ export function DeviceControlPanel({
           })
         }
       } catch (err) {
-        console.error('Brightness control error:', err)
+        logger.error('Brightness control error', {
+          error: err,
+          deviceId: device.id,
+          brightness: value,
+        })
         toast.error('Error setting brightness', {
           description: err instanceof Error ? err.message : 'Unknown error',
         })
@@ -138,7 +143,11 @@ export function DeviceControlPanel({
           })
         }
       } catch (err) {
-        console.error('Color control error:', err)
+        logger.error('Color control error', {
+          error: err,
+          deviceId: device.id,
+          color: hex,
+        })
         toast.error('Error setting color', {
           description: err instanceof Error ? err.message : 'Unknown error',
         })
@@ -177,7 +186,11 @@ export function DeviceControlPanel({
           })
         }
       } catch (err) {
-        console.error('Color temperature control error:', err)
+        logger.error('Color temperature control error', {
+          error: err,
+          deviceId: device.id,
+          colorTemp: value,
+        })
         toast.error('Error setting color temperature', {
           description: err instanceof Error ? err.message : 'Unknown error',
         })

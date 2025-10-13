@@ -1,12 +1,8 @@
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ControlTile } from '@/components/ui/control-tile'
-import { EmptyState } from '@/components/ui/empty-state'
-import { ErrorState } from '@/components/ui/error-state'
 import { PullToRefresh } from '@/components/ui/pull-to-refresh'
-import { DeviceCardSkeleton, StatusCardSkeleton } from '@/components/ui/skeleton'
 import { KV_KEYS } from '@/constants'
 import { useHaptic } from '@/hooks/use-haptic'
 import { useKV } from '@/hooks/use-kv'
@@ -27,14 +23,15 @@ import {
   RefreshIcon,
   ShieldIcon,
   SofaIcon,
+  StarIcon,
   SunRoomIcon,
   ThermometerIcon,
   TreeIcon,
   UsersIcon,
   UtensilsIcon,
-  WifiIcon,
   WifiOffIcon,
 } from '@/lib/icons'
+import { logger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
 import { DeviceRegistry } from '@/services/device'
 import { HTTPDeviceAdapter } from '@/services/device/HTTPDeviceAdapter'
@@ -118,7 +115,7 @@ export function Dashboard() {
         description: 'Devices and connections updated',
       })
     } catch (error) {
-      console.error('Refresh error:', error)
+      logger.error('Refresh error', error as Error)
       toast.error('Refresh failed', {
         description: 'Could not update dashboard',
       })
@@ -156,13 +153,6 @@ export function Dashboard() {
         return 'primary'
     }
   }
-
-  const quickScenesData = [
-    { id: 'good-morning', name: 'Good Morning', icon: 'sun' },
-    { id: 'good-night', name: 'Good Night', icon: 'moon' },
-    { id: 'home', name: "I'm Home", icon: 'home' },
-    { id: 'away', name: 'Away', icon: 'shield' },
-  ]
 
   const sceneIcons = {
     sun: SunRoomIcon,
@@ -256,7 +246,7 @@ export function Dashboard() {
           setKvDevices(currentDevices =>
             currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
           )
-          console.error('Hue device control error:', err)
+          logger.error('Hue device control error', err as Error)
           toast.error(`Error controlling ${device.name}`, {
             description: err instanceof Error ? err.message : 'Hue Bridge error',
           })
@@ -308,7 +298,7 @@ export function Dashboard() {
           setKvDevices(currentDevices =>
             currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
           )
-          console.error('HTTP device control error:', err)
+          logger.error('HTTP device control error', err as Error)
           toast.error(`Error controlling ${device.name}`, {
             description: err instanceof Error ? err.message : 'Unknown error',
           })
@@ -364,7 +354,7 @@ export function Dashboard() {
           description: `via ${device.protocol.toUpperCase()}`,
         })
       } catch (err) {
-        console.error('Device control error:', err)
+        logger.error('Device control error', err as Error)
         toast.error(`Failed to control ${device.name}`, {
           description: err instanceof Error ? err.message : 'Unknown error',
         })
@@ -449,25 +439,25 @@ export function Dashboard() {
 
         <div className="flex-1 overflow-y-auto px-6 pb-6">
           <div className="mb-6 grid grid-cols-3 gap-3">
-            <StatusCardSkeleton />
-            <StatusCardSkeleton />
-            <StatusCardSkeleton />
+            <iOS26Shimmer className="h-24 rounded-2xl" />
+            <iOS26Shimmer className="h-24 rounded-2xl" />
+            <iOS26Shimmer className="h-24 rounded-2xl" />
           </div>
 
           <div className="mb-6 grid grid-cols-2 gap-3">
-            <StatusCardSkeleton />
-            <StatusCardSkeleton />
-            <StatusCardSkeleton />
-            <StatusCardSkeleton />
+            <iOS26Shimmer className="h-24 rounded-2xl" />
+            <iOS26Shimmer className="h-24 rounded-2xl" />
+            <iOS26Shimmer className="h-24 rounded-2xl" />
+            <iOS26Shimmer className="h-24 rounded-2xl" />
           </div>
 
           <div className="mb-6">
             <h2 className="text-foreground mb-3 text-lg font-semibold">Favorite Devices</h2>
             <div className="grid grid-cols-2 gap-3">
-              <DeviceCardSkeleton />
-              <DeviceCardSkeleton />
-              <DeviceCardSkeleton />
-              <DeviceCardSkeleton />
+              <iOS26Shimmer className="h-32 rounded-2xl" />
+              <iOS26Shimmer className="h-32 rounded-2xl" />
+              <iOS26Shimmer className="h-32 rounded-2xl" />
+              <iOS26Shimmer className="h-32 rounded-2xl" />
             </div>
           </div>
         </div>
@@ -478,28 +468,29 @@ export function Dashboard() {
   // Show error state
   if (isError) {
     return (
-      <div className="flex h-full flex-col">
+      <div className="flex h-full flex-col bg-black">
         <div className="p-6 pb-4">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h1 className="text-foreground text-2xl font-bold">Good Morning</h1>
-              <p className="text-muted-foreground">Welcome home</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <NotificationBell />
-              <Button variant="outline" size="icon" className="rounded-full">
-                <PlusIcon className="h-5 w-5" />
-              </Button>
+              <h1 className="text-2xl font-bold text-white">Good Morning</h1>
+              <p className="text-white/60">Welcome home</p>
             </div>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 pb-6">
-          <ErrorState
+        <div className="flex flex-1 items-center justify-center px-6 pb-6">
+          <iOS26Error
+            variant="error"
             title="Unable to Load Devices"
-            description="There was a problem loading your devices. Please check your connection and try again."
-            onRetry={() => window.location.reload()}
-            size="lg"
+            message="There was a problem loading your devices. Please check your connection and try again."
+            action={{
+              label: 'Refresh Dashboard',
+              onClick: () => window.location.reload(),
+            }}
+            secondaryAction={{
+              label: 'View Docs',
+              onClick: () => window.open('/docs', '_blank'),
+            }}
           />
         </div>
       </div>
@@ -524,18 +515,9 @@ export function Dashboard() {
                 className="flex items-center gap-2"
               >
                 {mqttConnected ? (
-                  <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
-                    <WifiIcon className="mr-1 h-3.5 w-3.5" />
-                    MQTT
-                  </Badge>
+                  <iOS26StatusBadge status="idle" label="MQTT" showPulse={true} />
                 ) : connectionState === 'reconnecting' ? (
-                  <Badge
-                    variant="outline"
-                    className="border-yellow-200 bg-yellow-50 text-yellow-700"
-                  >
-                    <RefreshIcon className="mr-1 h-3.5 w-3.5 animate-spin" />
-                    Reconnecting
-                  </Badge>
+                  <iOS26StatusBadge status="alert" label="Reconnecting" showPulse={true} />
                 ) : connectionState === 'error' ? (
                   <Button
                     variant="outline"
@@ -704,7 +686,7 @@ export function Dashboard() {
             </Button>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {favoriteDeviceList.slice(0, 4).map((device, index) => (
+            {favoriteDeviceList.slice(0, 4).map(device => (
               <ControlTile
                 key={device.id}
                 device={device}
@@ -793,11 +775,16 @@ export function Dashboard() {
           </div>
 
           {favoriteDeviceList.length === 0 ? (
-            <EmptyState
-              type="favorites"
-              onAction={() => {
-                // Scroll to devices section or open device browser
-                toast.info('Browse your devices below to add favorites')
+            <iOS26EmptyState
+              icon={<StarIcon className="h-16 w-16" />}
+              title="No Favorites Yet"
+              message="Star your most-used devices to access them quickly here."
+              action={{
+                label: 'Browse Devices',
+                onClick: () => {
+                  // Scroll to devices section
+                  toast.info('Browse your devices below to add favorites')
+                },
               }}
             />
           ) : (

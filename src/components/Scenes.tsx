@@ -1,8 +1,5 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { EmptyState } from '@/components/ui/empty-state'
-import { ErrorState } from '@/components/ui/error-state'
-import { SceneCardSkeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { KV_KEYS, MOCK_SCENES } from '@/constants'
 import { useHaptic } from '@/hooks/use-haptic'
@@ -17,6 +14,7 @@ import {
   SunRoomIcon,
   UtensilsIcon,
 } from '@/lib/icons'
+import { logger } from '@/lib/logger'
 import type { Scene } from '@/types'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
@@ -78,18 +76,28 @@ export function Scenes() {
   const haptic = useHaptic()
 
   const activateScene = (sceneId: string) => {
-    haptic.success() // Success haptic for scene activation
-    setActiveScene(sceneId)
+    try {
+      haptic.success() // Success haptic for scene activation
+      setActiveScene(sceneId)
 
-    const scene = scenes.find(s => s.id === sceneId)
-    const deviceCount = scene?.deviceStates.length || 0
-    toast.success(`${scene?.name || 'Scene'} activated`, {
-      description: `Adjusting ${deviceCount} device${deviceCount !== 1 ? 's' : ''}`,
-    })
+      const scene = scenes.find(s => s.id === sceneId)
+      const deviceCount = scene?.deviceStates.length || 0
+      toast.success(`${scene?.name || 'Scene'} activated`, {
+        description: `Adjusting ${deviceCount} device${deviceCount !== 1 ? 's' : ''}`,
+      })
 
-    setTimeout(() => {
-      setActiveScene(null)
-    }, 2000)
+      setTimeout(() => {
+        setActiveScene(null)
+      }, 2000)
+    } catch (error) {
+      logger.error('Failed to activate scene', {
+        error,
+        sceneId,
+      })
+      toast.error('Failed to activate scene', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
   }
 
   // Smart loading state: Only show skeletons on initial load with no data
@@ -113,12 +121,12 @@ export function Scenes() {
 
         <div className="flex-1 overflow-y-auto px-6 pb-6">
           <div className="grid grid-cols-2 gap-4">
-            <SceneCardSkeleton />
-            <SceneCardSkeleton />
-            <SceneCardSkeleton />
-            <SceneCardSkeleton />
-            <SceneCardSkeleton />
-            <SceneCardSkeleton />
+            <iOS26Shimmer className="h-40 rounded-2xl" />
+            <iOS26Shimmer className="h-40 rounded-2xl" />
+            <iOS26Shimmer className="h-40 rounded-2xl" />
+            <iOS26Shimmer className="h-40 rounded-2xl" />
+            <iOS26Shimmer className="h-40 rounded-2xl" />
+            <iOS26Shimmer className="h-40 rounded-2xl" />
           </div>
         </div>
       </div>
@@ -141,12 +149,15 @@ export function Scenes() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 pb-6">
-          <ErrorState
+        <div className="flex flex-1 items-center justify-center px-6 pb-6">
+          <iOS26Error
+            variant="error"
             title="Unable to Load Scenes"
-            description="There was a problem loading your scenes. Please try again."
-            onRetry={() => window.location.reload()}
-            size="lg"
+            message="There was a problem loading your scenes. Please check your connection and try again."
+            action={{
+              label: 'Refresh',
+              onClick: () => window.location.reload(),
+            }}
           />
         </div>
       </div>
@@ -174,11 +185,15 @@ export function Scenes() {
       <div className="flex-1 overflow-y-auto px-4 pb-6 sm:px-6">
         {scenes.length === 0 ? (
           <div className="space-y-6">
-            <EmptyState
-              type="scenes"
-              onAction={() => {
-                // TODO: Open scene creation dialog
-                toast.info('Scene creation coming soon!')
+            <iOS26EmptyState
+              icon={<PlayIcon className="h-16 w-16" />}
+              title="No Scenes Created"
+              message="Create scenes to control multiple devices with a single tap. Perfect for routines like 'Movie Time' or 'Good Morning'."
+              action={{
+                label: 'Create Scene',
+                onClick: () => {
+                  toast.info('Scene creation coming soon!')
+                },
               }}
             />
 

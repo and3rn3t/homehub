@@ -1,12 +1,13 @@
 /**
  * HomeHub KV Worker
- * 
+ *
  * Cloudflare Worker providing REST API for KV storage operations.
  * Supports GET, POST, DELETE operations with CORS and error handling.
  */
 
 export interface Env {
   HOMEHUB_KV: KVNamespace
+  LOGS_KV: KVNamespace // New: Store application logs
   AUTH_TOKEN?: string
   ENVIRONMENT?: string
 }
@@ -17,6 +18,16 @@ interface KVResponse {
   success?: boolean
   timestamp?: number
   error?: string
+}
+
+interface LogEntry {
+  level: 'warn' | 'error'
+  message: string
+  context?: any
+  timestamp: string
+  userAgent?: string
+  url?: string
+  appVersion?: string
 }
 
 /**
@@ -42,32 +53,26 @@ function handleOptions(): Response {
  * Create error response
  */
 function errorResponse(message: string, status = 400): Response {
-  return new Response(
-    JSON.stringify({ error: message }),
-    {
-      status,
-      headers: {
-        'Content-Type': 'application/json',
-        ...corsHeaders,
-      },
-    }
-  )
+  return new Response(JSON.stringify({ error: message }), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      ...corsHeaders,
+    },
+  })
 }
 
 /**
  * Create success response
  */
 function jsonResponse(data: any, status = 200): Response {
-  return new Response(
-    JSON.stringify(data),
-    {
-      status,
-      headers: {
-        'Content-Type': 'application/json',
-        ...corsHeaders,
-      },
-    }
-  )
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      ...corsHeaders,
+    },
+  })
 }
 
 /**
@@ -82,10 +87,10 @@ function isValidKey(key: string): boolean {
  */
 function checkAuth(request: Request, env: Env): boolean {
   if (!env.AUTH_TOKEN) return true // No auth configured
-  
+
   const authHeader = request.headers.get('Authorization')
   if (!authHeader) return false
-  
+
   const token = authHeader.replace('Bearer ', '')
   return token === env.AUTH_TOKEN
 }
@@ -130,13 +135,13 @@ export default {
       // GET /kv/:key - Get value
       if (path.startsWith('/kv/') && request.method === 'GET') {
         const key = path.substring(4)
-        
+
         if (!isValidKey(key)) {
           return errorResponse('Invalid key format')
         }
 
         const value = await env.HOMEHUB_KV.get(key, { type: 'json' })
-        
+
         if (value === null) {
           return errorResponse('Key not found', 404)
         }
@@ -151,13 +156,13 @@ export default {
       // POST /kv/:key - Set value
       if (path.startsWith('/kv/') && request.method === 'POST') {
         const key = path.substring(4)
-        
+
         if (!isValidKey(key)) {
           return errorResponse('Invalid key format')
         }
 
-        const body = await request.json() as { value: any }
-        
+        const body = (await request.json()) as { value: any }
+
         if (!body || body.value === undefined) {
           return errorResponse('Missing value in request body')
         }
@@ -174,7 +179,7 @@ export default {
       // DELETE /kv/:key - Delete key
       if (path.startsWith('/kv/') && request.method === 'DELETE') {
         const key = path.substring(4)
-        
+
         if (!isValidKey(key)) {
           return errorResponse('Invalid key format')
         }
@@ -188,15 +193,58 @@ export default {
         } as KVResponse)
       }
 
+      // POST /api/logs - Store application logs
+      if (path === '/api/logs' && request.method === 'POST') {
+        try {
+          const logEntry = (await request.json()) as LogEntry
+
+          // Validate log entry
+          if (!logEntry.level || !logEntry.message || !logEntry.timestamp) {
+            return errorResponse('Invalid log entry format')
+          }
+
+          // Store in LOGS_KV with timestamp-based key for easy querying
+          const logKey = `log:${logEntry.timestamp}:${Math.random().toString(36).substr(2, 9)}`
+          await env.LOGS_KV.put(logKey, JSON.stringify(logEntry), {
+            expirationTtl: 60 * 60 * 24 * 30, // Keep logs for 30 days
+          })
+
+          // For errors, also store in a separate "recent-errors" list for quick access
+          if (logEntry.level === 'error') {
+            const recentErrors = (await env.LOGS_KV.get('recent-errors', { type: 'json' })) || []
+            const errors = Array.isArray(recentErrors) ? recentErrors : []
+
+            // Keep last 100 errors
+            errors.unshift(logEntry)
+            if (errors.length > 100) {
+              errors.pop()
+            }
+
+            await env.LOGS_KV.put('recent-errors', JSON.stringify(errors))
+          }
+
+          return jsonResponse({ success: true })
+        } catch (error) {
+          // Don't fail the request if logging fails
+          console.error('Failed to store log:', error)
+          return jsonResponse({ success: false, error: 'Failed to store log' }, 500)
+        }
+      }
+
+      // GET /api/logs - Retrieve recent logs (for debugging/monitoring dashboard)
+      if (path === '/api/logs' && request.method === 'GET') {
+        const recentErrors = (await env.LOGS_KV.get('recent-errors', { type: 'json' })) || []
+        return jsonResponse({
+          errors: recentErrors,
+          count: Array.isArray(recentErrors) ? recentErrors.length : 0,
+        })
+      }
+
       // 404 - Route not found
       return errorResponse('Not found', 404)
-
     } catch (error) {
       console.error('Worker error:', error)
-      return errorResponse(
-        error instanceof Error ? error.message : 'Internal server error',
-        500
-      )
+      return errorResponse(error instanceof Error ? error.message : 'Internal server error', 500)
     }
   },
 }

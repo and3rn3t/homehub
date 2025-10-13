@@ -10,6 +10,7 @@
  * API Documentation: https://github.com/softScheck/tplink-smartplug
  */
 
+import { logger } from '@/lib/logger'
 import type { Device } from '@/types'
 import type {
   DeviceAdapter,
@@ -84,9 +85,7 @@ export class TPLinkAdapter implements DeviceAdapter {
     while (attempt < this.retryConfig.maxAttempts) {
       try {
         if (this.debug) {
-          console.log(
-            `[TPLinkAdapter] Attempt ${attempt + 1}/${this.retryConfig.maxAttempts} - ${operation}`
-          )
+          logger.debug(`Attempt ${attempt + 1}/${this.retryConfig.maxAttempts} - ${operation}`)
         }
 
         return await fn()
@@ -106,7 +105,7 @@ export class TPLinkAdapter implements DeviceAdapter {
         )
 
         if (this.debug) {
-          console.log(`[TPLinkAdapter] Retry ${attempt} after ${delay}ms - ${lastError.message}`)
+          logger.debug(`Retry ${attempt} after ${delay}ms - ${lastError.message}`)
         }
 
         await new Promise(resolve => setTimeout(resolve, delay))
@@ -183,7 +182,7 @@ export class TPLinkAdapter implements DeviceAdapter {
           const data = await response.json()
 
           if (this.debug) {
-            console.log(`[TPLinkAdapter] Command:`, command, '→', data)
+            logger.debug(`Command: ${command}`, { response: data })
           }
 
           return data
@@ -361,10 +360,9 @@ export class TPLinkAdapter implements DeviceAdapter {
     } catch (error) {
       // Return offline state if can't reach device
       if (this.debug) {
-        console.log(
-          `[TPLinkAdapter] Failed to get state:`,
-          error instanceof Error ? error.message : 'Unknown error'
-        )
+        logger.debug('Failed to get state', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+        })
       }
       return {
         enabled: false,

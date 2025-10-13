@@ -13,14 +13,23 @@
  * - Auto-reconnect on disconnect
  */
 
-import { Skeleton } from '@/components/ui/skeleton'
 import type { Camera } from '@/constants/mock-cameras'
-import { AlertCircleIcon, MaximizeIcon, PauseIcon, PlayIcon, RefreshCwIcon } from '@/lib/icons'
+import { MaximizeIcon, PauseIcon, PlayIcon, RefreshCwIcon } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import { AnimatePresence, motion } from 'framer-motion'
-import Hls from 'hls.js'
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+
+// Dynamic import for hls.js (only loaded when needed)
+let HlsModule: typeof import('hls.js').default | null = null
+
+async function loadHls() {
+  if (!HlsModule) {
+    const module = await import('hls.js')
+    HlsModule = module.default
+  }
+  return HlsModule
+}
 
 interface VideoPlayerProps {
   camera: Camera
@@ -30,7 +39,7 @@ interface VideoPlayerProps {
   onError?: (error: Error) => void
 }
 
-export function VideoPlayer({
+export const VideoPlayer = memo(function VideoPlayer({
   camera,
   autoplay = true,
   muted = true,
@@ -38,7 +47,7 @@ export function VideoPlayer({
   onError,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const hlsRef = useRef<Hls | null>(null)
+  const hlsRef = useRef<any>(null) // Using any for dynamic HLS instance
   const [isPlaying, setIsPlaying] = useState(autoplay)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -48,79 +57,95 @@ export function VideoPlayer({
   const isStreamCamera = !!camera.streamUrl
   const isSnapshotCamera = !isStreamCamera && !!camera.snapshotUrl
 
-  // HLS stream setup
+  // HLS stream setup (dynamic import)
   useEffect(() => {
     if (!isStreamCamera || !camera.streamUrl || !videoRef.current) return
 
     const video = videoRef.current
+    let hls: any = null
 
-    // Check if HLS is supported
-    if (Hls.isSupported()) {
-      const hls = new Hls({
-        enableWorker: true,
-        lowLatencyMode: true,
-        backBufferLength: 90,
-        maxBufferLength: 30,
-        maxMaxBufferLength: 60,
-      })
+    // Async function to load and initialize HLS
+    const initHls = async () => {
+      try {
+        const Hls = await loadHls()
 
-      hlsRef.current = hls
+        // Check if HLS is supported
+        if (Hls.isSupported()) {
+          hls = new Hls({
+            enableWorker: true,
+            lowLatencyMode: true,
+            backBufferLength: 90,
+            maxBufferLength: 30,
+            maxMaxBufferLength: 60,
+          })
 
-      hls.loadSource(camera.streamUrl)
-      hls.attachMedia(video)
+          hlsRef.current = hls
 
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        setIsLoading(false)
-        if (autoplay) {
-          video.play().catch(err => {
-            console.error('Autoplay failed:', err)
-            setIsPlaying(false)
+          hls.loadSource(camera.streamUrl!)
+          hls.attachMedia(video)
+
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            setIsLoading(false)
+            if (autoplay) {
+              video.play().catch((err: Error) => {
+                console.error('Autoplay failed:', err)
+                setIsPlaying(false)
+              })
+            }
+          })
+
+          hls.on(Hls.Events.ERROR, (_event: any, data: any) => {
+            if (data.fatal) {
+              const errorMsg = `Stream error: ${data.type}`
+              setError(errorMsg)
+              setIsLoading(false)
+              onError?.(new Error(errorMsg))
+
+              // Auto-reconnect attempt
+              setTimeout(() => {
+                if (camera.streamUrl && hls) {
+                  setError(null)
+                  setIsLoading(true)
+                  hls.loadSource(camera.streamUrl)
+                }
+              }, 5000)
+            }
           })
         }
-      })
-
-      hls.on(Hls.Events.ERROR, (event, data) => {
-        if (data.fatal) {
-          const errorMsg = `Stream error: ${data.type}`
-          setError(errorMsg)
-          setIsLoading(false)
-          onError?.(new Error(errorMsg))
-
-          // Auto-reconnect attempt
-          setTimeout(() => {
-            if (camera.streamUrl) {
-              setError(null)
-              setIsLoading(true)
-              hls.loadSource(camera.streamUrl)
+        // Fallback for native HLS support (Safari)
+        else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          video.src = camera.streamUrl!
+          video.addEventListener('loadedmetadata', () => {
+            setIsLoading(false)
+            if (autoplay) {
+              video.play().catch((err: Error) => {
+                console.error('Autoplay failed:', err)
+                setIsPlaying(false)
+              })
             }
-          }, 5000)
+          })
+          video.addEventListener('error', () => {
+            setError('Failed to load stream')
+            setIsLoading(false)
+          })
+        } else {
+          setError('HLS not supported in this browser')
+          setIsLoading(false)
         }
-      })
+      } catch (err) {
+        console.error('Failed to load HLS:', err)
+        setError('Failed to load video library')
+        setIsLoading(false)
+      }
+    }
 
-      return () => {
+    initHls()
+
+    return () => {
+      if (hls) {
         hls.destroy()
         hlsRef.current = null
       }
-    }
-    // Fallback for native HLS support (Safari)
-    else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = camera.streamUrl
-      video.addEventListener('loadedmetadata', () => {
-        setIsLoading(false)
-        if (autoplay) {
-          video.play().catch(err => {
-            console.error('Autoplay failed:', err)
-            setIsPlaying(false)
-          })
-        }
-      })
-      video.addEventListener('error', () => {
-        setError('Failed to load stream')
-        setIsLoading(false)
-      })
-    } else {
-      setError('HLS not supported in this browser')
-      setIsLoading(false)
     }
   }, [camera.streamUrl, autoplay, isStreamCamera, onError])
 
@@ -180,16 +205,20 @@ export function VideoPlayer({
     return (
       <div
         className={cn(
-          'bg-muted/50 relative aspect-video overflow-hidden rounded-xl',
+          'relative aspect-video overflow-hidden rounded-xl bg-black',
           'flex items-center justify-center',
           className
         )}
       >
-        <div className="space-y-2 text-center">
-          <AlertCircleIcon className="text-muted-foreground mx-auto h-8 w-8" />
-          <p className="text-muted-foreground text-sm">Camera Offline</p>
-          <p className="text-muted-foreground/70 text-xs">{camera.name}</p>
-        </div>
+        <iOS26Error
+          variant="offline"
+          title="Camera Offline"
+          message={`${camera.name} is currently unavailable`}
+          action={{
+            label: 'Refresh',
+            onClick: () => window.location.reload(),
+          }}
+        />
       </div>
     )
   }
@@ -198,42 +227,43 @@ export function VideoPlayer({
     <div
       className={cn('group relative aspect-video overflow-hidden rounded-xl bg-black', className)}
     >
-      {/* Loading State */}
+      {/* iOS 26 Loading State */}
       <AnimatePresence>
         {isLoading && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-10"
+            className="absolute inset-0 z-10 flex items-center justify-center bg-black/90"
           >
-            <Skeleton className="h-full w-full" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-              >
-                <RefreshCwIcon className="h-8 w-8 text-white/50" />
-              </motion.div>
-            </div>
+            <iOS26Spinner message="Loading Stream" submessage={camera.name} size="md" />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Error State */}
-      {error && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="absolute inset-0 z-20 flex items-center justify-center bg-black/80"
-        >
-          <div className="space-y-2 p-4 text-center">
-            <AlertCircleIcon className="mx-auto h-8 w-8 text-red-400" />
-            <p className="text-sm text-white">{error}</p>
-            <p className="text-xs text-white/70">Reconnecting...</p>
-          </div>
-        </motion.div>
-      )}
+      {/* iOS 26 Error State */}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-20 flex items-center justify-center bg-black/95 p-6"
+          >
+            <iOS26Reconnecting
+              message={error}
+              onRetry={() => {
+                setError(null)
+                setIsLoading(true)
+                // Trigger reconnect
+                if (camera.streamUrl && hlsRef.current) {
+                  hlsRef.current.loadSource(camera.streamUrl)
+                }
+              }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* HLS Video Stream */}
       {isStreamCamera && (
@@ -344,4 +374,4 @@ export function VideoPlayer({
       )}
     </div>
   )
-}
+})

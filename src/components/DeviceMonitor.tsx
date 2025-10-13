@@ -410,12 +410,19 @@ export function DeviceMonitor() {
                             <h3 className="text-foreground font-semibold">{device.name}</h3>
                             <p className="text-muted-foreground text-sm">{device.room}</p>
                             <div className="mt-1 flex items-center gap-2">
-                              <Badge
-                                variant={device.status === 'online' ? 'default' : 'secondary'}
-                                className={`h-5 text-xs ${statusColors[device.status]}`}
-                              >
-                                {device.status}
-                              </Badge>
+                              <iOS26StatusBadge
+                                status={
+                                  device.status === 'online'
+                                    ? 'idle'
+                                    : device.status === 'warning'
+                                      ? 'alert'
+                                      : 'offline'
+                                }
+                                label={device.status}
+                                showPulse={
+                                  device.status === 'online' || device.status === 'warning'
+                                }
+                              />
                               <span className="text-muted-foreground flex items-center gap-1 text-xs">
                                 <ClockIcon className="h-3 w-3" />
                                 {getTimeAgo(device.lastSeen)}

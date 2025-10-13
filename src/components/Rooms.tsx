@@ -8,8 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { EmptyState } from '@/components/ui/empty-state'
-import { ErrorState } from '@/components/ui/error-state'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
@@ -20,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { RoomCardSkeleton } from '@/components/ui/skeleton'
 import { KV_KEYS, MOCK_DEVICES, MOCK_ROOMS } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
 import {
@@ -31,6 +28,7 @@ import {
   ThermometerIcon,
   WifiIcon,
 } from '@/lib/icons'
+import { logger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
 import type { Device, Room } from '@/types'
 import {
@@ -275,71 +273,87 @@ export function Rooms() {
   const unassignedDevices = devices.filter(device => device.room === 'Unassigned')
 
   const toggleDevice = async (deviceId: string) => {
-    const device = devices.find(d => d.id === deviceId)
-    if (!device) {
-      toast.error('Device not found')
-      return
-    }
+    try {
+      const device = devices.find(d => d.id === deviceId)
+      if (!device) {
+        toast.error('Device not found')
+        return
+      }
 
-    // For Hue devices, use HueBridgeAdapter
-    if (device.protocol === 'hue') {
-      try {
-        // Import adapter dynamically
-        const { HueBridgeAdapter } = await import('@/services/devices/HueBridgeAdapter')
+      // For Hue devices, use HueBridgeAdapter
+      if (device.protocol === 'hue') {
+        try {
+          // Import adapter dynamically
+          const { HueBridgeAdapter } = await import('@/services/devices/HueBridgeAdapter')
 
-        // Create adapter instance
-        const adapter = new HueBridgeAdapter({
-          ip: '192.168.1.6',
-          username: 'xddEM82d6i8rZDvEy0jAdXL3rA8vxmnxTSUBIhyA',
-          timeout: 5000,
-        })
-
-        // Optimistic update
-        setDevices(prevDevices =>
-          prevDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-        )
-
-        // Execute command
-        const result = device.enabled ? await adapter.turnOff(device) : await adapter.turnOn(device)
-
-        if (result.success) {
-          // Update with real state
-          setDevices(prevDevices =>
-            prevDevices.map(d =>
-              d.id === deviceId ? { ...d, ...result.newState, lastSeen: new Date() } : d
-            )
-          )
-          toast.success(`${device.name} turned ${result.newState?.enabled ? 'on' : 'off'}`, {
-            description: `Hue Bridge · ${result.duration}ms`,
+          // Create adapter instance
+          const adapter = new HueBridgeAdapter({
+            ip: '192.168.1.6',
+            username: 'xddEM82d6i8rZDvEy0jAdXL3rA8vxmnxTSUBIhyA',
+            timeout: 5000,
           })
-        } else {
-          // Rollback optimistic update
+
+          // Optimistic update
           setDevices(prevDevices =>
             prevDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
           )
-          toast.error(`Failed to control ${device.name}`, {
-            description: result.error || 'Hue Bridge error',
-          })
-        }
-        return
-      } catch (err) {
-        // Rollback on exception
-        setDevices(prevDevices =>
-          prevDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-        )
-        console.error('Hue device control error:', err)
-        toast.error(`Error controlling ${device.name}`, {
-          description: err instanceof Error ? err.message : 'Hue Bridge error',
-        })
-        return
-      }
-    }
 
-    // For other devices, just update UI state
-    setDevices(prevDevices =>
-      prevDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-    )
-    toast.success(`${device?.name} turned ${device?.enabled ? 'off' : 'on'}`)
+          // Execute command
+          const result = device.enabled
+            ? await adapter.turnOff(device)
+            : await adapter.turnOn(device)
+
+          if (result.success) {
+            // Update with real state
+            setDevices(prevDevices =>
+              prevDevices.map(d =>
+                d.id === deviceId ? { ...d, ...result.newState, lastSeen: new Date() } : d
+              )
+            )
+            toast.success(`${device.name} turned ${result.newState?.enabled ? 'on' : 'off'}`, {
+              description: `Hue Bridge · ${result.duration}ms`,
+            })
+          } else {
+            // Rollback optimistic update
+            setDevices(prevDevices =>
+              prevDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
+            )
+            toast.error(`Failed to control ${device.name}`, {
+              description: result.error || 'Hue Bridge error',
+            })
+          }
+          return
+        } catch (err) {
+          // Rollback on exception
+          setDevices(prevDevices =>
+            prevDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
+          )
+          logger.error('Hue device control error', {
+            error: err,
+            deviceId,
+            deviceName: device.name,
+          })
+          toast.error(`Error controlling ${device.name}`, {
+            description: err instanceof Error ? err.message : 'Hue Bridge error',
+          })
+          return
+        }
+      }
+
+      // For other devices, just update UI state
+      setDevices(prevDevices =>
+        prevDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
+      )
+      toast.success(`${device?.name} turned ${device?.enabled ? 'off' : 'on'}`)
+    } catch (error) {
+      logger.error('Failed to toggle device', {
+        error,
+        deviceId,
+      })
+      toast.error('Failed to toggle device', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
   }
 
   const openAssignDialog = (device: Device) => {
@@ -349,53 +363,97 @@ export function Rooms() {
   }
 
   const assignDeviceToRoom = () => {
-    if (!selectedDevice || !selectedRoom) {
-      toast.error('Please select a room')
-      return
+    try {
+      if (!selectedDevice || !selectedRoom) {
+        toast.error('Please select a room')
+        return
+      }
+
+      // Update device's room
+      setDevices(prevDevices =>
+        prevDevices.map(d => (d.id === selectedDevice.id ? { ...d, room: selectedRoom } : d))
+      )
+
+      toast.success(`${selectedDevice.name} assigned to ${selectedRoom}`)
+      setAssignDialogOpen(false)
+      setSelectedDevice(null)
+      setSelectedRoom('')
+    } catch (error) {
+      logger.error('Failed to assign device to room', {
+        error,
+        deviceId: selectedDevice?.id,
+        roomName: selectedRoom,
+      })
+      toast.error('Failed to assign device', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      })
     }
-
-    // Update device's room
-    setDevices(prevDevices =>
-      prevDevices.map(d => (d.id === selectedDevice.id ? { ...d, room: selectedRoom } : d))
-    )
-
-    toast.success(`${selectedDevice.name} assigned to ${selectedRoom}`)
-    setAssignDialogOpen(false)
-    setSelectedDevice(null)
-    setSelectedRoom('')
   }
 
   const createRoom = () => {
-    if (!newRoomName.trim()) {
-      toast.error('Please enter a room name')
-      return
-    }
+    try {
+      if (!newRoomName.trim()) {
+        toast.error('Please enter a room name')
+        return
+      }
 
-    // Check if room already exists
-    if (rooms.some(r => r.name.toLowerCase() === newRoomName.trim().toLowerCase())) {
-      toast.error('A room with this name already exists')
-      return
-    }
+      // Check if room already exists
+      if (rooms.some(r => r.name.toLowerCase() === newRoomName.trim().toLowerCase())) {
+        toast.error('A room with this name already exists')
+        return
+      }
 
-    const newRoom: Room = {
-      id: crypto.randomUUID(),
-      name: newRoomName.trim(),
-      icon: 'home', // Default icon
-      deviceIds: [],
-    }
+      const newRoom: Room = {
+        id: crypto.randomUUID(),
+        name: newRoomName.trim(),
+        icon: 'home', // Default icon
+        deviceIds: [],
+      }
 
-    setRooms(prevRooms => [...prevRooms, newRoom])
-    toast.success(`Created room: ${newRoom.name}`)
-    setCreateRoomDialogOpen(false)
-    setNewRoomName('')
+      setRooms(prevRooms => [...prevRooms, newRoom])
+      toast.success(`Created room: ${newRoom.name}`)
+      setCreateRoomDialogOpen(false)
+      setNewRoomName('')
+    } catch (error) {
+      logger.error('Failed to create room', {
+        error,
+        roomName: newRoomName,
+      })
+      toast.error('Failed to create room', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
   }
 
   const handleDeviceUpdate = (deviceId: string, updates: Partial<Device>) => {
-    setDevices(prevDevices => prevDevices.map(d => (d.id === deviceId ? { ...d, ...updates } : d)))
+    try {
+      setDevices(prevDevices =>
+        prevDevices.map(d => (d.id === deviceId ? { ...d, ...updates } : d))
+      )
+    } catch (error) {
+      logger.error('Failed to update device', {
+        error,
+        deviceId,
+        updates,
+      })
+      toast.error('Failed to update device', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
   }
 
   const handleDeviceDelete = (deviceId: string) => {
-    setDevices(prevDevices => prevDevices.filter(d => d.id !== deviceId))
+    try {
+      setDevices(prevDevices => prevDevices.filter(d => d.id !== deviceId))
+    } catch (error) {
+      logger.error('Failed to delete device', {
+        error,
+        deviceId,
+      })
+      toast.error('Failed to delete device', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
   }
 
   // Drag and drop handlers
@@ -444,10 +502,10 @@ export function Rooms() {
 
         <div className="flex-1 overflow-y-auto px-6 pb-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <RoomCardSkeleton />
-            <RoomCardSkeleton />
-            <RoomCardSkeleton />
-            <RoomCardSkeleton />
+            <iOS26Shimmer className="h-48 rounded-2xl" />
+            <iOS26Shimmer className="h-48 rounded-2xl" />
+            <iOS26Shimmer className="h-48 rounded-2xl" />
+            <iOS26Shimmer className="h-48 rounded-2xl" />
           </div>
         </div>
       </div>
@@ -502,12 +560,15 @@ export function Rooms() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 pb-6">
-          <ErrorState
+        <div className="flex flex-1 items-center justify-center px-6 pb-6">
+          <iOS26Error
+            variant="error"
             title="Unable to Load Rooms"
-            description="There was a problem loading your rooms. Please try again."
-            onRetry={() => window.location.reload()}
-            size="lg"
+            message="There was a problem loading your rooms. Please check your connection and try again."
+            action={{
+              label: 'Refresh',
+              onClick: () => window.location.reload(),
+            }}
           />
         </div>
       </div>
@@ -652,7 +713,15 @@ export function Rooms() {
 
           {/* Rooms Grid */}
           {rooms.length === 0 ? (
-            <EmptyState type="rooms" onAction={() => setCreateRoomDialogOpen(true)} />
+            <iOS26EmptyState
+              icon={<PlusIcon className="h-16 w-16" />}
+              title="No Rooms Created"
+              message="Create rooms to organize your devices by location. Start with common areas like Living Room or Bedroom."
+              action={{
+                label: 'Create First Room',
+                onClick: () => setCreateRoomDialogOpen(true),
+              }}
+            />
           ) : (
             <div>
               <h2 className="text-foreground mb-3 text-lg font-semibold">All Rooms</h2>

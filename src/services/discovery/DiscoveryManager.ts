@@ -4,6 +4,7 @@
  * Orchestrates multiple discovery scanners and manages the discovery process.
  */
 
+import { logger } from '@/lib/logger'
 import { HTTPScanner } from './HTTPScanner'
 import { MDNSScanner } from './mDNSScanner'
 import { SSDPScanner } from './SSDPScanner'
@@ -17,14 +18,14 @@ export class DiscoveryManager {
     this.scanners.push(new HTTPScanner())
     this.scanners.push(new MDNSScanner())
     this.scanners.push(new SSDPScanner())
-    console.log(`[DiscoveryManager] Registered ${this.scanners.length} scanners`)
+    logger.debug(`Registered ${this.scanners.length} scanners`)
   }
 
   /**
    * Scan for devices using all available scanners
    */
   async discoverDevices(options?: DiscoveryScanOptions): Promise<DiscoveredDevice[]> {
-    console.log('[DiscoveryManager] Starting discovery...')
+    logger.debug('Starting discovery...')
 
     const results = await Promise.allSettled(this.scanners.map(scanner => scanner.scan(options)))
 
@@ -35,7 +36,7 @@ export class DiscoveryManager {
     // Deduplicate by ID
     const uniqueDevices = Array.from(new Map(allDevices.map(d => [d.id, d])).values())
 
-    console.log(`[DiscoveryManager] Discovery complete: ${uniqueDevices.length} devices found`)
+    logger.debug(`Discovery complete: ${uniqueDevices.length} devices found`)
     return uniqueDevices
   }
 

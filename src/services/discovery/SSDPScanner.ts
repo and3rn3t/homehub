@@ -8,6 +8,7 @@
  * This implementation requires a backend service or Node.js environment.
  */
 
+import { logger } from '@/lib/logger'
 import type {
   DeviceCapability,
   DiscoveredDevice,
@@ -30,10 +31,8 @@ export class SSDPScanner implements DiscoveryScanner {
    * - This implementation provides a placeholder structure
    */
   async scan(options?: DiscoveryScanOptions): Promise<DiscoveredDevice[]> {
-    console.log('[SSDPScanner] Starting SSDP discovery...')
-    console.warn(
-      '[SSDPScanner] Browser-based SSDP requires a backend service. Checking for local API...'
-    )
+    logger.debug('Starting SSDP discovery...')
+    logger.warn('Browser-based SSDP requires a backend service. Checking for local API...')
 
     const devices: DiscoveredDevice[] = []
 
@@ -50,7 +49,7 @@ export class SSDPScanner implements DiscoveryScanner {
       devices.push(...knownDevices)
     }
 
-    console.log(`[SSDPScanner] Discovery complete: ${devices.length} devices found`)
+    logger.debug(`SSDP discovery complete: ${devices.length} devices found`)
     return devices
   }
 
@@ -88,7 +87,7 @@ export class SSDPScanner implements DiscoveryScanner {
       const data = await response.json()
       return this.parseSSDPResponses(data.devices || [])
     } catch (error) {
-      console.error('[SSDPScanner] Backend API error:', error)
+      logger.error('SSDP backend API error', { error })
       return []
     }
   }
@@ -109,7 +108,7 @@ export class SSDPScanner implements DiscoveryScanner {
     // const wemoDevices = await this.discoverWeMo()
     // devices.push(...wemoDevices)
 
-    console.log('[SSDPScanner] Known UPnP patterns not yet implemented')
+    logger.debug('Known UPnP patterns not yet implemented')
 
     return devices
   }
@@ -127,7 +126,7 @@ export class SSDPScanner implements DiscoveryScanner {
           devices.push(device)
         }
       } catch (error) {
-        console.error('[SSDPScanner] Failed to parse SSDP response:', error)
+        logger.error('Failed to parse SSDP response', { error, response })
       }
     }
 
@@ -189,7 +188,7 @@ export class SSDPScanner implements DiscoveryScanner {
       const xmlText = await response.text()
       return this.parseDeviceDescriptionXML(xmlText)
     } catch (error) {
-      console.error('[SSDPScanner] Failed to fetch device description:', error)
+      logger.error('Failed to fetch device description', { error, url: descriptionUrl })
       return null
     }
   }
@@ -205,7 +204,7 @@ export class SSDPScanner implements DiscoveryScanner {
       // Check for parsing errors
       const parserError = doc.querySelector('parsererror')
       if (parserError) {
-        console.error('[SSDPScanner] XML parsing error:', parserError.textContent)
+        logger.error('XML parsing error', { error: parserError.textContent })
         return null
       }
 
@@ -232,7 +231,7 @@ export class SSDPScanner implements DiscoveryScanner {
         serviceList: this.parseServiceList(device),
       }
     } catch (error) {
-      console.error('[SSDPScanner] XML parsing failed:', error)
+      logger.error('XML parsing failed', { error })
       return null
     }
   }
