@@ -1,8 +1,8 @@
 # HomeHub Documentation Index
 
-**Last Updated**: October 12, 2025
-**Total Documents**: 65+ files
-**Status**: 🚧 Consolidation planned (see `DOCUMENTATION_CONSOLIDATION.md`)
+**Last Updated**: October 13, 2025
+**Total Documents**: 100+ files (organized into logical directories)
+**Status**: ✅ Phase 3 reorganization complete
 
 ---
 
@@ -10,132 +10,191 @@
 
 **New to HomeHub?** Start here:
 
-1. 📖 [Setup Quickstart](guides/SETUP_QUICKSTART.md) - Get running in 15 minutes
+1. 📖 [Setup Quickstart](guides/setup/SETUP_QUICKSTART.md) - Get running in 15 minutes
 2. 🏗️ [Architecture Overview](guides/ARCHITECTURE.md) - Understand the system
 3. 💻 [Best Practices](guides/BEST_PRACTICES.md) - Coding standards and patterns
-4. 🎨 [Icon Usage Guide](guides/ICON_USAGE_GUIDE.md) - Lucide React icon system
-5. 🧪 [Discovery Test Plan](development/DISCOVERY_TEST_PLAN.md) - Testing guide
+4. � [Current Roadmap](development/NEXT_STEPS.md) - Phase 3 validation status
+5. 🧪 [Test Suite Guide](development/TEST_SUITE_QUICKSTART.md) - Testing overview
 
 ---
 
-## 📚 Documentation Categories
+## 📚 Documentation Structure
 
-### 🎯 Essential Core Documents
+### 📁 Directory Organization
+
+```
+docs/
+├── guides/               → Setup, integration, and reference guides
+│   ├── setup/           → Getting started guides
+│   ├── integration/     → Device/protocol integration
+│   └── reference/       → Quick reference docs
+├── development/         → Active development documentation
+│   ├── milestones/      → Phase/milestone completions
+│   ├── features/        → Feature implementations
+│   ├── sessions/        → Dev session notes
+│   └── fixes/           → Bug fix documentation
+├── deployment/          → Production deployment guides
+├── history/             → Phase 1-2 historical docs
+└── archive/             → Archived/outdated documentation
+    ├── planning/        → Old planning documents
+    └── development/     → Completed phase work
+```
+
+---
+
+## 🎯 Essential Core Documents
 
 **Must-read documentation for all contributors:**
 
-| Document                                          | Description                                | Status     |
-| ------------------------------------------------- | ------------------------------------------ | ---------- |
-| [ARCHITECTURE.md](guides/ARCHITECTURE.md)         | System design, data flow, Mermaid diagrams | ✅ Current |
-| [BEST_PRACTICES.md](guides/BEST_PRACTICES.md)     | Coding standards, component patterns       | ✅ Current |
-| [ICON_USAGE_GUIDE.md](guides/ICON_USAGE_GUIDE.md) | **NEW** - Lucide React icon system guide   | ✅ Current |
-| [SETUP_QUICKSTART.md](guides/SETUP_QUICKSTART.md) | Getting started guide                      | ✅ Current |
-| [SECURITY.md](deployment/SECURITY.md)             | Security guidelines and best practices     | ✅ Current |
-| [NEXT_STEPS.md](development/NEXT_STEPS.md)        | Roadmap and priorities                     | ✅ Current |
+| Document                                                 | Description                                | Status     |
+| -------------------------------------------------------- | ------------------------------------------ | ---------- |
+| [ARCHITECTURE.md](guides/ARCHITECTURE.md)                | System design, data flow, Mermaid diagrams | ✅ Current |
+| [BEST_PRACTICES.md](guides/BEST_PRACTICES.md)            | Coding standards, component patterns       | ✅ Current |
+| [CONFIGURATION.md](guides/CONFIGURATION.md)              | Complete configuration reference           | ✅ Current |
+| [NEXT_STEPS.md](development/NEXT_STEPS.md)               | Current roadmap and priorities (Phase 3)   | ✅ Current |
+| [SECURITY.md](deployment/SECURITY.md)                    | Security guidelines and best practices     | ✅ Current |
+| [guides/README.md](guides/README.md)                     | **NEW** - Guides navigation               | 🆕 NEW     |
+| [development/README.md](development/README.md)           | **NEW** - Development docs navigation     | 🆕 NEW     |
 
 ---
 
-### 🚀 Deployment & Configuration
+## �️ Setup & Configuration
 
-**Production deployment and environment setup:**
+**Getting started with HomeHub:**
 
-| Document                                               | Description                          | Status         |
-| ------------------------------------------------------ | ------------------------------------ | -------------- |
-| [CLOUDFLARE_DEPLOYMENT.md](CLOUDFLARE_DEPLOYMENT.md)   | Complete Cloudflare deployment guide | ✅ Current     |
-| [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)     | Pre-launch verification checklist    | ✅ Current     |
-| [CI_CD_COMPLETE.md](development/CI_CD_COMPLETE.md)     | **NEW** - CI/CD integration complete | 🆕 NEW         |
-| [CI_MONITORING.md](guides/CI_MONITORING.md)            | **NEW** - GitHub CI/CD monitoring    | 🆕 NEW         |
-| [GITHUB_TOKEN_SETUP.md](guides/GITHUB_TOKEN_SETUP.md)  | **NEW** - GitHub token creation      | 🆕 NEW         |
-| [CONFIGURATION.md](CONFIGURATION.md)                   | Complete configuration reference     | ✅ Current     |
-| [CONFIGURATION_QUICKREF.md](CONFIGURATION_QUICKREF.md) | Quick config lookup                  | ✅ Current     |
-| [CONFIGURATION_SYNC.md](CONFIGURATION_SYNC.md)         | Config synchronization guide         | 🟡 Consolidate |
-| [CLOUDFLARE_MIGRATION.md](CLOUDFLARE_MIGRATION.md)     | Migration from Spark to Cloudflare   | 📚 Archive     |
-| [MIGRATION_COMPLETE.md](MIGRATION_COMPLETE.md)         | Migration completion summary         | 📚 Archive     |
-| [MIGRATION_SUMMARY.md](MIGRATION_SUMMARY.md)           | Migration overview                   | 🗑️ Duplicate   |
+| Document                                                     | Description                       | Status     |
+| ------------------------------------------------------------ | --------------------------------- | ---------- |
+| [SETUP_QUICKSTART.md](guides/setup/SETUP_QUICKSTART.md)     | Complete setup guide (15 minutes) | ✅ Current |
+| [EXTENSIONS_GUIDE.md](guides/setup/EXTENSIONS_GUIDE.md)      | VS Code extensions                | ✅ Current |
+| [GITHUB_TOKEN_SETUP.md](guides/setup/GITHUB_TOKEN_SETUP.md)  | GitHub authentication            | ✅ Current |
+| [CI_CD_SETUP.md](guides/setup/CI_CD_SETUP.md)                | CI/CD configuration              | ✅ Current |
+| [CI_MONITORING.md](guides/setup/CI_MONITORING.md)            | CI monitoring and badges         | ✅ Current |
 
----
+**Configuration references:**
 
-### 🎨 Phase 1: Foundation (✅ Complete)
-
-**UI/UX framework, state management, design system:**
-
-| Document                                                                   | Description                                | Status         |
-| -------------------------------------------------------------------------- | ------------------------------------------ | -------------- |
-| [PHASE_1_COMPLETE.md](history/PHASE_1_COMPLETE.md)                         | Phase 1 summary and achievements           | ✅ Current     |
-| [LUCIDE_MIGRATION_COMPLETE.md](development/LUCIDE_MIGRATION_COMPLETE.md)   | **NEW** - Icon system migration (Oct 2025) | ✅ Current     |
-| [TODO_6_LUCIDE_MIGRATION.md](development/TODO_6_LUCIDE_MIGRATION.md)       | Icon migration planning doc                | ✅ Current     |
-| [PHASE_1_TESTING_GUIDE.md](history/PHASE_1_TESTING_GUIDE.md)               | Phase 1 testing procedures                 | ✅ Current     |
-| [PHASE_1.3_SUMMARY.md](history/PHASE_1.3_SUMMARY.md)                       | Phase 1.3 polish overview                  | 🟡 Consolidate |
-| [PHASE_1.3_ANIMATIONS.md](history/PHASE_1.3_ANIMATIONS.md)                 | Spring animation patterns                  | ✅ Current     |
-| [PHASE_1.3_LOADING_STATES.md](history/PHASE_1.3_LOADING_STATES.md)         | Skeleton loaders and spinners              | ✅ Current     |
-| [PHASE_1.3_INTEGRATION.md](history/PHASE_1.3_INTEGRATION.md)               | Integration patterns                       | 🟡 Consolidate |
-| [PHASE_1.3.4_ERROR_BOUNDARIES.md](history/PHASE_1.3.4_ERROR_BOUNDARIES.md) | Error handling patterns                    | ✅ Current     |
-| [PHASE_1.3.5_RESPONSIVE.md](history/PHASE_1.3.5_RESPONSIVE.md)             | Responsive design guide                    | ✅ Current     |
-| [PHASE_1.3.5_CHANGES.md](history/PHASE_1.3.5_CHANGES.md)                   | Phase 1.3.5 changelog                      | 🟡 Consolidate |
-| [PHASE_1.3.5_COMPLETE.md](history/PHASE_1.3.5_COMPLETE.md)                 | Phase 1.3.5 completion                     | 🟡 Consolidate |
-| [PHASE_1.3.5_TEST_RESULTS.md](history/PHASE_1.3.5_TEST_RESULTS.md)         | Phase 1.3.5 test results                   | 🟡 Consolidate |
-| [PHASE_1.3.6_FINAL_POLISH.md](history/PHASE_1.3.6_FINAL_POLISH.md)         | Final polish pass                          | ✅ Current     |
+| Document                                                     | Description                       | Status     |
+| ------------------------------------------------------------ | --------------------------------- | ---------- |
+| [CONFIGURATION.md](guides/CONFIGURATION.md)                  | Complete configuration guide      | ✅ Current |
+| [CONFIGURATION_SYNC.md](guides/CONFIGURATION_SYNC.md)        | Config synchronization patterns   | ✅ Current |
+| [CONFIGURATION_QUICKREF.md](guides/reference/CONFIGURATION_QUICKREF.md) | Quick config lookup      | ✅ Current |
 
 ---
 
-### 🔌 Phase 2: Device Integration (✅ Complete)
+## 🔌 Device Integration
 
-**HTTP/MQTT device discovery, control, and monitoring:**
+**Connecting smart home devices:**
 
-#### Phase 2.1: MQTT Setup (✅ Complete)
-
-| Document                                                      | Description                 | Status     |
-| ------------------------------------------------------------- | --------------------------- | ---------- |
-| [PHASE_2.1_COMPLETE.md](deployment/PHASE_2.1_COMPLETE.md)     | Phase 2.1 summary           | 📚 Archive |
-| [PHASE_2.1_MQTT_SETUP.md](deployment/PHASE_2.1_MQTT_SETUP.md) | MQTT broker setup guide     | 📚 Archive |
-| [PHASE_2.1_PROGRESS.md](development/PHASE_2.1_PROGRESS.md)    | Phase 2.1 progress tracking | 📚 Archive |
-| [PHASE_2.1.1_COMPLETE.md](history/PHASE_2.1.1_COMPLETE.md)    | Milestone 2.1.1 completion  | 📚 Archive |
-| [PHASE_2.1.2_COMPLETE.md](history/PHASE_2.1.2_COMPLETE.md)    | Milestone 2.1.2 completion  | 📚 Archive |
-| [PHASE_2.1.3_COMPLETE.md](history/PHASE_2.1.3_COMPLETE.md)    | Milestone 2.1.3 completion  | 📚 Archive |
-
-#### Phase 2.2: HTTP Integration (✅ Milestone 2.2.3 Complete)
-
-| Document                                                                                           | Description                              | Status         |
-| -------------------------------------------------------------------------------------------------- | ---------------------------------------- | -------------- |
-| [MILESTONE_2.2.3_DISCOVERY_COMPLETE.md](development/MILESTONE_2.2.3_DISCOVERY_COMPLETE.md)         | **Current milestone** - Device discovery | ✅ Current     |
-| [DISCOVERY_TEST_PLAN.md](development/DISCOVERY_TEST_PLAN.md)                                       | Comprehensive testing guide (10 phases)  | ✅ Current     |
-| [DISCOVERY_TEST_RESULTS.md](development/DISCOVERY_TEST_RESULTS.md)                                 | Test results (82% complete, 36/44 tests) | ✅ Current     |
-| [DEVICE_ACCESSIBILITY_FIX.md](development/DEVICE_ACCESSIBILITY_FIX.md)                             | Device visibility improvements           | ✅ Current     |
-| [ROOMS_DEVICE_CONTROL.md](development/ROOMS_DEVICE_CONTROL.md)                                     | Enhanced device control UI               | ✅ Current     |
-| [HTTP_ADAPTER_QUICKSTART.md](guides/HTTP_ADAPTER_QUICKSTART.md)                                    | HTTP integration quick start             | ✅ Current     |
-| [TESTING_HTTP_DEVICES.md](development/TESTING_HTTP_DEVICES.md)                                     | HTTP device testing guide                | ✅ Current     |
-| [VIRTUAL_HTTP_DEVICE_TEST_RESULTS.md](development/VIRTUAL_HTTP_DEVICE_TEST_RESULTS.md)             | Virtual device test results              | ✅ Current     |
-| [MILESTONE_2.2.2_COMPLETE.md](history/MILESTONE_2.2.2_COMPLETE.md)                                 | HTTP adapter implementation              | 🟡 Consolidate |
-| [MILESTONE_2.2.2_HTTP_INTEGRATION_SUCCESS.md](history/MILESTONE_2.2.2_HTTP_INTEGRATION_SUCCESS.md) | HTTP integration success                 | 🟡 Consolidate |
-| [MILESTONE_2.2.2_PROGRESS.md](archive/MILESTONE_2.2.2_PROGRESS.md)                                 | Milestone 2.2.2 progress                 | 📚 Archive     |
-| [MILESTONE_2.2.2_TESTING.md](archive/MILESTONE_2.2.2_TESTING.md)                                   | Milestone 2.2.2 testing                  | 📚 Archive     |
-| [MILESTONE_2.2.2_PLAN.md](archive/MILESTONE_2.2.2_PLAN.md)                                         | Milestone 2.2.2 planning                 | 📚 Archive     |
-| [MILESTONE_2.2.3_DISCOVERY_PLAN.md](archive/MILESTONE_2.2.3_DISCOVERY_PLAN.md)                     | Discovery planning doc                   | 📚 Archive     |
-| [PHASE_2.2_PLAN.md](archive/PHASE_2.2_PLAN.md)                                                     | Phase 2.2 planning                       | 📚 Archive     |
+| Document                                                                 | Description                  | Status     |
+| ------------------------------------------------------------------------ | ---------------------------- | ---------- |
+| [HTTP_ADAPTER_QUICKSTART.md](guides/integration/HTTP_ADAPTER_QUICKSTART.md) | HTTP device integration   | ✅ Current |
+| [MQTT_INTEGRATION_QUICKREF.md](guides/integration/MQTT_INTEGRATION_QUICKREF.md) | MQTT quick reference  | ✅ Current |
+| [MQTT_QUICKREF.md](guides/integration/MQTT_QUICKREF.md)                  | MQTT commands and patterns   | ✅ Current |
 
 ---
 
-### 🤖 Phase 3: Automation Engine (✅ Complete)
+## 📖 Quick References
 
-**Time/condition-based automation with visual flow designer:**
+**Cheat sheets and fast lookups:**
+
+| Document                                                                 | Description                  | Status     |
+| ------------------------------------------------------------------------ | ---------------------------- | ---------- |
+| [CONFIGURATION_QUICKREF.md](guides/reference/CONFIGURATION_QUICKREF.md)  | Config quick lookup          | ✅ Current |
+| [EXTENSIONS_QUICKREF.md](guides/reference/EXTENSIONS_QUICKREF.md)        | Extensions cheat sheet       | ✅ Current |
+| [VIRTUAL_DEVICES_QUICKREF.md](guides/reference/VIRTUAL_DEVICES_QUICKREF.md) | Testing with virtual devices | ✅ Current |
+| [ICON_USAGE_GUIDE.md](guides/reference/ICON_USAGE_GUIDE.md)              | Lucide icon system           | ✅ Current |
+| [iOS_DESIGN_ENHANCEMENTS.md](guides/reference/iOS_DESIGN_ENHANCEMENTS.md) | iOS design patterns         | ✅ Current |
+
+---
+
+## 🚀 Deployment
+
+**Production deployment and CI/CD:**
+
+| Document                                               | Description                          | Status     |
+| ------------------------------------------------------ | ------------------------------------ | ---------- |
+| [CLOUDFLARE_DEPLOYMENT.md](deployment/CLOUDFLARE_DEPLOYMENT.md) | Complete Cloudflare deployment | ✅ Current |
+| [SECURITY.md](deployment/SECURITY.md)                  | Security guidelines                  | ✅ Current |
+
+---
+
+## 🔬 Current Development (Phase 3)
+
+**Active Phase 3 validation documentation:**
 
 | Document                                                         | Description                                 | Status     |
 | ---------------------------------------------------------------- | ------------------------------------------- | ---------- |
-| [PHASE_3_COMPLETE.md](development/PHASE_3_COMPLETE.md)           | **Phase 3 summary** - All 5 milestones done | ✅ Current |
-| [PHASE_3_MILESTONE_3.4.md](development/PHASE_3_MILESTONE_3.4.md) | Flow Interpreter implementation             | ✅ Current |
-| [PHASE_3_MILESTONE_3.5.md](development/PHASE_3_MILESTONE_3.5.md) | Geofencing implementation                   | ✅ Current |
-
-**Key Features**:
-
-- ⏰ Scheduler Service (360 lines) - Time-based + sunrise/sunset
-- 📊 Condition Evaluator (300 lines) - Threshold monitoring with hysteresis
-- ⚡ Action Executor (360 lines) - 6 action types, retry logic, rollback
-- 🔀 Flow Interpreter (640 lines) - Visual automation graphs
-- 📍 Geofencing (497 lines) - GPS-based location triggers
-
-**Performance**: 5-12x faster than targets (device control <150ms, geofence <10ms)
+| [NEXT_STEPS.md](development/NEXT_STEPS.md)                       | Current roadmap and priorities              | ✅ Current |
+| [PHASE_3_PRODUCTION_VALIDATION.md](development/PHASE_3_PRODUCTION_VALIDATION.md) | Validation plan | 🔄 In Progress |
+| [PHASE_3_VALIDATION_STATUS.md](development/PHASE_3_VALIDATION_STATUS.md) | Current status | � In Progress |
+| [TEST_SUITE_QUICKSTART.md](development/TEST_SUITE_QUICKSTART.md) | Testing quick reference | ✅ Current |
+| [START_HERE_VALIDATION.md](development/START_HERE_VALIDATION.md) | Validation entry point | ✅ Current |
 
 ---
+
+## � Development Documentation
+
+### Milestones & Phases
+
+**Completed milestones and phase summaries:**
+
+| Document                                                         | Phase  | Description                    | Status     |
+| ---------------------------------------------------------------- | ------ | ------------------------------ | ---------- |
+| [PHASE_3_COMPLETE.md](development/milestones/PHASE_3_COMPLETE.md) | Phase 3 | Automation engine complete   | ✅ Complete |
+| [MILESTONE_3.1_SCHEDULER_COMPLETE.md](development/milestones/MILESTONE_3.1_SCHEDULER_COMPLETE.md) | 3.1 | Time-based scheduling | ✅ Complete |
+| [MILESTONE_3.2_CONDITION_EVALUATOR_COMPLETE.md](development/milestones/MILESTONE_3.2_CONDITION_EVALUATOR_COMPLETE.md) | 3.2 | Threshold monitoring | ✅ Complete |
+| [MILESTONE_3.3_ACTION_EXECUTOR_COMPLETE.md](development/milestones/MILESTONE_3.3_ACTION_EXECUTOR_COMPLETE.md) | 3.3 | Device control actions | ✅ Complete |
+| [MILESTONE_3.4_FLOW_INTERPRETER_COMPLETE.md](development/milestones/MILESTONE_3.4_FLOW_INTERPRETER_COMPLETE.md) | 3.4 | Visual flow interpreter | ✅ Complete |
+| [PHASE_2_COMPLETE_SUMMARY.md](development/milestones/PHASE_2_COMPLETE_SUMMARY.md) | Phase 2 | Device integration complete | ✅ Complete |
+| [MILESTONE_2.2.3_DISCOVERY_COMPLETE.md](development/milestones/MILESTONE_2.2.3_DISCOVERY_COMPLETE.md) | 2.2.3 | Device discovery | ✅ Complete |
+| [MILESTONE_2.2.4_COMPLETE.md](development/milestones/MILESTONE_2.2.4_COMPLETE.md) | 2.2.4 | HTTP device control | ✅ Complete |
+| [MILESTONE_2.2.5_COMPLETE.md](development/milestones/MILESTONE_2.2.5_COMPLETE.md) | 2.2.5 | Advanced discovery | ✅ Complete |
+
+*See [development/milestones/](development/milestones/) for all milestone documentation*
+
+### Features Implemented
+
+**Major feature implementations:**
+
+| Document                                                         | Feature | Status     |
+| ---------------------------------------------------------------- | ------- | ---------- |
+| [ADVANCED_HUE_FEATURES.md](development/features/ADVANCED_HUE_FEATURES.md) | Hue integration | ✅ Complete |
+| [COLOR_CONTROLS_COMPLETE.md](development/features/COLOR_CONTROLS_COMPLETE.md) | Color picker | ✅ Complete |
+| [DARK_MODE_IMPLEMENTATION_OCT_2025.md](development/features/DARK_MODE_IMPLEMENTATION_OCT_2025.md) | Dark mode | ✅ Complete |
+| [LUCIDE_MIGRATION_COMPLETE.md](development/features/LUCIDE_MIGRATION_COMPLETE.md) | Icon system | ✅ Complete |
+| [CI_CD_INTEGRATION_COMPLETE.md](development/features/CI_CD_INTEGRATION_COMPLETE.md) | CI/CD pipeline | ✅ Complete |
+| [VALIDATION_INFRASTRUCTURE_COMPLETE.md](development/features/VALIDATION_INFRASTRUCTURE_COMPLETE.md) | Test infrastructure | ✅ Complete |
+
+*See [development/features/](development/features/) for all feature documentation*
+
+### Development Sessions
+
+**Session notes and test results:**
+
+| Document                                                         | Type | Status     |
+| ---------------------------------------------------------------- | ---- | ---------- |
+| [PHASE_2_POLISH_SESSION_3_DRAG_DROP.md](development/sessions/PHASE_2_POLISH_SESSION_3_DRAG_DROP.md) | Polish | ✅ Complete |
+| [DISCOVERY_TEST_RESULTS.md](development/sessions/DISCOVERY_TEST_RESULTS.md) | Testing | ✅ Complete |
+| [HUE_ADAPTER_TEST_RESULTS.md](development/sessions/HUE_ADAPTER_TEST_RESULTS.md) | Testing | ✅ Complete |
+
+*See [development/sessions/](development/sessions/) for all session documentation*
+
+### Bug Fixes
+
+**Bug fixes and patches:**
+
+| Document                                                         | Fix | Status     |
+| ---------------------------------------------------------------- | --- | ---------- |
+| [INFINITE_LOOP_FIX_FINAL.md](development/fixes/INFINITE_LOOP_FIX_FINAL.md) | Infinite loop | ✅ Fixed |
+| [DEVICE_ACCESSIBILITY_FIX.md](development/fixes/DEVICE_ACCESSIBILITY_FIX.md) | Device visibility | ✅ Fixed |
+| [TYPESCRIPT_ERRORS_FIXED.md](development/fixes/TYPESCRIPT_ERRORS_FIXED.md) | TypeScript | ✅ Fixed |
+
+*See [development/fixes/](development/fixes/) for all bug fix documentation*
+
+---
+
+## � Historical Documentation
+
+### Phase 1: Foundation (✅ Complete)
 
 ### 🔐 Phase 5: Security & Surveillance (� Active - Your Setup)
 
@@ -168,76 +227,112 @@
 **Original Milestones** (Generic):
 
 1. 📷 Camera Integration (20-30h) - RTSP/ONVIF, live streaming
-2. 💾 Video Storage (12-20h) - 7-day NVR, event recording
-3. 🔔 Smart Notifications (15-25h) - Person detection, push alerts
-4. 🔐 Access Control (20-30h) - Smart locks, door sensors
-5. 🚨 Emergency Response (10-15h) - Panic mode, automated alerts
+**Phase 1 foundation documentation:**
 
-**Hardware**: $290-470 (4 cameras, POE switch, storage, smart locks)
+| Document                                                                   | Description                  | Status         |
+| -------------------------------------------------------------------------- | ---------------------------- | -------------- |
+| [PHASE_1_COMPLETE.md](history/PHASE_1_COMPLETE.md)                         | Phase 1 summary              | ✅ Complete    |
+| [PHASE_1.3_ANIMATIONS.md](history/PHASE_1.3_ANIMATIONS.md)                 | Spring animation patterns    | ✅ Reference   |
+| [PHASE_1.3_LOADING_STATES.md](history/PHASE_1.3_LOADING_STATES.md)         | Skeleton loaders & spinners  | ✅ Reference   |
+| [PHASE_1.3.4_ERROR_BOUNDARIES.md](history/PHASE_1.3.4_ERROR_BOUNDARIES.md) | Error handling patterns      | ✅ Reference   |
+| [PHASE_1.3.5_RESPONSIVE.md](history/PHASE_1.3.5_RESPONSIVE.md)             | Responsive design guide      | ✅ Reference   |
 
----
+*See [history/](history/) for complete Phase 1 documentation*
 
-### 🏆 Milestone History
+### Phase 2: Device Integration (✅ Complete)
 
-**Completed milestones (2.1.x series - superseded):**
+**Phase 2 historical documentation:**
 
-| Document                                                           | Description                  | Status         |
-| ------------------------------------------------------------------ | ---------------------------- | -------------- |
-| [MILESTONE_2.1.1_SUMMARY.md](MILESTONE_2.1.1_SUMMARY.md)           | Milestone 2.1.1 summary      | 📚 Archive     |
-| [MILESTONE_2.1.3_SUMMARY.md](MILESTONE_2.1.3_SUMMARY.md)           | Milestone 2.1.3 summary      | 📚 Archive     |
-| [MILESTONE_2.1.4_COMPLETE.md](MILESTONE_2.1.4_COMPLETE.md)         | Milestone 2.1.4 completion   | 📚 Archive     |
-| [MILESTONE_2.1.5_PLAN.md](MILESTONE_2.1.5_PLAN.md)                 | Milestone 2.1.5 planning     | 📚 Archive     |
-| [MILESTONE_2.2.1_COMPLETE.md](MILESTONE_2.2.1_COMPLETE.md)         | Milestone 2.2.1 completion   | 🟡 Consolidate |
-| [MILESTONE_2.2.1_SUMMARY.md](MILESTONE_2.2.1_SUMMARY.md)           | Milestone 2.2.1 summary      | 🟡 Consolidate |
-| [MILESTONE_2.2.1_TEST_RESULTS.md](MILESTONE_2.2.1_TEST_RESULTS.md) | Milestone 2.2.1 test results | 🟡 Consolidate |
+| Document                                                      | Description                 | Status         |
+| ------------------------------------------------------------- | --------------------------- | -------------- |
+| [PHASE_2_COMPLETE_SUMMARY.md](development/milestones/PHASE_2_COMPLETE_SUMMARY.md) | Phase 2 summary | ✅ Complete |
 
----
-
-### 📖 Quick Reference Guides
-
-**One-page cheat sheets for common tasks:**
-
-| Document                                                     | Description                    | Status         |
-| ------------------------------------------------------------ | ------------------------------ | -------------- |
-| [CONFIGURATION_QUICKREF.md](CONFIGURATION_QUICKREF.md)       | Config file quick reference    | ✅ Current     |
-| [VIRTUAL_DEVICES_QUICKREF.md](VIRTUAL_DEVICES_QUICKREF.md)   | Virtual device testing helpers | ✅ Current     |
-| [MQTT_QUICKREF.md](MQTT_QUICKREF.md)                         | MQTT commands and usage        | 🟡 Consolidate |
-| [MQTT_INTEGRATION_QUICKREF.md](MQTT_INTEGRATION_QUICKREF.md) | MQTT integration guide         | 🟡 Consolidate |
-| [EXTENSIONS_QUICKREF.md](EXTENSIONS_QUICKREF.md)             | VS Code extensions             | ✅ Current     |
-| [EXTENSIONS_GUIDE.md](EXTENSIONS_GUIDE.md)                   | Detailed extensions guide      | 🟡 Consolidate |
+*See [archive/development/phase-2/](archive/development/phase-2/) for detailed Phase 2 work*
 
 ---
 
-### 🧪 Testing Documentation
+## 📦 Archived Documentation
 
-**Test plans, results, and procedures:**
+**Old planning documents and completed work:**
 
-| Document                                                                   | Description                    | Status        |
-| -------------------------------------------------------------------------- | ------------------------------ | ------------- |
-| [DISCOVERY_TEST_PLAN.md](DISCOVERY_TEST_PLAN.md)                           | 10-phase discovery test plan   | ✅ Current    |
-| [DISCOVERY_TEST_RESULTS.md](DISCOVERY_TEST_RESULTS.md)                     | Latest test results (82% pass) | ✅ Current    |
-| [PHASE_1_TESTING_GUIDE.md](PHASE_1_TESTING_GUIDE.md)                       | Phase 1 testing procedures     | ✅ Current    |
-| [TESTING_HTTP_DEVICES.md](TESTING_HTTP_DEVICES.md)                         | HTTP device testing            | ✅ Current    |
-| [VIRTUAL_HTTP_DEVICE_TEST_RESULTS.md](VIRTUAL_HTTP_DEVICE_TEST_RESULTS.md) | Virtual device test results    | ✅ Current    |
-| [DASHBOARD_INTEGRATION_TEST.md](DASHBOARD_INTEGRATION_TEST.md)             | Dashboard integration tests    | 🗑️ Superseded |
+- **[archive/planning/](archive/planning/)** - Old planning and status documents
+- **[archive/development/phase-2/](archive/development/phase-2/)** - Completed Phase 2 work
+- **[history/](history/)** - Phase 1 and Phase 2 historical documentation
 
 ---
 
-### 🔧 Development Guides
+## 🔍 Finding Documentation
 
-**Code structure, refactoring, and data management:**
+### By Topic
 
-| Document                                               | Description                   | Status       |
-| ------------------------------------------------------ | ----------------------------- | ------------ |
-| [DATA_STANDARDIZATION.md](DATA_STANDARDIZATION.md)     | Data model standards          | ✅ Current   |
-| [MOCK_DATA_SUMMARY.md](MOCK_DATA_SUMMARY.md)           | Mock data reference           | ✅ Current   |
-| [REFACTOR_PLAN.md](REFACTOR_PLAN.md)                   | Code refactoring plan         | ✅ Current   |
-| [REORGANIZATION_SUMMARY.md](REORGANIZATION_SUMMARY.md) | File structure reorganization | 🗑️ Duplicate |
-| [MERMAID_UPDATE.md](MERMAID_UPDATE.md)                 | Mermaid diagram update        | 📚 Archive   |
+- **Setup**: Start with [guides/setup/SETUP_QUICKSTART.md](guides/setup/SETUP_QUICKSTART.md)
+- **Device Integration**: See [guides/integration/](guides/integration/)
+- **Current Work**: See [development/NEXT_STEPS.md](development/NEXT_STEPS.md)
+- **Architecture**: Read [guides/ARCHITECTURE.md](guides/ARCHITECTURE.md)
+- **Deployment**: See [deployment/CLOUDFLARE_DEPLOYMENT.md](deployment/CLOUDFLARE_DEPLOYMENT.md)
+
+### By Status
+
+- ✅ **Current** - Active, up-to-date documentation
+- 🔄 **In Progress** - Work currently underway
+- ✅ **Complete** - Finished work, reference material
+- ✅ **Reference** - Historical but still useful
+- 📚 **Archive** - Historical context only
 
 ---
 
-### 📋 Planning & Roadmap
+## 📊 Documentation Statistics
+
+**Last Reorganization**: October 13, 2025 (Phase 3)
+
+### File Counts
+
+- **Root docs/**: 5 essential files (INDEX, README, PRD, etc.)
+- **guides/**: 4 core + 3 subdirectories (17 total)
+- **development/**: 6 active + 4 subdirectories (~90 organized)
+- **archive/**: 22+ historical documents
+
+### Organization Benefits
+
+- ✅ **98 → 6 active files** in development/
+- ✅ **Clear directory structure** (by purpose)
+- ✅ **Easy navigation** (README in each directory)
+- ✅ **Preserved history** (git rename tracking)
+- ✅ **No broken links** (all paths updated)
+
+---
+
+## 🔄 Recent Updates
+
+### October 13, 2025
+- ✅ **Phase 3 Reorganization**: Major directory restructuring
+  - Created subdirectories: milestones/, features/, sessions/, fixes/
+  - Archived Phase 2 completed work
+  - Added navigation READMEs
+- ✅ **Phase 2 Consolidation**: Reduced Next Steps variants (4 → 1)
+- ✅ **Phase 1 Archive**: Moved old planning docs to archive/
+
+### October 12, 2025
+- ✅ **CI/CD Complete**: Coverage badges, automated testing
+- ✅ **Markdownlint Setup**: Linting with auto-fix
+
+### October 11-13, 2025
+- ✅ **Phase 3 Automation Engine**: All 5 milestones complete
+- ✅ **Production Validation**: Test infrastructure established
+
+---
+
+## 🎯 Next Phase Options
+
+**Choose your adventure (see [NEXT_STEPS.md](development/NEXT_STEPS.md)):**
+
+1. **Phase 4: Energy Monitoring** - Power tracking, cost analysis, insights
+2. **Phase 5: Security & Cameras** - Video surveillance, access control
+3. **Phase 6: Multi-User** - Authentication, roles, permissions
+
+---
+
+*For the complete documentation catalog, see the directory READMEs in [guides/](guides/) and [development/](development/)*
 
 **Future work and consolidation plans:**
 
@@ -252,96 +347,35 @@
 
 ### By Task
 
-#### "I want to..."
+## 📝 Quick Navigation
 
-- **Get started** → [SETUP_QUICKSTART.md](guides/SETUP_QUICKSTART.md)
+### "I want to..."
+
+- **Get started** → [SETUP_QUICKSTART.md](guides/setup/SETUP_QUICKSTART.md)
 - **Understand the architecture** → [ARCHITECTURE.md](guides/ARCHITECTURE.md)
 - **Deploy to production** → [CLOUDFLARE_DEPLOYMENT.md](deployment/CLOUDFLARE_DEPLOYMENT.md)
-- **Configure the app** → [CONFIGURATION_QUICKREF.md](guides/CONFIGURATION_QUICKREF.md)
-- **Test device discovery** → [DISCOVERY_TEST_PLAN.md](development/DISCOVERY_TEST_PLAN.md)
-- **Add a new device** → [HTTP_ADAPTER_QUICKSTART.md](guides/HTTP_ADAPTER_QUICKSTART.md)
-- **Test with virtual devices** → [VIRTUAL_DEVICES_QUICKREF.md](guides/VIRTUAL_DEVICES_QUICKREF.md)
-- **Improve UI/UX** → [BEST_PRACTICES.md](guides/BEST_PRACTICES.md)
-- **Add animations** → [PHASE_1.3_ANIMATIONS.md](history/PHASE_1.3_ANIMATIONS.md)
-- **Handle errors** → [PHASE_1.3.4_ERROR_BOUNDARIES.md](history/PHASE_1.3.4_ERROR_BOUNDARIES.md)
-- **Make it responsive** → [PHASE_1.3.5_RESPONSIVE.md](history/PHASE_1.3.5_RESPONSIVE.md)
-- **Build automations** → [PHASE_3_COMPLETE.md](development/PHASE_3_COMPLETE.md)
-- **Add security cameras** → [PHASE_5_QUICK_START.md](development/PHASE_5_QUICK_START.md)
+- **Configure the app** → [CONFIGURATION.md](guides/CONFIGURATION.md)
+- **Integrate devices** → [HTTP_ADAPTER_QUICKSTART.md](guides/integration/HTTP_ADAPTER_QUICKSTART.md)
+- **Test with virtual devices** → [VIRTUAL_DEVICES_QUICKREF.md](guides/reference/VIRTUAL_DEVICES_QUICKREF.md)
+- **Build automations** → [PHASE_3_COMPLETE.md](development/milestones/PHASE_3_COMPLETE.md)
+- **Check current work** → [NEXT_STEPS.md](development/NEXT_STEPS.md)
 
-### By Phase
+### By Role
 
-- **Phase 1 (Foundation)** → [PHASE_1_COMPLETE.md](history/PHASE_1_COMPLETE.md)
-- **Phase 2.1 (MQTT)** → [PHASE_2.1_COMPLETE.md](deployment/PHASE_2.1_COMPLETE.md)
-- **Phase 2.2 (HTTP)** → [MILESTONE_2.2.3_DISCOVERY_COMPLETE.md](development/MILESTONE_2.2.3_DISCOVERY_COMPLETE.md)
-- **Phase 3 (Automation)** → [PHASE_3_COMPLETE.md](development/PHASE_3_COMPLETE.md)
-- **Phase 5 (Security)** → [PHASE_5_SECURITY_PLAN.md](development/PHASE_5_SECURITY_PLAN.md) + [PHASE_5_QUICK_START.md](development/PHASE_5_QUICK_START.md)
+**New Contributors**:
+1. [SETUP_QUICKSTART.md](guides/setup/SETUP_QUICKSTART.md) - 15 min setup
+2. [ARCHITECTURE.md](guides/ARCHITECTURE.md) - 30 min system overview
+3. [BEST_PRACTICES.md](guides/BEST_PRACTICES.md) - 20 min patterns
+4. [NEXT_STEPS.md](development/NEXT_STEPS.md) - Current priorities
 
-### By Status
+**Testers**:
+1. [TEST_SUITE_QUICKSTART.md](development/TEST_SUITE_QUICKSTART.md) - Testing overview
+2. [VIRTUAL_DEVICES_QUICKREF.md](guides/reference/VIRTUAL_DEVICES_QUICKREF.md) - Test helpers
+3. [development/sessions/](development/sessions/) - Test results
 
-- **✅ Current** - Up-to-date, actively maintained (16 docs)
-- **🟡 Consolidate** - Should merge into unified doc (12 docs)
-- **📚 Archive** - Historical, move to archive/ (20+ docs)
-- **🗑️ Duplicate** - Remove, info exists elsewhere (3 docs)
-- **🆕 NEW** - Recently created (1 doc)
-
----
-
-## 📊 Documentation Statistics
-
-**Current State**:
-
-- Total Documents: **65+ files**
-- Active/Current: **18 files** (28%)
-- To Consolidate: **12 files** (18%)
-- To Archive: **25+ files** (38%)
-- Duplicates: **3 files** (5%)
-
-**Phase Coverage**:
-
-- ✅ Phase 1 (Foundation): 10+ docs
-- ✅ Phase 2 (Device Integration): 15+ docs
-- ✅ Phase 3 (Automation): 3 docs
-- 📋 Phase 5 (Security): 2 docs (planning)
-
-**After Consolidation** (Planned):
-
-- Active Documents: **~35 files** (includes Phase 3 & 5)
-- Archived Documents: **25+ files** (preserved for history)
-- Consolidated Guides: **5 unified documents**
-- Clear Directory Structure: ✅
-
-See [DOCUMENTATION_CONSOLIDATION.md](DOCUMENTATION_CONSOLIDATION.md) for detailed plan.
-
----
-
-## 🎯 Recommended Reading Order
-
-### For New Contributors
-
-1. [SETUP_QUICKSTART.md](guides/SETUP_QUICKSTART.md) - Get running (15 min)
-2. [ARCHITECTURE.md](guides/ARCHITECTURE.md) - Understand system (30 min)
-3. [BEST_PRACTICES.md](guides/BEST_PRACTICES.md) - Learn patterns (20 min)
-4. [PHASE_3_COMPLETE.md](development/PHASE_3_COMPLETE.md) - Current capabilities (15 min)
-
-**Total Time**: ~80 minutes to full productivity
-
-### For Phase 5 (Security) Development
-
-1. [PHASE_5_QUICK_START.md](development/PHASE_5_QUICK_START.md) - Hardware selection & setup (1-2 days)
-2. [PHASE_5_SECURITY_PLAN.md](development/PHASE_5_SECURITY_PLAN.md) - Complete implementation plan (10 weeks)
-3. [PHASE_3_COMPLETE.md](development/PHASE_3_COMPLETE.md) - Learn from automation patterns
-
-### For Testing
-
-1. [DISCOVERY_TEST_PLAN.md](DISCOVERY_TEST_PLAN.md) - Comprehensive test plan
-2. [VIRTUAL_DEVICES_QUICKREF.md](VIRTUAL_DEVICES_QUICKREF.md) - Test helpers
-3. [DISCOVERY_TEST_RESULTS.md](DISCOVERY_TEST_RESULTS.md) - Latest results
-
-### For Deployment
-
-1. [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) - Pre-launch checks
-2. [CLOUDFLARE_DEPLOYMENT.md](CLOUDFLARE_DEPLOYMENT.md) - Step-by-step guide
-3. [SECURITY.md](SECURITY.md) - Security best practices
+**Deployers**:
+1. [CLOUDFLARE_DEPLOYMENT.md](deployment/CLOUDFLARE_DEPLOYMENT.md) - Full deployment guide
+2. [SECURITY.md](deployment/SECURITY.md) - Security checklist
 
 ---
 
@@ -351,9 +385,9 @@ See [DOCUMENTATION_CONSOLIDATION.md](DOCUMENTATION_CONSOLIDATION.md) for detaile
 - [Cloudflare KV Docs](https://developers.cloudflare.com/kv/)
 - [React 19 Documentation](https://react.dev/)
 - [Framer Motion](https://www.framer.com/motion/)
-- [Tailwind CSS](https://tailwindcss.com/)
+- [Tailwind CSS 4](https://tailwindcss.com/)
 - [shadcn/ui](https://ui.shadcn.com/)
-- [Phosphor Icons](https://phosphoricons.com/)
+- [Lucide Icons](https://lucide.dev/)
 
 ---
 
@@ -366,31 +400,38 @@ See [DOCUMENTATION_CONSOLIDATION.md](DOCUMENTATION_CONSOLIDATION.md) for detaile
 
 **To Add New Documentation**:
 
-1. Create file in appropriate category
-2. Update this index
-3. Add to [DOCUMENTATION_CONSOLIDATION.md](DOCUMENTATION_CONSOLIDATION.md) tracking
-4. Follow [BEST_PRACTICES.md](BEST_PRACTICES.md) formatting
+1. Choose appropriate directory (guides/, development/, deployment/, etc.)
+2. Create file following naming conventions (PascalCase for docs)
+3. Update relevant README.md (guides/README.md or development/README.md)
+4. Update this INDEX.md if document is essential
+5. Follow [BEST_PRACTICES.md](guides/BEST_PRACTICES.md) formatting standards
 
 **To Archive Documentation**:
 
-1. Move to `docs/archive/` directory
-2. Update this index with status
-3. Add redirect/note in old location
-4. Update internal links
+1. Move to `docs/archive/` (with appropriate subdirectory)
+2. Update source directory README.md
+3. Update this index if document was listed
+4. Preserve git history (use `git mv`)
+
+**After Reorganization**:
+- Documentation is now organized by purpose
+- Each directory has navigation README
+- Essential docs listed in this index
+- Full catalog available in directory READMEs
 
 ---
 
 ## 🙏 Contributing
 
-Found outdated documentation? Have suggestions for consolidation?
+Found outdated documentation? Have suggestions?
 
-1. Check [DOCUMENTATION_CONSOLIDATION.md](DOCUMENTATION_CONSOLIDATION.md)
-2. Create PR with updates
-3. Update this index
-4. Follow documentation standards in [BEST_PRACTICES.md](BEST_PRACTICES.md)
+1. Check [development/NEXT_STEPS.md](development/NEXT_STEPS.md) for current priorities
+2. Review directory READMEs for organization structure
+3. Follow [BEST_PRACTICES.md](guides/BEST_PRACTICES.md) for standards
+4. Create PR with clear description of changes
 
 ---
 
-**Document Version**: 1.0
-**Maintainer**: GitHub Copilot AI Assistant
+**Document Version**: 2.0 (Phase 3 Reorganization)
+**Last Updated**: October 13, 2025
 **Status**: ✅ Active - Master documentation index
