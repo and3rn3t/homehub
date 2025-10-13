@@ -279,4 +279,4 @@ MIT License - See LICENSE file for details
 
 **Built with ❤️ using React, TypeScript, and Cloudflare**
 
-*HomeHub - Your Smart Home, Your Way*
+_HomeHub - Your Smart Home, Your Way_

@@ -1,7 +1,7 @@
 # HomeHub Deployment Guide
 
-**Custom Domain**: `homehub.andernet.dev`  
-**Worker Domain**: `homehub-worker.andernet.dev`  
+**Custom Domain**: `homehub.andernet.dev`
+**Worker Domain**: `homehub-worker.andernet.dev`
 **Date**: October 12, 2025
 
 ---
@@ -29,7 +29,7 @@ graph TD
     E --> F[Step 6: Configure Worker Domain]
     F --> G[Step 7: Update Environment]
     G --> H[Step 8: Test Everything]
-    
+
     style A fill:#10b981,stroke:#333,stroke-width:2px,color:#fff
     style H fill:#8b5cf6,stroke:#333,stroke-width:2px,color:#fff
 ```
@@ -51,6 +51,7 @@ npm run build
 ```
 
 **Verification:**
+
 ```powershell
 # Check dist/ folder exists
 ls dist/
@@ -61,6 +62,7 @@ ls dist/
 ```
 
 **Mark as complete:**
+
 ```powershell
 # Update todo list
 ✅ Deploy Step 1: Production Build
@@ -80,6 +82,7 @@ ls dist/
    - Choose `and3rn3t/homehub` repository
 
 3. **Configure Build Settings**:
+
    ```
    Project name:        homehub
    Production branch:   main
@@ -88,6 +91,7 @@ ls dist/
    ```
 
 4. **Environment Variables** (leave empty for now - we'll add later):
+
    ```
    # Will add in Step 7:
    # VITE_KV_API_URL
@@ -112,6 +116,7 @@ wrangler pages deploy dist --project-name=homehub
 ```
 
 **Mark as complete:**
+
 ```powershell
 ✅ Deploy Step 2: Cloudflare Pages
 # Initial URL: https://homehub.pages.dev
@@ -126,6 +131,7 @@ wrangler pages deploy dist --project-name=homehub
    - Click **Custom domains** tab
 
 2. **Add Custom Domain**:
+
    ```
    Domain: homehub.andernet.dev
    ```
@@ -146,6 +152,7 @@ wrangler pages deploy dist --project-name=homehub
    ```
 
 **Mark as complete:**
+
 ```powershell
 ✅ Deploy Step 3: Custom Domain
 # Live at: https://homehub.andernet.dev
@@ -206,6 +213,7 @@ vars = { ENVIRONMENT = "production" }
 ```
 
 **Replace placeholders:**
+
 - `YOUR_PRODUCTION_ID` - from Step 4A output
 - `YOUR_PREVIEW_ID` - from Step 4A preview output
 - `YOUR_LOGS_ID` - create with `wrangler kv:namespace create "LOGS_KV"`
@@ -227,6 +235,7 @@ wrangler deploy
 ```
 
 **Verify worker is running:**
+
 ```powershell
 # Test health endpoint
 curl https://homehub-kv-worker.<your-subdomain>.workers.dev/api/health
@@ -235,6 +244,7 @@ curl https://homehub-kv-worker.<your-subdomain>.workers.dev/api/health
 ```
 
 **Mark as complete:**
+
 ```powershell
 ✅ Deploy Step 4: Cloudflare Worker
 # Worker URL: https://homehub-kv-worker.<your-subdomain>.workers.dev
@@ -290,11 +300,13 @@ routes = [
 ```
 
 Then redeploy:
+
 ```powershell
 wrangler deploy
 ```
 
 **Verify custom domain:**
+
 ```powershell
 # Test worker on custom domain
 curl https://homehub-worker.andernet.dev/api/health
@@ -303,6 +315,7 @@ curl https://homehub-worker.andernet.dev/api/health
 ```
 
 **Mark as complete:**
+
 ```powershell
 ✅ Deploy Step 6: Worker Custom Domain
 # Worker URL: https://homehub-worker.andernet.dev
@@ -360,6 +373,7 @@ git push
 ```
 
 **Mark as complete:**
+
 ```powershell
 ✅ Deploy Step 7: Environment Variables
 # App now communicates with: https://homehub-worker.andernet.dev
@@ -374,12 +388,14 @@ git push
 Visit `https://homehub.andernet.dev` and verify:
 
 #### Basic Functionality
+
 - [ ] App loads without errors
 - [ ] Theme toggle works (light/dark mode)
 - [ ] iOS 26 tab bar animates smoothly
 - [ ] All 11 tabs navigate correctly
 
 #### Dashboard Tab
+
 - [ ] Devices render (22 Philips Hue lights + virtual devices)
 - [ ] Device cards show status (online/offline)
 - [ ] Toggle switches work (turn lights on/off)
@@ -387,45 +403,53 @@ Visit `https://homehub.andernet.dev` and verify:
 - [ ] Favorite button works
 
 #### Rooms Tab
+
 - [ ] 7 rooms render with device counts
 - [ ] Room cards clickable
 - [ ] Device list shows per room
 - [ ] Room statistics dashboard displays
 
 #### Scenes Tab
+
 - [ ] Scene cards render (12+ scenes)
 - [ ] Scene activation works
 - [ ] Scene creation dialog opens
 - [ ] Active scene indicator shows
 
 #### Automations Tab
+
 - [ ] Automation list renders (15+ rules)
 - [ ] Toggle automation on/off works
 - [ ] Flow Designer opens
 - [ ] Schedule Builder opens
 
 #### Device Monitor Tab
+
 - [ ] Device list renders
 - [ ] Real-time updates work
 - [ ] Signal strength indicators show
 - [ ] Battery levels display (if applicable)
 
 #### Energy Tab
+
 - [ ] Charts render (energy usage over time)
 - [ ] Current consumption shows
 - [ ] Monthly/weekly views toggle
 
 #### Security Tab
+
 - [ ] Camera grid renders (7 cameras)
 - [ ] Camera status shows (recording/idle/offline)
 - [ ] Security events list displays
 
 #### Settings Tab
+
 - [ ] User profile loads
 - [ ] Settings save correctly
 - [ ] Theme persists across sessions
 
 #### Network/API Tests
+
 - [ ] Open DevTools → Network tab
 - [ ] Verify API calls to `homehub-worker.andernet.dev`
 - [ ] Check for 200 OK responses
@@ -433,6 +457,7 @@ Visit `https://homehub.andernet.dev` and verify:
 - [ ] KV store read/write works
 
 #### Performance Tests
+
 - [ ] Lighthouse score > 90 (Performance)
 - [ ] First Contentful Paint < 1s
 - [ ] Time to Interactive < 2s
@@ -445,6 +470,7 @@ Visit `https://homehub.andernet.dev` and verify:
 **Symptom**: API calls to worker fail with CORS or network errors
 
 **Fix**:
+
 ```powershell
 # 1. Verify worker is accessible
 curl https://homehub-worker.andernet.dev/api/health
@@ -463,6 +489,7 @@ curl https://homehub-worker.andernet.dev/api/health
 **Symptom**: `homehub.andernet.dev` shows "Page not found"
 
 **Fix**:
+
 ```powershell
 # 1. Check DNS propagation
 nslookup homehub.andernet.dev
@@ -483,6 +510,7 @@ nslookup homehub.andernet.dev
 **Symptom**: Device states don't save across sessions
 
 **Fix**:
+
 ```powershell
 # 1. Verify KV namespace ID in wrangler.toml
 cd workers
@@ -505,6 +533,7 @@ curl https://homehub-worker.andernet.dev/api/kv?key=test
 **Symptom**: `import.meta.env.VITE_KV_API_URL` is undefined
 
 **Fix**:
+
 ```powershell
 # 1. Verify .env.production exists
 cat .env.production
@@ -521,6 +550,7 @@ console.log(import.meta.env.VITE_KV_API_URL)
 ```
 
 **Mark as complete:**
+
 ```powershell
 ✅ Deploy Step 8: Post-Deployment Testing
 # All features verified working in production!
@@ -533,10 +563,12 @@ console.log(import.meta.env.VITE_KV_API_URL)
 ### Your Live URLs
 
 **Frontend (Pages):**
+
 - Custom Domain: https://homehub.andernet.dev
 - Cloudflare URL: https://homehub.pages.dev
 
 **Backend (Worker):**
+
 - Custom Domain: https://homehub-worker.andernet.dev
 - Cloudflare URL: https://homehub-kv-worker.<your-subdomain>.workers.dev
 
@@ -602,6 +634,7 @@ console.log(import.meta.env.VITE_KV_API_URL)
 ## 🔒 Security Considerations
 
 ### Current Setup (Development)
+
 - ✅ HTTPS enforced (Cloudflare SSL)
 - ✅ CORS configured for API access
 - ⚠️ No authentication (open to public)
@@ -610,6 +643,7 @@ console.log(import.meta.env.VITE_KV_API_URL)
 ### Production Hardening (Optional)
 
 #### 1. Add Authentication
+
 ```typescript
 // workers/src/index.ts
 const AUTH_TOKEN = env.SECRET_TOKEN // Set in wrangler.toml secrets
@@ -620,18 +654,21 @@ if (request.headers.get('Authorization') !== `Bearer ${AUTH_TOKEN}`) {
 ```
 
 #### 2. Enable Rate Limiting
+
 ```typescript
 // Use Cloudflare Rate Limiting API
 // Or implement simple in-memory rate limiting in worker
 ```
 
 #### 3. Restrict CORS Origins
+
 ```typescript
 // Change from '*' to specific domain
 'Access-Control-Allow-Origin': 'https://homehub.andernet.dev'
 ```
 
 #### 4. Use Cloudflare Access (Zero Trust)
+
 - Protect Pages app behind login
 - Integrate with Google/GitHub SSO
 - Free tier: 50 users
@@ -685,46 +722,54 @@ wrangler kv:key delete "test" --namespace-id=YOUR_NAMESPACE_ID
 ## ✅ Deployment Checklist
 
 Before you start:
+
 - [ ] Cloudflare account active
 - [ ] `andernet.dev` domain in Cloudflare
 - [ ] Wrangler CLI installed + logged in
 - [ ] GitHub repo up to date
 
 Step 1: Production Build
+
 - [ ] `npm run build` succeeds
 - [ ] `dist/` folder created
 
 Step 2: Cloudflare Pages
+
 - [ ] Project created in Pages dashboard
 - [ ] GitHub connected
 - [ ] Build settings configured
 - [ ] Initial deployment successful
 
 Step 3: Custom Domain (Pages)
+
 - [ ] `homehub.andernet.dev` added
 - [ ] DNS CNAME created (automatic)
 - [ ] SSL certificate active
 - [ ] Site loads on custom domain
 
 Step 4: Deploy Worker
+
 - [ ] HOMEHUB_KV namespace created
 - [ ] wrangler.toml updated with IDs
 - [ ] `wrangler deploy` succeeds
 - [ ] Worker health endpoint responds
 
 Step 5: Worker Custom Domain
+
 - [ ] `homehub-worker.andernet.dev` added
 - [ ] DNS configured (automatic)
 - [ ] SSL certificate active
 - [ ] API endpoints accessible
 
 Step 6: Environment Variables
+
 - [ ] `.env.production` created
 - [ ] Variables added to Pages dashboard
 - [ ] Pages rebuilt with new env vars
 - [ ] `VITE_KV_API_URL` points to worker
 
 Step 7: Testing
+
 - [ ] All tabs load without errors
 - [ ] Device control works
 - [ ] KV store persists data
@@ -732,6 +777,7 @@ Step 7: Testing
 - [ ] Performance acceptable
 
 Optional: Logging Setup
+
 - [ ] LOGS_KV namespace created (if desired)
 - [ ] wrangler.toml updated
 - [ ] Worker redeployed
