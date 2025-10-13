@@ -26,7 +26,12 @@
     "http-device": "node scripts/http-virtual-device.js",
     "http-devices": "node scripts/launch-http-devices.js --preset full-house",
     "test:multi-protocol": "node scripts/test-multi-protocol.js",
-    "monitor": "node scripts/monitor-device.js"
+    "monitor": "node scripts/monitor-device.js",
+    "smoke:frontend": "node scripts/smoke-test-frontend.js",
+    "smoke:worker": "node scripts/smoke-test-worker.js",
+    "smoke:all": "node scripts/smoke-test-all.js",
+    "smoke": "npm run smoke:all",
+    "test:logging": "node scripts/test-logging.js"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -122,6 +127,7 @@
     "globals": "^16.0.0",
     "jsdom": "^27.0.0",
     "mermaid": "^11.12.0",
+    "playwright": "^1.56.0",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",
     "rollup-plugin-visualizer": "^6.0.4",

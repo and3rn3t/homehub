@@ -101,6 +101,13 @@ class Logger {
     if (!import.meta.env.PROD) return
 
     try {
+      // Get worker URL from environment
+      const workerUrl = import.meta.env.VITE_KV_API_URL
+      if (!workerUrl) {
+        console.warn('[Logger] VITE_KV_API_URL not configured, skipping monitoring')
+        return
+      }
+
       // Extract error details if context is an Error
       const errorDetails =
         context instanceof Error
@@ -112,7 +119,7 @@ class Logger {
           : context
 
       // Send to Cloudflare Worker logging endpoint
-      await fetch('/api/logs', {
+      await fetch(`${workerUrl}/api/logs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
