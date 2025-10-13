@@ -84,3 +84,90 @@ export interface SecurityEvent {
   /** Optional snapshot/thumbnail URL */
   thumbnailUrl?: string
 }
+
+/**
+ * Doorbell-specific event types
+ */
+export type DoorbellActionType = 'button_press' | 'motion_detected' | 'package_detected'
+export type DoorbellResponseStatus = 'answered' | 'ignored' | 'missed' | 'quick_reply'
+
+export interface DoorbellEvent {
+  /** Unique identifier */
+  id: string
+
+  /** Doorbell camera ID */
+  cameraId: string
+
+  /** Type of doorbell event */
+  actionType: DoorbellActionType
+
+  /** When the event occurred */
+  timestamp: Date | string
+
+  /** Snapshot URL from doorbell camera */
+  snapshotUrl?: string
+
+  /** Video clip URL (if available) */
+  videoUrl?: string
+
+  /** How the event was handled */
+  responseStatus: DoorbellResponseStatus
+
+  /** When the event was responded to */
+  respondedAt?: Date | string
+
+  /** Optional visitor identification */
+  visitorInfo?: {
+    /** Known visitor name (from face recognition, future) */
+    name?: string
+    /** Delivery service detected (Amazon, FedEx, etc.) */
+    deliveryService?: string
+    /** Whether this is a repeat visitor */
+    isRepeatVisitor?: boolean
+  }
+
+  /** Quick reply message sent (if applicable) */
+  quickReplyMessage?: string
+
+  /** Duration visitor waited (in seconds) */
+  waitDuration?: number
+
+  /** Whether user was notified */
+  notificationSent: boolean
+
+  /** Whether user has viewed this event */
+  viewed: boolean
+}
+
+/**
+ * Doorbell settings and preferences
+ */
+export interface DoorbellSettings {
+  /** Enable/disable doorbell chime sound */
+  chimeEnabled: boolean
+
+  /** Chime volume (0-100) */
+  chimeVolume: number
+
+  /** Enable push notifications */
+  notificationsEnabled: boolean
+
+  /** Enable motion detection alerts */
+  motionAlertsEnabled: boolean
+
+  /** Motion detection sensitivity (0-100) */
+  motionSensitivity: number
+
+  /** Quick reply messages */
+  quickReplyMessages: string[]
+
+  /** Auto-respond with quick reply after X seconds */
+  autoReplyAfter?: number
+
+  /** Do not disturb schedule */
+  doNotDisturb?: {
+    enabled: boolean
+    startTime: string // "HH:MM"
+    endTime: string // "HH:MM"
+  }
+}

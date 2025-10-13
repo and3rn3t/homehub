@@ -157,6 +157,12 @@ _See [development/milestones/](development/milestones/) for all milestone docume
 
 | Document                                                                                            | Feature             | Status      |
 | --------------------------------------------------------------------------------------------------- | ------------------- | ----------- |
+| [ARLO_INTEGRATION_SUMMARY.md](development/features/ARLO_INTEGRATION_SUMMARY.md)                     | Arlo Cloud API      | ⚠️ Blocked  |
+| [ARLO_CLOUDFLARE_BLOCKING.md](development/issues/ARLO_CLOUDFLARE_BLOCKING.md)                       | Arlo API blocker    | ✅ Updated  |
+| [ARLO_OPTION_C_DEVELOPER_API.md](development/issues/ARLO_OPTION_C_DEVELOPER_API.md)                 | Arlo OAuth2 (DEAD)  | ❌ Archived |
+| [DOORBELL_INTEGRATION.md](development/features/DOORBELL_INTEGRATION.md)                             | Doorbell system     | 🆕 NEW      |
+| [DOORBELL_QUICKREF.md](development/features/DOORBELL_QUICKREF.md)                                   | Doorbell quick ref  | 🆕 NEW      |
+| [DOORBELL_TEST_REPORT.md](development/features/DOORBELL_TEST_REPORT.md)                             | Doorbell testing    | 🆕 NEW      |
 | [ADVANCED_HUE_FEATURES.md](development/features/ADVANCED_HUE_FEATURES.md)                           | Hue integration     | ✅ Complete |
 | [COLOR_CONTROLS_COMPLETE.md](development/features/COLOR_CONTROLS_COMPLETE.md)                       | Color picker        | ✅ Complete |
 | [DARK_MODE_IMPLEMENTATION_OCT_2025.md](development/features/DARK_MODE_IMPLEMENTATION_OCT_2025.md)   | Dark mode           | ✅ Complete |
