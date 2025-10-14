@@ -24,6 +24,15 @@ export default defineConfig({
       '@': resolve(projectRoot, 'src'),
     },
   },
+  define: {
+    // Define process.env for browser environment (required by @koush/arlo)
+    'process.env': '{}',
+    'process.platform': '"browser"',
+    'process.version': '"v20.0.0"',
+    'process.exit': '(() => {})',
+    'process.cwd': '(() => "/")',
+    global: 'globalThis',
+  },
   // Cloudflare Pages configuration
   build: {
     outDir: 'dist',
