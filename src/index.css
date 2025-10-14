@@ -1,5 +1,6 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+/* Note: Tailwind imported from main.css */
+/* @import 'tailwindcss'; */
+/* @import 'tw-animate-css'; */
 
 @layer base {
   * {

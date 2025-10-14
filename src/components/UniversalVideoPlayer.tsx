@@ -160,10 +160,24 @@ export function UniversalVideoPlayer({
       const player = dashjs.MediaPlayer().create()
       dashRef.current = player
 
+      // Enable detailed logging
+      player.updateSettings({
+        debug: {
+          logLevel: dashjs.Debug.LOG_LEVEL_DEBUG,
+        },
+      })
+
       player.initialize(video, streamUrl, true) // autoPlay = true
 
       player.on(dashjs.MediaPlayer.events.STREAM_INITIALIZED, () => {
         console.log('[UniversalVideoPlayer] DASH stream initialized')
+        
+        // Log available tracks
+        const videoTracks = player.getTracksFor('video')
+        const audioTracks = player.getTracksFor('audio')
+        console.log('[UniversalVideoPlayer] Video tracks:', videoTracks?.length || 0)
+        console.log('[UniversalVideoPlayer] Audio tracks:', audioTracks?.length || 0)
+        
         setIsLoading(false)
       })
 
@@ -177,19 +191,32 @@ export function UniversalVideoPlayer({
         setIsPlaying(false)
       })
 
+      player.on(dashjs.MediaPlayer.events.PLAYBACK_WAITING, () => {
+        console.log('[UniversalVideoPlayer] DASH buffering...')
+      })
+
+      player.on(dashjs.MediaPlayer.events.PLAYBACK_PLAYING, () => {
+        console.log('[UniversalVideoPlayer] DASH playing (buffering complete)')
+      })
+
       player.on(dashjs.MediaPlayer.events.ERROR, (e: any) => {
         console.error('[UniversalVideoPlayer] DASH error:', e)
+        console.error('[UniversalVideoPlayer] Error code:', e.error?.code)
+        console.error('[UniversalVideoPlayer] Error message:', e.error?.message)
         setError('Stream playback failed. Please try again.')
         setIsLoading(false)
       })
 
-      // Configure DASH settings for low latency
+      // Configure DASH settings for better compatibility
       player.updateSettings({
         streaming: {
-          lowLatencyEnabled: true,
-          liveDelay: 3, // 3 seconds delay for live streams
+          lowLatencyEnabled: false, // Disable low latency for better compatibility
+          liveDelay: 6, // Increase buffer for stability
+          stableBufferTime: 12,
+          bufferTimeAtTopQuality: 30,
+          bufferTimeAtTopQualityLongForm: 60,
           delay: {
-            liveDelay: 3,
+            liveDelay: 6,
           },
         },
       })
