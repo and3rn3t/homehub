@@ -171,13 +171,13 @@ export function UniversalVideoPlayer({
 
       player.on(dashjs.MediaPlayer.events.STREAM_INITIALIZED, () => {
         console.log('[UniversalVideoPlayer] DASH stream initialized')
-        
+
         // Log available tracks
         const videoTracks = player.getTracksFor('video')
         const audioTracks = player.getTracksFor('audio')
         console.log('[UniversalVideoPlayer] Video tracks:', videoTracks?.length || 0)
         console.log('[UniversalVideoPlayer] Audio tracks:', audioTracks?.length || 0)
-        
+
         setIsLoading(false)
       })
 
