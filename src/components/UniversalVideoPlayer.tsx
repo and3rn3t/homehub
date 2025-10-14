@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
 import Hls from 'hls.js'
+import { useEffect, useRef, useState } from 'react'
 // @ts-expect-error - dashjs doesn't have TypeScript definitions
-import dashjs from 'dashjs'
 import { MaximizeIcon, PauseIcon, PlayIcon, VolumeIcon, VolumeOffIcon } from '@/lib/icons'
+import dashjs from 'dashjs'
 
 interface UniversalVideoPlayerProps {
   readonly streamUrl: string
