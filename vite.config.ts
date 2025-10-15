@@ -79,9 +79,12 @@ export default defineConfig({
         manualChunks: id => {
           // Split by node_modules for granular caching
           if (id.includes('node_modules')) {
-            // DO NOT split React/react-dom - inline in main bundle to guarantee load order
+            // DO NOT split React/react-dom - return undefined to inline in main bundle
             // This ensures React is available before any Radix UI components execute
-            
+            if (id.includes('/react/') || id.includes('/react-dom/')) {
+              return undefined // Force React into main bundle
+            }
+
             // Radix UI components (separate chunk)
             if (id.includes('@radix-ui')) {
               return 'radix-ui'
