@@ -1,15 +1,15 @@
 import { Badge } from '@/components/ui/badge'
+import {
+  BottomSheet,
+  BottomSheetContent,
+  BottomSheetDescription,
+  BottomSheetHeader,
+  BottomSheetTitle,
+} from '@/components/ui/bottom-sheet'
 import { BrightnessSlider } from '@/components/ui/brightness-slider'
 import { Button } from '@/components/ui/button'
 import { ColorTemperatureSlider } from '@/components/ui/color-temperature-slider'
 import { ColorWheelPicker } from '@/components/ui/color-wheel'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
@@ -231,9 +231,9 @@ export function DeviceControlPanel({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-[500px]">
-        <DialogHeader>
+    <BottomSheet open={open} onOpenChange={onOpenChange}>
+      <BottomSheetContent className="max-h-[85vh] overflow-y-auto sm:max-w-[500px]">
+        <BottomSheetHeader>
           <div className="flex items-start justify-between">
             <div className="flex-1">
               {isRenaming ? (
@@ -251,7 +251,7 @@ export function DeviceControlPanel({
                     autoFocus
                     className="text-lg font-semibold"
                   />
-                  <Button size="sm" onClick={handleRename}>
+                  <Button size="sm" onClick={handleRename} className="touch-target">
                     Save
                   </Button>
                   <Button
@@ -261,13 +261,14 @@ export function DeviceControlPanel({
                       setIsRenaming(false)
                       setDeviceName(device.name)
                     }}
+                    className="touch-target"
                   >
                     <XIcon className="h-4 w-4" />
                   </Button>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <DialogTitle className="text-xl">{device.name}</DialogTitle>
+                  <BottomSheetTitle className="text-xl">{device.name}</BottomSheetTitle>
                   <FavoriteButton
                     deviceId={device.id}
                     deviceName={device.name}
@@ -277,14 +278,14 @@ export function DeviceControlPanel({
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-7 w-7"
+                    className="touch-target h-7 w-7"
                     onClick={() => setIsRenaming(true)}
                   >
                     <EditIcon className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               )}
-              <DialogDescription className="mt-1 flex items-center gap-2">
+              <BottomSheetDescription className="mt-1 flex items-center gap-2 text-left">
                 <span>{device.room}</span>
                 <Badge
                   variant={
@@ -303,15 +304,19 @@ export function DeviceControlPanel({
                     {device.protocol}
                   </Badge>
                 )}
-              </DialogDescription>
+              </BottomSheetDescription>
             </div>
           </div>
-        </DialogHeader>
+        </BottomSheetHeader>
 
         <Tabs defaultValue="controls" className="mt-4">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="controls">Controls</TabsTrigger>
-            <TabsTrigger value="info">Info</TabsTrigger>
+            <TabsTrigger value="controls" className="touch-target">
+              Controls
+            </TabsTrigger>
+            <TabsTrigger value="info" className="touch-target">
+              Info
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="controls" className="space-y-6 pt-4">
@@ -391,7 +396,7 @@ export function DeviceControlPanel({
                           className="pr-12 font-mono"
                         />
                         <div
-                          className="border-border absolute top-1/2 right-2 h-8 w-8 -translate-y-1/2 rounded border-2"
+                          className="border-border absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded border-2"
                           style={{ backgroundColor: colorHex }}
                           aria-label="Current color preview"
                         />
@@ -597,7 +602,7 @@ export function DeviceControlPanel({
             </div>
           </TabsContent>
         </Tabs>
-      </DialogContent>
-    </Dialog>
+      </BottomSheetContent>
+    </BottomSheet>
   )
 }

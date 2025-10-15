@@ -9,6 +9,12 @@
 }
 
 :root {
+  /* iOS Safe Area Insets - For notch, Dynamic Island, and home indicator */
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+
   /* iOS 18 Liquid Glass - Light Mode (Enhanced Contrast) */
   --background: oklch(0.96 0.008 250); /* Slightly darker with blue tint */
   --foreground: oklch(0.15 0.01 264);
@@ -244,7 +250,65 @@
 
   .dark .card-elevated {
     box-shadow:
-      0 8px 32px oklch(0 0 0 / 0.24),
-      0 2px 8px oklch(0 0 0 / 0.12);
+      0 8px 32px oklch(0 0 0 / 0.6),
+      0 2px 8px oklch(0 0 0 / 0.3);
+  }
+}
+
+/* iOS Safe Area Utilities */
+@layer utilities {
+  /* Padding utilities that respect safe areas */
+  .safe-top {
+    padding-top: max(1rem, var(--safe-area-inset-top));
+  }
+
+  .safe-bottom {
+    padding-bottom: max(1rem, var(--safe-area-inset-bottom));
+  }
+
+  .safe-left {
+    padding-left: max(1rem, var(--safe-area-inset-left));
+  }
+
+  .safe-right {
+    padding-right: max(1rem, var(--safe-area-inset-right));
+  }
+
+  .safe-x {
+    padding-left: max(1rem, var(--safe-area-inset-left));
+    padding-right: max(1rem, var(--safe-area-inset-right));
+  }
+
+  .safe-y {
+    padding-top: max(1rem, var(--safe-area-inset-top));
+    padding-bottom: max(1rem, var(--safe-area-inset-bottom));
+  }
+
+  .safe-all {
+    padding-top: max(1rem, var(--safe-area-inset-top));
+    padding-right: max(1rem, var(--safe-area-inset-right));
+    padding-bottom: max(1rem, var(--safe-area-inset-bottom));
+    padding-left: max(1rem, var(--safe-area-inset-left));
+  }
+
+  /* Margin utilities for safe areas */
+  .safe-mt {
+    margin-top: var(--safe-area-inset-top);
+  }
+
+  .safe-mb {
+    margin-bottom: var(--safe-area-inset-bottom);
+  }
+
+  /* Mobile-optimized touch targets */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Mobile-friendly scrolling */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 }

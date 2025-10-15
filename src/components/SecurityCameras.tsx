@@ -12,6 +12,7 @@ import { EnhancedCameraCard } from '@/components/EnhancedCameraCard'
 import { TokenRefreshModal } from '@/components/TokenRefreshModal'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { Camera } from '@/constants/mock-cameras'
 import { MOCK_CAMERAS } from '@/constants/mock-cameras'
@@ -21,7 +22,7 @@ import { arloTokenManager } from '@/services/auth/ArloTokenManager'
 import { ArloAdapter } from '@/services/devices/ArloAdapter'
 import type { DoorbellEvent } from '@/types/security.types'
 import { motion } from 'framer-motion'
-import { memo, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 export const SecurityCameras = memo(function SecurityCameras() {
@@ -234,6 +235,27 @@ export const SecurityCameras = memo(function SecurityCameras() {
     }
   }
 
+  // Pull-to-refresh handler
+  const handleRefresh = useCallback(async () => {
+    try {
+      if (useRealData && arloAdapterInstance) {
+        // Reload real Arlo cameras
+        const realCameras = await arloAdapterInstance.getCameras()
+        setCameras(realCameras)
+        toast.success('Cameras refreshed', {
+          description: `${realCameras.length} cameras updated`,
+        })
+      } else {
+        // Simulate refresh for mock data
+        await new Promise(resolve => setTimeout(resolve, 800))
+        toast.success('Cameras refreshed')
+      }
+    } catch (error) {
+      console.error('[SecurityCameras] Failed to refresh cameras:', error)
+      toast.error('Failed to refresh cameras')
+    }
+  }, [useRealData, arloAdapterInstance])
+
   return (
     <div className="space-y-6 pb-6">
       {/* Token Refresh Modal */}
@@ -314,62 +336,64 @@ export const SecurityCameras = memo(function SecurityCameras() {
         </TabsList>
 
         <TabsContent value="cameras" className="mt-6 space-y-6">
-          {/* System Status */}
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-            <span className="text-muted-foreground text-sm">System Active</span>
-          </div>
+          <PullToRefresh onRefresh={handleRefresh}>
+            {/* System Status */}
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+              <span className="text-muted-foreground text-sm">System Active</span>
+            </div>
 
-          {/* Camera Grid */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-            {cameras.map((camera, index) => (
-              <EnhancedCameraCard
-                key={camera.id}
-                camera={camera}
-                index={index}
-                onClick={() => {
-                  setSelectedCamera(camera)
-                  setShowCameraDetails(true)
-                }}
-              />
-            ))}
-          </div>
+            {/* Camera Grid */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+              {cameras.map((camera, index) => (
+                <EnhancedCameraCard
+                  key={camera.id}
+                  camera={camera}
+                  index={index}
+                  onClick={() => {
+                    setSelectedCamera(camera)
+                    setShowCameraDetails(true)
+                  }}
+                />
+              ))}
+            </div>
 
-          {/* Offline Cameras Warning */}
-          {offlineCameras.length > 0 && (
+            {/* Offline Cameras Warning */}
+            {offlineCameras.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                <Card className="border-orange-500/20 bg-orange-500/5">
+                  <div className="flex items-start gap-3 p-4">
+                    <WifiOffIcon className="mt-0.5 h-5 w-5 text-orange-500" />
+                    <div>
+                      <h3 className="font-semibold text-orange-600 dark:text-orange-400">
+                        {offlineCameras.length} Camera{offlineCameras.length > 1 ? 's' : ''} Offline
+                      </h3>
+                      <p className="text-muted-foreground mt-1 text-sm">
+                        {offlineCameras.map(c => c.name).join(', ')}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            )}
+
+            {/* Development Note */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
+              transition={{ delay: 0.7 }}
+              className="rounded-xl border border-blue-500/10 bg-blue-500/5 p-4"
             >
-              <Card className="border-orange-500/20 bg-orange-500/5">
-                <div className="flex items-start gap-3 p-4">
-                  <WifiOffIcon className="mt-0.5 h-5 w-5 text-orange-500" />
-                  <div>
-                    <h3 className="font-semibold text-orange-600 dark:text-orange-400">
-                      {offlineCameras.length} Camera{offlineCameras.length > 1 ? 's' : ''} Offline
-                    </h3>
-                    <p className="text-muted-foreground mt-1 text-sm">
-                      {offlineCameras.map(c => c.name).join(', ')}
-                    </p>
-                  </div>
-                </div>
-              </Card>
+              <p className="text-sm text-blue-600 dark:text-blue-400">
+                <strong>Development Mode:</strong> Using test video streams. Real camera integration
+                pending API solutions for Eufy E30 and Arlo cameras.
+              </p>
             </motion.div>
-          )}
-
-          {/* Development Note */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7 }}
-            className="rounded-xl border border-blue-500/10 bg-blue-500/5 p-4"
-          >
-            <p className="text-sm text-blue-600 dark:text-blue-400">
-              <strong>Development Mode:</strong> Using test video streams. Real camera integration
-              pending API solutions for Eufy E30 and Arlo cameras.
-            </p>
-          </motion.div>
+          </PullToRefresh>
         </TabsContent>
 
         <TabsContent value="doorbell" className="mt-6">

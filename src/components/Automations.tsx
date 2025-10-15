@@ -1,20 +1,30 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu'
 import { IOS26EmptyState } from '@/components/ui/ios26-error'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { KV_KEYS, MOCK_AUTOMATIONS } from '@/constants'
 import { useConditionEvaluator } from '@/hooks/use-condition-evaluator'
+import { useHaptic } from '@/hooks/use-haptic'
 import { useKV } from '@/hooks/use-kv'
 import { useScheduler } from '@/hooks/use-scheduler'
 import {
   CalendarIcon,
   ClockIcon,
+  CopyIcon,
   EditIcon,
   MapPinIcon,
   PlayIcon,
   SettingsIcon,
+  TrashIcon,
   WorkflowIcon,
 } from '@/lib/icons'
 import { logger } from '@/lib/logger'
@@ -34,6 +44,7 @@ const automationIcons = {
 export function Automations() {
   const [automations, setAutomations] = useKV<Automation[]>(KV_KEYS.AUTOMATIONS, MOCK_AUTOMATIONS)
   const [currentTab, setCurrentTab] = useKV('automations-tab', 'overview')
+  const haptic = useHaptic()
 
   // Initialize scheduler (triggers in background)
   const { triggerAutomation } = useScheduler()
@@ -60,6 +71,30 @@ export function Automations() {
         description: error instanceof Error ? error.message : 'Unknown error',
       })
     }
+  }
+
+  // Context menu handlers
+  const handleEditAutomation = (automation: Automation) => {
+    haptic.light()
+    toast.info(`Edit ${automation.name}`, {
+      description: 'Automation editor coming soon',
+    })
+  }
+
+  const handleDuplicateAutomation = (automation: Automation) => {
+    haptic.light()
+    toast.success(`Duplicated ${automation.name}`, {
+      description: 'New automation created',
+    })
+    // TODO: Implement duplication logic
+  }
+
+  const handleDeleteAutomation = (automation: Automation) => {
+    haptic.heavy()
+    toast.success(`Deleted ${automation.name}`, {
+      description: 'Automation removed',
+    })
+    // TODO: Implement deletion logic
   }
 
   const runAutomation = async (automationId: string) => {
@@ -176,6 +211,79 @@ export function Automations() {
                   {automations.map(automation => {
                     const IconComponent = automationIcons[automation.type]
 
+                    const cardContent = (
+                      <Card className="hover:bg-accent/5 transition-colors">
+                        <CardContent className="p-4">
+                          <div className="mb-3 flex items-start justify-between">
+                            <div className="flex flex-1 items-start gap-3">
+                              <div className="bg-secondary mt-0.5 flex h-10 w-10 items-center justify-center rounded-full">
+                                <IconComponent
+                                  size={20}
+                                  className={
+                                    automation.enabled ? 'text-primary' : 'text-muted-foreground'
+                                  }
+                                />
+                              </div>
+
+                              <div className="min-w-0 flex-1">
+                                <h3 className="mb-1 text-sm font-medium">{automation.name}</h3>
+                                <p className="text-muted-foreground mb-2 line-clamp-2 text-xs">
+                                  {automation.description}
+                                </p>
+
+                                <div className="flex items-center gap-3">
+                                  <Badge
+                                    variant={
+                                      automation.type === 'schedule' ? 'default' : 'secondary'
+                                    }
+                                    className="h-5 text-xs capitalize"
+                                  >
+                                    {automation.type}
+                                  </Badge>
+
+                                  {automation.nextRun && (
+                                    <span className="text-muted-foreground text-xs">
+                                      Next: {formatTime(automation.nextRun)}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="ml-3 flex items-center gap-2">
+                              <motion.div whileTap={{ scale: 0.9 }}>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => runAutomation(automation.id)}
+                                >
+                                  <PlayIcon size={14} />
+                                </Button>
+                              </motion.div>
+
+                              <motion.div whileTap={{ scale: 0.9 }}>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <EditIcon size={14} />
+                                </Button>
+                              </motion.div>
+
+                              <Switch
+                                checked={automation.enabled}
+                                onCheckedChange={() => toggleAutomation(automation.id)}
+                              />
+                            </div>
+                          </div>
+
+                          {automation.lastRun && (
+                            <div className="text-muted-foreground text-xs">
+                              Last run: {formatTime(automation.lastRun)}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )
+
                     return (
                       <motion.div
                         key={automation.id}
@@ -183,76 +291,35 @@ export function Automations() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                       >
-                        <Card className="hover:bg-accent/5 transition-colors">
-                          <CardContent className="p-4">
-                            <div className="mb-3 flex items-start justify-between">
-                              <div className="flex flex-1 items-start gap-3">
-                                <div className="bg-secondary mt-0.5 flex h-10 w-10 items-center justify-center rounded-full">
-                                  <IconComponent
-                                    size={20}
-                                    className={
-                                      automation.enabled ? 'text-primary' : 'text-muted-foreground'
-                                    }
-                                  />
-                                </div>
-
-                                <div className="min-w-0 flex-1">
-                                  <h3 className="mb-1 text-sm font-medium">{automation.name}</h3>
-                                  <p className="text-muted-foreground mb-2 line-clamp-2 text-xs">
-                                    {automation.description}
-                                  </p>
-
-                                  <div className="flex items-center gap-3">
-                                    <Badge
-                                      variant={
-                                        automation.type === 'schedule' ? 'default' : 'secondary'
-                                      }
-                                      className="h-5 text-xs capitalize"
-                                    >
-                                      {automation.type}
-                                    </Badge>
-
-                                    {automation.nextRun && (
-                                      <span className="text-muted-foreground text-xs">
-                                        Next: {formatTime(automation.nextRun)}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="ml-3 flex items-center gap-2">
-                                <motion.div whileTap={{ scale: 0.9 }}>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={() => runAutomation(automation.id)}
-                                  >
-                                    <PlayIcon size={14} />
-                                  </Button>
-                                </motion.div>
-
-                                <motion.div whileTap={{ scale: 0.9 }}>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <EditIcon size={14} />
-                                  </Button>
-                                </motion.div>
-
-                                <Switch
-                                  checked={automation.enabled}
-                                  onCheckedChange={() => toggleAutomation(automation.id)}
-                                />
-                              </div>
-                            </div>
-
-                            {automation.lastRun && (
-                              <div className="text-muted-foreground text-xs">
-                                Last run: {formatTime(automation.lastRun)}
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
+                        <ContextMenu>
+                          <ContextMenuTrigger asChild>
+                            <div>{cardContent}</div>
+                          </ContextMenuTrigger>
+                          <ContextMenuContent className="w-48">
+                            <ContextMenuItem
+                              onClick={() => handleEditAutomation(automation)}
+                              className="gap-2"
+                            >
+                              <EditIcon className="h-4 w-4" />
+                              Edit Automation
+                            </ContextMenuItem>
+                            <ContextMenuItem
+                              onClick={() => handleDuplicateAutomation(automation)}
+                              className="gap-2"
+                            >
+                              <CopyIcon className="h-4 w-4" />
+                              Duplicate
+                            </ContextMenuItem>
+                            <ContextMenuSeparator />
+                            <ContextMenuItem
+                              onClick={() => handleDeleteAutomation(automation)}
+                              className="gap-2 text-red-600 dark:text-red-400"
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                              Delete
+                            </ContextMenuItem>
+                          </ContextMenuContent>
+                        </ContextMenu>
                       </motion.div>
                     )
                   })}

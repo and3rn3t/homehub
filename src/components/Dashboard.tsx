@@ -447,7 +447,7 @@ export function Dashboard() {
             <IOS26Shimmer className="h-24 rounded-2xl" />
           </div>
 
-          <div className="mb-6 grid grid-cols-2 gap-3">
+          <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <IOS26Shimmer className="h-24 rounded-2xl" />
             <IOS26Shimmer className="h-24 rounded-2xl" />
             <IOS26Shimmer className="h-24 rounded-2xl" />
@@ -703,7 +703,7 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* Section 3: Scenes (Horizontal Scroll) */}
+        {/* Section 3: Scenes (Horizontal Scroll with Snap) */}
         {scenes.length > 0 && (
           <div className="mb-6">
             <div className="mb-3 flex items-center justify-between">
@@ -713,41 +713,52 @@ export function Dashboard() {
                 <ChevronRightIcon className="ml-1 h-4 w-4" />
               </Button>
             </div>
-            <div className="scrollbar-hide flex gap-3 overflow-x-auto pb-2">
-              {scenes.slice(0, 6).map((scene, index) => {
-                const IconComponent = sceneIcons[scene.icon as keyof typeof sceneIcons] || HouseIcon
-                return (
-                  <motion.div
-                    key={scene.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 400,
-                      damping: 30,
-                      mass: 0.8,
-                      delay: index * 0.05,
-                    }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex-shrink-0"
-                  >
-                    <Card
-                      variant="glass"
-                      role="button"
-                      tabIndex={0}
-                      className="hover:bg-accent/5 w-[140px] cursor-pointer transition-all duration-200 hover:shadow-md"
-                      onClick={() => activateScene(scene.name)}
+            {/* Edge-to-edge scroll on mobile with snap points */}
+            <div className="-mx-6 sm:mx-0">
+              <div
+                className="scrollbar-hide flex gap-3 overflow-x-auto px-6 pb-2 sm:px-0"
+                style={{
+                  scrollSnapType: 'x mandatory',
+                  WebkitOverflowScrolling: 'touch',
+                }}
+              >
+                {scenes.slice(0, 6).map((scene, index) => {
+                  const IconComponent =
+                    sceneIcons[scene.icon as keyof typeof sceneIcons] || HouseIcon
+                  return (
+                    <motion.div
+                      key={scene.id}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 400,
+                        damping: 30,
+                        mass: 0.8,
+                        delay: index * 0.05,
+                      }}
+                      whileTap={{ scale: 0.95 }}
+                      className="flex-shrink-0"
+                      style={{ scrollSnapAlign: 'start' }}
                     >
-                      <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
-                        <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
-                          <IconComponent className="text-primary h-6 w-6" />
-                        </div>
-                        <span className="line-clamp-2 text-sm font-medium">{scene.name}</span>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                )
-              })}
+                      <Card
+                        variant="glass"
+                        role="button"
+                        tabIndex={0}
+                        className="hover:bg-accent/5 w-[140px] cursor-pointer transition-all duration-200 hover:shadow-md"
+                        onClick={() => activateScene(scene.name)}
+                      >
+                        <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
+                          <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
+                            <IconComponent className="text-primary h-6 w-6" />
+                          </div>
+                          <span className="line-clamp-2 text-sm font-medium">{scene.name}</span>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  )
+                })}
+              </div>
             </div>
           </div>
         )}

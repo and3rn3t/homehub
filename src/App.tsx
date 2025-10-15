@@ -2,6 +2,7 @@ import { CommandPalette, useKeyboardShortcut } from '@/components/ui/command-pal
 import { IOS26TabBar } from '@/components/ui/ios26-tab-bar'
 import { Toaster } from '@/components/ui/sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useHaptic } from '@/hooks/use-haptic'
 import { useKV } from '@/hooks/use-kv'
 import {
   CogIcon,
@@ -54,6 +55,7 @@ const AutomationMonitor = lazy(() =>
 // Small components can be loaded normally
 import { GeofenceTest } from './components/GeofenceTest'
 import { LoadingStatesDemo } from './components/LoadingStatesDemo'
+import { OfflineBanner } from './components/OfflineBanner'
 import { TestAdvancedControls } from './components/TestAdvancedControls'
 import { ThemeToggle } from './components/ThemeToggle'
 
@@ -70,10 +72,36 @@ function TabContentLoader() {
 }
 
 function App() {
+  const haptic = useHaptic()
   const [currentTab, setCurrentTab] = useKV('current-tab', 'home')
   const [devicesSubTab, setDevicesSubTab] = useKV('devices-subtab', 'rooms')
   const [controlSubTab, setControlSubTab] = useKV('control-subtab', 'scenes')
   const [settingsSubTab, setSettingsSubTab] = useKV('settings-subtab', 'settings')
+
+  // Badge tracking for tab bar
+  const [securityEvents] = useKV<Array<{ acknowledged: boolean }>>('security-events', [])
+  const unreadSecurityEvents = securityEvents.filter(event => !event.acknowledged).length
+
+  // Wrapped setters with haptic feedback
+  const handleTabChange = (tab: string) => {
+    haptic.light() // Light haptic on tab switch
+    setCurrentTab(tab)
+  }
+
+  const handleDevicesSubTabChange = (tab: string) => {
+    haptic.light()
+    setDevicesSubTab(tab)
+  }
+
+  const handleControlSubTabChange = (tab: string) => {
+    haptic.light()
+    setControlSubTab(tab)
+  }
+
+  const handleSettingsSubTabChange = (tab: string) => {
+    haptic.light()
+    setSettingsSubTab(tab)
+  }
 
   // Command palette actions
   const commandActions = [
@@ -84,7 +112,10 @@ function App() {
       description: 'View home overview and quick controls',
       icon: HouseIcon,
       shortcut: ['⌘', 'D'],
-      onSelect: () => setCurrentTab('home'),
+      onSelect: () => {
+        haptic.medium()
+        setCurrentTab('home')
+      },
       category: 'navigation' as const,
     },
     {
@@ -94,6 +125,7 @@ function App() {
       icon: HomeRoomIcon,
       shortcut: ['⌘', 'R'],
       onSelect: () => {
+        haptic.medium()
         setCurrentTab('devices')
         setDevicesSubTab('rooms')
       },
@@ -106,6 +138,7 @@ function App() {
       icon: LayoutGridIcon,
       shortcut: ['⌘', 'M'],
       onSelect: () => {
+        haptic.medium()
         setCurrentTab('devices')
         setDevicesSubTab('monitor')
       },
@@ -118,6 +151,7 @@ function App() {
       icon: PlayIcon,
       shortcut: ['⌘', 'S'],
       onSelect: () => {
+        haptic.medium()
         setCurrentTab('control')
         setControlSubTab('scenes')
       },
@@ -130,6 +164,7 @@ function App() {
       icon: ZapIcon,
       shortcut: ['⌘', 'A'],
       onSelect: () => {
+        haptic.medium()
         setCurrentTab('control')
         setControlSubTab('automations')
       },
@@ -141,7 +176,10 @@ function App() {
       description: 'View security cameras and events',
       icon: ShieldCheckIcon,
       shortcut: ['⌘', 'E'],
-      onSelect: () => setCurrentTab('security'),
+      onSelect: () => {
+        haptic.medium()
+        setCurrentTab('security')
+      },
       category: 'navigation' as const,
     },
     {
@@ -150,7 +188,10 @@ function App() {
       description: 'View analytics and insights',
       icon: LineChartIcon,
       shortcut: ['⌘', 'I'],
-      onSelect: () => setCurrentTab('insights'),
+      onSelect: () => {
+        haptic.medium()
+        setCurrentTab('insights')
+      },
       category: 'navigation' as const,
     },
     {
@@ -160,6 +201,7 @@ function App() {
       icon: UsersIcon,
       shortcut: ['⌘', 'U'],
       onSelect: () => {
+        haptic.medium()
         setCurrentTab('settings')
         setSettingsSubTab('users')
       },
@@ -172,6 +214,7 @@ function App() {
       icon: SettingsIcon,
       shortcut: ['⌘', ','],
       onSelect: () => {
+        haptic.medium()
         setCurrentTab('settings')
         setSettingsSubTab('settings')
       },
@@ -237,20 +280,30 @@ function App() {
     { id: 'home', label: 'Home', icon: HouseIcon },
     { id: 'devices', label: 'Devices', icon: CogIcon },
     { id: 'control', label: 'Control', icon: ZapIcon },
-    { id: 'security', label: 'Security', icon: ShieldCheckIcon },
-    { id: 'insights', label: 'Insights', icon: LineChartIcon },
+    {
+      id: 'security',
+      label: 'Security',
+      icon: ShieldCheckIcon,
+      badge: unreadSecurityEvents > 0 ? unreadSecurityEvents : undefined,
+    },
+    { id: 'insights', label: 'Insights', icon: LineChartIcon, badge: 'new' },
     { id: 'settings', label: 'Settings', icon: SlidersIconAlt },
   ]
 
   return (
     <div className="from-background via-background to-muted/30 fixed inset-0 bg-gradient-to-br">
-      {/* Command Palette - Centered at top to avoid all overlaps */}
-      <div className="fixed top-4 left-1/2 z-50 -translate-x-1/2">
+      {/* Offline indicator banner */}
+      <OfflineBanner />
+
+      {/* Command Palette - Centered at top to avoid all overlaps, with safe-area padding */}
+      <div className="safe-top fixed left-1/2 z-50 -translate-x-1/2 pt-2">
         <CommandPalette actions={commandActions} />
       </div>
 
-      <Tabs value={currentTab} onValueChange={setCurrentTab} className="flex h-full flex-col">
-        <div className="flex-1 overflow-hidden">
+      <Tabs value={currentTab} onValueChange={handleTabChange} className="flex h-full flex-col">
+        {/* Main content area with safe-area padding and mobile-optimized scrolling */}
+        <div className="mobile-scroll safe-mb flex-1 overflow-hidden pb-20">
+          {/* pb-20 for tab bar space */}
           <TabsContent value="home" className="m-0 h-full p-0">
             <Suspense fallback={<TabContentLoader />}>
               <Dashboard />
@@ -260,22 +313,31 @@ function App() {
           <TabsContent value="devices" className="m-0 h-full p-0">
             <Tabs
               value={devicesSubTab}
-              onValueChange={setDevicesSubTab}
+              onValueChange={handleDevicesSubTabChange}
               className="flex h-full flex-col"
             >
-              <div className="border-border bg-card/90 flex items-center justify-between border-b shadow-sm backdrop-blur-sm">
-                <TabsList className="h-12 justify-start rounded-none bg-transparent px-6">
-                  <TabsTrigger value="rooms" className="data-[state=active]:bg-primary/15">
+              <div className="border-border bg-card/90 safe-x flex items-center justify-between border-b shadow-sm backdrop-blur-sm">
+                <TabsList className="h-12 justify-start rounded-none bg-transparent px-2 sm:px-6">
+                  <TabsTrigger
+                    value="rooms"
+                    className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs sm:px-4 sm:text-sm"
+                  >
                     Rooms
                   </TabsTrigger>
-                  <TabsTrigger value="monitor" className="data-[state=active]:bg-primary/15">
+                  <TabsTrigger
+                    value="monitor"
+                    className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs sm:px-4 sm:text-sm"
+                  >
                     Monitor
                   </TabsTrigger>
-                  <TabsTrigger value="energy" className="data-[state=active]:bg-primary/15">
+                  <TabsTrigger
+                    value="energy"
+                    className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs sm:px-4 sm:text-sm"
+                  >
                     Energy
                   </TabsTrigger>
                 </TabsList>
-                <div className="px-4">
+                <div className="px-2 sm:px-4">
                   <ThemeToggle />
                 </div>
               </div>
@@ -302,22 +364,31 @@ function App() {
           <TabsContent value="control" className="m-0 h-full p-0">
             <Tabs
               value={controlSubTab}
-              onValueChange={setControlSubTab}
+              onValueChange={handleControlSubTabChange}
               className="flex h-full flex-col"
             >
-              <div className="border-border bg-card/90 flex items-center justify-between border-b shadow-sm backdrop-blur-sm">
-                <TabsList className="h-12 justify-start rounded-none bg-transparent px-6">
-                  <TabsTrigger value="scenes" className="data-[state=active]:bg-primary/15">
+              <div className="border-border bg-card/90 safe-x flex items-center justify-between border-b shadow-sm backdrop-blur-sm">
+                <TabsList className="h-12 justify-start rounded-none bg-transparent px-2 sm:px-6">
+                  <TabsTrigger
+                    value="scenes"
+                    className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs sm:px-4 sm:text-sm"
+                  >
                     Scenes
                   </TabsTrigger>
-                  <TabsTrigger value="automations" className="data-[state=active]:bg-primary/15">
+                  <TabsTrigger
+                    value="automations"
+                    className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs sm:px-4 sm:text-sm"
+                  >
                     Automations
                   </TabsTrigger>
-                  <TabsTrigger value="monitor" className="data-[state=active]:bg-primary/15">
+                  <TabsTrigger
+                    value="monitor"
+                    className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs sm:px-4 sm:text-sm"
+                  >
                     Monitor
                   </TabsTrigger>
                 </TabsList>
-                <div className="px-4">
+                <div className="px-2 sm:px-4">
                   <ThemeToggle />
                 </div>
               </div>
@@ -356,38 +427,64 @@ function App() {
           <TabsContent value="settings" className="m-0 h-full p-0">
             <Tabs
               value={settingsSubTab}
-              onValueChange={setSettingsSubTab}
+              onValueChange={handleSettingsSubTabChange}
               className="flex h-full flex-col"
             >
-              <div className="border-border bg-card/90 flex items-center justify-between border-b shadow-sm backdrop-blur-sm">
-                <TabsList className="h-12 justify-start rounded-none bg-transparent px-6">
-                  <TabsTrigger value="settings" className="data-[state=active]:bg-primary/15">
-                    Settings
-                  </TabsTrigger>
-                  <TabsTrigger value="users" className="data-[state=active]:bg-primary/15">
-                    Users
-                  </TabsTrigger>
-                  <TabsTrigger value="monitoring" className="data-[state=active]:bg-primary/15">
-                    Monitoring
-                  </TabsTrigger>
-                  <TabsTrigger value="intercom" className="data-[state=active]:bg-primary/15">
-                    Intercom
-                  </TabsTrigger>
-                  <TabsTrigger value="backup" className="data-[state=active]:bg-primary/15">
-                    Backup
-                  </TabsTrigger>
-                  <TabsTrigger value="test" className="data-[state=active]:bg-primary/15">
-                    Test Controls
-                  </TabsTrigger>
-                  <TabsTrigger value="geofence-test" className="data-[state=active]:bg-primary/15">
-                    Geofence Test
-                  </TabsTrigger>
-                  <TabsTrigger value="developer" className="data-[state=active]:bg-primary/15">
-                    Developer
-                  </TabsTrigger>
-                </TabsList>
-                <div className="px-4">
-                  <ThemeToggle />
+              <div className="border-border bg-card/90 safe-x border-b shadow-sm backdrop-blur-sm">
+                <div className="scrollbar-hide flex items-center justify-between overflow-x-auto">
+                  <TabsList className="scrollbar-hide h-12 flex-nowrap justify-start overflow-x-auto rounded-none bg-transparent px-2 sm:px-6">
+                    <TabsTrigger
+                      value="settings"
+                      className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs whitespace-nowrap sm:px-4 sm:text-sm"
+                    >
+                      Settings
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="users"
+                      className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs whitespace-nowrap sm:px-4 sm:text-sm"
+                    >
+                      Users
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="monitoring"
+                      className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs whitespace-nowrap sm:px-4 sm:text-sm"
+                    >
+                      Monitoring
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="intercom"
+                      className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs whitespace-nowrap sm:px-4 sm:text-sm"
+                    >
+                      Intercom
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="backup"
+                      className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs whitespace-nowrap sm:px-4 sm:text-sm"
+                    >
+                      Backup
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="test"
+                      className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs whitespace-nowrap sm:px-4 sm:text-sm"
+                    >
+                      Test
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="geofence-test"
+                      className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs whitespace-nowrap sm:px-4 sm:text-sm"
+                    >
+                      Geofence
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="developer"
+                      className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs whitespace-nowrap sm:px-4 sm:text-sm"
+                    >
+                      Developer
+                    </TabsTrigger>
+                  </TabsList>
+                  <div className="shrink-0 px-2 sm:px-4">
+                    <ThemeToggle />
+                  </div>
                 </div>
               </div>
               <div className="flex-1 overflow-hidden">

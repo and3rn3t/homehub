@@ -8,6 +8,7 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
 import { ProtocolBadge } from '@/components/ui/protocol-badge'
+import { SwipeableCard } from '@/components/ui/swipeable-card'
 import { Switch } from '@/components/ui/switch'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useHaptic } from '@/hooks/use-haptic'
@@ -375,13 +376,49 @@ export const DeviceCardEnhanced = memo(
       </motion.div>
     )
 
+    // Wrap with swipeable gestures
+    const swipeableContent = (
+      <SwipeableCard
+        actions={[
+          ...(onEdit
+            ? [
+                {
+                  label: 'Edit',
+                  icon: EditIcon,
+                  color: 'blue' as const,
+                  onAction: handleEdit,
+                },
+              ]
+            : []),
+          {
+            label: isFavorite ? 'Unfav' : 'Favorite',
+            icon: StarIcon,
+            color: 'yellow' as const,
+            onAction: handleToggleFavorite,
+          },
+          ...(onDelete
+            ? [
+                {
+                  label: 'Delete',
+                  icon: TrashIcon,
+                  color: 'red' as const,
+                  onAction: handleDelete,
+                },
+              ]
+            : []),
+        ]}
+      >
+        {cardContent}
+      </SwipeableCard>
+    )
+
     if (!showContextMenu) {
-      return cardContent
+      return swipeableContent
     }
 
     return (
       <ContextMenu onOpenChange={setContextMenuOpen}>
-        <ContextMenuTrigger asChild>{cardContent}</ContextMenuTrigger>
+        <ContextMenuTrigger asChild>{swipeableContent}</ContextMenuTrigger>
         <ContextMenuContent className="w-56">
           {onEdit && (
             <ContextMenuItem onClick={handleEdit}>

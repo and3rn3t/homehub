@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { IOS26StatusBadge } from '@/components/ui/ios26-status'
+import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { Switch } from '@/components/ui/switch'
 import { KV_KEYS, MOCK_DEVICES } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
@@ -24,7 +25,7 @@ import {
 } from '@/lib/icons'
 import type { Device } from '@/types'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 interface DeviceStatus {
@@ -128,6 +129,23 @@ export function DeviceMonitor() {
 
   const [activeAlerts, setActiveAlerts] = useState<DeviceAlert[]>([])
   const [filter, setFilter] = useState<'all' | 'online' | 'offline' | 'warning' | 'error'>('all')
+
+  // Pull-to-refresh handler
+  const handleRefresh = useCallback(async () => {
+    try {
+      // Simulate device status refresh
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      // Force a device status update
+      setDevices(kvDevices.map(convertToDeviceStatus))
+
+      toast.success('Device status refreshed', {
+        description: `Checked ${kvDevices.length} devices`,
+      })
+    } catch (_error) {
+      toast.error('Failed to refresh device status')
+    }
+  }, [kvDevices])
 
   // Simulate real-time updates
   useEffect(() => {
@@ -378,7 +396,7 @@ export function DeviceMonitor() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 pb-6">
+      <PullToRefresh onRefresh={handleRefresh} className="flex-1 px-6 pb-6">
         <div className="space-y-4">
           <AnimatePresence>
             {filteredDevices.map(device => {
@@ -539,7 +557,7 @@ export function DeviceMonitor() {
             </Card>
           )}
         </div>
-      </div>
+      </PullToRefresh>
     </div>
   )
 }

@@ -2,23 +2,29 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { IOS26EmptyState, IOS26Error } from '@/components/ui/ios26-error'
 import { IOS26Shimmer } from '@/components/ui/ios26-loading'
+import { PullToRefresh } from '@/components/ui/pull-to-refresh'
+import { SwipeableCard } from '@/components/ui/swipeable-card'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { KV_KEYS, MOCK_SCENES } from '@/constants'
 import { useHaptic } from '@/hooks/use-haptic'
 import { useKV } from '@/hooks/use-kv'
 import {
   BedIcon,
+  CopyIcon,
+  EditIcon,
   HomeRoomIcon,
   MoonIcon,
   PlayIcon,
   PlusIcon,
   ShieldIcon,
   SunRoomIcon,
+  TrashIcon,
   UtensilsIcon,
 } from '@/lib/icons'
 import { logger } from '@/lib/logger'
 import type { Scene } from '@/types'
 import { motion } from 'framer-motion'
+import { useCallback } from 'react'
 import { toast } from 'sonner'
 
 const sceneConfigs = {
@@ -77,6 +83,21 @@ export function Scenes() {
   const [activeScene, setActiveScene] = useKV<string | null>(KV_KEYS.ACTIVE_SCENE, null)
   const haptic = useHaptic()
 
+  // Pull-to-refresh handler
+  const handleRefresh = useCallback(async () => {
+    haptic.medium() // Haptic feedback on refresh
+
+    try {
+      // Simulate data refresh
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      toast.success('Scenes refreshed')
+    } catch (error) {
+      logger.error('Failed to refresh scenes', { component: 'Scenes', error })
+      toast.error('Failed to refresh scenes')
+    }
+  }, [haptic])
+
   const activateScene = (sceneId: string) => {
     try {
       haptic.success() // Success haptic for scene activation
@@ -102,6 +123,30 @@ export function Scenes() {
     }
   }
 
+  // Scene management handlers for swipe actions
+  const handleEditScene = (scene: Scene) => {
+    haptic.light()
+    toast.info(`Edit ${scene.name}`, {
+      description: 'Scene editing UI coming soon',
+    })
+  }
+
+  const handleDuplicateScene = (scene: Scene) => {
+    haptic.light()
+    toast.success(`Duplicated ${scene.name}`, {
+      description: 'New scene created',
+    })
+    // TODO: Implement scene duplication logic
+  }
+
+  const handleDeleteScene = (scene: Scene) => {
+    haptic.heavy()
+    toast.success(`Deleted ${scene.name}`, {
+      description: 'Scene removed',
+    })
+    // TODO: Implement scene deletion logic
+  }
+
   // Smart loading state: Only show skeletons on initial load with no data
   const showSkeleton = isLoading && scenes.length === 0
 
@@ -122,7 +167,7 @@ export function Scenes() {
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 pb-6">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <IOS26Shimmer className="h-40 rounded-2xl" />
             <IOS26Shimmer className="h-40 rounded-2xl" />
             <IOS26Shimmer className="h-40 rounded-2xl" />
@@ -184,7 +229,7 @@ export function Scenes() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-6 sm:px-6">
+      <PullToRefresh onRefresh={handleRefresh} className="flex-1 px-4 pb-6 sm:px-6">
         {scenes.length === 0 ? (
           <div className="space-y-6">
             <IOS26EmptyState
@@ -292,126 +337,150 @@ export function Scenes() {
                     willChange: 'transform',
                   }}
                 >
-                  <Card
-                    role="button"
-                    tabIndex={0}
-                    className={`group relative cursor-pointer overflow-hidden transition-all duration-300 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none ${
-                      scene.id === activeScene
-                        ? 'ring-primary shadow-primary/20 shadow-2xl ring-2'
-                        : 'focus-visible:ring-primary/50 hover:shadow-primary/10 hover:shadow-2xl'
-                    }`}
-                    onClick={() => activateScene(scene.id)}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        activateScene(scene.id)
-                      }
-                    }}
+                  <SwipeableCard
+                    actions={[
+                      {
+                        label: 'Edit',
+                        icon: EditIcon,
+                        color: 'blue',
+                        onAction: () => handleEditScene(scene),
+                      },
+                      {
+                        label: 'Copy',
+                        icon: CopyIcon,
+                        color: 'green',
+                        onAction: () => handleDuplicateScene(scene),
+                      },
+                      {
+                        label: 'Delete',
+                        icon: TrashIcon,
+                        color: 'red',
+                        onAction: () => handleDeleteScene(scene),
+                      },
+                    ]}
                   >
-                    {/* Animated border glow on hover (non-active scenes) */}
-                    {scene.id !== activeScene && (
-                      <motion.div
-                        className="pointer-events-none absolute -inset-[1px] rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                        style={{
-                          background:
-                            'linear-gradient(135deg, rgba(var(--primary-rgb), 0.4) 0%, rgba(var(--primary-rgb), 0) 50%, rgba(var(--primary-rgb), 0.4) 100%)',
-                          filter: 'blur(12px)',
-                        }}
-                      />
-                    )}
-
-                    <CardContent className="p-0">
-                      <motion.div
-                        className={`${bgColor} relative overflow-hidden p-6 text-white`}
-                        animate={{
-                          scale: scene.id === activeScene ? [1, 1.02, 1] : 1,
-                        }}
-                        transition={{
-                          duration: 0.3,
-                          ease: 'easeInOut',
-                        }}
-                      >
-                        {/* Shimmer effect on hover */}
+                    <Card
+                      role="button"
+                      tabIndex={0}
+                      className={`group relative cursor-pointer overflow-hidden transition-all duration-300 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none ${
+                        scene.id === activeScene
+                          ? 'ring-primary shadow-primary/20 shadow-2xl ring-2'
+                          : 'focus-visible:ring-primary/50 hover:shadow-primary/10 hover:shadow-2xl'
+                      }`}
+                      onClick={() => activateScene(scene.id)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          activateScene(scene.id)
+                        }
+                      }}
+                    >
+                      {/* Animated border glow on hover (non-active scenes) */}
+                      {scene.id !== activeScene && (
                         <motion.div
-                          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                          className="pointer-events-none absolute -inset-[1px] rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                           style={{
                             background:
-                              'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
-                          }}
-                          animate={{
-                            x: ['-100%', '200%'],
-                          }}
-                          transition={{
-                            duration: 1.5,
-                            repeat: Number.POSITIVE_INFINITY,
-                            ease: 'linear',
+                              'linear-gradient(135deg, rgba(var(--primary-rgb), 0.4) 0%, rgba(var(--primary-rgb), 0) 50%, rgba(var(--primary-rgb), 0.4) 100%)',
+                            filter: 'blur(12px)',
                           }}
                         />
+                      )}
 
-                        <div className="absolute top-2 right-2 opacity-20">
-                          <IconComponent className="h-10 w-10 fill-current" />
-                        </div>
-                        <div className="relative z-10">
+                      <CardContent className="p-0">
+                        <motion.div
+                          className={`${bgColor} relative overflow-hidden p-6 text-white`}
+                          animate={{
+                            scale: scene.id === activeScene ? [1, 1.02, 1] : 1,
+                          }}
+                          transition={{
+                            duration: 0.3,
+                            ease: 'easeInOut',
+                          }}
+                        >
+                          {/* Shimmer effect on hover */}
                           <motion.div
+                            className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                            style={{
+                              background:
+                                'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
+                            }}
                             animate={{
-                              rotate: scene.id === activeScene ? [0, 10, -10, 0] : 0,
+                              x: ['-100%', '200%'],
                             }}
                             transition={{
-                              duration: 0.5,
-                              ease: 'easeInOut',
+                              duration: 1.5,
+                              repeat: Number.POSITIVE_INFINITY,
+                              ease: 'linear',
                             }}
-                          >
-                            <IconComponent className="mb-3 h-7 w-7 fill-current" />
-                          </motion.div>
-                          <h4 className="mb-1 text-lg font-semibold">{scene.name}</h4>
-                        </div>
-
-                        {scene.id === activeScene && (
-                          <motion.div
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0, opacity: 0 }}
-                            transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                            className="absolute top-3 left-3 h-3 w-3 rounded-full bg-white shadow-lg"
                           />
-                        )}
-                      </motion.div>
 
-                      <div className="p-4">
-                        <p className="text-muted-foreground mb-3 text-sm">{scene.description}</p>
-                        <div className="flex items-center justify-between">
-                          <Tooltip delayDuration={500}>
-                            <TooltipTrigger asChild>
-                              <span className="text-muted-foreground cursor-help text-xs">
-                                {scene.deviceStates?.length || 0} devices
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>
-                                This scene controls {scene.deviceStates?.length || 0} smart devices
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
+                          <div className="absolute top-2 right-2 opacity-20">
+                            <IconComponent className="h-10 w-10 fill-current" />
+                          </div>
+                          <div className="relative z-10">
+                            <motion.div
+                              animate={{
+                                rotate: scene.id === activeScene ? [0, 10, -10, 0] : 0,
+                              }}
+                              transition={{
+                                duration: 0.5,
+                                ease: 'easeInOut',
+                              }}
+                            >
+                              <IconComponent className="mb-3 h-7 w-7 fill-current" />
+                            </motion.div>
+                            <h4 className="mb-1 text-lg font-semibold">{scene.name}</h4>
+                          </div>
+
                           {scene.id === activeScene && (
                             <motion.div
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                              className="text-primary text-xs font-medium"
-                            >
-                              Active
-                            </motion.div>
+                              initial={{ scale: 0, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              exit={{ scale: 0, opacity: 0 }}
+                              transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                              className="absolute top-3 left-3 h-3 w-3 rounded-full bg-white shadow-lg"
+                            />
                           )}
+                        </motion.div>
+
+                        <div className="p-4">
+                          <p className="text-muted-foreground mb-3 text-sm">{scene.description}</p>
+                          <div className="flex items-center justify-between">
+                            <Tooltip delayDuration={500}>
+                              <TooltipTrigger asChild>
+                                <span className="text-muted-foreground cursor-help text-xs">
+                                  {scene.deviceStates?.length || 0} devices
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>
+                                  This scene controls {scene.deviceStates?.length || 0} smart
+                                  devices
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                            {scene.id === activeScene && (
+                              <motion.div
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                                className="text-primary text-xs font-medium"
+                              >
+                                Active
+                              </motion.div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </SwipeableCard>
                 </motion.div>
               )
             })}
           </div>
         )}
-      </div>
+      </PullToRefresh>
     </div>
   )
 }

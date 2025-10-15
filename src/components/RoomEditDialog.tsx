@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { KV_KEYS } from '@/constants'
+import { useKeyboardAvoidance } from '@/hooks/use-keyboard-avoidance'
 import { useKV } from '@/hooks/use-kv'
 import {
   BathIcon,
@@ -82,6 +83,9 @@ export function RoomEditDialog({
 }: RoomEditDialogProps) {
   const [, setRooms] = useKV<Room[]>(KV_KEYS.ROOMS, [])
   const [devices, setDevices] = useKV<Device[]>(KV_KEYS.DEVICES, [])
+
+  // Keyboard avoidance for mobile
+  useKeyboardAvoidance()
 
   // Form state
   const [name, setName] = useState(room?.name || '')
