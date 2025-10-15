@@ -1,3 +1,7 @@
+// CRITICAL: Import React first to ensure it's available before any components
+import 'react'
+import 'react-dom'
+
 // Polyfill process for Node.js libraries in browser (e.g., @koush/arlo)
 import './lib/process-polyfill'
 
