@@ -26,11 +26,9 @@ export default defineConfig({
   },
   define: {
     // Define process.env for browser environment (required by @koush/arlo)
-    'process.env': '{}',
-    'process.platform': '"browser"',
-    'process.version': '"v20.0.0"',
-    'process.exit': '(() => {})',
-    'process.cwd': '(() => "/")',
+    'process.env': JSON.stringify({}),
+    'process.platform': JSON.stringify('browser'),
+    'process.version': JSON.stringify('v20.0.0'),
     global: 'globalThis',
   },
   // Cloudflare Pages configuration
