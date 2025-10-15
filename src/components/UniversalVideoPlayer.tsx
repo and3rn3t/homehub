@@ -1,7 +1,7 @@
 import { MaximizeIcon, PauseIcon, PlayIcon, VolumeIcon, VolumeOffIcon } from '@/lib/icons'
+import * as dashjs from 'dashjs'
 import Hls from 'hls.js'
 import { useEffect, useRef, useState } from 'react'
-import * as dashjs from 'dashjs'
 
 /**
  * Proxy Arlo URLs through our worker to bypass CORS
