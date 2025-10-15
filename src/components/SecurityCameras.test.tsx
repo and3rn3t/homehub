@@ -10,6 +10,24 @@ vi.mock('framer-motion', () => ({
     button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
   },
   AnimatePresence: ({ children }: any) => children,
+  useAnimation: () => ({
+    start: vi.fn(),
+    stop: vi.fn(),
+    set: vi.fn(),
+  }),
+  useMotionValue: (initialValue: any) => ({
+    get: () => initialValue,
+    set: vi.fn(),
+    onChange: vi.fn(),
+    destroy: vi.fn(),
+  }),
+  useTransform: () => ({
+    get: () => 0,
+    set: vi.fn(),
+    onChange: vi.fn(),
+    destroy: vi.fn(),
+  }),
+  useSpring: (value: any) => value,
 }))
 
 // Mock VideoPlayer component
