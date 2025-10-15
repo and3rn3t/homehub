@@ -81,17 +81,21 @@ All buttons disabled when camera is offline.
 
 1. **Import**: Added `CameraDetailsModal` component
 2. **State Management**: Added modal state
+
    ```tsx
    const [selectedCamera, setSelectedCamera] = useState<Camera | null>(null)
    const [showCameraDetails, setShowCameraDetails] = useState(false)
    ```
+
 3. **Click Handler**: Updated `EnhancedCameraCard` onClick
+
    ```tsx
    onClick={() => {
      setSelectedCamera(camera)
      setShowCameraDetails(true)
    }}
    ```
+
 4. **Modal Rendering**: Added modal at component end (after Tabs)
 
 ## Technical Implementation

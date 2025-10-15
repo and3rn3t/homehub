@@ -161,7 +161,7 @@ node scripts/test-arlo-exact-request.js
 
 ## ❓ Still Can't Find It?
 
-### Try These Actions to Trigger the Request:
+### Try These Actions to Trigger the Request
 
 1. **Refresh the Devices page**
    - Navigate to "Devices" in sidebar

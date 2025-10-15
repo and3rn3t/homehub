@@ -188,18 +188,18 @@ const response = await fetch(targetUrl, { ... })
 
 ## Recommended Next Steps
 
-### Immediate (Do Now):
+### Immediate (Do Now)
 
 1. **Test with 0s delay** - Rule out expiration theory
 2. **Check RTSP protocol** - Try VLC with stream URL
 3. **Inspect Arlo web app** - Compare network requests
 
-### Short-term (This Sprint):
+### Short-term (This Sprint)
 
 4. **Backend transcoding** - Set up FFmpeg RTSP→DASH pipeline
 5. **Alternative APIs** - Research Arlo SDK/embed options
 
-### Long-term (Future):
+### Long-term (Future)
 
 6. **Native RTSP player** - Consider rtsp.js or similar
 7. **HLS fallback** - Try HLS protocol instead of DASH

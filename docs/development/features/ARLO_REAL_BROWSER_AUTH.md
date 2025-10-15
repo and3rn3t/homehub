@@ -216,6 +216,7 @@ If the script doesn't work, manually export cookies:
 3. **Click Extension** → Export cookies (JSON format)
 4. **Save** to `data/arlo-real-auth.json` manually
 5. **Format** as:
+
    ```json
    {
      "cookies": [

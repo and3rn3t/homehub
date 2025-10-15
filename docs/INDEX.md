@@ -149,7 +149,7 @@ docs/
 | [MILESTONE_2.2.4_COMPLETE.md](development/milestones/MILESTONE_2.2.4_COMPLETE.md)                                     | 2.2.4   | HTTP device control         | ✅ Complete |
 | [MILESTONE_2.2.5_COMPLETE.md](development/milestones/MILESTONE_2.2.5_COMPLETE.md)                                     | 2.2.5   | Advanced discovery          | ✅ Complete |
 
-_See [development/milestones/](development/milestones/) for all milestone documentation_
+*See [development/milestones/](development/milestones/) for all milestone documentation*
 
 ### Features Implemented
 
@@ -170,7 +170,7 @@ _See [development/milestones/](development/milestones/) for all milestone docume
 | [CI_CD_INTEGRATION_COMPLETE.md](development/features/CI_CD_INTEGRATION_COMPLETE.md)                 | CI/CD pipeline      | ✅ Complete |
 | [VALIDATION_INFRASTRUCTURE_COMPLETE.md](development/features/VALIDATION_INFRASTRUCTURE_COMPLETE.md) | Test infrastructure | ✅ Complete |
 
-_See [development/features/](development/features/) for all feature documentation_
+*See [development/features/](development/features/) for all feature documentation*
 
 ### Development Sessions
 
@@ -182,7 +182,7 @@ _See [development/features/](development/features/) for all feature documentatio
 | [DISCOVERY_TEST_RESULTS.md](development/sessions/DISCOVERY_TEST_RESULTS.md)                         | Testing | ✅ Complete |
 | [HUE_ADAPTER_TEST_RESULTS.md](development/sessions/HUE_ADAPTER_TEST_RESULTS.md)                     | Testing | ✅ Complete |
 
-_See [development/sessions/](development/sessions/) for all session documentation_
+*See [development/sessions/](development/sessions/) for all session documentation*
 
 ### Bug Fixes
 
@@ -194,7 +194,7 @@ _See [development/sessions/](development/sessions/) for all session documentatio
 | [DEVICE_ACCESSIBILITY_FIX.md](development/fixes/DEVICE_ACCESSIBILITY_FIX.md) | Device visibility | ✅ Fixed |
 | [TYPESCRIPT_ERRORS_FIXED.md](development/fixes/TYPESCRIPT_ERRORS_FIXED.md)   | TypeScript        | ✅ Fixed |
 
-_See [development/fixes/](development/fixes/) for all bug fix documentation_
+*See [development/fixes/](development/fixes/) for all bug fix documentation*
 
 ---
 
@@ -243,7 +243,7 @@ _See [development/fixes/](development/fixes/) for all bug fix documentation_
 | [PHASE_1.3.4_ERROR_BOUNDARIES.md](history/PHASE_1.3.4_ERROR_BOUNDARIES.md) | Error handling patterns     | ✅ Reference |
 | [PHASE_1.3.5_RESPONSIVE.md](history/PHASE_1.3.5_RESPONSIVE.md)             | Responsive design guide     | ✅ Reference |
 
-_See [history/](history/) for complete Phase 1 documentation_
+*See [history/](history/) for complete Phase 1 documentation*
 
 ### Phase 2: Device Integration (✅ Complete)
 
@@ -253,7 +253,7 @@ _See [history/](history/) for complete Phase 1 documentation_
 | --------------------------------------------------------------------------------- | --------------- | ----------- |
 | [PHASE_2_COMPLETE_SUMMARY.md](development/milestones/PHASE_2_COMPLETE_SUMMARY.md) | Phase 2 summary | ✅ Complete |
 
-_See [archive/development/phase-2/](archive/development/phase-2/) for detailed Phase 2 work_
+*See [archive/development/phase-2/](archive/development/phase-2/) for detailed Phase 2 work*
 
 ---
 
@@ -341,7 +341,7 @@ _See [archive/development/phase-2/](archive/development/phase-2/) for detailed P
 
 ---
 
-_For the complete documentation catalog, see the directory READMEs in [guides/](guides/) and [development/](development/)_
+*For the complete documentation catalog, see the directory READMEs in [guides/](guides/) and [development/](development/)*
 
 **Future work and consolidation plans:**
 

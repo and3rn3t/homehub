@@ -78,17 +78,17 @@
 
 ### Bundle Sizes
 
-| Chunk                  | Size       | Gzip      | Notes                                |
-| ---------------------- | ---------- | --------- | ------------------------------------ |
-| **CSS**                | 228.12 KB  | 37.95 KB  | Tailwind + custom styles             |
-| **react-vendor**       | 11.84 KB   | 4.25 KB   | React + ReactDOM                     |
-| **ui-vendor**          | 134.63 KB  | 45.22 KB  | Framer Motion + Radix UI             |
-| **chart-vendor**       | 385.60 KB  | 106.31 KB | Recharts + D3                        |
-| **index (main)**       | 438.05 KB  | 134.11 KB | App shell + core logic               |
-| **Dashboard**          | 438.89 KB  | 130.68 KB | Dashboard component                  |
-| **Security**           | 1,592.52 KB| 486.87 KB | Security cameras + Arlo integration  |
-| **Automations**        | 91.11 KB   | 22.89 KB  | Automation engine                    |
-| **Rooms**              | 80.24 KB   | 24.23 KB  | Room management                      |
+| Chunk            | Size        | Gzip      | Notes                               |
+| ---------------- | ----------- | --------- | ----------------------------------- |
+| **CSS**          | 228.12 KB   | 37.95 KB  | Tailwind + custom styles            |
+| **react-vendor** | 11.84 KB    | 4.25 KB   | React + ReactDOM                    |
+| **ui-vendor**    | 134.63 KB   | 45.22 KB  | Framer Motion + Radix UI            |
+| **chart-vendor** | 385.60 KB   | 106.31 KB | Recharts + D3                       |
+| **index (main)** | 438.05 KB   | 134.11 KB | App shell + core logic              |
+| **Dashboard**    | 438.89 KB   | 130.68 KB | Dashboard component                 |
+| **Security**     | 1,592.52 KB | 486.87 KB | Security cameras + Arlo integration |
+| **Automations**  | 91.11 KB    | 22.89 KB  | Automation engine                   |
+| **Rooms**        | 80.24 KB    | 24.23 KB  | Room management                     |
 
 **Total Gzipped**: ~1.1 MB initial load (acceptable for feature-rich PWA)
 

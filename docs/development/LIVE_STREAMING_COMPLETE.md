@@ -344,4 +344,4 @@ This is why proxying just the manifest is sufficient - segments come through aut
 
 ---
 
-_End of Session Summary - October 14, 2025_
+*End of Session Summary - October 14, 2025*

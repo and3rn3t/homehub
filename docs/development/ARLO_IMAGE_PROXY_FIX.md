@@ -132,9 +132,11 @@ F12 → Network tab → "Disable cache" checkbox
 
 1. Open camera modal
 2. Check Network tab for requests like:
+
    ```
    http://localhost:8788/proxy/https%3A%2F%2Farlolastimage-z2.arlo.com%2F...
    ```
+
 3. Should return `200 OK` with image data
 
 ### 4. Verify Request Headers (in worker console)
