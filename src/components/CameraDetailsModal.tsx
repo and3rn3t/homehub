@@ -23,6 +23,24 @@ import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 
+/**
+ * Proxy Arlo URLs through our worker to bypass CORS
+ */
+function getProxiedUrl(arloUrl: string | undefined): string {
+  if (!arloUrl) return ''
+
+  // If already proxied, return as-is
+  if (arloUrl.includes('localhost:8787') || arloUrl.includes('arlo-proxy')) {
+    return arloUrl
+  }
+
+  // Build proxy URL with wildcard pattern: /proxy/{encodedFullUrl}
+  const proxyBaseUrl = import.meta.env.VITE_ARLO_PROXY_URL || 'http://localhost:8787'
+
+  // Return original URL for non-Arlo domains
+  return arloUrl
+}
+
 interface CameraDetailsModalProps {
   camera: Camera | null
   open: boolean
@@ -38,13 +56,15 @@ export function CameraDetailsModal({
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [streamUrl, setStreamUrl] = useState<string | null>(null)
   const [isStreaming, setIsStreaming] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   // Auto-refresh snapshot every 10 seconds (when not streaming)
   useEffect(() => {
     if (!camera || !open) return
 
     const refreshSnapshot = () => {
-      setSnapshotUrl(camera.snapshotUrl || '')
+      // Proxy the snapshot URL through our worker to bypass CORS
+      setSnapshotUrl(getProxiedUrl(camera.snapshotUrl))
     }
 
     refreshSnapshot() // Initial load
@@ -57,9 +77,10 @@ export function CameraDetailsModal({
 
   const handleRefreshSnapshot = async () => {
     setIsRefreshing(true)
-    // Simulate snapshot refresh delay
+    // Simulate snapshot refresh delay and proxy the URL
     setTimeout(() => {
-      setSnapshotUrl(`${camera.snapshotUrl}?t=${Date.now()}`)
+      const proxiedUrl = getProxiedUrl(camera.snapshotUrl)
+      setSnapshotUrl(`${proxiedUrl}${proxiedUrl.includes('?') ? '&' : '?'}t=${Date.now()}`)
       setIsRefreshing(false)
     }, 500)
   }
@@ -107,9 +128,13 @@ export function CameraDetailsModal({
             '• API rate limiting or temporary service issue\n\n' +
             'Please check the console for detailed error information.'
         )
-        setIsLoadingStream(false)
+        setIsRefreshing(false)
         return
       }
+
+      console.log('[CameraDetailsModal] ✅ Stream URL received:', streamUrl)
+      setStreamUrl(streamUrl)
+      setIsStreaming(true)
     } catch (error) {
       console.error('[CameraDetailsModal] ❌ Failed to start stream:', error)
       alert(`Failed to start stream: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -143,21 +168,66 @@ export function CameraDetailsModal({
     }
   }
 
-  const handleDownloadSnapshot = () => {
-    // TODO: Implement snapshot download
-    console.log('Download snapshot:', camera.name)
+  const handleDownloadSnapshot = async () => {
+    if (!camera?.snapshotUrl) return
+
+    try {
+      // Fetch the snapshot image through our proxy
+      const proxiedUrl = getProxiedUrl(camera.snapshotUrl)
+      const response = await fetch(proxiedUrl)
+      const blob = await response.blob()
+
+      // Create download link
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${camera.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.jpg`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('[CameraDetailsModal] Failed to download snapshot:', error)
+      alert('Failed to download snapshot')
+    }
   }
 
-  const handleStartRecording = () => {
-    // TODO: Implement recording via Arlo API
-    console.log('Start recording:', camera.name)
+  const handleStartRecording = async () => {
+    if (!camera) return
+
+    try {
+      console.log('[CameraDetailsModal] Starting recording for camera:', camera.name)
+      alert('Recording feature will be implemented in Milestone 6.1.4')
+      // TODO: Implement recording via Arlo API POST /hmsweb/users/devices/startRecord
+    } catch (error) {
+      console.error('[CameraDetailsModal] Failed to start recording:', error)
+      alert('Failed to start recording')
+    }
+  }
+
+  const handleFullscreen = () => {
+    setIsFullscreen(!isFullscreen)
+    // Toggle modal size
+  }
+
+  const handleSettings = () => {
+    alert(
+      `Camera Settings for ${camera?.name}\n\nSettings panel will be implemented in a future update.`
+    )
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex h-[90vh] max-w-5xl flex-col p-0">
+      <DialogContent
+        className={cn(
+          'flex flex-col gap-0 p-0',
+          isFullscreen ? 'h-screen w-full max-w-full' : 'h-[90vh] max-w-5xl'
+        )}
+        // Disable default close button since we have our own
+        onPointerDownOutside={e => e.preventDefault()}
+      >
         {/* Header */}
-        <DialogHeader className="border-b px-6 pt-6 pb-4">
+        <DialogHeader className="shrink-0 border-b px-6 pt-6 pb-4">
           <div className="flex items-start justify-between">
             <div>
               <DialogTitle className="text-2xl font-semibold">{camera.name}</DialogTitle>
@@ -167,7 +237,7 @@ export function CameraDetailsModal({
               variant="ghost"
               size="icon"
               onClick={() => onOpenChange(false)}
-              className="h-8 w-8"
+              className="h-8 w-8 shrink-0"
             >
               <XIcon className="h-4 w-4" />
             </Button>
@@ -242,14 +312,14 @@ export function CameraDetailsModal({
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                 {/* Live Stream Toggle */}
                 {!isStreaming ? (
                   <Button
                     onClick={handleStartLiveStream}
                     disabled={camera.status === 'offline' || isRefreshing}
                     variant="default"
-                    className="min-w-[120px] flex-1"
+                    className="col-span-2 sm:min-w-[140px] sm:flex-1"
                   >
                     <VideoIcon className="mr-2 h-4 w-4" />
                     Start Live Stream
@@ -258,7 +328,7 @@ export function CameraDetailsModal({
                   <Button
                     onClick={handleStopLiveStream}
                     variant="destructive"
-                    className="min-w-[120px] flex-1"
+                    className="col-span-2 sm:min-w-[140px] sm:flex-1"
                   >
                     <VideoIcon className="mr-2 h-4 w-4" />
                     Stop Stream
@@ -269,28 +339,32 @@ export function CameraDetailsModal({
                   onClick={handleRefreshSnapshot}
                   disabled={camera.status === 'offline' || isRefreshing || isStreaming}
                   variant="secondary"
-                  className="min-w-[120px] flex-1"
+                  className="sm:min-w-[120px]"
                 >
                   <CameraIcon className="mr-2 h-4 w-4" />
-                  Refresh Snapshot
+                  Refresh
                 </Button>
                 <Button
                   onClick={handleStartRecording}
                   disabled={camera.status === 'offline'}
                   variant="secondary"
-                  className="min-w-[120px] flex-1"
+                  className="sm:min-w-[120px]"
                 >
                   <VideoIcon className="mr-2 h-4 w-4" />
-                  Start Recording
+                  Record
                 </Button>
                 <Button
                   onClick={handleDownloadSnapshot}
                   disabled={camera.status === 'offline'}
                   variant="outline"
-                  className="min-w-[120px] flex-1"
+                  className="sm:min-w-[120px]"
                 >
                   <DownloadIcon className="mr-2 h-4 w-4" />
                   Download
+                </Button>
+                <Button onClick={handleFullscreen} variant="outline" className="sm:min-w-[120px]">
+                  <MaximizeIcon className="mr-2 h-4 w-4" />
+                  {isFullscreen ? 'Exit' : 'Fullscreen'}
                 </Button>
               </div>
 
@@ -390,20 +464,7 @@ export function CameraDetailsModal({
               <div className="bg-card/50 space-y-3 rounded-lg border p-4 backdrop-blur-xl">
                 <h3 className="text-sm font-semibold">Quick Actions</h3>
 
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  disabled={camera.status === 'offline'}
-                >
-                  <MaximizeIcon className="mr-2 h-4 w-4" />
-                  Full Screen View
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => console.log('Open settings:', camera.name)}
-                >
+                <Button variant="outline" className="w-full justify-start" onClick={handleSettings}>
                   <SettingsIcon className="mr-2 h-4 w-4" />
                   Camera Settings
                 </Button>

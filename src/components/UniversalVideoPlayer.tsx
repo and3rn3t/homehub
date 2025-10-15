@@ -1,8 +1,24 @@
+import { MaximizeIcon, PauseIcon, PlayIcon, VolumeIcon, VolumeOffIcon } from '@/lib/icons'
 import Hls from 'hls.js'
 import { useEffect, useRef, useState } from 'react'
-// @ts-expect-error - dashjs doesn't have TypeScript definitions
-import { MaximizeIcon, PauseIcon, PlayIcon, VolumeIcon, VolumeOffIcon } from '@/lib/icons'
-import dashjs from 'dashjs'
+// @ts-expect-error - dashjs doesn't have proper TypeScript definitions
+import * as dashjs from 'dashjs'
+
+/**
+ * Proxy Arlo URLs through our worker to bypass CORS
+ */
+function getProxiedUrl(arloUrl: string | undefined): string {
+  if (!arloUrl) return ''
+
+  // If already proxied, return as-is
+  if (arloUrl.includes('localhost:8787') || arloUrl.includes('arlo-proxy')) {
+    return arloUrl
+  }
+
+  // Build proxy URL with wildcard pattern: /proxy/{encodedFullUrl}
+  const proxyBaseUrl = import.meta.env.VITE_ARLO_PROXY_URL || 'http://localhost:8787'
+  return `${proxyBaseUrl}/proxy/${encodeURIComponent(arloUrl)}`
+}
 
 interface UniversalVideoPlayerProps {
   readonly streamUrl: string
@@ -43,14 +59,35 @@ export function UniversalVideoPlayer({
   const [error, setError] = useState<string | null>(null)
   const [streamType, setStreamType] = useState<'hls' | 'dash' | 'native' | null>(null)
 
+  // Log props on mount and when they change
+  useEffect(() => {
+    console.log('[UniversalVideoPlayer] Props received:', {
+      streamUrl,
+      snapshotUrl,
+      cameraName,
+      hasStreamUrl: !!streamUrl,
+      streamUrlLength: streamUrl?.length || 0,
+    })
+  }, [streamUrl, snapshotUrl, cameraName])
+
   // Detect stream type from URL
   useEffect(() => {
+    if (!streamUrl) {
+      console.warn('[UniversalVideoPlayer] No stream URL provided')
+      return
+    }
+
+    console.log('[UniversalVideoPlayer] Detecting stream type for URL:', streamUrl)
+
     if (streamUrl.includes('.m3u8')) {
+      console.log('[UniversalVideoPlayer] Detected HLS stream (.m3u8)')
       setStreamType('hls')
     } else if (streamUrl.includes('.mpd')) {
+      console.log('[UniversalVideoPlayer] Detected DASH stream (.mpd)')
       setStreamType('dash')
     } else {
       console.warn('[UniversalVideoPlayer] Unknown stream format, defaulting to HLS')
+      console.warn('[UniversalVideoPlayer] URL:', streamUrl)
       setStreamType('hls')
     }
   }, [streamUrl])
@@ -81,10 +118,14 @@ export function UniversalVideoPlayer({
 
     // HLS Stream
     if (streamType === 'hls') {
+      // Proxy the stream URL to avoid CORS
+      const proxiedStreamUrl = getProxiedUrl(streamUrl)
+      console.log('[UniversalVideoPlayer] Proxied HLS URL:', proxiedStreamUrl)
+
       // Check for native HLS support (Safari)
       if (video.canPlayType('application/vnd.apple.mpegurl')) {
         console.log('[UniversalVideoPlayer] Using native HLS support')
-        video.src = streamUrl
+        video.src = proxiedStreamUrl
         setStreamType('native')
         setIsLoading(false)
 
@@ -111,7 +152,7 @@ export function UniversalVideoPlayer({
 
         hls.on(Hls.Events.MEDIA_ATTACHED, () => {
           console.log('[UniversalVideoPlayer] HLS media attached')
-          hls.loadSource(streamUrl)
+          hls.loadSource(proxiedStreamUrl)
         })
 
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
@@ -157,71 +198,83 @@ export function UniversalVideoPlayer({
     if (streamType === 'dash') {
       console.log('[UniversalVideoPlayer] Using DASH.js')
 
-      const player = dashjs.MediaPlayer().create()
-      dashRef.current = player
+      try {
+        // Create DASH player
+        const player = dashjs.MediaPlayer().create()
+        dashRef.current = player
 
-      // Enable detailed logging
-      player.updateSettings({
-        debug: {
-          logLevel: dashjs.Debug.LOG_LEVEL_DEBUG,
-        },
-      })
-
-      player.initialize(video, streamUrl, true) // autoPlay = true
-
-      player.on(dashjs.MediaPlayer.events.STREAM_INITIALIZED, () => {
-        console.log('[UniversalVideoPlayer] DASH stream initialized')
-
-        // Log available tracks
-        const videoTracks = player.getTracksFor('video')
-        const audioTracks = player.getTracksFor('audio')
-        console.log('[UniversalVideoPlayer] Video tracks:', videoTracks?.length || 0)
-        console.log('[UniversalVideoPlayer] Audio tracks:', audioTracks?.length || 0)
-
-        setIsLoading(false)
-      })
-
-      player.on(dashjs.MediaPlayer.events.PLAYBACK_STARTED, () => {
-        console.log('[UniversalVideoPlayer] DASH playback started')
-        setIsPlaying(true)
-      })
-
-      player.on(dashjs.MediaPlayer.events.PLAYBACK_PAUSED, () => {
-        console.log('[UniversalVideoPlayer] DASH playback paused')
-        setIsPlaying(false)
-      })
-
-      player.on(dashjs.MediaPlayer.events.PLAYBACK_WAITING, () => {
-        console.log('[UniversalVideoPlayer] DASH buffering...')
-      })
-
-      player.on(dashjs.MediaPlayer.events.PLAYBACK_PLAYING, () => {
-        console.log('[UniversalVideoPlayer] DASH playing (buffering complete)')
-      })
-
-      player.on(dashjs.MediaPlayer.events.ERROR, (e: any) => {
-        console.error('[UniversalVideoPlayer] DASH error:', e)
-        console.error('[UniversalVideoPlayer] Error code:', e.error?.code)
-        console.error('[UniversalVideoPlayer] Error message:', e.error?.message)
-        setError('Stream playback failed. Please try again.')
-        setIsLoading(false)
-      })
-
-      // Configure DASH settings for better compatibility
-      player.updateSettings({
-        streaming: {
-          lowLatencyEnabled: false, // Disable low latency for better compatibility
-          liveDelay: 6, // Increase buffer for stability
-          stableBufferTime: 12,
-          bufferTimeAtTopQuality: 30,
-          bufferTimeAtTopQualityLongForm: 60,
-          delay: {
-            liveDelay: 6,
+        // Enable detailed logging
+        player.updateSettings({
+          debug: {
+            logLevel: dashjs.Debug.LOG_LEVEL_DEBUG,
           },
-        },
-      })
-    }
+        })
 
+        // Proxy the manifest URL to avoid CORS
+        const proxiedStreamUrl = getProxiedUrl(streamUrl)
+        console.log('[UniversalVideoPlayer] Original stream URL:', streamUrl)
+        console.log('[UniversalVideoPlayer] Proxied manifest URL:', proxiedStreamUrl)
+        console.log('[UniversalVideoPlayer] Initializing DASH player...')
+
+        player.initialize(video, proxiedStreamUrl, true) // autoPlay = true
+
+        // Log ALL DASH events for debugging
+        player.on(dashjs.MediaPlayer.events.MANIFEST_LOADED, (e: any) => {
+          console.log('[UniversalVideoPlayer] DASH manifest loaded:', e)
+        })
+
+        player.on(dashjs.MediaPlayer.events.STREAM_INITIALIZED, () => {
+          console.log('[UniversalVideoPlayer] DASH stream initialized')
+
+          // Log available tracks
+          const videoTracks = player.getTracksFor('video')
+          const audioTracks = player.getTracksFor('audio')
+          console.log('[UniversalVideoPlayer] Video tracks:', videoTracks?.length || 0)
+          console.log('[UniversalVideoPlayer] Audio tracks:', audioTracks?.length || 0)
+
+          setIsLoading(false)
+        })
+
+        player.on(dashjs.MediaPlayer.events.PLAYBACK_STARTED, () => {
+          console.log('[UniversalVideoPlayer] DASH playback started')
+          setIsPlaying(true)
+        })
+
+        player.on(dashjs.MediaPlayer.events.PLAYBACK_PAUSED, () => {
+          console.log('[UniversalVideoPlayer] DASH playback paused')
+          setIsPlaying(false)
+        })
+
+        player.on(dashjs.MediaPlayer.events.PLAYBACK_WAITING, () => {
+          console.log('[UniversalVideoPlayer] DASH buffering...')
+        })
+
+        player.on(dashjs.MediaPlayer.events.PLAYBACK_PLAYING, () => {
+          console.log('[UniversalVideoPlayer] DASH playing (buffering complete)')
+        })
+
+        player.on(dashjs.MediaPlayer.events.ERROR, (e: any) => {
+          console.error('[UniversalVideoPlayer] DASH error:', e)
+          console.error('[UniversalVideoPlayer] Error code:', e.error?.code)
+          console.error('[UniversalVideoPlayer] Error message:', e.error?.message)
+          setError('Stream playback failed. Please try again.')
+          setIsLoading(false)
+        })
+
+        // Configure DASH settings for better stability
+        player.updateSettings({
+          streaming: {
+            liveDelay: 6, // Increase buffer for stability
+            stableBufferTime: 12,
+            bufferTimeAtTopQuality: 30,
+          },
+        })
+      } catch (dashError) {
+        console.error('[UniversalVideoPlayer] Failed to initialize DASH.js:', dashError)
+        setError('Failed to load video player. Please refresh the page.')
+        setIsLoading(false)
+      }
+    }
     return cleanup
   }, [streamUrl, streamType, cameraName])
 
@@ -272,9 +325,10 @@ export function UniversalVideoPlayer({
 
   // Show snapshot fallback if error and snapshot available
   if (error && snapshotUrl) {
+    const proxiedSnapshotUrl = getProxiedUrl(snapshotUrl)
     return (
       <div className="bg-muted relative aspect-video w-full overflow-hidden rounded-lg">
-        <img src={snapshotUrl} alt={cameraName} className="h-full w-full object-cover" />
+        <img src={proxiedSnapshotUrl} alt={cameraName} className="h-full w-full object-cover" />
         <div className="absolute inset-0 flex items-center justify-center bg-black/50">
           <div className="text-center text-white">
             <p className="text-sm font-medium">{error}</p>

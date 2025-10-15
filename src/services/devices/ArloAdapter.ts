@@ -607,8 +607,26 @@ export class ArloAdapter extends EventEmitter {
       const data = await response.json()
 
       if (data.success && data.data?.url) {
-        console.log(`[ArloAdapter] ✅ Stream started: ${data.data.url}`)
-        return data.data.url // HLS manifest URL
+        const streamUrl = data.data.url
+        console.log(`[ArloAdapter] ✅ Stream URL received: ${streamUrl}`)
+
+        // IMPORTANT: Wait for stream to actually be ready on Arlo's Wowza servers
+        // The API returns the URL immediately, but the streaming session needs 7-15 seconds to initialize
+        // Note: We can't poll with HEAD requests due to CORS restrictions from the browser
+        // Testing history: 3s failed, 5s failed, 10s failed → Using 15s for worst-case coverage
+        console.log(
+          '[ArloAdapter] ⏳ Waiting 15 seconds for stream to initialize on Wowza servers...'
+        )
+        console.log('[ArloAdapter] (Arlo provisions the stream session asynchronously)')
+        console.log('[ArloAdapter] Previous tests: 3s ❌, 5s ❌, 10s ❌ → Trying 15s')
+
+        // Wait 15 seconds for Wowza to provision the stream
+        await new Promise(resolve => setTimeout(resolve, 15000))
+
+        console.log(
+          '[ArloAdapter] ✅ Stream should now be ready after 15 second initialization period'
+        )
+        return streamUrl
       }
 
       console.warn('[ArloAdapter] Stream URL not found in response:', data)
