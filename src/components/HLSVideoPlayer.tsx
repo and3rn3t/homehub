@@ -207,7 +207,12 @@ export function HLSVideoPlayer({
   if (useSnapshot || !streamUrl) {
     return (
       <div className={cn('bg-muted relative', className)}>
-        <img src={camera.snapshotUrl} alt={camera.name} className="h-full w-full object-cover" />
+        <img
+          src={camera.snapshotUrl}
+          alt={camera.name}
+          loading="lazy"
+          className="h-full w-full object-cover"
+        />
         {error && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50">
             <p className="text-sm text-white">{error}</p>

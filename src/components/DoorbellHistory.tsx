@@ -258,6 +258,7 @@ export const DoorbellHistory = memo(function DoorbellHistory({
                           <img
                             src={event.snapshotUrl}
                             alt="Doorbell snapshot"
+                            loading="lazy"
                             className="h-full w-full object-cover"
                           />
                           {!event.viewed && (
@@ -368,6 +369,7 @@ export const DoorbellHistory = memo(function DoorbellHistory({
                     <img
                       src={selectedEvent.snapshotUrl}
                       alt="Doorbell snapshot"
+                      loading="lazy"
                       className="h-full w-full object-cover"
                     />
                   </div>

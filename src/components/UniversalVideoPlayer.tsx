@@ -328,7 +328,12 @@ export function UniversalVideoPlayer({
     const proxiedSnapshotUrl = getProxiedUrl(snapshotUrl)
     return (
       <div className="bg-muted relative aspect-video w-full overflow-hidden rounded-lg">
-        <img src={proxiedSnapshotUrl} alt={cameraName} className="h-full w-full object-cover" />
+        <img
+          src={proxiedSnapshotUrl}
+          alt={cameraName}
+          loading="lazy"
+          className="h-full w-full object-cover"
+        />
         <div className="absolute inset-0 flex items-center justify-center bg-black/50">
           <div className="text-center text-white">
             <p className="text-sm font-medium">{error}</p>

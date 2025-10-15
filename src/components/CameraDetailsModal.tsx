@@ -300,6 +300,7 @@ export function CameraDetailsModal({
                     <img
                       src={snapshotUrl || camera.snapshotUrl}
                       alt={camera.name}
+                      loading="lazy"
                       className="h-full w-full object-cover"
                     />
                     {isRefreshing && (

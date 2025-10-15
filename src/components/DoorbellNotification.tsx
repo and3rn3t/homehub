@@ -188,6 +188,7 @@ export const DoorbellNotification = memo(function DoorbellNotification({
                   <img
                     src={event.snapshotUrl}
                     alt="Doorbell snapshot"
+                    loading="lazy"
                     className="h-full w-full object-cover"
                   />
                 ) : (

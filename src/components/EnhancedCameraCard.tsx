@@ -114,6 +114,7 @@ export const EnhancedCameraCard = memo(function EnhancedCameraCard({
             key={snapshotKey}
             src={`${camera.snapshotUrl}?t=${snapshotKey}`}
             alt={camera.name}
+            loading="lazy"
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
