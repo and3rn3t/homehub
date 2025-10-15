@@ -17,8 +17,8 @@ Test and fix the `useMergeRef` React error reported in production and check if w
 
 ```json
 {
-  "latest": "19.2.0",        // ← Current stable (what we use)
-  "next": "19.3.0-canary-5f2b5718-20251014",  // Experimental canary
+  "latest": "19.2.0", // ← Current stable (what we use)
+  "next": "19.3.0-canary-5f2b5718-20251014", // Experimental canary
   "canary": "19.3.0-canary-5f2b5718-20251014",
   "rc": "19.0.0-rc.1",
   "beta": "19.0.0-beta-26f2496093-20240514"
@@ -31,8 +31,8 @@ Test and fix the `useMergeRef` React error reported in production and check if w
 
 ```json
 {
-  "react": "^19.0.0",      // Installed: 19.2.0
-  "react-dom": "^19.0.0"   // Installed: 19.2.0
+  "react": "^19.0.0", // Installed: 19.2.0
+  "react-dom": "^19.0.0" // Installed: 19.2.0
 }
 ```
 
@@ -61,18 +61,18 @@ Checked `@radix-ui/react-compose-refs` (the package that contains `useMergeRef`)
 
 After `npm update @radix-ui/*`:
 
-| Package | Version | React 19 Support |
-|---------|---------|------------------|
-| @radix-ui/react-compose-refs | 1.1.2 | ✅ Yes |
-| @radix-ui/react-accordion | 1.2.12 | ✅ Yes |
-| @radix-ui/react-dialog | 1.1.15 | ✅ Yes |
-| @radix-ui/react-dropdown-menu | 2.1.16 | ✅ Yes |
-| @radix-ui/react-select | 2.2.6 | ✅ Yes |
-| @radix-ui/react-tooltip | 1.2.8 | ✅ Yes |
-| @radix-ui/react-slider | 1.3.6 | ✅ Yes |
-| @radix-ui/react-switch | 1.2.6 | ✅ Yes |
-| @radix-ui/react-tabs | 1.1.13 | ✅ Yes |
-| @radix-ui/react-label | 2.1.7 | ✅ Yes |
+| Package                       | Version | React 19 Support |
+| ----------------------------- | ------- | ---------------- |
+| @radix-ui/react-compose-refs  | 1.1.2   | ✅ Yes           |
+| @radix-ui/react-accordion     | 1.2.12  | ✅ Yes           |
+| @radix-ui/react-dialog        | 1.1.15  | ✅ Yes           |
+| @radix-ui/react-dropdown-menu | 2.1.16  | ✅ Yes           |
+| @radix-ui/react-select        | 2.2.6   | ✅ Yes           |
+| @radix-ui/react-tooltip       | 1.2.8   | ✅ Yes           |
+| @radix-ui/react-slider        | 1.3.6   | ✅ Yes           |
+| @radix-ui/react-switch        | 1.2.6   | ✅ Yes           |
+| @radix-ui/react-tabs          | 1.1.13  | ✅ Yes           |
+| @radix-ui/react-label         | 2.1.7   | ✅ Yes           |
 
 **All Radix UI packages updated to latest versions with React 19 support.**
 
@@ -149,6 +149,7 @@ npm run preview
 ### Immediate Actions (Before Deploy)
 
 1. **Clear Cloudflare Cache**:
+
    ```bash
    # In Cloudflare Dashboard:
    # Pages → HomeHub → Deployments → [Latest] → Purge Cache
@@ -241,6 +242,7 @@ These are **non-critical** - sourcemaps are used for debugging only.
 ### 1. React 20 Doesn't Exist (Yet)
 
 React versioning:
+
 - React 18.x → Current LTS
 - React 19.x → Latest stable (19.2.0 as of Oct 2025)
 - React 19.3.x-canary → Experimental builds
@@ -255,6 +257,7 @@ Radix UI has been React 19 compatible since their 1.1+ releases. No migration ne
 ### 3. Production Errors vs Build Errors
 
 The `useMergeRef` error was a **runtime production error**, not a build-time error:
+
 - Build: ✅ Successful
 - Local: ✅ No errors
 - Production: ❌ Runtime error
@@ -280,6 +283,7 @@ npm run build && npm run deploy
 ### 2. Monitor Production
 
 After deployment, monitor for:
+
 - Browser console errors (especially React/Radix related)
 - User reports of broken UI components
 - Cloudflare Analytics error rates
@@ -294,6 +298,7 @@ If the `useMergeRef` error appears again after cache clear + fresh deploy:
    - Sources: Check if React is actually loaded before Radix UI
 
 2. **Verify Bundle Integrity**:
+
    ```bash
    # Check that React is in the bundle
    grep -r "React.useLayoutEffect" dist/assets/react-vendor-*.js

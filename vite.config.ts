@@ -75,37 +75,39 @@ export default defineConfig({
     // Optimize chunk splitting for better caching and parallel loading
     rollupOptions: {
       output: {
+        // Ensure React loads before other libraries by controlling chunk order
         manualChunks: id => {
           // Split by node_modules for granular caching
           if (id.includes('node_modules')) {
-            // Core React libraries
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'react-vendor'
-            }
-            // Radix UI components
+            // DO NOT split React/react-dom - inline in main bundle to guarantee load order
+            // This ensures React is available before any Radix UI components execute
+            
+            // Radix UI components (separate chunk)
             if (id.includes('@radix-ui')) {
-              return 'radix-vendor'
-            }
-            // Chart libraries (heavy, load on-demand)
-            if (id.includes('recharts') || id.includes('d3')) {
-              return 'chart-vendor'
+              return 'radix-ui'
             }
             // Animation library
             if (id.includes('framer-motion')) {
-              return 'animation-vendor'
+              return 'animation'
             }
             // Icon library
             if (id.includes('lucide-react') || id.includes('@phosphor-icons')) {
-              return 'icon-vendor'
+              return 'icons'
             }
             // Form libraries
             if (id.includes('react-hook-form') || id.includes('@hookform')) {
-              return 'form-vendor'
+              return 'forms'
             }
-            // Other vendor code
+            // Chart libraries (heavy, load on-demand)
+            if (id.includes('recharts') || id.includes('d3')) {
+              return 'charts'
+            }
+            // Other vendor code (react ecosystem libs like react-error-boundary)
             return 'vendor'
           }
         },
+        // Force modulepreload order by chunk file names
+        chunkFileNames: 'assets/[name]-[hash].js',
       },
     },
   },
