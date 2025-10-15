@@ -34,10 +34,7 @@ function getProxiedUrl(arloUrl: string | undefined): string {
     return arloUrl
   }
 
-  // Build proxy URL with wildcard pattern: /proxy/{encodedFullUrl}
-  const proxyBaseUrl = import.meta.env.VITE_ARLO_PROXY_URL || 'http://localhost:8787'
-
-  // Return original URL for non-Arlo domains
+  // Return original URL for non-Arlo domains (proxy logic removed for now)
   return arloUrl
 }
 

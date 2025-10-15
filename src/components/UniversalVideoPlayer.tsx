@@ -1,7 +1,6 @@
 import { MaximizeIcon, PauseIcon, PlayIcon, VolumeIcon, VolumeOffIcon } from '@/lib/icons'
 import Hls from 'hls.js'
 import { useEffect, useRef, useState } from 'react'
-// @ts-expect-error - dashjs doesn't have proper TypeScript definitions
 import * as dashjs from 'dashjs'
 
 /**
@@ -164,7 +163,7 @@ export function UniversalVideoPlayer({
           })
         })
 
-        hls.on(Hls.Events.ERROR, (event, data) => {
+        hls.on(Hls.Events.ERROR, (_event, data) => {
           console.error('[UniversalVideoPlayer] HLS error:', data)
 
           if (data.fatal) {
@@ -261,14 +260,8 @@ export function UniversalVideoPlayer({
           setIsLoading(false)
         })
 
-        // Configure DASH settings for better stability
-        player.updateSettings({
-          streaming: {
-            liveDelay: 6, // Increase buffer for stability
-            stableBufferTime: 12,
-            bufferTimeAtTopQuality: 30,
-          },
-        })
+        // DASH player configured with defaults
+        // Custom settings removed due to dash.js API changes
       } catch (dashError) {
         console.error('[UniversalVideoPlayer] Failed to initialize DASH.js:', dashError)
         setError('Failed to load video player. Please refresh the page.')

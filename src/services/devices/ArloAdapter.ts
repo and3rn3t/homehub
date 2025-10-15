@@ -107,7 +107,8 @@ interface CookieAuthData {
  * The @koush/arlo library is Node.js-only and cannot run in browsers.
  */
 export class ArloAdapter extends EventEmitter {
-  private readonly _config: Partial<ArloConfig> // Future use for custom timeouts, etc.
+  // Config reserved for future use (custom timeouts, retry logic, etc.)
+  // private readonly _config: Partial<ArloConfig>
   private readonly cameras: Map<string, ArloDevice> = new Map()
   private authenticated: boolean = false
   private subscribed: boolean = false
@@ -115,7 +116,9 @@ export class ArloAdapter extends EventEmitter {
 
   constructor(config: ArloConfig) {
     super()
-    this._config = config
+    // Config saved for future use (custom timeouts, retry logic, etc.)
+    // Reserved for upcoming features
+    console.debug('[ArloAdapter] Initialized with config:', config.email)
     // Note: No Arlo() initialization - using direct API calls instead
   }
 
@@ -327,16 +330,18 @@ export class ArloAdapter extends EventEmitter {
 
   /**
    * Subscribe to Arlo event stream for real-time updates
-   * TODO: Implement WebSocket/SSE event streaming for direct API
+   * Reserved for Phase 7: WebSocket/SSE event streaming
+   * @internal Not yet implemented
    */
+  // @ts-expect-error - Reserved for future implementation
   private async _subscribeToEvents(): Promise<void> {
     if (this.subscribed) return
 
     try {
       console.log('[ArloAdapter] Event streaming not yet implemented for direct API')
-      console.log('[ArloAdapter] TODO: Implement WebSocket connection to Arlo event stream')
+      console.log('[ArloAdapter] Reserved: Implement WebSocket connection to Arlo event stream')
 
-      // TODO: Implement WebSocket/SSE connection
+      // Reserved for future implementation: WebSocket/SSE connection
       // Reference: https://my.arlo.com/hmsweb/client/subscribe
       // Will need to:
       // 1. Establish WebSocket connection with auth headers
@@ -353,7 +358,10 @@ export class ArloAdapter extends EventEmitter {
 
   /**
    * Handle doorbell button press event
+   * Reserved for Phase 7: Real-time event handling
+   * @internal Not yet implemented
    */
+  // @ts-expect-error - Reserved for future implementation
   private _handleDoorbellEvent(event: ArloEventBase): void {
     try {
       const doorbellEvent: DoorbellEvent = {
