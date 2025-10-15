@@ -1,8 +1,8 @@
 # HomeHub Documentation Index
 
-**Last Updated**: October 13, 2025
-**Total Documents**: 100+ files (organized into logical directories)
-**Status**: ✅ Phase 3 reorganization complete
+**Last Updated**: October 14, 2025
+**Total Documents**: 105+ files (organized into logical directories)
+**Status**: ✅ Phase 6.1 complete + Mobile optimization complete
 
 ---
 
@@ -13,8 +13,10 @@
 1. 📖 [Setup Quickstart](guides/setup/SETUP_QUICKSTART.md) - Get running in 15 minutes
 2. 🏗️ [Architecture Overview](guides/ARCHITECTURE.md) - Understand the system
 3. 💻 [Best Practices](guides/BEST_PRACTICES.md) - Coding standards and patterns
-4. � [Current Roadmap](development/NEXT_STEPS.md) - Phase 3 validation status
+4. 🎯 [Current Roadmap](development/NEXT_STEPS.md) - Planning Phase 4/5
 5. 🧪 [Test Suite Guide](development/TEST_SUITE_QUICKSTART.md) - Testing overview
+6. 📱 [Mobile Optimization](development/MOBILE_OPTIMIZATION_COMPLETE.md) - iOS enhancements
+7. 🎓 [Lessons Learned](development/LESSONS_LEARNED_OCT14_2025.md) - Recent technical wins
 
 ---
 
@@ -110,10 +112,31 @@ docs/
 
 **Production deployment and CI/CD:**
 
-| Document                                                        | Description                    | Status     |
-| --------------------------------------------------------------- | ------------------------------ | ---------- |
-| [CLOUDFLARE_DEPLOYMENT.md](deployment/CLOUDFLARE_DEPLOYMENT.md) | Complete Cloudflare deployment | ✅ Current |
-| [SECURITY.md](deployment/SECURITY.md)                           | Security guidelines            | ✅ Current |
+| Document                                                                              | Description                    | Status      |
+| ------------------------------------------------------------------------------------- | ------------------------------ | ----------- |
+| [CLOUDFLARE_DEPLOYMENT.md](deployment/CLOUDFLARE_DEPLOYMENT.md)                       | Complete Cloudflare deployment | ✅ Current  |
+| [PRODUCTION_DEPLOYMENT_OCT14_2025.md](deployment/PRODUCTION_DEPLOYMENT_OCT14_2025.md) | Latest deployment log          | ✅ Current  |
+| [PRODUCTION_LOGGING_COMPLETE.md](deployment/PRODUCTION_LOGGING_COMPLETE.md)           | Logging setup                  | ✅ Complete |
+| [SECURITY.md](deployment/SECURITY.md)                                                 | Security guidelines            | ✅ Current  |
+
+---
+
+## 🔬 Current Development (Phase 6.1 + Mobile)
+
+**Active Phase 6.1 and mobile optimization documentation:**
+
+| Document                                                                                           | Description                    | Status       |
+| -------------------------------------------------------------------------------------------------- | ------------------------------ | ------------ |
+| [NEXT_STEPS.md](development/NEXT_STEPS.md)                                                         | Current roadmap and priorities | ✅ Current   |
+| [LESSONS_LEARNED_OCT14_2025.md](development/LESSONS_LEARNED_OCT14_2025.md)                         | Comprehensive lessons learned  | ✅ Current   |
+| [MOBILE_OPTIMIZATION_COMPLETE.md](development/MOBILE_OPTIMIZATION_COMPLETE.md)                     | iOS-focused enhancements       | ✅ Complete  |
+| [MOBILE_SESSION_SUMMARY_OCT14_2025.md](development/MOBILE_SESSION_SUMMARY_OCT14_2025.md)           | Mobile features summary        | ✅ Complete  |
+| [PERFORMANCE_OPTIMIZATION_SESSION_OCT14.md](development/PERFORMANCE_OPTIMIZATION_SESSION_OCT14.md) | Performance guide              | ✅ Complete  |
+| [LIVE_STREAMING_COMPLETE.md](development/LIVE_STREAMING_COMPLETE.md)                               | DASH/HLS streaming             | ✅ Complete  |
+| [MILESTONE_6.1.3_COMPLETE.md](development/MILESTONE_6.1.3_COMPLETE.md)                             | Video optimization             | ✅ Complete  |
+| [TEST_SUITE_QUICKSTART.md](development/TEST_SUITE_QUICKSTART.md)                                   | Testing quick reference        | ✅ Current   |
+| [PHASE_3_PRODUCTION_VALIDATION.md](development/PHASE_3_PRODUCTION_VALIDATION.md)                   | Phase 3 validation (ref)       | 🔄 Reference |
+| [PHASE_3_VALIDATION_STATUS.md](development/PHASE_3_VALIDATION_STATUS.md)                           | Phase 3 status (ref)           | 🔄 Reference |
 
 ---
 
@@ -149,7 +172,7 @@ docs/
 | [MILESTONE_2.2.4_COMPLETE.md](development/milestones/MILESTONE_2.2.4_COMPLETE.md)                                     | 2.2.4   | HTTP device control         | ✅ Complete |
 | [MILESTONE_2.2.5_COMPLETE.md](development/milestones/MILESTONE_2.2.5_COMPLETE.md)                                     | 2.2.5   | Advanced discovery          | ✅ Complete |
 
-*See [development/milestones/](development/milestones/) for all milestone documentation*
+_See [development/milestones/](development/milestones/) for all milestone documentation_
 
 ### Features Implemented
 
@@ -170,7 +193,7 @@ docs/
 | [CI_CD_INTEGRATION_COMPLETE.md](development/features/CI_CD_INTEGRATION_COMPLETE.md)                 | CI/CD pipeline      | ✅ Complete |
 | [VALIDATION_INFRASTRUCTURE_COMPLETE.md](development/features/VALIDATION_INFRASTRUCTURE_COMPLETE.md) | Test infrastructure | ✅ Complete |
 
-*See [development/features/](development/features/) for all feature documentation*
+_See [development/features/](development/features/) for all feature documentation_
 
 ### Development Sessions
 
@@ -182,7 +205,7 @@ docs/
 | [DISCOVERY_TEST_RESULTS.md](development/sessions/DISCOVERY_TEST_RESULTS.md)                         | Testing | ✅ Complete |
 | [HUE_ADAPTER_TEST_RESULTS.md](development/sessions/HUE_ADAPTER_TEST_RESULTS.md)                     | Testing | ✅ Complete |
 
-*See [development/sessions/](development/sessions/) for all session documentation*
+_See [development/sessions/](development/sessions/) for all session documentation_
 
 ### Bug Fixes
 
@@ -194,7 +217,7 @@ docs/
 | [DEVICE_ACCESSIBILITY_FIX.md](development/fixes/DEVICE_ACCESSIBILITY_FIX.md) | Device visibility | ✅ Fixed |
 | [TYPESCRIPT_ERRORS_FIXED.md](development/fixes/TYPESCRIPT_ERRORS_FIXED.md)   | TypeScript        | ✅ Fixed |
 
-*See [development/fixes/](development/fixes/) for all bug fix documentation*
+_See [development/fixes/](development/fixes/) for all bug fix documentation_
 
 ---
 
@@ -243,7 +266,7 @@ docs/
 | [PHASE_1.3.4_ERROR_BOUNDARIES.md](history/PHASE_1.3.4_ERROR_BOUNDARIES.md) | Error handling patterns     | ✅ Reference |
 | [PHASE_1.3.5_RESPONSIVE.md](history/PHASE_1.3.5_RESPONSIVE.md)             | Responsive design guide     | ✅ Reference |
 
-*See [history/](history/) for complete Phase 1 documentation*
+_See [history/](history/) for complete Phase 1 documentation_
 
 ### Phase 2: Device Integration (✅ Complete)
 
@@ -253,7 +276,7 @@ docs/
 | --------------------------------------------------------------------------------- | --------------- | ----------- |
 | [PHASE_2_COMPLETE_SUMMARY.md](development/milestones/PHASE_2_COMPLETE_SUMMARY.md) | Phase 2 summary | ✅ Complete |
 
-*See [archive/development/phase-2/](archive/development/phase-2/) for detailed Phase 2 work*
+_See [archive/development/phase-2/](archive/development/phase-2/) for detailed Phase 2 work_
 
 ---
 
@@ -341,7 +364,7 @@ docs/
 
 ---
 
-*For the complete documentation catalog, see the directory READMEs in [guides/](guides/) and [development/](development/)*
+_For the complete documentation catalog, see the directory READMEs in [guides/](guides/) and [development/](development/)_
 
 **Future work and consolidation plans:**
 
