@@ -380,7 +380,7 @@ export function UniversalVideoPlayer({
       )}
 
       {/* Video Controls */}
-      <div className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {/* Play/Pause */}
@@ -412,7 +412,7 @@ export function UniversalVideoPlayer({
 
           <div className="flex items-center gap-2">
             {/* Stream Type Indicator */}
-            <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white uppercase backdrop-blur-sm">
+            <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium uppercase text-white backdrop-blur-sm">
               {streamType === 'native' ? 'HLS' : streamType}
             </span>
 

@@ -1,5 +1,3 @@
-import { lazy, Suspense } from 'react'
-import { Spinner } from './components/ui/spinner'
 import { CommandPalette, useKeyboardShortcut } from '@/components/ui/command-palette'
 import { IOS26TabBar } from '@/components/ui/ios26-tab-bar'
 import { Toaster } from '@/components/ui/sonner'
@@ -19,6 +17,8 @@ import {
   UsersIcon,
   ZapIcon,
 } from '@/lib/icons'
+import { lazy, Suspense } from 'react'
+import { Spinner } from './components/ui/spinner'
 
 // Lazy load heavy components for better performance
 const Dashboard = lazy(() => import('./components/Dashboard').then(m => ({ default: m.Dashboard })))
