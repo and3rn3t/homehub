@@ -40,7 +40,7 @@ Successfully resolved **13 TypeScript compilation errors**:
 #### ArloAdapter.ts (Reserved Methods)
 
 **Errors**: `'_subscribeToEvents' is declared but its value is never read`
-         `'_handleDoorbellEvent' is declared but its value is never read`
+`'_handleDoorbellEvent' is declared but its value is never read`
 
 **Fix**: Added `@ts-expect-error` directive to mark as reserved for Phase 7 (WebSocket/SSE event streaming)
 
@@ -99,7 +99,7 @@ Update the framer-motion mock to include `useAnimation`:
 
 ```typescript
 // vitest.setup.ts or vitest.config.ts
-vi.mock('framer-motion', async (importOriginal) => {
+vi.mock('framer-motion', async importOriginal => {
   const actual = await importOriginal<typeof import('framer-motion')>()
   return {
     ...actual,

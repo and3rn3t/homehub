@@ -4,10 +4,7 @@
     <meta charset="UTF-8" />
 
     <!-- Enhanced viewport for iOS with safe-area support -->
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <title>HomeHub - Home Automation</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -17,6 +14,7 @@
     <meta name="theme-color" content="oklch(0.17 0.012 264)" media="(prefers-color-scheme: dark)" />
 
     <!-- iOS-specific meta tags for better PWA experience -->
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="HomeHub" />
@@ -25,7 +23,7 @@
     <meta name="format-detection" content="telephone=no" />
 
     <!-- PWA manifest -->
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="/manifest.webmanifest" />
 
     <!-- Performance optimizations: Resource hints -->
     <link rel="dns-prefetch" href="https://api.cloudflare.com" />
