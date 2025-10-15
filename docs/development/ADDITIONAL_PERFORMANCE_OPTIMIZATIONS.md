@@ -1,7 +1,7 @@
 # Additional Performance Optimization Strategies
 
-**Current Baseline**: 27/100 Performance  
-**Goal**: 90+/100 Performance  
+**Current Baseline**: 27/100 Performance
+**Goal**: 90+/100 Performance
 **Date**: October 14, 2025
 
 ## 🎯 High-Impact Optimizations (Beyond Phase 1)
@@ -19,6 +19,7 @@ npm run build
 ```
 
 **Large dependencies to address**:
+
 - `@koush/arlo` - Only load in Security tab
 - `recharts` (303KB) - Only load in Energy tab
 - `d3` - Lazy load with recharts
@@ -59,6 +60,7 @@ depcheck
 ```
 
 **Likely candidates**:
+
 - Old icon libraries (if fully migrated to Lucide)
 - Duplicate utilities
 - Dev dependencies in production
@@ -127,7 +129,7 @@ const AutomationWidget = lazy(() => import('./components/widgets/AutomationWidge
 
 ```typescript
 // vite.config.ts
-manualChunks: (id) => {
+manualChunks: id => {
   if (id.includes('node_modules')) {
     // Split by feature
     if (id.includes('@koush/arlo')) return 'arlo-vendor' // Security only
@@ -152,13 +154,7 @@ manualChunks: (id) => {
 
 ```tsx
 // All images below fold
-<img
-  src="/camera-feed.jpg"
-  loading="lazy"
-  width="640"
-  height="480"
-  alt="Camera feed"
-/>
+<img src="/camera-feed.jpg" loading="lazy" width="640" height="480" alt="Camera feed" />
 ```
 
 **Expected Impact**: -300ms to -600ms LCP
@@ -213,13 +209,13 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 
 function DeviceList({ devices }) {
   const parentRef = useRef()
-  
+
   const virtualizer = useVirtualizer({
     count: devices.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 80, // Height of each device card
   })
-  
+
   return (
     <div ref={parentRef} style={{ height: '600px', overflow: 'auto' }}>
       <div style={{ height: `${virtualizer.getTotalSize()}px`, position: 'relative' }}>
@@ -298,7 +294,8 @@ plugins: [
 ]
 ```
 
-**Expected Impact**: 
+**Expected Impact**:
+
 - First visit: +5-10 points
 - Repeat visits: 90+ performance instantly
 
@@ -326,13 +323,7 @@ plugins: [
 
 ```html
 <!-- index.html -->
-<link
-  rel="preload"
-  href="/fonts/sf-pro-regular.woff2"
-  as="font"
-  type="font/woff2"
-  crossorigin
-/>
+<link rel="preload" href="/fonts/sf-pro-regular.woff2" as="font" type="font/woff2" crossorigin />
 ```
 
 **Expected Impact**: -100ms to -200ms
@@ -371,8 +362,8 @@ plugins: [
   critical({
     inline: true,
     dimensions: [
-      { width: 375, height: 667 },  // Mobile
-      { width: 1920, height: 1080 } // Desktop
+      { width: 375, height: 667 }, // Mobile
+      { width: 1920, height: 1080 }, // Desktop
     ],
   }),
 ]
@@ -388,11 +379,14 @@ plugins: [
 
 ```tsx
 // Expensive components
-const DeviceCard = memo(({ device }) => {
-  return <Card>...</Card>
-}, (prevProps, nextProps) => {
-  return prevProps.device.id === nextProps.device.id
-})
+const DeviceCard = memo(
+  ({ device }) => {
+    return <Card>...</Card>
+  },
+  (prevProps, nextProps) => {
+    return prevProps.device.id === nextProps.device.id
+  }
+)
 
 // Expensive calculations
 const sortedDevices = useMemo(() => {
@@ -400,10 +394,8 @@ const sortedDevices = useMemo(() => {
 }, [devices])
 
 // Callbacks passed to children
-const handleDeviceToggle = useCallback((deviceId) => {
-  setDevices(prev => prev.map(d => 
-    d.id === deviceId ? { ...d, enabled: !d.enabled } : d
-  ))
+const handleDeviceToggle = useCallback(deviceId => {
+  setDevices(prev => prev.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d)))
 }, [])
 ```
 
@@ -468,15 +460,13 @@ Already enabled on Cloudflare Pages! ✅
 
 ```typescript
 // Batch API requests
-const fetchMultiple = async (endpoints) => {
-  return Promise.all(
-    endpoints.map(endpoint => fetch(endpoint))
-  )
+const fetchMultiple = async endpoints => {
+  return Promise.all(endpoints.map(endpoint => fetch(endpoint)))
 }
 
 // Deduplicate requests
 const requestCache = new Map()
-const fetchWithCache = async (url) => {
+const fetchWithCache = async url => {
   if (requestCache.has(url)) {
     return requestCache.get(url)
   }
@@ -489,9 +479,7 @@ const fetchWithCache = async (url) => {
 const fetchWithTimeout = (url, timeout = 5000) => {
   return Promise.race([
     fetch(url),
-    new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Timeout')), timeout)
-    )
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout)),
   ])
 }
 ```
@@ -550,7 +538,7 @@ export default {
 const worker = new Worker('/workers/data-processor.js')
 
 worker.postMessage({ devices, operation: 'sort' })
-worker.onmessage = (e) => {
+worker.onmessage = e => {
   setDevices(e.data)
 }
 ```
@@ -569,7 +557,7 @@ const [apiData, setApiData] = useState(largeResponse)
 const [devices, setDevices] = useState(largeResponse.devices)
 const [metadata, setMetadata] = useState({
   total: largeResponse.total,
-  page: largeResponse.page
+  page: largeResponse.page,
 })
 ```
 
@@ -626,7 +614,7 @@ getLCP(console.log)
 #### B. Performance Observer API
 
 ```typescript
-const observer = new PerformanceObserver((list) => {
+const observer = new PerformanceObserver(list => {
   for (const entry of list.getEntries()) {
     if (entry.entryType === 'navigation') {
       console.log('DOM Content Loaded:', entry.domContentLoadedEventEnd)
@@ -681,18 +669,18 @@ observer.observe({ entryTypes: ['navigation', 'resource'] })
 
 ## 📊 Expected Improvements Summary
 
-| Optimization | Impact on FCP | Impact on LCP | Impact on TBT | Difficulty |
-|--------------|---------------|---------------|---------------|------------|
-| Bundle splitting | -500ms | -1000ms | -300ms | Medium |
-| Lazy loading deps | -300ms | -800ms | -400ms | Easy |
-| Virtual scrolling | -100ms | -200ms | -500ms | Medium |
-| Service worker | -200ms* | -500ms* | -100ms* | Medium |
-| Image optimization | -200ms | -600ms | -50ms | Easy |
-| Font optimization | -300ms | -100ms | 0ms | Easy |
-| Critical CSS | -400ms | -200ms | 0ms | Medium |
-| React memo | 0ms | -100ms | -300ms | Medium |
-| API optimization | -300ms | -400ms | -200ms | Medium |
-| Performance budgets | Prevents regressions | - | - | Easy |
+| Optimization        | Impact on FCP        | Impact on LCP | Impact on TBT | Difficulty |
+| ------------------- | -------------------- | ------------- | ------------- | ---------- |
+| Bundle splitting    | -500ms               | -1000ms       | -300ms        | Medium     |
+| Lazy loading deps   | -300ms               | -800ms        | -400ms        | Easy       |
+| Virtual scrolling   | -100ms               | -200ms        | -500ms        | Medium     |
+| Service worker      | -200ms\*             | -500ms\*      | -100ms\*      | Medium     |
+| Image optimization  | -200ms               | -600ms        | -50ms         | Easy       |
+| Font optimization   | -300ms               | -100ms        | 0ms           | Easy       |
+| Critical CSS        | -400ms               | -200ms        | 0ms           | Medium     |
+| React memo          | 0ms                  | -100ms        | -300ms        | Medium     |
+| API optimization    | -300ms               | -400ms        | -200ms        | Medium     |
+| Performance budgets | Prevents regressions | -             | -             | Easy       |
 
 **\* Repeat visits only**
 
@@ -742,7 +730,8 @@ Goal: 90+/100 ✅
 
 **Total Time Estimate**: 3-4 weeks of focused optimization work
 
-**Most Impactful**: 
+**Most Impactful**:
+
 1. Lazy load heavy dependencies (Arlo, recharts, d3)
 2. Implement virtual scrolling
 3. Add service worker
