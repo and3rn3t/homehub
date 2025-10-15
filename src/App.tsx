@@ -58,6 +58,7 @@ import { LoadingStatesDemo } from './components/LoadingStatesDemo'
 import { OfflineBanner } from './components/OfflineBanner'
 import { TestAdvancedControls } from './components/TestAdvancedControls'
 import { ThemeToggle } from './components/ThemeToggle'
+import { UpdateBanner } from './components/UpdateBanner'
 
 // Loading fallback component
 function TabContentLoader() {
@@ -292,6 +293,9 @@ function App() {
 
   return (
     <div className="from-background via-background to-muted/30 fixed inset-0 bg-gradient-to-br">
+      {/* Update notification banner */}
+      <UpdateBanner />
+
       {/* Offline indicator banner */}
       <OfflineBanner />
 

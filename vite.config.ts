@@ -14,8 +14,18 @@ export default defineConfig({
     tailwindcss(),
     // PWA Service Worker for caching and performance
     VitePWA({
-      registerType: 'autoUpdate',
+      // Disable auto-registration - we handle it manually in useServiceWorkerUpdate
+      injectRegister: false, // Don't inject registerSW.js
+      registerType: 'prompt',
       includeAssets: ['favicon.ico', '*.png', '*.svg'],
+      // Use custom service worker with background sync
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
+      injectManifest: {
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MB limit
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+      },
       manifest: {
         name: 'HomeHub',
         short_name: 'HomeHub',
@@ -34,35 +44,6 @@ export default defineConfig({
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable',
-          },
-        ],
-      },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MB limit
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/.*\.cloudflareaccess\.com\/.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'cloudflare-api-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60, // 1 hour
-              },
-              networkTimeoutSeconds: 10,
-            },
-          },
-          {
-            urlPattern: /\.(png|jpg|jpeg|svg|gif|webp)$/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'image-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-              },
-            },
           },
         ],
       },
