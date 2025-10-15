@@ -75,40 +75,10 @@ export default defineConfig({
     // Optimize chunk splitting for better caching and parallel loading
     rollupOptions: {
       output: {
-        // Ensure React loads before other libraries by controlling chunk order
-        manualChunks: id => {
-          // Split by node_modules for granular caching
-          if (id.includes('node_modules')) {
-            // DO NOT split React/react-dom - return undefined to inline in main bundle
-            // This ensures React is available before any Radix UI components execute
-            if (id.includes('/react/') || id.includes('/react-dom/')) {
-              return undefined // Force React into main bundle
-            }
-
-            // Radix UI components (separate chunk)
-            if (id.includes('@radix-ui')) {
-              return 'radix-ui'
-            }
-            // Animation library
-            if (id.includes('framer-motion')) {
-              return 'animation'
-            }
-            // Icon library
-            if (id.includes('lucide-react') || id.includes('@phosphor-icons')) {
-              return 'icons'
-            }
-            // Form libraries
-            if (id.includes('react-hook-form') || id.includes('@hookform')) {
-              return 'forms'
-            }
-            // Chart libraries (heavy, load on-demand)
-            if (id.includes('recharts') || id.includes('d3')) {
-              return 'charts'
-            }
-            // Other vendor code (react ecosystem libs like react-error-boundary)
-            return 'vendor'
-          }
-        },
+        // CRITICAL: Disable chunking for node_modules to prevent React duplication
+        // All vendor code (including React) will be in main bundle
+        // This ensures React is initialized before any components try to use it
+        manualChunks: undefined,
         // Force modulepreload order by chunk file names
         chunkFileNames: 'assets/[name]-[hash].js',
       },
