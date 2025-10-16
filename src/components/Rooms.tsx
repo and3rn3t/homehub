@@ -26,13 +26,22 @@ import { KV_KEYS, MOCK_DEVICES, MOCK_ROOMS } from '@/constants'
 import { useHaptic } from '@/hooks/use-haptic'
 import { useKV } from '@/hooks/use-kv'
 import {
+  BathIcon,
+  BedIcon,
+  BriefcaseIcon,
   EditIcon,
+  HouseIcon,
   LightbulbIcon,
   MoreHorizontalIcon,
+  NavigationIcon,
   PlusIcon,
   ShieldIcon,
+  SofaIcon,
   ThermometerIcon,
   TrashIcon,
+  TreeIcon,
+  UtensilsIcon,
+  WarehouseIcon,
   WifiIcon,
 } from '@/lib/icons'
 import { logger } from '@/lib/logger'
@@ -760,15 +769,72 @@ export function Rooms() {
 
           {/* Rooms Grid */}
           {rooms.length === 0 ? (
-            <IOS26EmptyState
-              icon={<PlusIcon className="h-16 w-16" />}
-              title="No Rooms Created"
-              message="Create rooms to organize your devices by location. Start with common areas like Living Room or Bedroom."
-              action={{
-                label: 'Create First Room',
-                onClick: () => setCreateRoomDialogOpen(true),
-              }}
-            />
+            <div className="space-y-6">
+              <IOS26EmptyState
+                icon={<HouseIcon className="h-16 w-16" />}
+                title="No Rooms Created"
+                message="Organize your smart home by creating rooms. Group devices by location for easier control and automation."
+                action={{
+                  label: 'Create First Room',
+                  onClick: () => setCreateRoomDialogOpen(true),
+                }}
+              />
+
+              {/* Quick Start Room Templates */}
+              <div>
+                <h3 className="mb-4 text-base font-semibold sm:text-lg">Common Rooms</h3>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {[
+                    { icon: SofaIcon, name: 'Living Room', color: 'oklch(0.6 0.15 250)' },
+                    { icon: BedIcon, name: 'Bedroom', color: 'oklch(0.65 0.15 290)' },
+                    { icon: UtensilsIcon, name: 'Kitchen', color: 'oklch(0.7 0.15 145)' },
+                    { icon: BathIcon, name: 'Bathroom', color: 'oklch(0.6 0.15 210)' },
+                    { icon: BriefcaseIcon, name: 'Office', color: 'oklch(0.65 0.15 30)' },
+                    { icon: WarehouseIcon, name: 'Garage', color: 'oklch(0.5 0.1 280)' },
+                    { icon: TreeIcon, name: 'Garden', color: 'oklch(0.7 0.18 145)' },
+                    { icon: NavigationIcon, name: 'Hallway', color: 'oklch(0.55 0.1 260)' },
+                  ].map((template, index) => (
+                    <motion.button
+                      key={template.name}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: index * 0.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ y: -2 }}
+                      onClick={() => {
+                        const newRoom = {
+                          id: `room-${Date.now()}`,
+                          name: template.name,
+                          icon: template.icon.name,
+                          color: template.color,
+                          deviceIds: [],
+                        }
+                        setRooms([...rooms, newRoom])
+                        toast.success(`${template.name} created!`, {
+                          description: 'Add devices to this room to get started',
+                        })
+                      }}
+                      className="text-left"
+                    >
+                      <Card className="hover:bg-accent/5 border-border/50 transition-all duration-200 hover:border-primary/30 hover:shadow-md">
+                        <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
+                          <div
+                            className="flex h-12 w-12 items-center justify-center rounded-full"
+                            style={{ backgroundColor: `${template.color}15` }}
+                          >
+                            <template.icon
+                              className="h-6 w-6"
+                              style={{ color: template.color }}
+                            />
+                          </div>
+                          <span className="text-sm font-medium">{template.name}</span>
+                        </CardContent>
+                      </Card>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            </div>
           ) : (
             <div>
               <h2 className="text-foreground mb-3 text-lg font-semibold">All Rooms</h2>

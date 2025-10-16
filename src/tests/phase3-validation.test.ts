@@ -155,7 +155,7 @@ describe('Phase 3: Automation Engine Validation', () => {
     })
 
     it('should handle boolean value comparisons', () => {
-      const mockDevice: Partial<Device> = { id: 'test', name: 'Test', value: true }
+      const mockDevice: Partial<Device> = { id: 'test', name: 'Test', value: 1 }
       const mockTrigger: AutomationTrigger = { type: 'condition', operator: '==', threshold: 1 }
       const result = evaluator.evaluateCondition(mockTrigger, mockDevice as Device)
       expect(result.met).toBe(true)

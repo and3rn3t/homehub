@@ -9,6 +9,7 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
 import { IOS26EmptyState } from '@/components/ui/ios26-error'
+import { AutomationCardSkeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { KV_KEYS, MOCK_AUTOMATIONS } from '@/constants'
@@ -22,8 +23,12 @@ import {
   CopyIcon,
   EditIcon,
   MapPinIcon,
+  MoonIcon,
   PlayIcon,
   SettingsIcon,
+  ShieldIcon,
+  SunRoomIcon,
+  ThermometerIcon,
   TrashIcon,
   WorkflowIcon,
 } from '@/lib/icons'
@@ -34,6 +39,7 @@ import { toast } from 'sonner'
 import { FlowDesigner } from './FlowDesigner'
 import { GeofenceBuilder } from './GeofenceBuilder'
 import { ScheduleBuilder } from './ScheduleBuilder'
+
 const automationIcons = {
   schedule: ClockIcon,
   geofence: MapPinIcon,
@@ -42,7 +48,11 @@ const automationIcons = {
 } as const
 
 export function Automations() {
-  const [automations, setAutomations] = useKV<Automation[]>(KV_KEYS.AUTOMATIONS, MOCK_AUTOMATIONS)
+  const [automations, setAutomations, { isLoading }] = useKV<Automation[]>(
+    KV_KEYS.AUTOMATIONS,
+    MOCK_AUTOMATIONS,
+    { withMeta: true }
+  )
   const [currentTab, setCurrentTab] = useKV('automations-tab', 'overview')
   const haptic = useHaptic()
 
@@ -51,6 +61,9 @@ export function Automations() {
 
   // Initialize condition evaluator (monitors device states)
   useConditionEvaluator()
+
+  // Smart loading state: Only show skeletons on initial load with no data
+  const showSkeleton = isLoading && automations.length === 0
 
   const toggleAutomation = (automationId: string) => {
     try {
@@ -222,16 +235,90 @@ export function Automations() {
             </div>
 
             <div className="flex-1 overflow-y-auto px-6 pb-6">
-              {automations.length === 0 ? (
-                <IOS26EmptyState
-                  icon={<ClockIcon className="h-16 w-16" />}
-                  title="No Automations Yet"
-                  message="Create smart rules to automate your home devices based on time, location, or conditions."
-                  action={{
-                    label: 'Create Flow',
-                    onClick: () => setCurrentTab('flows'),
-                  }}
-                />
+              {showSkeleton ? (
+                // Loading state with skeletons
+                <div className="space-y-3">
+                  {[...Array(5)].map((_, i) => (
+                    <AutomationCardSkeleton key={i} />
+                  ))}
+                </div>
+              ) : automations.length === 0 ? (
+                <div className="space-y-6">
+                  <IOS26EmptyState
+                    icon={<ClockIcon className="h-16 w-16" />}
+                    title="No Automations Yet"
+                    message="Automate your home with smart rules based on time, device state, or location. Save time and energy with intelligent automation."
+                    action={{
+                      label: 'Create Visual Flow',
+                      onClick: () => setCurrentTab('flows'),
+                    }}
+                  />
+
+                  {/* Quick Start Templates */}
+                  <div>
+                    <h3 className="mb-4 text-base font-semibold sm:text-lg">Quick Start Ideas</h3>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      {[
+                        {
+                          icon: SunRoomIcon,
+                          title: 'Wake Up Routine',
+                          description: 'Turn on lights gradually at sunrise',
+                          type: 'time',
+                        },
+                        {
+                          icon: MoonIcon,
+                          title: 'Good Night',
+                          description: 'Lock doors and turn off lights at bedtime',
+                          type: 'time',
+                        },
+                        {
+                          icon: ThermometerIcon,
+                          title: 'Climate Control',
+                          description: 'Adjust temperature when you arrive home',
+                          type: 'location',
+                        },
+                        {
+                          icon: ShieldIcon,
+                          title: 'Security Alert',
+                          description: 'Send notification when door opens',
+                          type: 'device-state',
+                        },
+                      ].map((template, index) => (
+                        <motion.button
+                          key={template.title}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          whileHover={{ y: -2 }}
+                          onClick={() => {
+                            toast.info(`${template.title} template coming soon!`)
+                          }}
+                          className="group text-left"
+                        >
+                          <Card className="hover:bg-accent/5 border-border/50 transition-all duration-200 hover:border-primary/30 hover:shadow-md">
+                            <CardContent className="p-4">
+                              <div className="mb-2 flex items-start gap-3">
+                                <div className="bg-primary/10 group-hover:bg-primary/20 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full transition-colors">
+                                  <template.icon className="text-primary h-5 w-5" />
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="mb-1 font-medium">{template.title}</h4>
+                                  <p className="text-muted-foreground text-sm">
+                                    {template.description}
+                                  </p>
+                                </div>
+                              </div>
+                              <Badge variant="secondary" className="text-xs">
+                                {template.type}
+                              </Badge>
+                            </CardContent>
+                          </Card>
+                        </motion.button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <div className="space-y-3">
                   {automations.map(automation => {

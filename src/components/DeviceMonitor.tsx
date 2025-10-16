@@ -2,6 +2,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { IOS26EmptyState } from '@/components/ui/ios26-error'
 import { IOS26StatusBadge } from '@/components/ui/ios26-status'
 import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { Switch } from '@/components/ui/switch'
@@ -542,19 +543,26 @@ export function DeviceMonitor() {
           </AnimatePresence>
 
           {filteredDevices.length === 0 && (
-            <Card className="border-border/30 border-2 border-dashed">
-              <CardContent className="p-8 text-center">
-                <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                  <LineChartIcon className="text-muted-foreground h-6 w-6" />
-                </div>
-                <p className="text-muted-foreground mb-2">No devices found</p>
-                <p className="text-muted-foreground text-sm">
-                  {filter === 'all'
-                    ? 'No devices are currently registered'
-                    : `No devices with status "${filter}"`}
-                </p>
-              </CardContent>
-            </Card>
+            <IOS26EmptyState
+              icon={<LineChartIcon className="h-16 w-16" />}
+              title={filter === 'all' ? 'No Devices Monitored' : `No ${filter.charAt(0).toUpperCase() + filter.slice(1)} Devices`}
+              message={
+                filter === 'all'
+                  ? 'Add devices to start monitoring their health, connectivity, and performance metrics in real-time.'
+                  : `No devices currently have "${filter}" status. This is good news!`
+              }
+              action={
+                filter === 'all'
+                  ? {
+                      label: 'Discover Devices',
+                      onClick: () => toast.info('Go to Dashboard to discover devices'),
+                    }
+                  : {
+                      label: 'View All Devices',
+                      onClick: () => setFilter('all'),
+                    }
+              }
+            />
           )}
         </div>
       </PullToRefresh>

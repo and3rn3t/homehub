@@ -143,7 +143,7 @@ export function Scenes() {
     }
 
     // Add to scenes array
-    setScenes([...scenes, duplicateScene])
+    _setScenes([...scenes, duplicateScene])
 
     toast.success(`Duplicated ${scene.name}`, {
       description: 'New scene created successfully',
@@ -160,7 +160,7 @@ export function Scenes() {
 
     // Remove scene from array
     const updatedScenes = scenes.filter(s => s.id !== scene.id)
-    setScenes(updatedScenes)
+    _setScenes(updatedScenes)
 
     toast.success(`Deleted ${scene.name}`, {
       description: 'Scene removed successfully',
