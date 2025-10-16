@@ -1,8 +1,8 @@
 # HomeHub Documentation Index
 
-**Last Updated**: October 14, 2025
-**Total Documents**: 105+ files (organized into logical directories)
-**Status**: ✅ Phase 6.1 complete + Mobile optimization complete
+**Last Updated**: October 15, 2025
+**Total Documents**: 100+ files (organized into logical directories)
+**Status**: ✅ Phase 6.1 complete + Mobile optimization + Production hardening complete
 
 ---
 
@@ -10,13 +10,11 @@
 
 **New to HomeHub?** Start here:
 
-1. 📖 [Setup Quickstart](guides/setup/SETUP_QUICKSTART.md) - Get running in 15 minutes
+1. 📖 [Setup Quickstart](guides/SETUP_QUICKSTART.md) - Get running in 15 minutes
 2. 🏗️ [Architecture Overview](guides/ARCHITECTURE.md) - Understand the system
 3. 💻 [Best Practices](guides/BEST_PRACTICES.md) - Coding standards and patterns
 4. 🎯 [Current Roadmap](development/NEXT_STEPS.md) - Planning Phase 4/5
-5. 🧪 [Test Suite Guide](development/TEST_SUITE_QUICKSTART.md) - Testing overview
-6. 📱 [Mobile Optimization](development/MOBILE_OPTIMIZATION_COMPLETE.md) - iOS enhancements
-7. 🎓 [Lessons Learned](development/LESSONS_LEARNED_OCT14_2025.md) - Recent technical wins
+5. 🎓 [Lessons Learned](development/LESSONS_LEARNED_OCT14_2025.md) - Oct 12-15 technical wins
 
 ---
 
@@ -121,22 +119,20 @@ docs/
 
 ---
 
-## 🔬 Current Development (Phase 6.1 + Mobile)
+## 🔬 Current Development (Phase 6.1 + Production Hardening)
 
-**Active Phase 6.1 and mobile optimization documentation:**
+**Active Phase 6.1, mobile optimization, and production fixes:**
 
-| Document                                                                                           | Description                    | Status       |
-| -------------------------------------------------------------------------------------------------- | ------------------------------ | ------------ |
-| [NEXT_STEPS.md](development/NEXT_STEPS.md)                                                         | Current roadmap and priorities | ✅ Current   |
-| [LESSONS_LEARNED_OCT14_2025.md](development/LESSONS_LEARNED_OCT14_2025.md)                         | Comprehensive lessons learned  | ✅ Current   |
-| [MOBILE_OPTIMIZATION_COMPLETE.md](development/MOBILE_OPTIMIZATION_COMPLETE.md)                     | iOS-focused enhancements       | ✅ Complete  |
-| [MOBILE_SESSION_SUMMARY_OCT14_2025.md](development/MOBILE_SESSION_SUMMARY_OCT14_2025.md)           | Mobile features summary        | ✅ Complete  |
-| [PERFORMANCE_OPTIMIZATION_SESSION_OCT14.md](development/PERFORMANCE_OPTIMIZATION_SESSION_OCT14.md) | Performance guide              | ✅ Complete  |
-| [LIVE_STREAMING_COMPLETE.md](development/LIVE_STREAMING_COMPLETE.md)                               | DASH/HLS streaming             | ✅ Complete  |
-| [MILESTONE_6.1.3_COMPLETE.md](development/MILESTONE_6.1.3_COMPLETE.md)                             | Video optimization             | ✅ Complete  |
-| [TEST_SUITE_QUICKSTART.md](development/TEST_SUITE_QUICKSTART.md)                                   | Testing quick reference        | ✅ Current   |
-| [PHASE_3_PRODUCTION_VALIDATION.md](development/PHASE_3_PRODUCTION_VALIDATION.md)                   | Phase 3 validation (ref)       | 🔄 Reference |
-| [PHASE_3_VALIDATION_STATUS.md](development/PHASE_3_VALIDATION_STATUS.md)                           | Phase 3 status (ref)           | 🔄 Reference |
+| Document                                                                                                         | Description                             | Status      |
+| ---------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ----------- |
+| [LESSONS_LEARNED_OCT14_2025.md](development/LESSONS_LEARNED_OCT14_2025.md)                                       | **Master lessons doc** (Oct 12-15 2025) | ✅ Current  |
+| [NEXT_STEPS.md](development/NEXT_STEPS.md)                                                                       | Current roadmap and priorities          | ✅ Current  |
+| [DASHBOARD_REFACTORING_OCT15_2025.md](development/DASHBOARD_REFACTORING_OCT15_2025.md)                           | 87% complexity reduction                | ✅ Complete |
+| [LANDING_PAGE_OPTIMIZATION_COMPLETE_OCT15_2025.md](development/LANDING_PAGE_OPTIMIZATION_COMPLETE_OCT15_2025.md) | 96% bundle size reduction               | ✅ Complete |
+| [ISSUE_RESOLUTION_SUMMARY_OCT15_2025.md](development/ISSUE_RESOLUTION_SUMMARY_OCT15_2025.md)                     | Production bug fixes                    | ✅ Complete |
+| [MOBILE_OPTIMIZATION_COMPLETE.md](development/MOBILE_OPTIMIZATION_COMPLETE.md)                                   | iOS-focused enhancements                | ✅ Complete |
+| [LIVE_STREAMING_COMPLETE.md](development/LIVE_STREAMING_COMPLETE.md)                                             | DASH/HLS streaming                      | ✅ Complete |
+| [MILESTONE_6.1.3_COMPLETE.md](development/MILESTONE_6.1.3_COMPLETE.md)                                           | Video optimization                      | ✅ Complete |
 
 ---
 

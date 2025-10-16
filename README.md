@@ -1,6 +1,6 @@
 # 🏠 HomeHub - Smart Home Automation Dashboard
 
-**iOS-inspired home automation control center** built with React 19 and Cloudflare infrastructure. Beautiful, fast, and ready for real device integration.
+**iOS-inspired home automation control center** built with React 19 and Cloudflare infrastructure. Production-ready with live camera streaming, smart device control, and mobile optimization.
 
 🚀 **Live Production App**: [homehub.andernet.dev](https://homehub.andernet.dev)
 
@@ -12,29 +12,28 @@
 ![Coverage: Statements](https://img.shields.io/badge/coverage-94.1%25-green)
 ![Coverage: Branches](https://img.shields.io/badge/branches-89.1%25-yellowgreen)
 ![Coverage: Functions](https://img.shields.io/badge/functions-100.0%25-brightgreen)
+![Lighthouse](https://img.shields.io/badge/lighthouse-90+-brightgreen)
 
-- Pre-configured for local development
+---
 
----- Ready to scale with your ideas
+## 🎯 What is HomeHub?
 
-## 🎯 What is HomeHub?🧠 What Can You Do?
+HomeHub is a **production-ready home automation dashboard** with real device integration. Originally built as a proof-of-concept framework, it now features:
 
-HomeHub is a **proof-of-concept framework** for DIY home automation. Currently powered by mock data, it's being built as the foundation for a production-ready personal home automation system. Right now, this is just a starting point — and the perfect place to begin building.
+- ✅ **Live Camera Streaming**: Arlo cameras with DASH/HLS playback
+- ✅ **Smart Device Control**: Philips Hue lights with advanced color controls
+- ✅ **Mobile-Optimized**: iOS-focused PWA with 90+ Lighthouse score
+- ✅ **Automation Engine**: Time, condition, and geofence-based rules
+- ✅ **Visual Flow Designer**: Drag-and-drop automation builder
+- ✅ **Production Hardened**: 87% complexity reduction, 96% bundle optimization
 
-### ✨ Key Features🧹 Just Exploring?
+### ✨ Key Features
 
-No problem! If you were just checking things out and don’t need to keep this code:
-
-- **iOS-Inspired UI**: OKLCH color system, spring animations, familiar interactions
-
-- **11 Feature Sections**: Dashboard, Rooms, Scenes, Automations, Energy, Security, and more- Simply delete your Spark.
-
-- **Visual Flow Designer**: Drag-and-drop automation builder (think Node-RED meets iOS)- Everything will be cleaned up — no traces left behind.
-
+- **iOS-Inspired UI**: OKLCH color system, spring animations, native-feeling interactions
+- **11 Feature Sections**: Dashboard, Rooms, Scenes, Automations, Energy, Security, Users, Insights, Backup, Settings
+- **Visual Flow Designer**: Drag-and-drop automation builder (Node-RED meets iOS)
 - **Edge-First Architecture**: Cloudflare Workers + KV for global performance
-
-- **Offline-First**: localStorage cache for instant reads, optimistic UI updates📄 License For Spark Template Resources
-
+- **Offline-First**: localStorage cache, optimistic updates, service worker with 45 precached assets
 - **Type-Safe**: Full TypeScript with JSDoc documentation
 
 ---
@@ -51,7 +50,7 @@ No problem! If you were just checking things out and don’t need to keep this c
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/homehub.git
+git clone https://github.com/and3rn3t/homehub.git
 cd homehub
 
 # Install dependencies
@@ -92,7 +91,8 @@ graph TD
 - **Backend**: Cloudflare Workers (serverless functions)
 - **Database**: Cloudflare KV (key-value store)
 - **UI**: shadcn/ui, Tailwind CSS 4, Framer Motion
-- **Icons**: Phosphor Icons
+- **Icons**: Lucide React (centralized icon system)
+- **Video**: DASH.js, HLS.js (adaptive streaming)
 
 ---
 
@@ -104,36 +104,37 @@ homehub/
 │   ├── components/      # Feature components (Dashboard, Rooms, etc.)
 │   ├── types/          # TypeScript definitions (100+ interfaces)
 │   ├── constants/      # KV keys, mock data, icons
-│   ├── hooks/          # Custom React hooks (useKV)
+│   ├── hooks/          # Custom React hooks (useKV, usePullToRefresh, etc.)
+│   ├── services/       # Business logic (automation engine, device adapters)
 │   └── lib/            # API clients, utilities
 ├── workers/
 │   └── src/
-│       └── index.ts    # Cloudflare Worker (REST API)
-├── docs/               # Comprehensive documentation
-└── scripts/            # Automation scripts
+│       └── index.ts    # Cloudflare Worker (REST API + Arlo proxy)
+├── docs/               # Comprehensive documentation (100+ files)
+└── scripts/            # Automation scripts & tooling
 ```
 
 ---
 
 ## 🎨 Features Overview
 
-### 1. Dashboard
+### 1. Dashboard 📊
 
-Real-time device status, quick controls, energy insights, security alerts
+Real-time device status, quick controls, energy insights, security alerts, favorite devices
 
-### 2. Rooms
+### 2. Rooms 🏠
 
-Organize devices by physical location, room-level controls
+Organize devices by physical location, room-level controls, drag-and-drop reordering, customizable icons/colors
 
-### 3. Scenes
+### 3. Scenes 🎭
 
-One-touch automation (e.g., "Movie Time", "Good Morning", "Leaving Home")
+One-touch automation (e.g., "Movie Time", "Good Morning", "Leaving Home"), swipe-to-activate on mobile
 
-### 4. Automations
+### 4. Automations ⚙️
 
-Time-based and condition-based rules with schedule builder
+Time-based and condition-based rules with schedule builder, flow designer integration
 
-### 5. Flow Designer
+### 5. Flow Designer 🎨
 
 Visual automation builder with drag-and-drop nodes:
 
@@ -142,29 +143,35 @@ Visual automation builder with drag-and-drop nodes:
 - **Actions**: Control devices, notifications, delays
 - **100+ pre-built nodes** with mini-map navigation
 
-### 6. Energy Monitoring
+### 6. Energy Monitoring ⚡
 
-Track consumption, costs, identify energy hogs (Phase 4)
+Track consumption, costs, identify energy hogs (Phase 4 - planned)
 
-### 7. Security
+### 7. Security 🔒
 
-Camera integration, event logging, arm/disarm system (Phase 5)
+**Live Features**:
 
-### 8. User Management
+- ✅ Arlo camera integration with live streaming
+- ✅ DASH/HLS playback with adaptive bitrate
+- ✅ Snapshot lazy loading for performance
+- ✅ Context menus (long-press/right-click)
+- ✅ Camera controls (record, settings, delete)
 
-Multi-user support with role-based permissions (Phase 6)
+### 8. User Management 👥
 
-### 9. Insights
+Multi-user support with role-based permissions (Phase 6 - in progress)
 
-AI-powered recommendations, pattern analysis (Phase 7)
+### 9. Insights 📈
 
-### 10. Backup & Recovery
+AI-powered recommendations, pattern analysis (Phase 7 - planned)
 
-Export/import configurations, disaster recovery
+### 10. Backup & Recovery 💾
 
-### 11. Settings
+Export/import configurations, automatic device migration
 
-Device preferences, notifications, integrations
+### 11. Settings ⚙️
+
+Device preferences, notifications, integrations, theme customization
 
 ---
 
@@ -177,6 +184,8 @@ npm run dev              # Start Vite dev server
 npm run build            # Production build
 npm run preview          # Preview production build
 npm run lint             # ESLint check
+npm test                 # Run test suite
+npm run test:coverage    # Generate coverage report
 ```
 
 ### Working with Cloudflare Workers
@@ -194,7 +203,7 @@ npm run deploy           # Deploy to Cloudflare
 import { useKV } from '@/hooks/use-kv'
 
 // Persistent state (survives page refresh)
-const [devices, setDevices] = useKV<Device[]>('devices', [])
+const [devices, setDevices] = useKV<Device[]>('devices', MOCK_DEVICES)
 
 // Update device
 const toggleDevice = (id: string) => {
@@ -205,99 +214,86 @@ const toggleDevice = (id: string) => {
 
 ---
 
-## 📚 Documentation
-
-- **[Architecture Diagrams](docs/ARCHITECTURE.md)** - Complete visual system architecture
-- **[Deployment Guide](docs/CLOUDFLARE_DEPLOYMENT.md)** - Step-by-step Cloudflare setup
-- **[Migration Complete](docs/MIGRATION_COMPLETE.md)** - Spark → Cloudflare migration summary
-- **[Migration Strategy](docs/CLOUDFLARE_MIGRATION.md)** - Technical migration details
-- **[Copilot Instructions](.github/copilot-instructions.md)** - AI coding agent guidelines
-- **[Best Practices](docs/BEST_PRACTICES.md)** - Code standards and patterns
-- **[Refactor Plan](docs/REFACTOR_PLAN.md)** - Project reorganization roadmap
-
----
-
 ## 🗺️ Roadmap
 
-### Phase 1: Foundation (Current) ✅
+### Phase 1: Foundation (✅ Complete)
 
 - iOS-inspired UI framework
 - Mock data for all 11 sections
-- Cloudflare infrastructure migration
+- Cloudflare infrastructure
 - Type system and constants
 
-### Phase 2: Device Integration (Q1 2026)
+### Phase 2: Device Integration (✅ Complete)
 
-- MQTT broker setup
+- Philips Hue Bridge integration
 - HTTP/REST device adapters
 - Real-time state sync
-- Connect first physical device
+- Advanced color controls
 
-### Phase 3: Automation Engine (Q2 2026)
+### Phase 3: Automation Engine (✅ Complete)
 
 - Time-based scheduler
 - Condition evaluator
-- Flow execution engine
-- Geofencing (mobile)
+- Action executor
+- Flow interpreter
+- Geofencing
 
-### Phase 4: Energy & Monitoring (Q3 2026)
+### Phase 6.1: Arlo Integration (✅ Complete - Oct 12-14, 2025)
+
+- Arlo API reverse engineering
+- Live streaming (DASH/HLS)
+- Mobile video optimization
+- Snapshot lazy loading
+
+### Production Hardening (✅ Complete - Oct 15, 2025)
+
+- Dashboard refactoring (87% complexity reduction)
+- Bundle optimization (96% size reduction)
+- Device migration scripts
+- React 19 compatibility validation
+- PWA manifest fixes
+
+### Phase 4: Energy & Monitoring (🚧 Next)
 
 - Power metering integration
 - Cost calculation
 - Historical analytics
 - AI insights
 
-### Phase 5: Security & Surveillance (Q4 2026)
+### Phase 5: Security Expansion (📋 Planned)
 
-- Camera integration (RTSP/ONVIF)
+- Additional camera protocols (RTSP/ONVIF)
 - Motion detection
+- Smart locks integration
 - Event notifications
-- Smart locks
 
-### Phase 6: Multi-User (Q1 2027)
-
-- Authentication (OAuth)
-- Role-based access
-- User permissions
-- Presence detection
-
-### Phase 7: Voice & AI (Q2 2027)
-
-- Alexa/Google Assistant
-- Natural language control
-- Predictive automation
-- Pattern recognition
-
-### Phase 8+: Advanced Features (2027+)
-
-- Zigbee/Z-Wave support
-- Custom integrations
-- Mobile apps (React Native)
-- Edge gateway (Raspberry Pi)
-
-Full roadmap: [Copilot Instructions](.github/copilot-instructions.md#product-roadmap)
+Full roadmap: [Copilot Instructions](.github/instructions/copilot-instructions.md#product-roadmap)
 
 ---
 
 ## 🎯 Current Status
 
-**Phase**: 1 (Foundation)
-**Progress**: 85% complete
-**Next Milestone**: Deploy to Cloudflare Pages
+**Phase**: 6.1 Complete + Production Hardening ✅
+**Production URL**: <https://homehub.andernet.dev>
+**Next Focus**: Phase 4 (Energy) or Phase 5 (Security expansion)
 
 **What Works**:
 
-- ✅ All 11 UI sections render correctly
-- ✅ Mock data for devices, rooms, scenes, automations
+- ✅ Live Arlo camera streaming (DASH/HLS)
+- ✅ Philips Hue control (22 lights, <300ms response)
 - ✅ Visual flow designer with 100+ nodes
-- ✅ Cloudflare KV state persistence
-- ✅ Type-safe codebase with JSDoc
+- ✅ Complete automation engine (time, condition, geofence)
+- ✅ Mobile-optimized PWA (90+ Lighthouse on repeat visits)
+- ✅ Offline support with service worker
+- ✅ Device migration and data integrity
+- ✅ Production-grade code quality
 
-**What's Next**:
+**Performance Metrics**:
 
-- 🚧 Deploy Worker to Cloudflare
-- 🚧 Connect Cloudflare Pages
-- 📋 Device protocol research (Phase 2)
+- Lighthouse Performance: 90+ (repeat visits)
+- Security tab bundle: 487KB → 21KB (96% reduction)
+- Dashboard complexity: 39 → 5 (87% reduction)
+- Test coverage: 94% statements, 89% branches, 100% functions
 
 ---
 
@@ -310,7 +306,7 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 - **🚀 [Getting Started](docs/guides/SETUP_QUICKSTART.md)** - Get running in 15 minutes
 - **🏗️ [Architecture](docs/guides/ARCHITECTURE.md)** - System design and data flow
 - **💻 [Best Practices](docs/guides/BEST_PRACTICES.md)** - Coding standards
-- **🧪 [Testing Guide](docs/development/DISCOVERY_TEST_PLAN.md)** - Comprehensive test plan
+- **🎓 [Lessons Learned](docs/development/LESSONS_LEARNED_OCT14_2025.md)** - Oct 12-15 technical wins
 - **🚀 [Deployment](docs/deployment/CLOUDFLARE_DEPLOYMENT.md)** - Deploy to production
 - **📖 [Full Documentation Index](docs/INDEX.md)** - Complete catalog
 
@@ -318,11 +314,11 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 
 ```
 docs/
-├── guides/         # User guides & references (13 files)
-├── deployment/     # Production deployment (6 files)
-├── development/    # Active work (9 files)
-├── history/        # Completed features (24 files)
-└── archive/        # Historical documents (13 files)
+├── guides/         # User guides & references
+├── deployment/     # Production deployment
+├── development/    # Active work & lessons learned
+├── history/        # Completed phase documentation
+└── archive/        # Historical documents
 ```
 
 **See [`docs/README.md`](docs/README.md) for the complete documentation overview.**
@@ -344,7 +340,7 @@ This is a personal project, but suggestions and feedback are welcome!
 - Follow TypeScript conventions in [`docs/guides/BEST_PRACTICES.md`](docs/guides/BEST_PRACTICES.md)
 - Use `useKV` for persistent state (never `useState` for data that should persist)
 - Import types from `@/types`
-- Use Phosphor Icons exclusively
+- Use Lucide React icons exclusively from `@/lib/icons`
 - See [`docs/guides/ARCHITECTURE.md`](docs/guides/ARCHITECTURE.md) for architectural patterns
 
 ---
@@ -353,8 +349,6 @@ This is a personal project, but suggestions and feedback are welcome!
 
 MIT License - Copyright (c) 2025
 
-The Spark Template files and resources from GitHub are licensed under the terms of the MIT license, Copyright GitHub, Inc.
-
 ---
 
 ## 🙏 Acknowledgments
@@ -362,7 +356,9 @@ The Spark Template files and resources from GitHub are licensed under the terms 
 - **React Team**: For React 19 and modern patterns
 - **Cloudflare**: For amazing free tier and edge network
 - **shadcn**: For beautiful UI components
-- **Phosphor Icons**: For comprehensive icon library
+- **Lucide Icons**: For comprehensive icon library
+- **Arlo**: For camera API (reverse engineered)
+- **Philips Hue**: For smart lighting integration
 - **GitHub Copilot**: For AI-assisted development
 
 ---
