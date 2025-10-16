@@ -29,7 +29,7 @@ import { EventEmitter } from 'events'
  */
 const ARLO_API_BASE_URL = import.meta.env.DEV
   ? 'http://localhost:8788' // Local worker dev server
-  : 'https://homehub-arlo-proxy.your-worker.workers.dev' // TODO: Replace with your deployed worker URL
+  : 'https://homehub-arlo-proxy.andernet.workers.dev' // Deployed Cloudflare Worker
 
 /**
  * Arlo event types (from direct API responses)

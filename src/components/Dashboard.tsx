@@ -6,7 +6,7 @@ import { IOS26EmptyState, IOS26Error } from '@/components/ui/ios26-error'
 import { IOS26Shimmer } from '@/components/ui/ios26-loading'
 import { IOS26StatusBadge } from '@/components/ui/ios26-status'
 import { PullToRefresh } from '@/components/ui/pull-to-refresh'
-import { KV_KEYS } from '@/constants'
+import { KV_KEYS, MOCK_DEVICES } from '@/constants'
 import { useHaptic } from '@/hooks/use-haptic'
 import { useKV } from '@/hooks/use-kv'
 import { useMQTTConnection } from '@/hooks/use-mqtt-connection'
@@ -82,7 +82,7 @@ export function Dashboard() {
   // Fallback to KV store if MQTT not available
   const [kvDevices, setKvDevices, { isLoading: kvLoading, isError: kvError }] = useKV<Device[]>(
     KV_KEYS.DEVICES,
-    [], // Empty array as default - will use localStorage if available
+    MOCK_DEVICES, // Use mock devices as default fallback
     { withMeta: true }
   )
 

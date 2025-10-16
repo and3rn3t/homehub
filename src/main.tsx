@@ -10,9 +10,14 @@ import { ErrorBoundary } from 'react-error-boundary'
 
 import App from './App.tsx'
 import { ErrorFallback } from './ErrorFallback.tsx'
+import { migrateDeviceStorage } from './lib/migrate-devices'
 
 import './index.css'
 import './main.css'
+
+// Run device storage migration before app starts
+// This ensures devices are never empty
+migrateDeviceStorage()
 
 const rootElement = document.getElementById('root')
 if (!rootElement) throw new Error('Root element not found')
