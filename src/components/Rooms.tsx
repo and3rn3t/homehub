@@ -1009,8 +1009,40 @@ export function Rooms() {
           toast.success('Room updated')
         }}
         onRoomDeleted={roomId => {
+          // Store original state for undo
+          const deletedRoom = rooms.find(r => r.id === roomId)
+          const originalRooms = [...rooms]
+
+          // Remove room (optimistic)
           setRooms(prev => prev.filter(r => r.id !== roomId))
-          toast.success('Room deleted')
+
+          // Show toast with undo action
+          toast.success('Room deleted', {
+            description: deletedRoom ? `${deletedRoom.name} removed successfully` : 'Room removed',
+            duration: 5000, // 5-second undo window
+            action: deletedRoom
+              ? {
+                  label: 'Undo',
+                  onClick: () => {
+                    // Restore the deleted room
+                    setRooms(originalRooms)
+                    haptic.light()
+                    toast.success(`Restored ${deletedRoom.name}`, {
+                      description: 'Room has been restored',
+                    })
+                    logger.info('Room deletion undone', {
+                      roomId: deletedRoom.id,
+                      roomName: deletedRoom.name,
+                    })
+                  },
+                }
+              : undefined,
+          })
+
+          logger.info('Room deleted', {
+            roomId,
+            roomName: deletedRoom?.name,
+          })
         }}
       />
     </div>

@@ -8,6 +8,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
+import { Input } from '@/components/ui/input'
 import { IOS26EmptyState } from '@/components/ui/ios26-error'
 import { AutomationCardSkeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
@@ -25,16 +26,19 @@ import {
   MapPinIcon,
   MoonIcon,
   PlayIcon,
+  SearchIcon,
   SettingsIcon,
   ShieldIcon,
   SunRoomIcon,
   ThermometerIcon,
   TrashIcon,
   WorkflowIcon,
+  XIcon,
 } from '@/lib/icons'
 import { logger } from '@/lib/logger'
 import type { Automation } from '@/types'
 import { motion } from 'framer-motion'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { FlowDesigner } from './FlowDesigner'
 import { GeofenceBuilder } from './GeofenceBuilder'
@@ -54,6 +58,7 @@ export function Automations() {
     { withMeta: true }
   )
   const [currentTab, setCurrentTab] = useKV('automations-tab', 'overview')
+  const [searchQuery, setSearchQuery] = useState('')
   const haptic = useHaptic()
 
   // Initialize scheduler (triggers in background)
@@ -122,12 +127,33 @@ export function Automations() {
   const handleDeleteAutomation = (automation: Automation) => {
     haptic.heavy()
 
-    // Remove automation from array
+    // Store original state for undo
+    const originalAutomations = [...automations]
+    const deletedAutomation = automation
+
+    // Remove automation from array (optimistic)
     const updatedAutomations = automations.filter(a => a.id !== automation.id)
     setAutomations(updatedAutomations)
 
+    // Show toast with undo action
     toast.success(`Deleted ${automation.name}`, {
       description: 'Automation removed successfully',
+      duration: 5000, // 5-second undo window
+      action: {
+        label: 'Undo',
+        onClick: () => {
+          // Restore the deleted automation
+          setAutomations(originalAutomations)
+          haptic.light()
+          toast.success(`Restored ${deletedAutomation.name}`, {
+            description: 'Automation has been restored',
+          })
+          logger.info('Automation deletion undone', {
+            automationId: deletedAutomation.id,
+            automationName: deletedAutomation.name,
+          })
+        },
+      },
     })
 
     logger.info('Automation deleted', {
@@ -135,6 +161,20 @@ export function Automations() {
       automationName: automation.name,
     })
   }
+
+  // Filter automations by search query
+  const filteredAutomations = automations.filter(automation => {
+    if (!searchQuery) return true
+
+    const query = searchQuery.toLowerCase()
+    const triggerTypes = automation.triggers?.map(t => t.type).join(' ') || ''
+    const searchableText = [automation.name, automation.type, triggerTypes]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+
+    return searchableText.includes(query)
+  })
 
   const runAutomation = async (automationId: string) => {
     try {
@@ -232,6 +272,26 @@ export function Automations() {
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Search Input */}
+              <div className="relative mb-6">
+                <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                <Input
+                  type="text"
+                  placeholder="Search automations by name or type..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="pr-10 pl-10"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="hover:bg-accent absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1"
+                  >
+                    <XIcon className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto px-6 pb-6">
@@ -242,7 +302,7 @@ export function Automations() {
                     <AutomationCardSkeleton key={i} />
                   ))}
                 </div>
-              ) : automations.length === 0 ? (
+              ) : filteredAutomations.length === 0 ? (
                 <div className="space-y-6">
                   <IOS26EmptyState
                     icon={<ClockIcon className="h-16 w-16" />}
@@ -321,7 +381,7 @@ export function Automations() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {automations.map(automation => {
+                  {filteredAutomations.map(automation => {
                     const IconComponent = automationIcons[automation.type]
 
                     const cardContent = (

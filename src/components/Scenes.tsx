@@ -158,12 +158,33 @@ export function Scenes() {
   const handleDeleteScene = (scene: Scene) => {
     haptic.heavy()
 
-    // Remove scene from array
+    // Store original state for undo
+    const originalScenes = [...scenes]
+    const deletedScene = scene
+
+    // Remove scene from array (optimistic)
     const updatedScenes = scenes.filter(s => s.id !== scene.id)
     _setScenes(updatedScenes)
 
+    // Show toast with undo action
     toast.success(`Deleted ${scene.name}`, {
       description: 'Scene removed successfully',
+      duration: 5000, // 5-second undo window
+      action: {
+        label: 'Undo',
+        onClick: () => {
+          // Restore the deleted scene
+          _setScenes(originalScenes)
+          haptic.light()
+          toast.success(`Restored ${deletedScene.name}`, {
+            description: 'Scene has been restored',
+          })
+          logger.info('Scene deletion undone', {
+            sceneId: deletedScene.id,
+            sceneName: deletedScene.name,
+          })
+        },
+      },
     })
 
     logger.info('Scene deleted', {
@@ -423,6 +444,27 @@ export function Scenes() {
                             ease: 'easeInOut',
                           }}
                         >
+                          {/* Scene activation ripple effect */}
+                          {scene.id === activeScene && (
+                            <motion.div
+                              className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                              initial={{ scale: 0, opacity: 0.8 }}
+                              animate={{ scale: 4, opacity: 0 }}
+                              transition={{
+                                duration: 1.2,
+                                ease: [0.23, 1, 0.32, 1], // Custom easing curve
+                              }}
+                              key={`ripple-${scene.id}-${activeScene}`}
+                              style={{
+                                width: '200px',
+                                height: '200px',
+                                borderRadius: '50%',
+                                background:
+                                  'radial-gradient(circle, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 70%)',
+                              }}
+                            />
+                          )}
+
                           {/* Shimmer effect on hover */}
                           <motion.div
                             className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
@@ -474,9 +516,26 @@ export function Scenes() {
                           <div className="flex items-center justify-between">
                             <Tooltip delayDuration={500}>
                               <TooltipTrigger asChild>
-                                <span className="text-muted-foreground cursor-help text-xs">
+                                <motion.span
+                                  className="text-muted-foreground cursor-help text-xs"
+                                  animate={{
+                                    scale: scene.id === activeScene ? [1, 1.15, 1] : 1,
+                                    color:
+                                      scene.id === activeScene
+                                        ? [
+                                            'currentColor',
+                                            'rgb(var(--primary-rgb))',
+                                            'currentColor',
+                                          ]
+                                        : 'currentColor',
+                                  }}
+                                  transition={{
+                                    duration: 0.6,
+                                    ease: 'easeInOut',
+                                  }}
+                                >
                                   {scene.deviceStates?.length || 0} devices
-                                </span>
+                                </motion.span>
                               </TooltipTrigger>
                               <TooltipContent>
                                 <p>

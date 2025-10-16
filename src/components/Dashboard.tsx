@@ -2,6 +2,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ControlTile } from '@/components/ui/control-tile'
+import { Input } from '@/components/ui/input'
 import { IOS26EmptyState, IOS26Error } from '@/components/ui/ios26-error'
 import { IOS26Shimmer } from '@/components/ui/ios26-loading'
 import { IOS26StatusBadge } from '@/components/ui/ios26-status'
@@ -24,6 +25,7 @@ import {
   PlayIcon,
   PlusIcon,
   RefreshIcon,
+  SearchIcon,
   ShieldIcon,
   SofaIcon,
   StarIcon,
@@ -33,6 +35,7 @@ import {
   UsersIcon,
   UtensilsIcon,
   WifiOffIcon,
+  XIcon,
 } from '@/lib/icons'
 import { logger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
@@ -277,6 +280,9 @@ export function Dashboard() {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [editDevice, setEditDevice] = useState<Device | null>(null)
 
+  // Search query for favorite devices
+  const [searchQuery, setSearchQuery] = useState('')
+
   // Try MQTT connection first
   const {
     devices: mqttDevices,
@@ -463,6 +469,28 @@ export function Dashboard() {
     () => devices.filter(device => favoriteDevices.includes(device.id)),
     [devices, favoriteDevices]
   )
+
+  // Filtered favorites based on search query
+  const filteredFavorites = useMemo(() => {
+    if (!searchQuery.trim()) return favoriteDeviceList
+
+    const query = searchQuery.toLowerCase()
+    return favoriteDeviceList.filter(device => {
+      // Fuzzy match: check if all query characters appear in order in the searchable text
+      const searchableText = [device.name, device.type, device.room || '', device.status]
+        .join(' ')
+        .toLowerCase()
+
+      let queryIndex = 0
+      for (const char of searchableText) {
+        if (char === query[queryIndex]) {
+          queryIndex++
+          if (queryIndex === query.length) return true
+        }
+      }
+      return false
+    })
+  }, [favoriteDeviceList, searchQuery])
 
   // Auto-fix: If we have devices and favoriteDevices but no matches, fix it
   if (devices.length > 0 && favoriteDevices.length > 0 && favoriteDeviceList.length === 0) {
@@ -831,7 +859,39 @@ export function Dashboard() {
             </div>
           </div>
 
-          {favoriteDeviceList.length === 0 ? (
+          {/* Search Input */}
+          {favoriteDeviceList.length > 0 && (
+            <div className="relative mb-4">
+              <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+              <Input
+                type="text"
+                placeholder="Search favorites by name, type, or room..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="bg-background pr-10 pl-10"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
+                >
+                  <XIcon className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          )}
+
+          {filteredFavorites.length === 0 && searchQuery ? (
+            <IOS26EmptyState
+              icon={<SearchIcon className="h-16 w-16" />}
+              title="No Matches Found"
+              message={`No favorite devices match "${searchQuery}". Try a different search term.`}
+              action={{
+                label: 'Clear Search',
+                onClick: () => setSearchQuery(''),
+              }}
+            />
+          ) : favoriteDeviceList.length === 0 ? (
             <IOS26EmptyState
               icon={<StarIcon className="h-16 w-16" />}
               title="No Favorites Yet"
@@ -846,7 +906,7 @@ export function Dashboard() {
             />
           ) : (
             <div className="grid gap-3">
-              {favoriteDeviceList.map((device, index) => (
+              {filteredFavorites.map((device, index) => (
                 <DeviceCardEnhanced
                   key={device.id}
                   device={device}
@@ -976,7 +1036,42 @@ export function Dashboard() {
           toast.success('Device updated')
         }}
         onDeviceRemoved={deviceId => {
+          // Store original state for undo
+          const deletedDevice = kvDevices.find(d => d.id === deviceId)
+          const originalDevices = [...kvDevices]
+
+          // Remove device (optimistic)
           setKvDevices(prev => prev.filter(d => d.id !== deviceId))
+
+          // Show toast with undo action
+          toast.success('Device removed', {
+            description: deletedDevice
+              ? `${deletedDevice.name} deleted successfully`
+              : 'Device deleted',
+            duration: 5000, // 5-second undo window
+            action: deletedDevice
+              ? {
+                  label: 'Undo',
+                  onClick: () => {
+                    // Restore the deleted device
+                    setKvDevices(originalDevices)
+                    haptic.medium()
+                    toast.success(`Restored ${deletedDevice.name}`, {
+                      description: 'Device has been restored',
+                    })
+                    logger.info('Device deletion undone', {
+                      deviceId: deletedDevice.id,
+                      deviceName: deletedDevice.name,
+                    })
+                  },
+                }
+              : undefined,
+          })
+
+          logger.info('Device deleted', {
+            deviceId,
+            deviceName: deletedDevice?.name,
+          })
         }}
       />
 

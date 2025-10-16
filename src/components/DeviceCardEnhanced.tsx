@@ -238,6 +238,20 @@ export const DeviceCardEnhanced = memo(
                       ease: 'easeInOut',
                     }}
                   >
+                    {/* Power-on ripple effect */}
+                    {device.enabled && (
+                      <motion.div
+                        className="bg-primary/30 pointer-events-none absolute inset-0 rounded-full"
+                        initial={{ scale: 0, opacity: 0.8 }}
+                        animate={{ scale: 2.5, opacity: 0 }}
+                        transition={{
+                          duration: 0.6,
+                          ease: 'easeOut',
+                        }}
+                        key={`ripple-${device.id}-${device.enabled}`}
+                      />
+                    )}
+
                     <IconComponent
                       size={20}
                       className={device.enabled ? 'text-primary' : 'text-muted-foreground'}
@@ -361,13 +375,17 @@ export const DeviceCardEnhanced = memo(
                       size={18}
                     />
                   )}
-                  <div onClick={e => e.stopPropagation()}>
+                  <motion.div
+                    onClick={e => e.stopPropagation()}
+                    whileTap={{ scale: 0.9 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                  >
                     <Switch
                       checked={device.enabled}
                       onCheckedChange={handleToggle}
                       disabled={device.status === 'offline'}
                     />
-                  </div>
+                  </motion.div>
                 </div>
               </div>
             </div>
