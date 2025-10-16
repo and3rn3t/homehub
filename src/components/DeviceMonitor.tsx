@@ -545,7 +545,11 @@ export function DeviceMonitor() {
           {filteredDevices.length === 0 && (
             <IOS26EmptyState
               icon={<LineChartIcon className="h-16 w-16" />}
-              title={filter === 'all' ? 'No Devices Monitored' : `No ${filter.charAt(0).toUpperCase() + filter.slice(1)} Devices`}
+              title={
+                filter === 'all'
+                  ? 'No Devices Monitored'
+                  : `No ${filter.charAt(0).toUpperCase() + filter.slice(1)} Devices`
+              }
               message={
                 filter === 'all'
                   ? 'Add devices to start monitoring their health, connectivity, and performance metrics in real-time.'

@@ -296,7 +296,7 @@ export function Automations() {
                           }}
                           className="group text-left"
                         >
-                          <Card className="hover:bg-accent/5 border-border/50 transition-all duration-200 hover:border-primary/30 hover:shadow-md">
+                          <Card className="hover:bg-accent/5 border-border/50 hover:border-primary/30 transition-all duration-200 hover:shadow-md">
                             <CardContent className="p-4">
                               <div className="mb-2 flex items-start gap-3">
                                 <div className="bg-primary/10 group-hover:bg-primary/20 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full transition-colors">

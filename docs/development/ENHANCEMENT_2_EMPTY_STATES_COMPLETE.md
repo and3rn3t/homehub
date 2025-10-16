@@ -1,8 +1,8 @@
 # Enhancement #2: Empty State Illustrations - Complete ✅
 
-**Date**: October 16, 2025  
-**Status**: ✅ Complete  
-**Time**: ~45 minutes  
+**Date**: October 16, 2025
+**Status**: ✅ Complete
+**Time**: ~45 minutes
 **Files Modified**: 3
 
 ---
@@ -40,7 +40,11 @@ Enhanced empty states across multiple components with engaging illustrations, he
 ```tsx
 <IOS26EmptyState
   icon={<LineChartIcon className="h-16 w-16" />}
-  title={filter === 'all' ? 'No Devices Monitored' : `No ${filter.charAt(0).toUpperCase() + filter.slice(1)} Devices`}
+  title={
+    filter === 'all'
+      ? 'No Devices Monitored'
+      : `No ${filter.charAt(0).toUpperCase() + filter.slice(1)} Devices`
+  }
   message={
     filter === 'all'
       ? 'Add devices to start monitoring their health, connectivity, and performance metrics in real-time.'
@@ -61,6 +65,7 @@ Enhanced empty states across multiple components with engaging illustrations, he
 ```
 
 **Benefits**:
+
 - Contextual messaging based on filter state
 - Actionable CTA to either discover devices or clear filter
 - Consistent iOS 26 design language
@@ -140,7 +145,7 @@ Enhanced empty states across multiple components with engaging illustrations, he
           }}
           className="group text-left"
         >
-          <Card className="hover:bg-accent/5 border-border/50 transition-all duration-200 hover:border-primary/30 hover:shadow-md">
+          <Card className="hover:bg-accent/5 border-border/50 hover:border-primary/30 transition-all duration-200 hover:shadow-md">
             <CardContent className="p-4">
               <div className="mb-2 flex items-start gap-3">
                 <div className="bg-primary/10 group-hover:bg-primary/20 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full transition-colors">
@@ -148,9 +153,7 @@ Enhanced empty states across multiple components with engaging illustrations, he
                 </div>
                 <div className="flex-1">
                   <h4 className="mb-1 font-medium">{template.title}</h4>
-                  <p className="text-muted-foreground text-sm">
-                    {template.description}
-                  </p>
+                  <p className="text-muted-foreground text-sm">{template.description}</p>
                 </div>
               </div>
               <Badge variant="secondary" className="text-xs">
@@ -166,12 +169,14 @@ Enhanced empty states across multiple components with engaging illustrations, he
 ```
 
 **Templates Provided**:
+
 1. **Wake Up Routine** (time-based) - Gradual sunrise lighting
 2. **Good Night** (time-based) - Security and lights off
 3. **Climate Control** (location-based) - Geofence temperature adjustment
 4. **Security Alert** (device-state) - Door sensor notifications
 
 **Benefits**:
+
 - Educates users on automation types (time, location, device-state)
 - Provides concrete examples of common use cases
 - Interactive cards with hover effects and spring animations
@@ -246,16 +251,13 @@ Enhanced empty states across multiple components with engaging illustrations, he
           }}
           className="text-left"
         >
-          <Card className="hover:bg-accent/5 border-border/50 transition-all duration-200 hover:border-primary/30 hover:shadow-md">
+          <Card className="hover:bg-accent/5 border-border/50 hover:border-primary/30 transition-all duration-200 hover:shadow-md">
             <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
               <div
                 className="flex h-12 w-12 items-center justify-center rounded-full"
                 style={{ backgroundColor: `${template.color}15` }}
               >
-                <template.icon
-                  className="h-6 w-6"
-                  style={{ color: template.color }}
-                />
+                <template.icon className="h-6 w-6" style={{ color: template.color }} />
               </div>
               <span className="text-sm font-medium">{template.name}</span>
             </CardContent>
@@ -268,6 +270,7 @@ Enhanced empty states across multiple components with engaging illustrations, he
 ```
 
 **Room Templates Provided**:
+
 1. **Living Room** (Blue - `oklch(0.6 0.15 250)`)
 2. **Bedroom** (Purple - `oklch(0.65 0.15 290)`)
 3. **Kitchen** (Green - `oklch(0.7 0.15 145)`)
@@ -278,6 +281,7 @@ Enhanced empty states across multiple components with engaging illustrations, he
 8. **Hallway** (Medium Gray - `oklch(0.55 0.1 260)`)
 
 **Benefits**:
+
 - One-tap room creation with pre-configured icon and color
 - Responsive grid (2 cols mobile, 4 cols desktop)
 - Unique OKLCH color theming for each room type
@@ -357,6 +361,7 @@ export function IOS26EmptyState({ icon, title, message, action, className }: iOS
 ```
 
 **Features**:
+
 - Spring animations with sequential delays
 - Icon with soft glow effect
 - Glass morphism button with hover states
@@ -369,15 +374,15 @@ Reusable pattern for quick-start templates:
 ```tsx
 <motion.button
   key={item.id}
-  initial={{ opacity: 0, y: 20 }}          // Enter from below
+  initial={{ opacity: 0, y: 20 }} // Enter from below
   animate={{ opacity: 1, y: 0 }}
-  transition={{ delay: index * 0.1 }}       // Stagger by index
-  whileTap={{ scale: 0.95 }}                // Tap feedback
-  whileHover={{ y: -2 }}                    // Lift on hover
+  transition={{ delay: index * 0.1 }} // Stagger by index
+  whileTap={{ scale: 0.95 }} // Tap feedback
+  whileHover={{ y: -2 }} // Lift on hover
   onClick={handleCreate}
-  className="group text-left"               // Enable group hover states
+  className="group text-left" // Enable group hover states
 >
-  <Card className="hover:bg-accent/5 border-border/50 transition-all duration-200 hover:border-primary/30 hover:shadow-md">
+  <Card className="hover:bg-accent/5 border-border/50 hover:border-primary/30 transition-all duration-200 hover:shadow-md">
     <CardContent className="p-4">
       {/* Icon + Content */}
       <div className="mb-2 flex items-start gap-3">
@@ -397,6 +402,7 @@ Reusable pattern for quick-start templates:
 ```
 
 **Key Elements**:
+
 - `group` class for coordinated hover states
 - Staggered entrance animations
 - Icon background intensifies on hover (10% → 20% opacity)
@@ -408,6 +414,7 @@ Reusable pattern for quick-start templates:
 ## Animation Timings
 
 ### Empty State Component
+
 - Container: `opacity 0→1`, `y 20→0` over 200ms spring
 - Icon: `scale 0.8→1`, `opacity 0→1` (100ms delay)
 - Title: `opacity 0→1`, `y 5→0` (200ms delay)
@@ -415,6 +422,7 @@ Reusable pattern for quick-start templates:
 - Button: `opacity 0→1`, `y 5→0` (400ms delay)
 
 ### Template Cards
+
 - **Automations**: 100ms stagger (`index * 0.1`)
 - **Rooms**: 50ms stagger (`index * 0.05`)
 - **Hover**: -2px Y lift with default spring
@@ -425,6 +433,7 @@ Reusable pattern for quick-start templates:
 ## User Experience Improvements
 
 ### Before Enhancement
+
 1. Empty states were passive - no guidance on next steps
 2. Generic "no data" messages didn't educate users
 3. Single CTA required manual input (open dialog, type room name)
@@ -432,6 +441,7 @@ Reusable pattern for quick-start templates:
 5. Inconsistent styling across components
 
 ### After Enhancement
+
 1. ✅ Empty states are **proactive** - suggest concrete actions
 2. ✅ Messages explain **benefits** ("Save time and energy", "Monitor health")
 3. ✅ One-tap templates remove friction from first use
@@ -445,21 +455,19 @@ Reusable pattern for quick-start templates:
 ### Import Additions
 
 **DeviceMonitor.tsx**:
+
 ```tsx
 import { IOS26EmptyState } from '@/components/ui/ios26-error'
 ```
 
 **Automations.tsx**:
+
 ```tsx
-import {
-  MoonIcon,
-  ShieldIcon,
-  SunRoomIcon,
-  ThermometerIcon,
-} from '@/lib/icons'
+import { MoonIcon, ShieldIcon, SunRoomIcon, ThermometerIcon } from '@/lib/icons'
 ```
 
 **Rooms.tsx**:
+
 ```tsx
 import {
   BathIcon,
@@ -477,12 +485,14 @@ import {
 ### Color System (OKLCH)
 
 Rooms use OKLCH colors for perceptually uniform brightness:
+
 - Format: `oklch(lightness chroma hue)`
 - Lightness: 0.5-0.7 (medium-bright)
 - Chroma: 0.1-0.18 (moderate saturation)
 - Hue: 30-290° (full spectrum)
 
 **Example**:
+
 ```tsx
 { icon: SofaIcon, name: 'Living Room', color: 'oklch(0.6 0.15 250)' }
 //                                             ├──┘ ├──┘ └──┘
@@ -496,17 +506,20 @@ Rooms use OKLCH colors for perceptually uniform brightness:
 ## Metrics
 
 ### Code Changes
+
 - **Files Modified**: 3
 - **Lines Added**: ~220
 - **Lines Removed**: ~40
 - **Net Change**: +180 lines
 
 ### Component Counts
+
 - Empty states enhanced: 3
 - Quick-start templates added: 12 (4 automation + 8 room)
 - New imports: 14 icons
 
 ### Performance
+
 - No additional bundle size (icons already imported elsewhere)
 - Spring animations use GPU acceleration (transform, opacity)
 - Template arrays are static (no runtime generation)
@@ -533,16 +546,19 @@ Rooms use OKLCH colors for perceptually uniform brightness:
 ## Future Enhancements
 
 ### Phase 1: Template Functionality
+
 1. Wire up automation templates to create actual automation rules
 2. Add "Customize" option to templates before creation
 3. Pre-fill FlowDesigner with template structure
 
 ### Phase 2: Personalization
+
 1. Track which templates are most used
 2. Show personalized template suggestions based on devices
 3. "Recently used" templates section
 
 ### Phase 3: Advanced Templates
+
 1. Multi-room scenes (e.g., "Movie Time" affects living room + kitchen)
 2. Seasonal automations (winter vs summer modes)
 3. Community-shared templates marketplace
@@ -581,10 +597,10 @@ Rooms use OKLCH colors for perceptually uniform brightness:
 
 ## Success Metrics
 
-✅ **Zero TypeScript Errors**: All changes type-safe  
-✅ **Consistent Design**: All empty states use iOS26EmptyState  
-✅ **Actionable CTAs**: Every empty state has at least one action  
-✅ **Educational Content**: Users learn about features while seeing empty states  
-✅ **Reduced Friction**: One-tap templates vs manual form entry  
+✅ **Zero TypeScript Errors**: All changes type-safe
+✅ **Consistent Design**: All empty states use iOS26EmptyState
+✅ **Actionable CTAs**: Every empty state has at least one action
+✅ **Educational Content**: Users learn about features while seeing empty states
+✅ **Reduced Friction**: One-tap templates vs manual form entry
 
 **Enhancement #2 Complete!** 🎉

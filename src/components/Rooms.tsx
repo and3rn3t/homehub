@@ -816,16 +816,13 @@ export function Rooms() {
                       }}
                       className="text-left"
                     >
-                      <Card className="hover:bg-accent/5 border-border/50 transition-all duration-200 hover:border-primary/30 hover:shadow-md">
+                      <Card className="hover:bg-accent/5 border-border/50 hover:border-primary/30 transition-all duration-200 hover:shadow-md">
                         <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
                           <div
                             className="flex h-12 w-12 items-center justify-center rounded-full"
                             style={{ backgroundColor: `${template.color}15` }}
                           >
-                            <template.icon
-                              className="h-6 w-6"
-                              style={{ color: template.color }}
-                            />
+                            <template.icon className="h-6 w-6" style={{ color: template.color }} />
                           </div>
                           <span className="text-sm font-medium">{template.name}</span>
                         </CardContent>
