@@ -133,18 +133,43 @@ export function Scenes() {
 
   const handleDuplicateScene = (scene: Scene) => {
     haptic.light()
+
+    // Create duplicate with new ID and modified name
+    const duplicateScene: Scene = {
+      ...scene,
+      id: `${scene.id}-copy-${Date.now()}`,
+      name: `${scene.name} (Copy)`,
+      lastActivated: undefined, // Reset activation history
+    }
+
+    // Add to scenes array
+    setScenes([...scenes, duplicateScene])
+
     toast.success(`Duplicated ${scene.name}`, {
-      description: 'New scene created',
+      description: 'New scene created successfully',
     })
-    // TODO: Implement scene duplication logic
+
+    logger.info('Scene duplicated', {
+      originalId: scene.id,
+      duplicateId: duplicateScene.id,
+    })
   }
 
   const handleDeleteScene = (scene: Scene) => {
     haptic.heavy()
+
+    // Remove scene from array
+    const updatedScenes = scenes.filter(s => s.id !== scene.id)
+    setScenes(updatedScenes)
+
     toast.success(`Deleted ${scene.name}`, {
-      description: 'Scene removed',
+      description: 'Scene removed successfully',
     })
-    // TODO: Implement scene deletion logic
+
+    logger.info('Scene deleted', {
+      sceneId: scene.id,
+      sceneName: scene.name,
+    })
   }
 
   // Smart loading state: Only show skeletons on initial load with no data

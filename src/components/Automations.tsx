@@ -83,18 +83,44 @@ export function Automations() {
 
   const handleDuplicateAutomation = (automation: Automation) => {
     haptic.light()
+
+    // Create duplicate with new ID and modified name
+    const duplicateAutomation: Automation = {
+      ...automation,
+      id: `${automation.id}-copy-${Date.now()}`,
+      name: `${automation.name} (Copy)`,
+      enabled: false, // Start disabled for safety
+      lastRun: undefined, // Reset execution history
+    }
+
+    // Add to automations array
+    setAutomations([...automations, duplicateAutomation])
+
     toast.success(`Duplicated ${automation.name}`, {
-      description: 'New automation created',
+      description: 'New automation created (disabled)',
     })
-    // TODO: Implement duplication logic
+
+    logger.info('Automation duplicated', {
+      originalId: automation.id,
+      duplicateId: duplicateAutomation.id,
+    })
   }
 
   const handleDeleteAutomation = (automation: Automation) => {
     haptic.heavy()
+
+    // Remove automation from array
+    const updatedAutomations = automations.filter(a => a.id !== automation.id)
+    setAutomations(updatedAutomations)
+
     toast.success(`Deleted ${automation.name}`, {
-      description: 'Automation removed',
+      description: 'Automation removed successfully',
     })
-    // TODO: Implement deletion logic
+
+    logger.info('Automation deleted', {
+      automationId: automation.id,
+      automationName: automation.name,
+    })
   }
 
   const runAutomation = async (automationId: string) => {

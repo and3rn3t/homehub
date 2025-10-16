@@ -22,6 +22,7 @@ import {
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 /**
  * Proxy Arlo URLs through our worker to bypass CORS
@@ -194,11 +195,37 @@ export function CameraDetailsModal({
 
     try {
       console.log('[CameraDetailsModal] Starting recording for camera:', camera.name)
-      alert('Recording feature will be implemented in Milestone 6.1.4')
-      // TODO: Implement recording via Arlo API POST /hmsweb/users/devices/startRecord
+
+      // Import and get the global Arlo adapter instance
+      const { arloTokenManager } = await import('@/services/auth/ArloTokenManager')
+
+      // Check if authenticated
+      const token = arloTokenManager.getToken()
+      if (!token) {
+        toast.error('Not authenticated', {
+          description: 'Please authenticate with Arlo first',
+        })
+        return
+      }
+
+      // Create temporary adapter instance for recording
+      const { ArloAdapter } = await import('@/services/devices/ArloAdapter')
+      const adapter = new ArloAdapter({})
+      await adapter.initialize()
+
+      // Start 30-second recording (default duration)
+      await adapter.startRecording(camera.id, 30)
+
+      toast.success('Recording started', {
+        description: `Recording ${camera.name} for 30 seconds`,
+      })
+
+      console.log('[CameraDetailsModal] ✅ Recording started successfully')
     } catch (error) {
       console.error('[CameraDetailsModal] Failed to start recording:', error)
-      alert('Failed to start recording')
+      toast.error('Failed to start recording', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred',
+      })
     }
   }
 
