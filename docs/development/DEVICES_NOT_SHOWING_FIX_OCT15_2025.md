@@ -96,7 +96,7 @@ When Dashboard used `[]` as default:
 The Rooms component was always using `MOCK_DEVICES` as default, so it would:
 
 1. Load from localStorage (which had empty array from Dashboard)
-2. **BUT** if the Rooms component loaded _before_ Dashboard, it would initialize correctly
+2. **BUT** if the Rooms component loaded *before* Dashboard, it would initialize correctly
 
 This created a race condition where devices would appear or disappear depending on navigation order.
 

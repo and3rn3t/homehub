@@ -243,4 +243,4 @@ git push origin main --force
 
 ---
 
-_Will update this document with deployment URL and test results once build completes._
+*Will update this document with deployment URL and test results once build completes.*

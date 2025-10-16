@@ -144,4 +144,4 @@ Watch for these in Cloudflare Analytics after deployment:
 
 ---
 
-_This is an automated summary. Full details in DEPLOYMENT_OCT15_2025_PRODUCTION_FIXES.md_
+*This is an automated summary. Full details in DEPLOYMENT_OCT15_2025_PRODUCTION_FIXES.md*

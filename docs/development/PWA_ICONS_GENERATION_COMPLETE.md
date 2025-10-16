@@ -266,7 +266,7 @@ Complete guides available:
 
 ---
 
-## 🎯 Achievement Unlocked!
+## 🎯 Achievement Unlocked
 
 ```
 ┌──────────────────────────────────────────────┐
@@ -321,7 +321,7 @@ apple-touch-icon.png (2.56 KB) favicon.ico (464 bytes)
 └──────────────────┘
 ```
 
-_(Blue gradient background with white house icon and green lightning bolt)_
+*(Blue gradient background with white house icon and green lightning bolt)*
 
 ---
 

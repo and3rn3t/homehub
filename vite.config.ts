@@ -72,6 +72,11 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    // Increase chunk size warning limit for production bundles
+    chunkSizeWarningLimit: 1000,
+    // Enable minification
+    minify: 'esbuild',
+    target: 'es2020',
     // Optimize chunk splitting for better caching and parallel loading
     rollupOptions: {
       output: {
@@ -81,7 +86,13 @@ export default defineConfig({
         manualChunks: undefined,
         // Force modulepreload order by chunk file names
         chunkFileNames: 'assets/[name]-[hash].js',
+        // Optimize asset naming
+        assetFileNames: 'assets/[name]-[hash][extname]',
       },
     },
+    // Enable CSS code splitting
+    cssCodeSplit: true,
+    // Report compressed size
+    reportCompressedSize: true,
   },
 })

@@ -302,6 +302,6 @@ With Dashboard code quality improvements complete, recommended next priorities:
 
 ---
 
-_Generated: October 15, 2025_
-_Refactoring Time: ~45 minutes_
-_Lines Changed: ~150 deletions, ~245 additions (net +95)_
+*Generated: October 15, 2025*
+*Refactoring Time: ~45 minutes*
+*Lines Changed: ~150 deletions, ~245 additions (net +95)*
