@@ -1033,6 +1033,331 @@ interface Flow {
 8. ⏳ **Phase 5** → Security expansion (additional protocols)
 9. ⏳ **Phases 6.2-10** → Scale based on personal needs
 
+## Quick Reference Code Snippets
+
+### New Feature Component Template
+
+```tsx
+import { useKV } from '@/hooks/use-kv'
+import type { Device } from '@/types'
+import { KV_KEYS } from '@/constants'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { LightbulbIcon } from '@/lib/icons'
+import { toast } from 'sonner'
+import { motion } from 'framer-motion'
+
+/**
+ * [Component Name] - [Brief Description]
+ */
+export function MyNewComponent() {
+  // 1. State management (always useKV for persistent data)
+  const [devices, setDevices] = useKV<Device[]>(KV_KEYS.DEVICES, [])
+  const [loading, setLoading] = useKV<boolean>('my-component-loading', false)
+
+  // 2. Event handlers with async/error handling
+  const handleAction = async () => {
+    setLoading(true)
+
+    try {
+      // Optimistic update
+      setDevices(prev => prev.map(d => ({ ...d, enabled: !d.enabled })))
+
+      // Async operation (API call, etc.)
+      await someApiCall()
+
+      toast.success('Action completed')
+    } catch (error) {
+      // Rollback on error
+      setDevices(prev => prev.map(d => ({ ...d, enabled: !d.enabled })))
+      toast.error('Action failed')
+      console.error('Error:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 3. Render with Framer Motion animations
+  return (
+    <div className="container mx-auto p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      >
+        <Card className="p-6">
+          <div className="mb-4 flex items-center gap-2">
+            <LightbulbIcon className="h-6 w-6" />
+            <h2 className="text-xl font-semibold">Component Title</h2>
+          </div>
+
+          <Button onClick={handleAction} disabled={loading}>
+            {loading ? 'Loading...' : 'Action'}
+          </Button>
+        </Card>
+      </motion.div>
+    </div>
+  )
+}
+```
+
+### Device Control Pattern
+
+```tsx
+import { HueBridgeAdapter } from '@/services/devices/HueBridgeAdapter'
+import { HTTPDeviceAdapter } from '@/services/devices/HTTPDeviceAdapter'
+import type { Device } from '@/types'
+
+/**
+ * Universal device control handler
+ */
+const controlDevice = async (device: Device, enabled: boolean) => {
+  try {
+    switch (device.protocol) {
+      case 'hue':
+        await HueBridgeAdapter.setLightState(device.config!.bridgeId!, device.config!.deviceId!, {
+          on: enabled,
+        })
+        break
+
+      case 'http':
+        await HTTPDeviceAdapter.control(device.id, { power: enabled })
+        break
+
+      case 'mqtt':
+        // MQTT control logic
+        break
+
+      default:
+        throw new Error(`Unsupported protocol: ${device.protocol}`)
+    }
+
+    // Update UI state
+    setDevices(prev => prev.map(d => (d.id === device.id ? { ...d, enabled } : d)))
+
+    toast.success(`${device.name} turned ${enabled ? 'on' : 'off'}`)
+  } catch (error) {
+    toast.error(`Failed to control ${device.name}`)
+    console.error('Device control error:', error)
+  }
+}
+```
+
+### New Service Class Template
+
+````typescript
+/**
+ * [Service Name] - [Brief Description]
+ *
+ * @example
+ * ```typescript
+ * MyService.initialize(config)
+ * const result = await MyService.doSomething()
+ * ```
+ */
+export class MyService {
+  private static config: ServiceConfig
+  private static cache = new Map<string, any>()
+
+  /**
+   * Initialize service with configuration
+   */
+  static initialize(config: ServiceConfig): void {
+    this.config = config
+  }
+
+  /**
+   * Main service method
+   * @param param - Parameter description
+   * @returns Return value description
+   * @throws {Error} When operation fails
+   */
+  static async doSomething(param: string): Promise<ResultType> {
+    // Check cache first
+    if (this.cache.has(param)) {
+      return this.cache.get(param)!
+    }
+
+    try {
+      const response = await fetch(`${this.config.baseUrl}/endpoint`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ param }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.statusText}`)
+      }
+
+      const result = await response.json()
+
+      // Cache result
+      this.cache.set(param, result)
+
+      return result
+    } catch (error) {
+      console.error('Service error:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Clear service cache
+   */
+  static clearCache(): void {
+    this.cache.clear()
+  }
+}
+````
+
+### Custom Hook Pattern
+
+````typescript
+import { useState, useEffect } from 'react'
+
+/**
+ * Custom hook for [functionality]
+ *
+ * @param initialValue - Initial value
+ * @returns Current value and setter
+ *
+ * @example
+ * ```tsx
+ * const value = useMyHook('initial')
+ * ```
+ */
+export function useMyHook<T>(initialValue: T) {
+  const [value, setValue] = useState<T>(initialValue)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    // Setup effect
+    const subscription = setupSomething()
+
+    return () => {
+      // Cleanup
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  return { value, setValue, loading }
+}
+````
+
+### Test File Template
+
+```typescript
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MyComponent } from './MyComponent'
+
+// Mock dependencies
+vi.mock('@/hooks/use-kv', () => ({
+  useKV: vi.fn((key, defaultValue) => [defaultValue, vi.fn()]),
+}))
+
+describe('MyComponent', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('should render successfully', () => {
+    render(<MyComponent />)
+    expect(screen.getByText('Component Title')).toBeInTheDocument()
+  })
+
+  it('should handle user interaction', async () => {
+    const user = userEvent.setup()
+    render(<MyComponent />)
+
+    const button = screen.getByRole('button', { name: /action/i })
+    await user.click(button)
+
+    await waitFor(() => {
+      expect(screen.getByText('Success')).toBeInTheDocument()
+    })
+  })
+})
+```
+
+### Standard Import Order
+
+```typescript
+// 1. React imports
+import { useState, useEffect } from 'react'
+
+// 2. Type imports
+import type { Device, Room, Scene } from '@/types'
+
+// 3. Custom hooks
+import { useKV } from '@/hooks/use-kv'
+import { useHaptics } from '@/hooks/use-haptics'
+
+// 4. Constants
+import { KV_KEYS, MOCK_DEVICES } from '@/constants'
+
+// 5. UI components
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+
+// 6. Icons
+import { LightbulbIcon, PowerIcon } from '@/lib/icons'
+
+// 7. Services
+import { HueBridgeAdapter } from '@/services/devices/HueBridgeAdapter'
+import { DiscoveryManager } from '@/services/discovery/DiscoveryManager'
+
+// 8. Utilities
+import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
+
+// 9. External utilities
+import { motion } from 'framer-motion'
+```
+
+### Framer Motion Animation Patterns
+
+```tsx
+// Spring entrance
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+>
+
+// Staggered children
+<motion.div
+  variants={{
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  }}
+  initial="hidden"
+  animate="show"
+>
+  {items.map(item => (
+    <motion.div
+      key={item.id}
+      variants={{
+        hidden: { opacity: 0, y: 20 },
+        show: { opacity: 1, y: 0 }
+      }}
+    />
+  ))}
+</motion.div>
+
+// Scale on tap
+<motion.button
+  whileTap={{ scale: 0.95 }}
+  whileHover={{ scale: 1.05 }}
+/>
+```
+
+---
+
 ## Reference Files
 
 ### Core Framework
