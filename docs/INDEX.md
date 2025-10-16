@@ -168,31 +168,31 @@ docs/
 | [MILESTONE_2.2.4_COMPLETE.md](development/milestones/MILESTONE_2.2.4_COMPLETE.md)                                     | 2.2.4   | HTTP device control         | ✅ Complete |
 | [MILESTONE_2.2.5_COMPLETE.md](development/milestones/MILESTONE_2.2.5_COMPLETE.md)                                     | 2.2.5   | Advanced discovery          | ✅ Complete |
 
-*See [development/milestones/](development/milestones/) for all milestone documentation*
+_See [development/milestones/](development/milestones/) for all milestone documentation_
 
 ### Features Implemented
 
 **Major feature implementations:**
 
-| Document                                                                                            | Feature              | Status      |
-| --------------------------------------------------------------------------------------------------- | -------------------- | ----------- |
-| [PHASE_1_POLISH_UI_UX_ENHANCEMENTS.md](development/PHASE_1_POLISH_UI_UX_ENHANCEMENTS.md)           | UI/UX Polish (Oct 16) | 🆕 NEW      |
-| [ENHANCEMENT_2_EMPTY_STATES_COMPLETE.md](development/ENHANCEMENT_2_EMPTY_STATES_COMPLETE.md)       | Empty state templates | ✅ Complete |
-| [ENHANCEMENT_3_UNDO_REDO_COMPLETE.md](development/ENHANCEMENT_3_UNDO_REDO_COMPLETE.md)             | Undo/redo actions     | ✅ Complete |
-| [ARLO_INTEGRATION_SUMMARY.md](development/features/ARLO_INTEGRATION_SUMMARY.md)                     | Arlo Cloud API       | ⚠️ Blocked  |
-| [ARLO_CLOUDFLARE_BLOCKING.md](development/issues/ARLO_CLOUDFLARE_BLOCKING.md)                       | Arlo API blocker     | ✅ Updated  |
-| [ARLO_OPTION_C_DEVELOPER_API.md](development/issues/ARLO_OPTION_C_DEVELOPER_API.md)                 | Arlo OAuth2 (DEAD)   | ❌ Archived |
-| [DOORBELL_INTEGRATION.md](development/features/DOORBELL_INTEGRATION.md)                             | Doorbell system      | 🆕 NEW      |
-| [DOORBELL_QUICKREF.md](development/features/DOORBELL_QUICKREF.md)                                   | Doorbell quick ref   | 🆕 NEW      |
-| [DOORBELL_TEST_REPORT.md](development/features/DOORBELL_TEST_REPORT.md)                             | Doorbell testing     | 🆕 NEW      |
-| [ADVANCED_HUE_FEATURES.md](development/features/ADVANCED_HUE_FEATURES.md)                           | Hue integration      | ✅ Complete |
-| [COLOR_CONTROLS_COMPLETE.md](development/features/COLOR_CONTROLS_COMPLETE.md)                       | Color picker         | ✅ Complete |
-| [DARK_MODE_IMPLEMENTATION_OCT_2025.md](development/features/DARK_MODE_IMPLEMENTATION_OCT_2025.md)   | Dark mode            | ✅ Complete |
-| [LUCIDE_MIGRATION_COMPLETE.md](development/features/LUCIDE_MIGRATION_COMPLETE.md)                   | Icon system          | ✅ Complete |
-| [CI_CD_INTEGRATION_COMPLETE.md](development/features/CI_CD_INTEGRATION_COMPLETE.md)                 | CI/CD pipeline       | ✅ Complete |
-| [VALIDATION_INFRASTRUCTURE_COMPLETE.md](development/features/VALIDATION_INFRASTRUCTURE_COMPLETE.md) | Test infrastructure  | ✅ Complete |
+| Document                                                                                            | Feature               | Status      |
+| --------------------------------------------------------------------------------------------------- | --------------------- | ----------- |
+| [PHASE_1_POLISH_UI_UX_ENHANCEMENTS.md](development/PHASE_1_POLISH_UI_UX_ENHANCEMENTS.md)            | UI/UX Polish (Oct 16) | 🆕 NEW      |
+| [ENHANCEMENT_2_EMPTY_STATES_COMPLETE.md](development/ENHANCEMENT_2_EMPTY_STATES_COMPLETE.md)        | Empty state templates | ✅ Complete |
+| [ENHANCEMENT_3_UNDO_REDO_COMPLETE.md](development/ENHANCEMENT_3_UNDO_REDO_COMPLETE.md)              | Undo/redo actions     | ✅ Complete |
+| [ARLO_INTEGRATION_SUMMARY.md](development/features/ARLO_INTEGRATION_SUMMARY.md)                     | Arlo Cloud API        | ⚠️ Blocked  |
+| [ARLO_CLOUDFLARE_BLOCKING.md](development/issues/ARLO_CLOUDFLARE_BLOCKING.md)                       | Arlo API blocker      | ✅ Updated  |
+| [ARLO_OPTION_C_DEVELOPER_API.md](development/issues/ARLO_OPTION_C_DEVELOPER_API.md)                 | Arlo OAuth2 (DEAD)    | ❌ Archived |
+| [DOORBELL_INTEGRATION.md](development/features/DOORBELL_INTEGRATION.md)                             | Doorbell system       | 🆕 NEW      |
+| [DOORBELL_QUICKREF.md](development/features/DOORBELL_QUICKREF.md)                                   | Doorbell quick ref    | 🆕 NEW      |
+| [DOORBELL_TEST_REPORT.md](development/features/DOORBELL_TEST_REPORT.md)                             | Doorbell testing      | 🆕 NEW      |
+| [ADVANCED_HUE_FEATURES.md](development/features/ADVANCED_HUE_FEATURES.md)                           | Hue integration       | ✅ Complete |
+| [COLOR_CONTROLS_COMPLETE.md](development/features/COLOR_CONTROLS_COMPLETE.md)                       | Color picker          | ✅ Complete |
+| [DARK_MODE_IMPLEMENTATION_OCT_2025.md](development/features/DARK_MODE_IMPLEMENTATION_OCT_2025.md)   | Dark mode             | ✅ Complete |
+| [LUCIDE_MIGRATION_COMPLETE.md](development/features/LUCIDE_MIGRATION_COMPLETE.md)                   | Icon system           | ✅ Complete |
+| [CI_CD_INTEGRATION_COMPLETE.md](development/features/CI_CD_INTEGRATION_COMPLETE.md)                 | CI/CD pipeline        | ✅ Complete |
+| [VALIDATION_INFRASTRUCTURE_COMPLETE.md](development/features/VALIDATION_INFRASTRUCTURE_COMPLETE.md) | Test infrastructure   | ✅ Complete |
 
-*See [development/features/](development/features/) for all feature documentation*
+_See [development/features/](development/features/) for all feature documentation_
 
 ### Development Sessions
 
@@ -204,7 +204,7 @@ docs/
 | [DISCOVERY_TEST_RESULTS.md](development/sessions/DISCOVERY_TEST_RESULTS.md)                         | Testing | ✅ Complete |
 | [HUE_ADAPTER_TEST_RESULTS.md](development/sessions/HUE_ADAPTER_TEST_RESULTS.md)                     | Testing | ✅ Complete |
 
-*See [development/sessions/](development/sessions/) for all session documentation*
+_See [development/sessions/](development/sessions/) for all session documentation_
 
 ### Bug Fixes
 
@@ -216,7 +216,7 @@ docs/
 | [DEVICE_ACCESSIBILITY_FIX.md](development/fixes/DEVICE_ACCESSIBILITY_FIX.md) | Device visibility | ✅ Fixed |
 | [TYPESCRIPT_ERRORS_FIXED.md](development/fixes/TYPESCRIPT_ERRORS_FIXED.md)   | TypeScript        | ✅ Fixed |
 
-*See [development/fixes/](development/fixes/) for all bug fix documentation*
+_See [development/fixes/](development/fixes/) for all bug fix documentation_
 
 ---
 
@@ -265,7 +265,7 @@ docs/
 | [PHASE_1.3.4_ERROR_BOUNDARIES.md](history/PHASE_1.3.4_ERROR_BOUNDARIES.md) | Error handling patterns     | ✅ Reference |
 | [PHASE_1.3.5_RESPONSIVE.md](history/PHASE_1.3.5_RESPONSIVE.md)             | Responsive design guide     | ✅ Reference |
 
-*See [history/](history/) for complete Phase 1 documentation*
+_See [history/](history/) for complete Phase 1 documentation_
 
 ### Phase 2: Device Integration (✅ Complete)
 
@@ -275,7 +275,7 @@ docs/
 | --------------------------------------------------------------------------------- | --------------- | ----------- |
 | [PHASE_2_COMPLETE_SUMMARY.md](development/milestones/PHASE_2_COMPLETE_SUMMARY.md) | Phase 2 summary | ✅ Complete |
 
-*See [archive/development/phase-2/](archive/development/phase-2/) for detailed Phase 2 work*
+_See [archive/development/phase-2/](archive/development/phase-2/) for detailed Phase 2 work_
 
 ---
 
@@ -363,7 +363,7 @@ docs/
 
 ---
 
-*For the complete documentation catalog, see the directory READMEs in [guides/](guides/) and [development/](development/)*
+_For the complete documentation catalog, see the directory READMEs in [guides/](guides/) and [development/](development/)_
 
 **Future work and consolidation plans:**
 
