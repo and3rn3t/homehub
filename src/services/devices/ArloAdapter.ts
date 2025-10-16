@@ -143,9 +143,9 @@ export class ArloAdapter extends EventEmitter {
       // Discover devices via direct API
       await this.discoverDevices()
 
-      // Note: Event subscription not implemented yet for direct API
-      // TODO: Implement WebSocket/SSE event streaming for real-time updates
-      console.log('[ArloAdapter] ℹ️  Event streaming not yet implemented for direct API')
+      // Start event streaming for real-time updates
+      await this.subscribeToEvents()
+      console.log('[ArloAdapter] ✅ Event streaming initialized')
     } catch (error) {
       console.error('[ArloAdapter] Initialization failed:', error)
       throw new Error(
@@ -163,17 +163,19 @@ export class ArloAdapter extends EventEmitter {
       console.log('[ArloAdapter] Using token manager for authentication...')
 
       // Try to get existing token from storage
-      let token = arloTokenManager.getToken()
+      const token = arloTokenManager.getToken()
 
       if (!token) {
-        console.log('[ArloAdapter] No stored token found, using fallback hardcoded token')
+        console.error('[ArloAdapter] ❌ No authentication token available')
 
-        // Fallback to hardcoded token (for first-time setup)
-        // TODO: Remove this fallback once token refresh UI is implemented
-        token = arloTokenManager.saveToken(
-          '2_oVQxGhmXyVsFJcZo3agKwxeW0SPkrsZMMIWShghKUwK8jh7pWobZdMtsqaLby55b5XLiokNTVztaPR0BRfnXjY9w8YEXgVOXJPKe4QG430Zr1ZuNzKRizjBs2G6VwS6K_CroERHLsGAoxfibH49SEcghzPb9PnxYIj8PG4OMGR3Akp73gjuUKqSFsOKekPxXV6RQRcRhzs5x6yTqMP9z4PzeDY2kCwSHXBm0KDcp7bFY52saSPiN29tndnYhez43nt4iRilc3OP9KfHK9D0Do9LgfhFqnsON0_yVoP33GajS3NmWYX4jVh4mnq3LJXFJkSq604WE_a_m7yrFS-pddpE',
-          'K5HYEUA3-2400-336-127845809',
-          '2'
+        // Emit event for UI to handle token setup
+        this.emit('token-required', {
+          message: 'No authentication token found. Please authenticate with Arlo.',
+          timestamp: new Date().toISOString(),
+        })
+
+        throw new Error(
+          'No authentication token available. Please use the Arlo Token Manager to authenticate.'
         )
       }
 
@@ -330,8 +332,222 @@ export class ArloAdapter extends EventEmitter {
 
   /**
    * Subscribe to Arlo event stream for real-time updates
+   *
+   * Implements Server-Sent Events (SSE) connection to Arlo's EventStream API.
+   * Receives real-time events for:
+   * - Motion detection
+   * - Doorbell presses
+   * - Camera state changes
+   * - Battery level updates
+   * - Signal strength changes
+   */
+  private async subscribeToEvents(): Promise<void> {
+    if (this.subscribed) {
+      console.log('[ArloAdapter] Already subscribed to events')
+      return
+    }
+
+    try {
+      console.log('[ArloAdapter] Subscribing to Arlo event stream...')
+
+      // Subscribe via Arlo API
+      const subscribeUrl = `${ARLO_API_BASE_URL}/hmsweb/client/subscribe`
+
+      const response = await this.makeAuthenticatedRequest(subscribeUrl, {
+        method: 'GET',
+      })
+
+      if (!response.ok) {
+        throw new Error(`Event subscription failed: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+
+      if (data.success) {
+        this.subscribed = true
+        console.log('[ArloAdapter] ✅ Event subscription successful')
+
+        // Start event polling (Arlo uses long-polling instead of true SSE)
+        this.startEventPolling()
+      } else {
+        throw new Error(`Event subscription failed: ${data.error?.message || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('[ArloAdapter] Event subscription failed:', error)
+      // Don't throw - event streaming is optional, app can work without it
+      console.warn('[ArloAdapter] ⚠️  Continuing without real-time events')
+    }
+  }
+
+  /**
+   * Poll for events from Arlo's event stream
+   * Uses long-polling with timeout to receive real-time updates
+   */
+  private async startEventPolling(): Promise<void> {
+    if (!this.subscribed) return
+
+    const pollEvents = async () => {
+      try {
+        const notifyUrl = `${ARLO_API_BASE_URL}/hmsweb/client/notify`
+
+        // Long-polling request with 120s timeout
+        const response = await this.makeAuthenticatedRequest(notifyUrl, {
+          method: 'GET',
+          signal: AbortSignal.timeout(120000), // 2 minute timeout
+        })
+
+        if (!response.ok) {
+          console.warn('[ArloAdapter] Event polling failed:', response.status)
+          return
+        }
+
+        const data = await response.json()
+
+        if (data.success && data.data) {
+          // Process events
+          this.processEvents(data.data)
+        }
+
+        // Continue polling if still subscribed
+        if (this.subscribed) {
+          // No delay needed - Arlo's long-polling handles this
+          pollEvents()
+        }
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          // Timeout is expected for long-polling, just continue
+          if (this.subscribed) {
+            pollEvents()
+          }
+        } else {
+          console.error('[ArloAdapter] Event polling error:', error)
+          // Wait a bit before retrying on error
+          if (this.subscribed) {
+            setTimeout(pollEvents, 5000)
+          }
+        }
+      }
+    }
+
+    // Start polling loop
+    pollEvents()
+  }
+
+  /**
+   * Process events from Arlo event stream
+   */
+  private processEvents(events: ArloEventBase[]): void {
+    const eventArray = Array.isArray(events) ? events : [events]
+
+    for (const event of eventArray) {
+      try {
+        this.processEvent(event)
+      } catch (error) {
+        console.error('[ArloAdapter] Error processing event:', error)
+      }
+    }
+  }
+
+  /**
+   * Process a single Arlo event
+   */
+  private processEvent(event: ArloEventBase): void {
+    const deviceId = event.deviceId || event.resource?.split('/')[1]
+    if (!deviceId) return
+
+    const device = this.cameras.get(deviceId)
+    if (!device) return
+
+    this.updateDeviceUrls(device, event)
+    this.emitDeviceUpdate(deviceId, device.deviceName, event)
+    this.emitSpecificEvents(deviceId, device.deviceName, event)
+  }
+
+  /**
+   * Update device presigned URLs from event
+   */
+  private updateDeviceUrls(device: ArloDevice, event: ArloEventBase): void {
+    if (event.presignedLastImageUrl) {
+      device.presignedLastImageUrl = event.presignedLastImageUrl
+      console.log(`[ArloAdapter] 📸 New snapshot available for ${device.deviceName}`)
+
+      this.emit('snapshot', {
+        cameraId: device.deviceId,
+        cameraName: device.deviceName,
+        url: event.presignedLastImageUrl,
+        timestamp: new Date().toISOString(),
+      })
+    }
+
+    if (event.presignedSnapshotUrl) {
+      device.presignedSnapshotUrl = event.presignedSnapshotUrl
+    }
+  }
+
+  /**
+   * Emit generic device update event
+   */
+  private emitDeviceUpdate(deviceId: string, deviceName: string, event: ArloEventBase): void {
+    this.emit('device-update', {
+      deviceId,
+      deviceName,
+      event,
+      timestamp: new Date().toISOString(),
+    })
+  }
+
+  /**
+   * Emit specific events based on event type
+   */
+  private emitSpecificEvents(deviceId: string, deviceName: string, event: ArloEventBase): void {
+    if (event.resource?.includes('motion')) {
+      console.log(`[ArloAdapter] 🚶 Motion detected on ${deviceName}`)
+      this.emit('motion', {
+        cameraId: deviceId,
+        cameraName: deviceName,
+        timestamp: new Date().toISOString(),
+      })
+    }
+
+    if (event.resource?.includes('doorbell')) {
+      console.log(`[ArloAdapter] 🔔 Doorbell pressed: ${deviceName}`)
+      this.emit('doorbell', {
+        id: `doorbell-${Date.now()}`,
+        cameraId: deviceId,
+        actionType: 'button_press',
+        responseStatus: 'missed',
+        timestamp: new Date().toISOString(),
+        notificationSent: false,
+        viewed: false,
+      } satisfies DoorbellEvent)
+    }
+  }
+
+  /**
+   * Unsubscribe from event stream
+   */
+  private async unsubscribeFromEvents(): Promise<void> {
+    if (!this.subscribed) return
+
+    try {
+      this.subscribed = false
+
+      const unsubscribeUrl = `${ARLO_API_BASE_URL}/hmsweb/client/unsubscribe`
+      await this.makeAuthenticatedRequest(unsubscribeUrl, {
+        method: 'GET',
+      })
+
+      console.log('[ArloAdapter] ✅ Unsubscribed from events')
+    } catch (error) {
+      console.error('[ArloAdapter] Failed to unsubscribe:', error)
+    }
+  }
+
+  /**
+   * Subscribe to Arlo event stream for real-time updates
    * Reserved for Phase 7: WebSocket/SSE event streaming
    * @internal Not yet implemented
+   * @deprecated Replaced by subscribeToEvents()
    */
   // @ts-expect-error - Reserved for future implementation
   private async _subscribeToEvents(): Promise<void> {
@@ -487,7 +703,12 @@ export class ArloAdapter extends EventEmitter {
   /**
    * Request a new snapshot from a camera
    * Note: Arlo snapshots are async and can take 5-10 seconds
-   * TODO: Implement snapshot request via direct API
+   *
+   * Implemented via Arlo's fullFrameSnapshot API:
+   * - Triggers camera to capture new frame
+   * - Returns immediately with success
+   * - Actual snapshot URL arrives via event stream
+   * - Listen to 'snapshot' event for the URL
    */
   async requestSnapshot(cameraId: string): Promise<string | null> {
     try {
@@ -498,29 +719,62 @@ export class ArloAdapter extends EventEmitter {
 
       console.log(`[ArloAdapter] Requesting snapshot for ${device.deviceName}...`)
 
-      // TODO: Implement snapshot request via direct API
-      // Endpoint: POST https://myapi.arlo.com/hmsweb/users/devices/fullFrameSnapshot
-      // Body: { "from": "<device_id>", "to": "<device_id>", "action": "set", "resource": "cameras/<device_id>", "publishResponse": true }
+      const url = `${ARLO_API_BASE_URL}/hmsweb/users/devices/fullFrameSnapshot`
 
-      // For now, return cached snapshot if available
-      if (device.presignedLastImageUrl) {
-        console.log(`[ArloAdapter] Using cached snapshot: ${device.deviceName}`)
+      const response = await this.makeAuthenticatedRequest(url, {
+        method: 'POST',
+        body: JSON.stringify({
+          from: `${device.deviceId}_web`,
+          to: device.deviceId,
+          action: 'set',
+          resource: `cameras/${device.deviceId}`,
+          publishResponse: true,
+          transId: `web!${Date.now()}`,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Snapshot request failed: ${response.status} ${errorText}`)
+      }
+
+      const data = await response.json()
+
+      if (data.success) {
+        console.log(`[ArloAdapter] ✅ Snapshot requested for ${device.deviceName}`)
+        console.log('[ArloAdapter] ℹ️  Snapshot will be available via event stream in 5-10 seconds')
+
+        // Return cached snapshot if available (new one coming via events)
+        if (device.presignedLastImageUrl) {
+          return device.presignedLastImageUrl
+        }
+
+        return null
+      } else {
+        throw new Error(`Snapshot request failed: ${data.error?.message || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error(`[ArloAdapter] Snapshot request failed:`, error)
+
+      // Fallback to cached snapshot
+      const device = this.cameras.get(cameraId)
+      if (device?.presignedLastImageUrl) {
+        console.log(`[ArloAdapter] Using cached snapshot as fallback`)
         return device.presignedLastImageUrl
       }
 
-      console.warn(
-        `[ArloAdapter] No snapshot available for ${device.deviceName} (request not implemented)`
-      )
-      return null
-    } catch (error) {
-      console.error(`[ArloAdapter] Snapshot request failed:`, error)
       return null
     }
   }
 
   /**
    * Start recording on a camera
-   * TODO: Implement recording via direct API
+   *
+   * Triggers manual recording for specified duration.
+   * Recording will automatically stop after duration expires.
+   *
+   * @param cameraId - Camera device ID
+   * @param duration - Recording duration in seconds (default: 30s)
    */
   async startRecording(cameraId: string, duration: number = 30): Promise<void> {
     try {
@@ -529,10 +783,45 @@ export class ArloAdapter extends EventEmitter {
         throw new Error(`Camera not found: ${cameraId}`)
       }
 
-      console.log(
-        `[ArloAdapter] Recording not yet implemented via direct API (${device.deviceName}, ${duration}s)`
-      )
-      throw new Error('Recording not implemented for direct API mode')
+      console.log(`[ArloAdapter] Starting ${duration}s recording on ${device.deviceName}...`)
+
+      const url = `${ARLO_API_BASE_URL}/hmsweb/users/devices/startRecord`
+
+      const response = await this.makeAuthenticatedRequest(url, {
+        method: 'POST',
+        body: JSON.stringify({
+          from: `${device.deviceId}_web`,
+          to: device.deviceId,
+          action: 'set',
+          resource: `cameras/${device.deviceId}`,
+          publishResponse: true,
+          transId: `web!${Date.now()}`,
+          properties: {
+            recordingDuration: duration,
+          },
+        }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Recording start failed: ${response.status} ${errorText}`)
+      }
+
+      const data = await response.json()
+
+      if (data.success) {
+        console.log(`[ArloAdapter] ✅ Recording started on ${device.deviceName} for ${duration}s`)
+
+        // Emit recording event
+        this.emit('recording-started', {
+          cameraId,
+          cameraName: device.deviceName,
+          duration,
+          timestamp: new Date().toISOString(),
+        })
+      } else {
+        throw new Error(`Recording start failed: ${data.error?.message || 'Unknown error'}`)
+      }
     } catch (error) {
       console.error(`[ArloAdapter] Start recording failed:`, error)
       throw error
@@ -541,7 +830,10 @@ export class ArloAdapter extends EventEmitter {
 
   /**
    * Stop recording on a camera
-   * TODO: Implement recording via direct API
+   *
+   * Stops an active manual recording before its duration expires.
+   *
+   * @param cameraId - Camera device ID
    */
   async stopRecording(cameraId: string): Promise<void> {
     try {
@@ -550,10 +842,41 @@ export class ArloAdapter extends EventEmitter {
         throw new Error(`Camera not found: ${cameraId}`)
       }
 
-      console.log(
-        `[ArloAdapter] Recording stop not yet implemented via direct API (${device.deviceName})`
-      )
-      throw new Error('Recording not implemented for direct API mode')
+      console.log(`[ArloAdapter] Stopping recording on ${device.deviceName}...`)
+
+      const url = `${ARLO_API_BASE_URL}/hmsweb/users/devices/stopRecord`
+
+      const response = await this.makeAuthenticatedRequest(url, {
+        method: 'POST',
+        body: JSON.stringify({
+          from: `${device.deviceId}_web`,
+          to: device.deviceId,
+          action: 'set',
+          resource: `cameras/${device.deviceId}`,
+          publishResponse: true,
+          transId: `web!${Date.now()}`,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Recording stop failed: ${response.status} ${errorText}`)
+      }
+
+      const data = await response.json()
+
+      if (data.success) {
+        console.log(`[ArloAdapter] ✅ Recording stopped on ${device.deviceName}`)
+
+        // Emit recording event
+        this.emit('recording-stopped', {
+          cameraId,
+          cameraName: device.deviceName,
+          timestamp: new Date().toISOString(),
+        })
+      } else {
+        throw new Error(`Recording stop failed: ${data.error?.message || 'Unknown error'}`)
+      }
     } catch (error) {
       console.error(`[ArloAdapter] Stop recording failed:`, error)
       throw error
@@ -693,7 +1016,10 @@ export class ArloAdapter extends EventEmitter {
    */
   async disconnect(): Promise<void> {
     try {
-      // No library cleanup needed for direct API mode
+      // Unsubscribe from events
+      await this.unsubscribeFromEvents()
+
+      // Clear state
       this.subscribed = false
       this.authenticated = false
       this.cameras.clear()

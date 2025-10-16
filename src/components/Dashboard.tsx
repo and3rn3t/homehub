@@ -49,6 +49,219 @@ import { DeviceEditDialog } from './DeviceEditDialog'
 import { NotificationBell } from './NotificationCenter'
 import { ThemeToggle } from './ThemeToggle'
 
+// ============================================================================
+// Helper Functions (Extracted to reduce cognitive complexity)
+// ============================================================================
+
+/**
+ * Renders connection status badge based on current connection state
+ */
+function ConnectionStatusBadge({
+  connectionState,
+  mqttConnected,
+  onReconnect,
+}: Readonly<{
+  connectionState: string
+  mqttConnected: boolean
+  onReconnect: () => Promise<void>
+}>) {
+  if (connectionState === 'offline') {
+    return null
+  }
+
+  if (mqttConnected) {
+    return <IOS26StatusBadge status="idle" label="MQTT" showPulse={true} />
+  }
+
+  if (connectionState === 'reconnecting') {
+    return <IOS26StatusBadge status="alert" label="Reconnecting" showPulse={true} />
+  }
+
+  if (connectionState === 'error') {
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        className="h-7 border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+        onClick={() => {
+          onReconnect().catch(err => {
+            toast.error('Failed to reconnect', {
+              description: err.message,
+            })
+          })
+        }}
+      >
+        <WifiOffIcon className="mr-1 h-3.5 w-3.5" />
+        Reconnect
+      </Button>
+    )
+  }
+
+  return null
+}
+
+/**
+ * Controls a Hue device via the Hue Bridge
+ */
+async function controlHueDevice(
+  device: Device,
+  setKvDevices: (updater: (devices: Device[]) => Device[]) => void
+): Promise<void> {
+  try {
+    const { HueBridgeAdapter } = await import('@/services/devices/HueBridgeAdapter')
+    const adapter = new HueBridgeAdapter({
+      ip: '192.168.1.6',
+      username: 'xddEM82d6i8rZDvEy0jAdXL3rA8vxmnxTSUBIhyA',
+      timeout: 5000,
+    })
+
+    // Optimistic update
+    setKvDevices(currentDevices =>
+      currentDevices.map(d => (d.id === device.id ? { ...d, enabled: !d.enabled } : d))
+    )
+
+    // Execute command
+    const result = device.enabled ? await adapter.turnOff(device) : await adapter.turnOn(device)
+
+    if (result.success) {
+      setKvDevices(currentDevices =>
+        currentDevices.map(d =>
+          d.id === device.id ? { ...d, ...result.newState, lastSeen: new Date() } : d
+        )
+      )
+      toast.success(`${device.name} turned ${result.newState?.enabled ? 'on' : 'off'}`, {
+        description: `Hue Bridge · ${result.duration}ms`,
+      })
+    } else {
+      // Rollback optimistic update
+      setKvDevices(currentDevices =>
+        currentDevices.map(d => (d.id === device.id ? { ...d, enabled: !d.enabled } : d))
+      )
+      toast.error(`Failed to control ${device.name}`, {
+        description: result.error || 'Hue Bridge error',
+      })
+    }
+  } catch (err) {
+    // Rollback on exception
+    setKvDevices(currentDevices =>
+      currentDevices.map(d => (d.id === device.id ? { ...d, enabled: !d.enabled } : d))
+    )
+    logger.error('Hue device control error', err as Error)
+    toast.error(`Error controlling ${device.name}`, {
+      description: err instanceof Error ? err.message : 'Hue Bridge error',
+    })
+  }
+}
+
+/**
+ * Controls an HTTP device via the Shelly adapter
+ */
+async function controlHTTPDevice(
+  device: Device,
+  setKvDevices: (updater: (devices: Device[]) => Device[]) => void
+): Promise<void> {
+  if (!device.ip) {
+    toast.error('Device IP address missing')
+    return
+  }
+
+  try {
+    const { ShellyAdapter } = await import('@/services/devices/ShellyAdapter')
+    const adapter = new ShellyAdapter(device.ip, device.port || 80, { debug: true })
+
+    // Optimistic update
+    setKvDevices(currentDevices =>
+      currentDevices.map(d => (d.id === device.id ? { ...d, enabled: !d.enabled } : d))
+    )
+
+    // Execute command
+    const result = device.enabled ? await adapter.turnOff(device) : await adapter.turnOn(device)
+
+    if (result.success) {
+      setKvDevices(currentDevices =>
+        currentDevices.map(d =>
+          d.id === device.id ? { ...d, ...result.newState, lastSeen: new Date() } : d
+        )
+      )
+      toast.success(`${device.name} turned ${result.newState?.enabled ? 'on' : 'off'}`, {
+        description: `Response time: ${result.duration}ms`,
+      })
+    } else {
+      // Rollback optimistic update
+      setKvDevices(currentDevices =>
+        currentDevices.map(d => (d.id === device.id ? { ...d, enabled: !d.enabled } : d))
+      )
+      toast.error(`Failed to control ${device.name}`, {
+        description: result.error || 'Unknown error',
+      })
+    }
+  } catch (err) {
+    // Rollback on exception
+    setKvDevices(currentDevices =>
+      currentDevices.map(d => (d.id === device.id ? { ...d, enabled: !d.enabled } : d))
+    )
+    logger.error('HTTP device control error', err as Error)
+    toast.error(`Error controlling ${device.name}`, {
+      description: err instanceof Error ? err.message : 'Unknown error',
+    })
+  }
+}
+
+/**
+ * Controls an MQTT device via the device registry
+ */
+async function controlMQTTDevice(
+  device: Device,
+  deviceRegistry: DeviceRegistry,
+  setKvDevices: (updater: (devices: Device[]) => Device[]) => void
+): Promise<void> {
+  const adapter = deviceRegistry.getAdapter(device.protocol)
+
+  if (!adapter) {
+    // Fallback to KV store if no adapter registered
+    setKvDevices(currentDevices =>
+      currentDevices.map(d => (d.id === device.id ? { ...d, enabled: !d.enabled } : d))
+    )
+    toast.success(`${device.name} turned ${!device.enabled ? 'on' : 'off'}`)
+    return
+  }
+
+  if (!adapter.isConnected()) {
+    toast.warning(`${device.protocol.toUpperCase()} adapter not connected`, {
+      description: 'Using fallback mode',
+    })
+    setKvDevices(currentDevices =>
+      currentDevices.map(d => (d.id === device.id ? { ...d, enabled: !d.enabled } : d))
+    )
+    return
+  }
+
+  try {
+    await adapter.sendCommand({
+      deviceId: device.id,
+      command: 'toggle',
+    })
+
+    // Optimistic update in KV store
+    setKvDevices(currentDevices =>
+      currentDevices.map(d => (d.id === device.id ? { ...d, enabled: !d.enabled } : d))
+    )
+
+    toast.success(`${device.name} turned ${!device.enabled ? 'on' : 'off'}`, {
+      description: `via ${device.protocol.toUpperCase()}`,
+    })
+  } catch (err) {
+    logger.error('Device control error', err as Error)
+    toast.error(`Failed to control ${device.name}`, {
+      description: err instanceof Error ? err.message : 'Unknown error',
+    })
+  }
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
 export function Dashboard() {
   // Initialize multi-protocol device registry (singleton)
   const deviceRegistry = useMemo(() => DeviceRegistry.getInstance(), [])
@@ -201,167 +414,19 @@ export function Dashboard() {
         return
       }
 
-      // For Hue devices, use HueBridgeAdapter
+      // Route to appropriate protocol handler
       if (device.protocol === 'hue') {
-        try {
-          // Import adapter dynamically
-          const { HueBridgeAdapter } = await import('@/services/devices/HueBridgeAdapter')
-
-          // Create adapter instance with bridge configuration
-          const adapter = new HueBridgeAdapter({
-            ip: '192.168.1.6',
-            username: 'xddEM82d6i8rZDvEy0jAdXL3rA8vxmnxTSUBIhyA',
-            timeout: 5000,
-          })
-
-          // Optimistic update
-          setKvDevices(currentDevices =>
-            currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-          )
-
-          // Execute command
-          const result = device.enabled
-            ? await adapter.turnOff(device)
-            : await adapter.turnOn(device)
-
-          if (result.success) {
-            // Update with real state
-            setKvDevices(currentDevices =>
-              currentDevices.map(d =>
-                d.id === deviceId ? { ...d, ...result.newState, lastSeen: new Date() } : d
-              )
-            )
-            toast.success(`${device.name} turned ${result.newState?.enabled ? 'on' : 'off'}`, {
-              description: `Hue Bridge · ${result.duration}ms`,
-            })
-          } else {
-            // Rollback optimistic update
-            setKvDevices(currentDevices =>
-              currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-            )
-            toast.error(`Failed to control ${device.name}`, {
-              description: result.error || 'Hue Bridge error',
-            })
-          }
-          return
-        } catch (err) {
-          // Rollback on exception
-          setKvDevices(currentDevices =>
-            currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-          )
-          logger.error('Hue device control error', err as Error)
-          toast.error(`Error controlling ${device.name}`, {
-            description: err instanceof Error ? err.message : 'Hue Bridge error',
-          })
-          return
-        }
+        await controlHueDevice(device, setKvDevices)
+        return
       }
 
-      // For HTTP devices, use direct adapter control
       if (device.protocol === 'http' && device.ip) {
-        try {
-          // Import adapter dynamically
-          const { ShellyAdapter } = await import('@/services/devices/ShellyAdapter')
-
-          // Create adapter instance
-          const adapter = new ShellyAdapter(device.ip, device.port || 80, { debug: true })
-
-          // Optimistic update
-          setKvDevices(currentDevices =>
-            currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-          )
-
-          // Execute command
-          const result = device.enabled
-            ? await adapter.turnOff(device)
-            : await adapter.turnOn(device)
-
-          if (result.success) {
-            // Update with real state
-            setKvDevices(currentDevices =>
-              currentDevices.map(d =>
-                d.id === deviceId ? { ...d, ...result.newState, lastSeen: new Date() } : d
-              )
-            )
-            toast.success(`${device.name} turned ${result.newState?.enabled ? 'on' : 'off'}`, {
-              description: `Response time: ${result.duration}ms`,
-            })
-          } else {
-            // Rollback optimistic update
-            setKvDevices(currentDevices =>
-              currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-            )
-            toast.error(`Failed to control ${device.name}`, {
-              description: result.error || 'Unknown error',
-            })
-          }
-          return
-        } catch (err) {
-          // Rollback on exception
-          setKvDevices(currentDevices =>
-            currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-          )
-          logger.error('HTTP device control error', err as Error)
-          toast.error(`Error controlling ${device.name}`, {
-            description: err instanceof Error ? err.message : 'Unknown error',
-          })
-          return
-        }
+        await controlHTTPDevice(device, setKvDevices)
+        return
       }
 
-      // For MQTT devices, use existing device registry
-      try {
-        // Get appropriate adapter based on device protocol
-        const adapter = deviceRegistry.getAdapter(device.protocol)
-        console.log(`🔌 Adapter for ${device.protocol}:`, adapter ? 'Found' : 'Not found')
-
-        if (!adapter) {
-          console.log('⚠️ No adapter found, using KV fallback')
-          // Fallback to KV store if no adapter registered
-          setKvDevices(currentDevices =>
-            currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-          )
-          toast.success(`${device.name} turned ${!device.enabled ? 'on' : 'off'}`)
-          return
-        }
-
-        // Check if adapter is connected
-        const isConnected = adapter.isConnected()
-        console.log(`🔗 Adapter connected:`, isConnected)
-
-        if (!isConnected) {
-          toast.warning(`${device.protocol.toUpperCase()} adapter not connected`, {
-            description: 'Using fallback mode',
-          })
-          // Fallback to KV store
-          setKvDevices(currentDevices =>
-            currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-          )
-          return
-        }
-
-        // Send toggle command via adapter
-        console.log(`📤 Sending toggle command to device ${deviceId} via ${device.protocol}`)
-        await adapter.sendCommand({
-          deviceId,
-          command: 'toggle',
-        })
-        console.log(`✅ Toggle command sent successfully`)
-
-        // Optimistic update in KV store
-        setKvDevices(currentDevices =>
-          currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-        )
-
-        toast.success(`${device.name} turned ${!device.enabled ? 'on' : 'off'}`, {
-          description: `via ${device.protocol.toUpperCase()}`,
-        })
-      } catch (err) {
-        logger.error('Device control error', err as Error)
-        toast.error(`Failed to control ${device.name}`, {
-          description: err instanceof Error ? err.message : 'Unknown error',
-        })
-      }
+      // Default to MQTT or generic device registry
+      await controlMQTTDevice(device, deviceRegistry, setKvDevices)
     },
     [devices, setKvDevices, deviceRegistry]
   )
@@ -511,35 +576,17 @@ export function Dashboard() {
               <p className="text-muted-foreground text-sm sm:text-base">Welcome home</p>
             </div>
             {/* MQTT Connection Status */}
-            {connectionState !== 'offline' && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex items-center gap-2"
-              >
-                {mqttConnected ? (
-                  <IOS26StatusBadge status="idle" label="MQTT" showPulse={true} />
-                ) : connectionState === 'reconnecting' ? (
-                  <IOS26StatusBadge status="alert" label="Reconnecting" showPulse={true} />
-                ) : connectionState === 'error' ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
-                    onClick={() => {
-                      reconnectMQTT().catch(err => {
-                        toast.error('Failed to reconnect', {
-                          description: err.message,
-                        })
-                      })
-                    }}
-                  >
-                    <WifiOffIcon className="mr-1 h-3.5 w-3.5" />
-                    Reconnect
-                  </Button>
-                ) : null}
-              </motion.div>
-            )}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex items-center gap-2"
+            >
+              <ConnectionStatusBadge
+                connectionState={connectionState}
+                mqttConnected={mqttConnected}
+                onReconnect={reconnectMQTT}
+              />
+            </motion.div>
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
@@ -715,13 +762,7 @@ export function Dashboard() {
             </div>
             {/* Edge-to-edge scroll on mobile with snap points */}
             <div className="-mx-6 sm:mx-0">
-              <div
-                className="scrollbar-hide flex gap-3 overflow-x-auto px-6 pb-2 sm:px-0"
-                style={{
-                  scrollSnapType: 'x mandatory',
-                  WebkitOverflowScrolling: 'touch',
-                }}
-              >
+              <div className="scrollbar-hide scroll-snap-x flex gap-3 overflow-x-auto px-6 pb-2 sm:px-0">
                 {scenes.slice(0, 6).map((scene, index) => {
                   const IconComponent =
                     sceneIcons[scene.icon as keyof typeof sceneIcons] || HouseIcon
@@ -738,23 +779,25 @@ export function Dashboard() {
                         delay: index * 0.05,
                       }}
                       whileTap={{ scale: 0.95 }}
-                      className="flex-shrink-0"
-                      style={{ scrollSnapAlign: 'start' }}
+                      className="scroll-snap-start flex-shrink-0"
                     >
-                      <Card
-                        variant="glass"
-                        role="button"
-                        tabIndex={0}
-                        className="hover:bg-accent/5 w-[140px] cursor-pointer transition-all duration-200 hover:shadow-md"
+                      <button
+                        type="button"
                         onClick={() => activateScene(scene.name)}
+                        className="w-full text-left"
                       >
-                        <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
-                          <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
-                            <IconComponent className="text-primary h-6 w-6" />
-                          </div>
-                          <span className="line-clamp-2 text-sm font-medium">{scene.name}</span>
-                        </CardContent>
-                      </Card>
+                        <Card
+                          variant="glass"
+                          className="hover:bg-accent/5 w-[140px] cursor-pointer transition-all duration-200 hover:shadow-md"
+                        >
+                          <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
+                            <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
+                              <IconComponent className="text-primary h-6 w-6" />
+                            </div>
+                            <span className="line-clamp-2 text-sm font-medium">{scene.name}</span>
+                          </CardContent>
+                        </Card>
+                      </button>
                     </motion.div>
                   )
                 })}

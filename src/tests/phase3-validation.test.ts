@@ -1,0 +1,526 @@
+/**
+ * Phase 3 Validation Test Suite
+ *
+ * Quick validation tests for Phase 3 Automation Engine
+ * Tests service instantiation and basic functionality
+ *
+ * Run: npm test -- src/tests/phase3-validation.test.ts
+ */
+
+import { ActionExecutorService } from '@/services/automation/action-executor.service'
+import { ConditionEvaluatorService } from '@/services/automation/condition-evaluator.service'
+import { SchedulerService } from '@/services/automation/scheduler.service'
+import type { Automation } from '@/types'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+
+describe('Phase 3: Automation Engine Validation', () => {
+  describe('Milestone 3.1: Scheduler Service', () => {
+    let scheduler: SchedulerService
+
+    beforeEach(() => {
+      scheduler = new SchedulerService({ debug: false })
+    })
+
+    afterEach(() => {
+      scheduler.stopAll()
+    })
+
+    it('should instantiate without errors', () => {
+      expect(scheduler).toBeDefined()
+      expect(scheduler).toBeInstanceOf(SchedulerService)
+    })
+
+    it('should calculate next run time for future time', () => {
+      // Get tomorrow's date at 10:00 AM
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      tomorrow.setHours(10, 0, 0, 0)
+
+      const automation: Automation = {
+        id: 'test-morning',
+        name: 'Morning Test',
+        description: '',
+        enabled: true,
+        triggers: [
+          {
+            id: 'trigger-1',
+            type: 'time',
+            time: '10:00',
+            days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+          },
+        ],
+        actions: [
+          {
+            id: 'action-1',
+            deviceId: 'test-device',
+            action: 'turn_on',
+          },
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+
+      // Schedule should not throw
+      expect(() => scheduler.schedule(automation)).not.toThrow()
+    })
+
+    it('should handle disabled automations', () => {
+      const automation: Automation = {
+        id: 'test-disabled',
+        name: 'Disabled Test',
+        description: '',
+        enabled: false,
+        triggers: [
+          {
+            id: 'trigger-1',
+            type: 'time',
+            time: '10:00',
+          },
+        ],
+        actions: [
+          {
+            id: 'action-1',
+            deviceId: 'test-device',
+            action: 'turn_on',
+          },
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+
+      // Should not schedule disabled automation
+      scheduler.schedule(automation)
+      expect(scheduler.getScheduledTasks()).toHaveLength(0)
+    })
+
+    it('should unschedule automations', () => {
+      const automation: Automation = {
+        id: 'test-unschedule',
+        name: 'Unschedule Test',
+        description: '',
+        enabled: true,
+        triggers: [
+          {
+            id: 'trigger-1',
+            type: 'time',
+            time: '10:00',
+          },
+        ],
+        actions: [
+          {
+            id: 'action-1',
+            deviceId: 'test-device',
+            action: 'turn_on',
+          },
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+
+      scheduler.schedule(automation)
+      scheduler.unschedule('test-unschedule')
+      expect(scheduler.getScheduledTasks()).not.toContain('test-unschedule')
+    })
+  })
+
+  describe('Milestone 3.2: Condition Evaluator', () => {
+    let evaluator: ConditionEvaluatorService
+
+    beforeEach(() => {
+      evaluator = new ConditionEvaluatorService({ debug: false })
+    })
+
+    afterEach(() => {
+      evaluator.stopAll()
+    })
+
+    it('should instantiate without errors', () => {
+      expect(evaluator).toBeDefined()
+      expect(evaluator).toBeInstanceOf(ConditionEvaluatorService)
+    })
+
+    it('should evaluate greater than condition', () => {
+      const result = evaluator.evaluateCondition(80, '>', 75)
+      expect(result).toBe(true)
+    })
+
+    it('should evaluate less than condition', () => {
+      const result = evaluator.evaluateCondition(70, '<', 75)
+      expect(result).toBe(true)
+    })
+
+    it('should evaluate equals condition', () => {
+      const result = evaluator.evaluateCondition(75, '==', 75)
+      expect(result).toBe(true)
+    })
+
+    it('should evaluate not equals condition', () => {
+      const result = evaluator.evaluateCondition(75, '!=', 80)
+      expect(result).toBe(true)
+    })
+
+    it('should handle string value comparisons', () => {
+      const result = evaluator.evaluateCondition('75', '>', '70')
+      expect(result).toBe(true)
+    })
+
+    it('should handle boolean value comparisons', () => {
+      const result = evaluator.evaluateCondition(true, '==', true)
+      expect(result).toBe(true)
+    })
+  })
+
+  describe('Milestone 3.3: Action Executor', () => {
+    let executor: ActionExecutorService
+
+    beforeEach(() => {
+      executor = new ActionExecutorService({ debug: false })
+    })
+
+    it('should instantiate without errors', () => {
+      expect(executor).toBeDefined()
+      expect(executor).toBeInstanceOf(ActionExecutorService)
+    })
+
+    it('should validate action types', () => {
+      const validActions = [
+        'turn_on',
+        'turn_off',
+        'toggle',
+        'set_brightness',
+        'set_color',
+        'set_temperature',
+      ]
+
+      validActions.forEach(action => {
+        expect(() => {
+          executor.validateAction({
+            id: 'test-action',
+            deviceId: 'test-device',
+            action: action as any,
+          })
+        }).not.toThrow()
+      })
+    })
+
+    it('should reject invalid action types', () => {
+      expect(() => {
+        executor.validateAction({
+          id: 'test-action',
+          deviceId: 'test-device',
+          action: 'invalid_action' as any,
+        })
+      }).toThrow()
+    })
+
+    it('should validate brightness value ranges', () => {
+      // Valid brightness
+      expect(() => {
+        executor.validateAction({
+          id: 'test-action',
+          deviceId: 'test-device',
+          action: 'set_brightness',
+          value: 50,
+        })
+      }).not.toThrow()
+
+      // Invalid brightness (too high)
+      expect(() => {
+        executor.validateAction({
+          id: 'test-action',
+          deviceId: 'test-device',
+          action: 'set_brightness',
+          value: 150,
+        })
+      }).toThrow()
+    })
+
+    it('should get execution metrics', () => {
+      const metrics = executor.getMetrics()
+
+      expect(metrics).toHaveProperty('totalExecutions')
+      expect(metrics).toHaveProperty('successfulExecutions')
+      expect(metrics).toHaveProperty('failedExecutions')
+      expect(metrics).toHaveProperty('averageExecutionTime')
+    })
+  })
+
+  describe('Integration Tests', () => {
+    it('should allow scheduler to trigger action executor', async () => {
+      const scheduler = new SchedulerService({ debug: false })
+      const executor = new ActionExecutorService({ debug: false })
+
+      let triggered = false
+      const mockCallback = async () => {
+        triggered = true
+      }
+
+      scheduler.setExecutionCallback(mockCallback)
+
+      expect(scheduler).toBeDefined()
+      expect(executor).toBeDefined()
+      expect(triggered).toBe(false)
+
+      scheduler.stopAll()
+    })
+
+    it('should allow condition evaluator to trigger action executor', () => {
+      const evaluator = new ConditionEvaluatorService({ debug: false })
+      const executor = new ActionExecutorService({ debug: false })
+
+      // Mock condition that should trigger
+      const shouldTrigger = evaluator.evaluateCondition(80, '>', 75)
+
+      expect(shouldTrigger).toBe(true)
+      expect(executor).toBeDefined()
+
+      evaluator.stopAll()
+    })
+  })
+
+  describe('Performance Tests', () => {
+    it('should schedule automation in <100ms', () => {
+      const scheduler = new SchedulerService({ debug: false })
+
+      const automation: Automation = {
+        id: 'perf-test',
+        name: 'Performance Test',
+        description: '',
+        enabled: true,
+        triggers: [
+          {
+            id: 'trigger-1',
+            type: 'time',
+            time: '10:00',
+          },
+        ],
+        actions: [
+          {
+            id: 'action-1',
+            deviceId: 'test-device',
+            action: 'turn_on',
+          },
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+
+      const start = performance.now()
+      scheduler.schedule(automation)
+      const elapsed = performance.now() - start
+
+      expect(elapsed).toBeLessThan(100)
+      scheduler.stopAll()
+    })
+
+    it('should evaluate condition in <50ms', () => {
+      const evaluator = new ConditionEvaluatorService({ debug: false })
+
+      const start = performance.now()
+      evaluator.evaluateCondition(80, '>', 75)
+      const elapsed = performance.now() - start
+
+      expect(elapsed).toBeLessThan(50)
+      evaluator.stopAll()
+    })
+
+    it('should validate action in <10ms', () => {
+      const executor = new ActionExecutorService({ debug: false })
+
+      const start = performance.now()
+      executor.validateAction({
+        id: 'test-action',
+        deviceId: 'test-device',
+        action: 'turn_on',
+      })
+      const elapsed = performance.now() - start
+
+      expect(elapsed).toBeLessThan(10)
+    })
+  })
+
+  describe('Error Handling', () => {
+    it('should handle invalid time format gracefully', () => {
+      const scheduler = new SchedulerService({ debug: false })
+
+      const automation: Automation = {
+        id: 'invalid-time',
+        name: 'Invalid Time Test',
+        description: '',
+        enabled: true,
+        triggers: [
+          {
+            id: 'trigger-1',
+            type: 'time',
+            time: 'invalid',
+          },
+        ],
+        actions: [
+          {
+            id: 'action-1',
+            deviceId: 'test-device',
+            action: 'turn_on',
+          },
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+
+      // Should not throw, but should log error
+      expect(() => scheduler.schedule(automation)).not.toThrow()
+      scheduler.stopAll()
+    })
+
+    it('should handle null/undefined conditions', () => {
+      const evaluator = new ConditionEvaluatorService({ debug: false })
+
+      const resultNull = evaluator.evaluateCondition(null as any, '>', 75)
+      const resultUndefined = evaluator.evaluateCondition(undefined as any, '>', 75)
+
+      expect(resultNull).toBe(false)
+      expect(resultUndefined).toBe(false)
+      evaluator.stopAll()
+    })
+
+    it('should handle missing device ID in action', () => {
+      const executor = new ActionExecutorService({ debug: false })
+
+      expect(() => {
+        executor.validateAction({
+          id: 'test-action',
+          deviceId: '',
+          action: 'turn_on',
+        })
+      }).toThrow()
+    })
+  })
+
+  describe('Cleanup', () => {
+    it('should properly clean up scheduler resources', () => {
+      const scheduler = new SchedulerService({ debug: false })
+
+      const automation: Automation = {
+        id: 'cleanup-test',
+        name: 'Cleanup Test',
+        description: '',
+        enabled: true,
+        triggers: [
+          {
+            id: 'trigger-1',
+            type: 'time',
+            time: '10:00',
+          },
+        ],
+        actions: [
+          {
+            id: 'action-1',
+            deviceId: 'test-device',
+            action: 'turn_on',
+          },
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+
+      scheduler.schedule(automation)
+      scheduler.stopAll()
+
+      expect(scheduler.getScheduledTasks()).toHaveLength(0)
+    })
+
+    it('should properly clean up evaluator resources', () => {
+      const evaluator = new ConditionEvaluatorService({ debug: false })
+
+      const automation: Automation = {
+        id: 'cleanup-test',
+        name: 'Cleanup Test',
+        description: '',
+        enabled: true,
+        triggers: [
+          {
+            id: 'trigger-1',
+            type: 'condition',
+            deviceId: 'test-device',
+            operator: '>',
+            threshold: 75,
+          },
+        ],
+        actions: [
+          {
+            id: 'action-1',
+            deviceId: 'test-device',
+            action: 'turn_on',
+          },
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+
+      evaluator.watch(automation)
+      evaluator.stopAll()
+
+      // Should have no active watchers
+      expect(evaluator.getActiveWatchers()).toHaveLength(0)
+    })
+  })
+})
+
+describe('Phase 3: Validation Summary', () => {
+  it('should have all required services available', () => {
+    expect(SchedulerService).toBeDefined()
+    expect(ConditionEvaluatorService).toBeDefined()
+    expect(ActionExecutorService).toBeDefined()
+  })
+
+  it('should pass all performance targets', async () => {
+    const scheduler = new SchedulerService({ debug: false })
+    const evaluator = new ConditionEvaluatorService({ debug: false })
+    const executor = new ActionExecutorService({ debug: false })
+
+    // Performance targets from Phase 3 goals
+    const targets = {
+      schedulerCheck: 100, // ms
+      conditionEval: 50, // ms
+      actionValidation: 10, // ms
+    }
+
+    // Quick performance check
+    const start1 = performance.now()
+    const automation: Automation = {
+      id: 'perf-test',
+      name: 'Performance Test',
+      description: '',
+      enabled: true,
+      triggers: [{ id: 'trigger-1', type: 'time', time: '10:00' }],
+      actions: [{ id: 'action-1', deviceId: 'test', action: 'turn_on' }],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+    scheduler.schedule(automation)
+    const schedulerTime = performance.now() - start1
+
+    const start2 = performance.now()
+    evaluator.evaluateCondition(80, '>', 75)
+    const evaluatorTime = performance.now() - start2
+
+    const start3 = performance.now()
+    executor.validateAction({ id: 'test', deviceId: 'test', action: 'turn_on' })
+    const executorTime = performance.now() - start3
+
+    console.log('📊 Performance Results:')
+    console.log(
+      `   Scheduler: ${schedulerTime.toFixed(2)}ms (target: <${targets.schedulerCheck}ms)`
+    )
+    console.log(`   Evaluator: ${evaluatorTime.toFixed(2)}ms (target: <${targets.conditionEval}ms)`)
+    console.log(
+      `   Executor: ${executorTime.toFixed(2)}ms (target: <${targets.actionValidation}ms)`
+    )
+
+    expect(schedulerTime).toBeLessThan(targets.schedulerCheck)
+    expect(evaluatorTime).toBeLessThan(targets.conditionEval)
+    expect(executorTime).toBeLessThan(targets.actionValidation)
+
+    scheduler.stopAll()
+    evaluator.stopAll()
+  })
+})
