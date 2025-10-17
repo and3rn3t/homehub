@@ -59,10 +59,11 @@ export default defineConfig({
     },
 
     // Test against mobile viewports (iOS focus)
-    {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 13 Pro'] },
-    },
+    // Temporarily disabled - install webkit with: npx playwright install webkit
+    // {
+    //   name: 'Mobile Safari',
+    //   use: { ...devices['iPhone 13 Pro'] },
+    // },
   ],
 
   // Run your local dev server before starting the tests
@@ -71,5 +72,12 @@ export default defineConfig({
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
+    // Output dev server logs for debugging
+    stdout: 'pipe',
+    stderr: 'pipe',
+    // Set environment variable to disable PWA plugin during tests
+    env: {
+      PLAYWRIGHT_TEST: 'true',
+    },
   },
 })

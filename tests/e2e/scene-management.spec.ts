@@ -12,8 +12,12 @@ import { expect, test } from '@playwright/test'
 
 test.describe('Scene Management', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/')
-    await page.waitForSelector('[data-testid="dashboard"]')
+    // Navigate and wait for network to be idle (lazy-loaded components)
+    await page.goto('/', { waitUntil: 'networkidle' })
+
+    // Wait for React hydration and dashboard to render
+    await page.waitForLoadState('domcontentloaded')
+    await page.waitForSelector('[data-testid="dashboard"]', { timeout: 15000 })
   })
 
   test('User can navigate to Scenes tab', async ({ page }) => {

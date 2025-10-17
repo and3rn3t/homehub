@@ -8,7 +8,7 @@
 ![Status](https://img.shields.io/badge/status-production-brightgreen)
 ![Platform](https://img.shields.io/badge/platform-Cloudflare-orange)
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![Tests](https://img.shields.io/badge/tests-passing-brightgreen)
+![Tests](https://github.com/and3rn3t/homehub/actions/workflows/test.yml/badge.svg)
 ![Coverage: Statements](https://img.shields.io/badge/coverage-94.1%25-green)
 ![Coverage: Branches](https://img.shields.io/badge/branches-89.1%25-yellowgreen)
 ![Coverage: Functions](https://img.shields.io/badge/functions-100.0%25-brightgreen)

@@ -630,7 +630,10 @@ export function Dashboard() {
   }
 
   return (
-    <div className={cn('bg-background flex h-full flex-col', highContrastMode && 'high-contrast')}>
+    <div
+      data-testid="dashboard"
+      className={cn('bg-background flex h-full flex-col', highContrastMode && 'high-contrast')}
+    >
       {/* Header */}
       <div className="p-4 pb-0 sm:p-6 sm:pb-0">
         <div className="mb-4 flex items-center justify-between">
