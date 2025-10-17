@@ -23,11 +23,11 @@ describe('State Persistence & Recovery', () => {
     sessionStorage.clear()
     localCache.clear()
     vi.clearAllMocks()
-    
+
     // Clear any timers from debouncing
     vi.clearAllTimers()
   })
-  
+
   afterEach(() => {
     // Additional cleanup after each test
     localStorage.clear()

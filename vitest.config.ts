@@ -13,7 +13,15 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: ['node_modules/', 'src/test/', '**/*.d.ts', '**/*.config.*', '**/mockData', 'dist/', 'tests/e2e/'],
+      exclude: [
+        'node_modules/',
+        'src/test/',
+        '**/*.d.ts',
+        '**/*.config.*',
+        '**/mockData',
+        'dist/',
+        'tests/e2e/',
+      ],
     },
     pool: 'forks', // Use forks instead of threads to avoid Node.js 18 compatibility issues
     poolOptions: {
