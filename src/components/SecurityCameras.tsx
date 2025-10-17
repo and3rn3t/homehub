@@ -19,9 +19,11 @@ import { Card } from '@/components/ui/card'
 import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { type ColorblindMode, getStatusClasses } from '@/constants/colorblind-palettes'
 import type { Camera } from '@/constants/mock-cameras'
 import { MOCK_CAMERAS } from '@/constants/mock-cameras'
 import { DEFAULT_QUICK_REPLIES, generateMockDoorbellEvent } from '@/constants/mock-doorbell-events'
+import { useKV } from '@/hooks/use-kv'
 import { BellIcon, ClockIcon, VideoIcon, WifiOffIcon } from '@/lib/icons'
 import { arloTokenManager } from '@/services/auth/ArloTokenManager'
 import { ArloAdapter } from '@/services/devices/ArloAdapter'
@@ -41,6 +43,9 @@ export const SecurityCameras = memo(function SecurityCameras() {
   const [showDoorbellNotification, setShowDoorbellNotification] = useState(false)
   const [selectedCamera, setSelectedCamera] = useState<Camera | null>(null)
   const [showCameraDetails, setShowCameraDetails] = useState(false)
+
+  // Colorblind mode for accessibility
+  const [colorblindMode] = useKV<ColorblindMode>('colorblind-mode', 'default')
 
   // Real Arlo integration state
   const [cameras, setCameras] = useState<Camera[]>(MOCK_CAMERAS) // Start with mock data as fallback
@@ -350,7 +355,9 @@ export const SecurityCameras = memo(function SecurityCameras() {
           <PullToRefresh onRefresh={handleRefresh}>
             {/* System Status */}
             <div className="flex items-center gap-2">
-              <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+              <div
+                className={`h-2 w-2 animate-pulse rounded-full ${getStatusClasses(colorblindMode, 'success').icon.replace('text-', 'bg-')}`}
+              />
               <span className="text-muted-foreground text-sm">System Active</span>
             </div>
 
@@ -376,11 +383,17 @@ export const SecurityCameras = memo(function SecurityCameras() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
               >
-                <Card className="border-orange-500/20 bg-orange-500/5">
+                <Card
+                  className={`${getStatusClasses(colorblindMode, 'warning').border} ${getStatusClasses(colorblindMode, 'warning').bg}`}
+                >
                   <div className="flex items-start gap-3 p-4">
-                    <WifiOffIcon className="mt-0.5 h-5 w-5 text-orange-500" />
+                    <WifiOffIcon
+                      className={`mt-0.5 h-5 w-5 ${getStatusClasses(colorblindMode, 'warning').icon}`}
+                    />
                     <div>
-                      <h3 className="font-semibold text-orange-600 dark:text-orange-400">
+                      <h3
+                        className={`font-semibold ${getStatusClasses(colorblindMode, 'warning').text}`}
+                      >
                         {offlineCameras.length} Camera{offlineCameras.length > 1 ? 's' : ''} Offline
                       </h3>
                       <p className="text-muted-foreground mt-1 text-sm">

@@ -311,4 +311,132 @@
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
   }
+
+  /* Typography Scale - iOS System (PRD-compliant) */
+  .text-h1 {
+    @apply text-2xl font-bold tracking-tight sm:text-[28px];
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  }
+
+  .text-h2 {
+    @apply text-lg font-semibold tracking-normal sm:text-xl;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  }
+
+  .text-h3 {
+    @apply text-base font-medium tracking-normal;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  }
+
+  .text-body {
+    @apply text-sm font-normal tracking-normal;
+    letter-spacing: 0.01em; /* Slightly relaxed for readability */
+  }
+
+  .text-caption {
+    @apply text-xs font-normal tracking-wide;
+    letter-spacing: 0.02em;
+  }
+
+  /* Icon Sizing Scale - iOS-aligned (16/20/24/32px) */
+  .icon-sm {
+    @apply h-4 w-4; /* 16px - Small icons (status indicators, inline icons) */
+  }
+
+  .icon-md {
+    @apply h-5 w-5; /* 20px - Medium icons (buttons, controls) */
+  }
+
+  .icon-lg {
+    @apply h-6 w-6; /* 24px - Large icons (cards, headers) */
+  }
+
+  .icon-xl {
+    @apply h-8 w-8; /* 32px - Extra large icons (feature cards, empty states) */
+  }
+}
+
+/* WCAG 2.3.3 - Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable spring animations */
+  .motion-safe\:animate-spring {
+    animation: none !important;
+  }
+
+  /* Disable Framer Motion animations */
+  [data-framer-motion] {
+    transition: none !important;
+  }
+}
+
+/* WCAG 1.4.6 - High Contrast Mode Support (Level AAA) */
+.high-contrast {
+  /* Increase background opacity for solid colors */
+  --card: oklch(1 0 0); /* Pure white cards */
+  --background: oklch(0.98 0 0); /* Near-white background */
+
+  /* Increase border visibility */
+  --border: oklch(0.3 0.02 264); /* Dark, visible borders */
+
+  /* Text with maximum contrast */
+  --foreground: oklch(0.1 0.01 264); /* Nearly black text */
+  --muted-foreground: oklch(0.25 0.02 264); /* Darker muted text */
+
+  /* Stronger status colors */
+  --accent: oklch(0.5 0.25 145); /* Darker green for better contrast */
+  --destructive: oklch(0.45 0.25 25); /* Darker red */
+  --primary: oklch(0.45 0.25 250); /* Darker blue */
+}
+
+.dark.high-contrast {
+  /* Dark mode high contrast */
+  --card: oklch(0.12 0.015 264); /* Very dark cards */
+  --background: oklch(0.08 0.012 264); /* Nearly black background */
+
+  /* Maximum contrast borders */
+  --border: oklch(0.7 0.02 264); /* Light, visible borders */
+
+  /* Text with maximum contrast */
+  --foreground: oklch(0.98 0.005 264); /* Nearly white text */
+  --muted-foreground: oklch(0.75 0.01 264); /* Lighter muted text */
+
+  /* Stronger status colors for dark mode */
+  --accent: oklch(0.75 0.2 145); /* Brighter green */
+  --destructive: oklch(0.7 0.22 25); /* Brighter red */
+  --primary: oklch(0.7 0.22 250); /* Brighter blue */
+}
+
+/* High contrast utility classes */
+.high-contrast .glass-card,
+.high-contrast [data-glass='true'] {
+  /* Remove glass effect transparency in high contrast mode */
+  background-color: rgb(255 255 255) !important;
+  backdrop-filter: none !important;
+}
+
+.dark.high-contrast .glass-card,
+.dark.high-contrast [data-glass='true'] {
+  background-color: rgb(20 20 25) !important;
+  backdrop-filter: none !important;
+}
+
+.high-contrast .border,
+.high-contrast [class*='border-'] {
+  /* Thicker borders for better visibility */
+  border-width: 2px !important;
+}
+
+.high-contrast .text-muted-foreground {
+  /* Increase muted text contrast */
+  opacity: 1 !important;
+  color: rgb(var(--muted-foreground)) !important;
 }

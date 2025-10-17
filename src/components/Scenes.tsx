@@ -6,6 +6,7 @@ import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { SwipeableCard } from '@/components/ui/swipeable-card'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { KV_KEYS, MOCK_SCENES } from '@/constants'
+import { type ColorblindMode, getStatusClasses } from '@/constants/colorblind-palettes'
 import { useHaptic } from '@/hooks/use-haptic'
 import { useKV } from '@/hooks/use-kv'
 import {
@@ -81,6 +82,7 @@ export function Scenes() {
     withMeta: true,
   })
   const [activeScene, setActiveScene] = useKV<string | null>(KV_KEYS.ACTIVE_SCENE, null)
+  const [colorblindMode] = useKV<ColorblindMode>('colorblind-mode', 'default')
   const haptic = useHaptic()
 
   // Pull-to-refresh handler
@@ -506,7 +508,7 @@ export function Scenes() {
                               animate={{ scale: 1, opacity: 1 }}
                               exit={{ scale: 0, opacity: 0 }}
                               transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                              className="absolute top-3 left-3 h-3 w-3 rounded-full bg-white shadow-lg"
+                              className={`absolute top-3 left-3 h-3 w-3 rounded-full shadow-lg ${getStatusClasses(colorblindMode, 'success').icon.replace('text-', 'bg-')}`}
                             />
                           )}
                         </motion.div>
@@ -517,17 +519,13 @@ export function Scenes() {
                             <Tooltip delayDuration={500}>
                               <TooltipTrigger asChild>
                                 <motion.span
-                                  className="text-muted-foreground cursor-help text-xs"
+                                  className={`cursor-help text-xs ${
+                                    scene.id === activeScene
+                                      ? getStatusClasses(colorblindMode, 'success').text
+                                      : 'text-muted-foreground'
+                                  }`}
                                   animate={{
                                     scale: scene.id === activeScene ? [1, 1.15, 1] : 1,
-                                    color:
-                                      scene.id === activeScene
-                                        ? [
-                                            'currentColor',
-                                            'rgb(var(--primary-rgb))',
-                                            'currentColor',
-                                          ]
-                                        : 'currentColor',
                                   }}
                                   transition={{
                                     duration: 0.6,
@@ -549,7 +547,7 @@ export function Scenes() {
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                                className="text-primary text-xs font-medium"
+                                className={`text-xs font-medium ${getStatusClasses(colorblindMode, 'success').text}`}
                               >
                                 Active
                               </motion.div>

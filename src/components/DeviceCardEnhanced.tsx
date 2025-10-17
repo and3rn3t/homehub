@@ -155,6 +155,17 @@ export const DeviceCardEnhanced = memo(
       onDelete?.(device.id)
     }, [device.id, onDelete, haptic])
 
+    // Keyboard navigation handler (WCAG 2.1.1)
+    const handleKeyDown = useCallback(
+      (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          handleClick()
+        }
+      },
+      [handleClick]
+    )
+
     // Long press detection
     const longPressHandlers = useLongPress({
       onLongPress: () => {
@@ -221,6 +232,10 @@ export const DeviceCardEnhanced = memo(
             <div
               className="cursor-pointer"
               onClick={handleClick}
+              onKeyDown={handleKeyDown}
+              role="button"
+              tabIndex={0}
+              aria-label={`${device.name} - ${device.status} - Click to open advanced controls`}
               title="Click to open advanced controls"
             >
               <div className="flex items-center justify-between">

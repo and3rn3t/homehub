@@ -293,6 +293,14 @@ function App() {
 
   return (
     <div className="from-background via-background to-muted/30 fixed inset-0 bg-gradient-to-br">
+      {/* WCAG 2.4.1 - Skip to main content link for keyboard users */}
+      <a
+        href="#main-content"
+        className="focus:bg-primary focus:text-primary-foreground focus:ring-ring sr-only absolute top-4 left-4 z-[100] rounded-lg px-4 py-2 font-medium shadow-lg focus:not-sr-only focus:ring-2 focus:ring-offset-2 focus:outline-none"
+      >
+        Skip to main content
+      </a>
+
       {/* Update notification banner */}
       <UpdateBanner />
 
@@ -308,7 +316,7 @@ function App() {
         {/* Main content area with safe-area padding and mobile-optimized scrolling */}
         <div className="mobile-scroll safe-mb flex-1 overflow-hidden pb-20">
           {/* pb-20 for tab bar space */}
-          <TabsContent value="home" className="m-0 h-full p-0">
+          <TabsContent value="home" className="m-0 h-full p-0" id="main-content">
             <Suspense fallback={<TabContentLoader />}>
               <Dashboard />
             </Suspense>
@@ -324,19 +332,19 @@ function App() {
                 <TabsList className="h-12 justify-start rounded-none bg-transparent px-2 sm:px-6">
                   <TabsTrigger
                     value="rooms"
-                    className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs sm:px-4 sm:text-sm"
+                    className="touch-target data-[state=active]:bg-primary/15 px-3 text-sm sm:px-4"
                   >
                     Rooms
                   </TabsTrigger>
                   <TabsTrigger
                     value="monitor"
-                    className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs sm:px-4 sm:text-sm"
+                    className="touch-target data-[state=active]:bg-primary/15 px-3 text-sm sm:px-4"
                   >
                     Monitor
                   </TabsTrigger>
                   <TabsTrigger
                     value="energy"
-                    className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs sm:px-4 sm:text-sm"
+                    className="touch-target data-[state=active]:bg-primary/15 px-3 text-sm sm:px-4"
                   >
                     Energy
                   </TabsTrigger>
@@ -375,19 +383,19 @@ function App() {
                 <TabsList className="h-12 justify-start rounded-none bg-transparent px-2 sm:px-6">
                   <TabsTrigger
                     value="scenes"
-                    className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs sm:px-4 sm:text-sm"
+                    className="touch-target data-[state=active]:bg-primary/15 px-3 text-sm sm:px-4"
                   >
                     Scenes
                   </TabsTrigger>
                   <TabsTrigger
                     value="automations"
-                    className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs sm:px-4 sm:text-sm"
+                    className="touch-target data-[state=active]:bg-primary/15 px-3 text-sm sm:px-4"
                   >
                     Automations
                   </TabsTrigger>
                   <TabsTrigger
                     value="monitor"
-                    className="touch-target data-[state=active]:bg-primary/15 px-3 text-xs sm:px-4 sm:text-sm"
+                    className="touch-target data-[state=active]:bg-primary/15 px-3 text-sm sm:px-4"
                   >
                     Monitor
                   </TabsTrigger>

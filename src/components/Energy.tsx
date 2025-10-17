@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { EnergyChartSkeleton } from '@/components/ui/skeleton'
+import { type ColorblindMode, getStatusClasses } from '@/constants/colorblind-palettes'
 import { useKV } from '@/hooks/use-kv'
 import { BoltIcon, CalendarIcon, ClockIcon, SparklesIcon, TrendingUpIcon } from '@/lib/icons'
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
@@ -21,6 +22,9 @@ interface DeviceUsage {
 }
 
 export function Energy() {
+  // Colorblind mode for accessibility
+  const [colorblindMode] = useKV<ColorblindMode>('colorblind-mode', 'default')
+
   const [energyData, , { isLoading: energyLoading }] = useKV<EnergyData[]>(
     'energy-data',
     [
@@ -121,10 +125,18 @@ export function Energy() {
           <Card className="bg-secondary border-border/50">
             <CardContent className="p-4 text-center">
               <TrendingUpIcon
-                className={`mx-auto mb-2 h-5 w-5 ${weeklyTrend > 0 ? 'text-destructive' : 'text-accent'}`}
+                className={`mx-auto mb-2 h-5 w-5 ${
+                  weeklyTrend > 0
+                    ? getStatusClasses(colorblindMode, 'error').icon
+                    : getStatusClasses(colorblindMode, 'success').icon
+                }`}
               />
               <div
-                className={`mb-1 text-lg font-bold ${weeklyTrend > 0 ? 'text-destructive' : 'text-accent'}`}
+                className={`mb-1 text-lg font-bold ${
+                  weeklyTrend > 0
+                    ? getStatusClasses(colorblindMode, 'error').text
+                    : getStatusClasses(colorblindMode, 'success').text
+                }`}
               >
                 {weeklyTrend > 0 ? '+' : ''}
                 {weeklyTrend.toFixed(1)}%

@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select'
 import { SwipeableCard } from '@/components/ui/swipeable-card'
 import { KV_KEYS, MOCK_DEVICES, MOCK_ROOMS } from '@/constants'
+import { type ColorblindMode, getStatusClasses } from '@/constants/colorblind-palettes'
 import { useHaptic } from '@/hooks/use-haptic'
 import { useKV } from '@/hooks/use-kv'
 import {
@@ -90,6 +91,7 @@ interface SortableRoomCardProps {
   onDeleteClick: (room: Room) => void
   onDeviceToggle: (deviceId: string) => void
   onDeviceContextMenu: (device: Device) => void
+  colorblindMode: ColorblindMode
 }
 
 function SortableRoomCard({
@@ -100,6 +102,7 @@ function SortableRoomCard({
   onDeleteClick,
   onDeviceToggle,
   onDeviceContextMenu,
+  colorblindMode,
 }: SortableRoomCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: room.id,
@@ -178,7 +181,15 @@ function SortableRoomCard({
                     </div>
                     <Progress
                       value={(activeDevices / roomDevices.length) * 100}
-                      className="h-1.5"
+                      className={cn(
+                        'h-1.5',
+                        '[&>div]:transition-colors',
+                        activeDevices / roomDevices.length >= 0.75
+                          ? `[&>div]:${getStatusClasses(colorblindMode, 'success').icon.replace('text-', 'bg-')}`
+                          : activeDevices / roomDevices.length >= 0.25
+                            ? `[&>div]:${getStatusClasses(colorblindMode, 'warning').icon.replace('text-', 'bg-')}`
+                            : `[&>div]:${getStatusClasses(colorblindMode, 'error').icon.replace('text-', 'bg-')}`
+                      )}
                     />
                   </div>
                 )}
@@ -207,10 +218,24 @@ function SortableRoomCard({
                         }}
                         title={`Click to toggle • Right-click for advanced controls`}
                       >
+                        {/* Status indicator dot - colorblind safe */}
                         <div
-                          className={`absolute top-1 right-1 h-1.5 w-1.5 rounded-full ${
-                            device.enabled ? 'bg-primary' : 'bg-muted-foreground/30'
-                          }`}
+                          className={cn(
+                            'absolute top-1 right-1 h-1.5 w-1.5 rounded-full',
+                            device.enabled && device.status === 'online'
+                              ? getStatusClasses(colorblindMode, 'success').icon.replace(
+                                  'text-',
+                                  'bg-'
+                                )
+                              : device.status === 'offline'
+                                ? getStatusClasses(colorblindMode, 'error').icon.replace(
+                                    'text-',
+                                    'bg-'
+                                  )
+                                : getStatusClasses(colorblindMode, 'warning')
+                                    .icon.replace('text-', 'bg-')
+                                    .replace('600', '400/50')
+                          )}
                         />
                         <div
                           className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${
@@ -282,6 +307,9 @@ export function Rooms() {
   const [newRoomName, setNewRoomName] = useState('')
   const [roomEditDialogOpen, setRoomEditDialogOpen] = useState(false)
   const [editRoom, setEditRoom] = useState<Room | null>(null)
+
+  // Colorblind mode for accessibility
+  const [colorblindMode] = useKV<ColorblindMode>('colorblind-mode', 'default')
 
   // Drag and drop state
   const [activeRoomId, setActiveRoomId] = useState<string | null>(null)
@@ -814,6 +842,25 @@ export function Rooms() {
                           description: 'Add devices to this room to get started',
                         })
                       }}
+                      onKeyDown={(e: React.KeyboardEvent) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          const newRoom = {
+                            id: `room-${Date.now()}`,
+                            name: template.name,
+                            icon: template.icon.name,
+                            color: template.color,
+                            deviceIds: [],
+                          }
+                          setRooms([...rooms, newRoom])
+                          toast.success(`${template.name} created!`, {
+                            description: 'Add devices to this room to get started',
+                          })
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Create ${template.name} room`}
                       className="text-left"
                     >
                       <Card className="hover:bg-accent/5 border-border/50 hover:border-primary/30 transition-all duration-200 hover:shadow-md">
@@ -856,6 +903,7 @@ export function Rooms() {
                           room={room}
                           roomDevices={roomDevices}
                           activeDevices={activeDevices}
+                          colorblindMode={colorblindMode}
                           onEditClick={room => {
                             setEditRoom(room)
                             setRoomEditDialogOpen(true)
