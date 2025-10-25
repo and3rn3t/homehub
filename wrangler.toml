@@ -1,0 +1,8 @@
+# Cloudflare Pages configuration
+# https://developers.cloudflare.com/pages/
+
+# Project name
+name = "homehub"
+
+# Pages build output directory
+pages_build_output_dir = "dist"

@@ -1,14 +1,14 @@
 @import 'tailwindcss';
 
 @import './styles/theme.css';
-@import './index.css';
-@import "tw-animate-css";
+@import 'tw-animate-css';
 /*
   ---break---
 */
 @custom-variant dark (&:is(.dark *));
 
-@config '../tailwind.config.js';
+/* Note: Tailwind v4 no longer uses tailwind.config.js */
+/* @config '../tailwind.config.js'; */
 
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
@@ -19,7 +19,6 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
-
   *,
   ::after,
   ::before,
@@ -183,5 +182,20 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/*
+  ---break---
+  Horizontal scroll snap container for mobile UX
+*/
+@layer utilities {
+  .scroll-snap-x {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .scroll-snap-start {
+    scroll-snap-align: start;
   }
 }

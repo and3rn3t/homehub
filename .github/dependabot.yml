@@ -1,11 +1,77 @@
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
+  # Main dependencies
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "daily"
+      interval: 'daily'
+      time: '03:00'
+      timezone: 'America/New_York'
+    open-pull-requests-limit: 5
+    labels:
+      - 'dependencies'
+      - 'npm'
+    commit-message:
+      prefix: 'chore(deps)'
+    groups:
+      # Group dev dependencies
+      dev-dependencies:
+        patterns:
+          - '@types/*'
+          - '@testing-library/*'
+          - '@vitest/*'
+          - 'eslint*'
+          - 'prettier*'
+          - 'typescript*'
+        update-types:
+          - 'minor'
+          - 'patch'
+      # Group production dependencies by category
+      ui-dependencies:
+        patterns:
+          - '@radix-ui/*'
+          - 'lucide-react'
+          - 'framer-motion'
+        update-types:
+          - 'minor'
+          - 'patch'
 
-  - package-ecosystem: "devcontainers"
-    directory: "/"
+  # Worker dependencies
+  - package-ecosystem: 'npm'
+    directory: '/workers'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
+      day: 'monday'
+      time: '03:00'
+      timezone: 'America/New_York'
+    open-pull-requests-limit: 3
+    labels:
+      - 'dependencies'
+      - 'workers'
+    commit-message:
+      prefix: 'chore(workers)'
+
+  # GitHub Actions
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '03:00'
+      timezone: 'America/New_York'
+    open-pull-requests-limit: 2
+    labels:
+      - 'dependencies'
+      - 'ci'
+    commit-message:
+      prefix: 'chore(ci)'
+
+  # Dev containers (if used)
+  - package-ecosystem: 'devcontainers'
+    directory: '/'
+    schedule:
+      interval: 'monthly'
+    open-pull-requests-limit: 1
+    labels:
+      - 'dependencies'
+      - 'devcontainers'

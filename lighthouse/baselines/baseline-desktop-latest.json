@@ -1,0 +1,20 @@
+{
+  "scores": {
+    "performance": 0.27,
+    "accessibility": 0.8,
+    "bestPractices": 0.96
+  },
+  "metrics": {
+    "firstContentfulPaint": 3277.878199999999,
+    "largestContentfulPaint": 7881.9753749999945,
+    "interactive": 7902.041297499996,
+    "speedIndex": 5582.760696334715,
+    "totalBlockingTime": 1090.9999999999995,
+    "cumulativeLayoutShift": 0.0000706641428755144
+  },
+  "timing": {
+    "timestamp": "2025-10-15T01:59:14.213Z",
+    "formFactor": "desktop",
+    "url": "http://localhost:5173/"
+  }
+}
