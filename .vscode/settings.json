@@ -55,5 +55,14 @@
   // Path Intellisense
   "path-intellisense.mappings": {
     "@": "${workspaceRoot}/src"
+  },
+  "[powershell]": {
+    "editor.defaultFormatter": "ms-vscode.powershell"
+  },
+  "[xml]": {
+    "editor.defaultFormatter": "redhat.vscode-xml"
+  },
+  "[toml]": {
+    "editor.defaultFormatter": "tamasfe.even-better-toml"
   }
 }

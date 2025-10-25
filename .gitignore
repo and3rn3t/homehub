@@ -61,3 +61,12 @@ pids
 # package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
+
+# MQTT/Mosquitto
+mosquitto/data/
+mosquitto/log/*.log
+
+# Debug tools and runtime data
+debug-tools/
+data/
+*.debug.html

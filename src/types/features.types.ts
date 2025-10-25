@@ -1,6 +1,6 @@
 /**
  * Additional Feature Type Definitions
- * 
+ *
  * Types for specialized features.
  */
 

@@ -2,26 +2,34 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { IOS26EmptyState } from '@/components/ui/ios26-error'
+import { IOS26StatusBadge } from '@/components/ui/ios26-status'
+import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { Switch } from '@/components/ui/switch'
+import { KV_KEYS, MOCK_DEVICES } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
 import {
-  BatteryMedium,
-  BatteryWarning,
-  Bell,
-  BellSlash,
-  Camera,
-  ChartLineUp,
-  Clock,
-  Lightbulb,
-  Shield,
-  SpeakerHigh,
-  Thermometer,
-  Warning,
-  WifiHigh,
-  WifiSlash,
-} from '@phosphor-icons/react'
+  AlertTriangleIcon,
+  BatteryIcon,
+  BatteryWarningIcon,
+  BellIcon,
+  BellOffIcon,
+  CameraIcon,
+  ClockIcon,
+  LightbulbIcon,
+  LineChartIcon,
+  SearchIcon,
+  ShieldIcon,
+  SpeakerIcon,
+  ThermometerIcon,
+  WifiIcon,
+  WifiOffIcon,
+  XIcon,
+} from '@/lib/icons'
+import type { Device } from '@/types'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 interface DeviceStatus {
@@ -58,12 +66,12 @@ interface MonitoringSettings {
 }
 
 const deviceIcons = {
-  light: Lightbulb,
-  thermostat: Thermometer,
-  security: Shield,
-  sensor: WifiHigh,
-  camera: Camera,
-  speaker: SpeakerHigh,
+  light: LightbulbIcon,
+  thermostat: ThermometerIcon,
+  security: ShieldIcon,
+  sensor: WifiIcon,
+  camera: CameraIcon,
+  speaker: SpeakerIcon,
 }
 
 const statusColors = {
@@ -88,86 +96,31 @@ const alertSeverityColors = {
 }
 
 export function DeviceMonitor() {
-  const [devices, setDevices] = useKV<DeviceStatus[]>('device-status', [
-    {
-      id: 'living-room-light',
-      name: 'Living Room Light',
-      type: 'light',
-      room: 'Living Room',
-      status: 'online',
-      lastSeen: new Date(),
-      enabled: true,
-      signalStrength: 95,
-      alerts: [],
-    },
-    {
-      id: 'thermostat-main',
-      name: 'Main Thermostat',
-      type: 'thermostat',
-      room: 'Living Room',
-      status: 'online',
-      lastSeen: new Date(),
-      enabled: true,
-      value: 72,
-      unit: '°F',
-      batteryLevel: 85,
-      signalStrength: 88,
-      alerts: [],
-    },
-    {
-      id: 'front-door-lock',
-      name: 'Front Door Lock',
-      type: 'security',
-      room: 'Entryway',
-      status: 'warning',
-      lastSeen: new Date(Date.now() - 300000), // 5 minutes ago
-      enabled: true,
-      batteryLevel: 15,
-      signalStrength: 92,
-      alerts: [
-        {
-          id: 'battery-low-1',
-          type: 'low-battery',
-          message: 'Battery level is critically low (15%)',
-          severity: 'high',
-          timestamp: new Date(Date.now() - 120000),
-          acknowledged: false,
-        },
-      ],
-    },
-    {
-      id: 'motion-sensor',
-      name: 'Motion Sensor',
-      type: 'sensor',
-      room: 'Living Room',
-      status: 'offline',
-      lastSeen: new Date(Date.now() - 900000), // 15 minutes ago
-      enabled: true,
-      batteryLevel: 45,
-      signalStrength: 0,
-      alerts: [
-        {
-          id: 'offline-1',
-          type: 'offline',
-          message: 'Device has been offline for 15 minutes',
-          severity: 'critical',
-          timestamp: new Date(Date.now() - 900000),
-          acknowledged: false,
-        },
-      ],
-    },
-    {
-      id: 'security-camera',
-      name: 'Security Camera',
-      type: 'camera',
-      room: 'Front Yard',
-      status: 'online',
-      lastSeen: new Date(),
-      enabled: true,
-      signalStrength: 76,
-      alerts: [],
-    },
-  ])
+  // Read actual devices from KV store
+  const [kvDevices] = useKV<Device[]>(KV_KEYS.DEVICES, MOCK_DEVICES)
+
+  // Convert Device[] to DeviceStatus[] for monitoring
+  const convertToDeviceStatus = (device: Device): DeviceStatus => ({
+    id: device.id,
+    name: device.name,
+    type: device.type as DeviceStatus['type'],
+    room: device.room,
+    status: device.status,
+    lastSeen: device.lastSeen || new Date(),
+    enabled: device.enabled,
+    batteryLevel: device.batteryLevel,
+    signalStrength: device.signalStrength,
+    value: device.value,
+    unit: device.unit,
+    alerts: [], // Alerts would be populated from separate KV store or logic
+  })
+
+  const [devices, setDevices] = useState<DeviceStatus[]>(() => kvDevices.map(convertToDeviceStatus))
+
+  // Sync with KV store when kvDevices changes
+  useEffect(() => {
+    setDevices(kvDevices.map(convertToDeviceStatus))
+  }, [kvDevices])
 
   const [settings, setSettings] = useKV<MonitoringSettings>('monitoring-settings', {
     alertsEnabled: true,
@@ -180,6 +133,24 @@ export function DeviceMonitor() {
 
   const [activeAlerts, setActiveAlerts] = useState<DeviceAlert[]>([])
   const [filter, setFilter] = useState<'all' | 'online' | 'offline' | 'warning' | 'error'>('all')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // Pull-to-refresh handler
+  const handleRefresh = useCallback(async () => {
+    try {
+      // Simulate device status refresh
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      // Force a device status update
+      setDevices(kvDevices.map(convertToDeviceStatus))
+
+      toast.success('Device status refreshed', {
+        description: `Checked ${kvDevices.length} devices`,
+      })
+    } catch (_error) {
+      toast.error('Failed to refresh device status')
+    }
+  }, [kvDevices])
 
   // Simulate real-time updates
   useEffect(() => {
@@ -193,7 +164,7 @@ export function DeviceMonitor() {
           if (randomChange < 0.02) {
             // 2% chance of status change
             const statuses: DeviceStatus['status'][] = ['online', 'warning', 'error']
-            newStatus = statuses[Math.floor(Math.random() * statuses.length)]
+            newStatus = statuses[Math.floor(Math.random() * statuses.length)] ?? device.status
           }
 
           // Update battery levels
@@ -349,8 +320,29 @@ export function DeviceMonitor() {
   }
 
   const filteredDevices = devices.filter(device => {
-    if (filter === 'all') return true
-    return device.status === filter
+    // Filter by status
+    if (filter !== 'all' && device.status !== filter) return false
+
+    // Filter by search query (fuzzy match)
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      const searchableText = [device.name, device.type, device.room, device.status]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+
+      // Simple fuzzy match: check if all characters appear in order
+      let searchIndex = 0
+      for (const char of searchableText) {
+        if (char === query[searchIndex]) {
+          searchIndex++
+          if (searchIndex === query.length) return true
+        }
+      }
+      return false
+    }
+
+    return true
   })
 
   const getTimeAgo = (date: Date | string | undefined) => {
@@ -379,9 +371,9 @@ export function DeviceMonitor() {
           <div className="flex items-center gap-3">
             <Switch checked={settings.alertsEnabled} onCheckedChange={toggleAlertsEnabled} />
             {settings.alertsEnabled ? (
-              <Bell size={20} className="text-primary" />
+              <BellIcon className="text-primary h-5 w-5" />
             ) : (
-              <BellSlash size={20} className="text-muted-foreground" />
+              <BellOffIcon className="text-muted-foreground h-5 w-5" />
             )}
           </div>
         </div>
@@ -391,9 +383,8 @@ export function DeviceMonitor() {
           <Alert
             className={`mb-6 ${criticalAlerts > 0 ? 'border-red-200 bg-red-50' : 'border-yellow-200 bg-yellow-50'}`}
           >
-            <Warning
-              size={16}
-              className={criticalAlerts > 0 ? 'text-red-600' : 'text-yellow-600'}
+            <AlertTriangleIcon
+              className={`h-4 w-4 ${criticalAlerts > 0 ? 'text-red-600' : 'text-yellow-600'}`}
             />
             <AlertDescription className={criticalAlerts > 0 ? 'text-red-700' : 'text-yellow-700'}>
               {criticalAlerts > 0 ? (
@@ -409,6 +400,26 @@ export function DeviceMonitor() {
             </AlertDescription>
           </Alert>
         )}
+
+        {/* Search Input */}
+        <div className="relative mb-4">
+          <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <Input
+            type="text"
+            placeholder="Search devices by name, type, room..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="pr-10 pl-10"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="hover:bg-accent absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1"
+            >
+              <XIcon className="h-4 w-4" />
+            </button>
+          )}
+        </div>
 
         {/* Filter Buttons */}
         <div className="mb-6 flex gap-2 overflow-x-auto">
@@ -431,7 +442,7 @@ export function DeviceMonitor() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 pb-6">
+      <PullToRefresh onRefresh={handleRefresh} className="flex-1 px-6 pb-6">
         <div className="space-y-4">
           <AnimatePresence>
             {filteredDevices.map(device => {
@@ -464,14 +475,21 @@ export function DeviceMonitor() {
                             <h3 className="text-foreground font-semibold">{device.name}</h3>
                             <p className="text-muted-foreground text-sm">{device.room}</p>
                             <div className="mt-1 flex items-center gap-2">
-                              <Badge
-                                variant={device.status === 'online' ? 'default' : 'secondary'}
-                                className={`h-5 text-xs ${statusColors[device.status]}`}
-                              >
-                                {device.status}
-                              </Badge>
+                              <IOS26StatusBadge
+                                status={
+                                  device.status === 'online'
+                                    ? 'idle'
+                                    : device.status === 'warning'
+                                      ? 'alert'
+                                      : 'offline'
+                                }
+                                label={device.status}
+                                showPulse={
+                                  device.status === 'online' || device.status === 'warning'
+                                }
+                              />
                               <span className="text-muted-foreground flex items-center gap-1 text-xs">
-                                <Clock size={12} />
+                                <ClockIcon className="h-3 w-3" />
                                 {getTimeAgo(device.lastSeen)}
                               </span>
                             </div>
@@ -489,9 +507,9 @@ export function DeviceMonitor() {
                             {device.batteryLevel !== undefined && (
                               <div className="flex items-center gap-1 text-xs">
                                 {device.batteryLevel <= 20 ? (
-                                  <BatteryWarning size={14} className="text-red-500" />
+                                  <BatteryWarningIcon className="h-3.5 w-3.5 text-red-500" />
                                 ) : (
-                                  <BatteryMedium size={14} className="text-green-500" />
+                                  <BatteryIcon className="h-3.5 w-3.5 text-green-500" />
                                 )}
                                 <span
                                   className={
@@ -507,16 +525,15 @@ export function DeviceMonitor() {
                             {device.signalStrength !== undefined && (
                               <div className="flex items-center gap-1 text-xs">
                                 {device.signalStrength > 0 ? (
-                                  <WifiHigh
-                                    size={14}
-                                    className={
+                                  <WifiIcon
+                                    className={`h-3.5 w-3.5 ${
                                       device.signalStrength > 50
                                         ? 'text-green-500'
                                         : 'text-yellow-500'
-                                    }
+                                    }`}
                                   />
                                 ) : (
-                                  <WifiSlash size={14} className="text-red-500" />
+                                  <WifiOffIcon className="h-3.5 w-3.5 text-red-500" />
                                 )}
                                 <span
                                   className={
@@ -571,22 +588,33 @@ export function DeviceMonitor() {
           </AnimatePresence>
 
           {filteredDevices.length === 0 && (
-            <Card className="border-border/30 border-2 border-dashed">
-              <CardContent className="p-8 text-center">
-                <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                  <ChartLineUp size={24} className="text-muted-foreground" />
-                </div>
-                <p className="text-muted-foreground mb-2">No devices found</p>
-                <p className="text-muted-foreground text-sm">
-                  {filter === 'all'
-                    ? 'No devices are currently registered'
-                    : `No devices with status "${filter}"`}
-                </p>
-              </CardContent>
-            </Card>
+            <IOS26EmptyState
+              icon={<LineChartIcon className="h-16 w-16" />}
+              title={
+                filter === 'all'
+                  ? 'No Devices Monitored'
+                  : `No ${filter.charAt(0).toUpperCase() + filter.slice(1)} Devices`
+              }
+              message={
+                filter === 'all'
+                  ? 'Add devices to start monitoring their health, connectivity, and performance metrics in real-time.'
+                  : `No devices currently have "${filter}" status. This is good news!`
+              }
+              action={
+                filter === 'all'
+                  ? {
+                      label: 'Discover Devices',
+                      onClick: () => toast.info('Go to Dashboard to discover devices'),
+                    }
+                  : {
+                      label: 'View All Devices',
+                      onClick: () => setFilter('all'),
+                    }
+              }
+            />
           )}
         </div>
-      </div>
+      </PullToRefresh>
     </div>
   )
 }

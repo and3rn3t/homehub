@@ -1,0 +1,20 @@
+curl $'https://myapi.arlo.com/hmsweb/users/devices/sipInfo/v2?cameraId=A8G325KE0123E&modelId=AVD1001B&uniqueId=E9BPXBNZ-336-53101298_A8G325KE0123E&eventId=FE\u0021e774bf41-13d8-473c-a018-377060601c49&time=1760397809204' \
+  -H 'accept: application/json' \
+  -H 'accept-language: en-US,en;q=0.9' \
+  -H 'auth-version: 2' \
+  -H 'authorization: 2_oVQxGhmXyVsFJcZo3agKwxeW0SPkrsZMMIWShghKUwK8jh7pWobZdMtsqaLby55b5XLiokNTVztaPR0BRfnXjY9w8YEXgVOXJPKe4QG430Zr1ZuNzKRizjBs2G6VwS6K_CroERHLsGAoxfibH49SEcghzPb9PnxYIj8PG4OMGR3Akp73gjuUKqSFsOKekPxXV6RQRcRhzs5x6yTqMP9z4PzeDY2kCwSHXBm0KDcp7bFY52saSPiN29tndnYhez43nt4iRilc3OP9KfHK9D0Do9LgfhFqnsON0_yVoP33GajS3NmWYX4jVh4mnq3LJXFJkSq604WE_a_m7yrFS-pddpE' \
+  -H 'cameraid: A8G325KE0123E' \
+  -H 'content-type: application/json; charset=utf-8' \
+  -b 'JSESSIONID=EB9E05D2CC25671191852024848D923A; AWSALBAPP-1=_remove_; AWSALBAPP-2=_remove_; AWSALBAPP-3=_remove_; AWSALBAPP-0=_remove_; AWSALB=xrbXSq9Lk9gX9v9LE6zfmq+IFseKiZDix0SS0BnM/Ga9hfs7p4wUnBn20XUtlRPWqeoBG8uzXLbGZFozm4CM0Plr0mhK9Jbj2nFMJzZ8rVWHk0F5ogEqSQsAW99O; AMP_d756bcd445=JTdCJTIyZGV2aWNlSWQlMjIlM0ElMjJiN2M0OWQyOC04OWI3LTQ4M2YtYWM2MC0xY2VlYWZmMGViMGMlMjIlMkMlMjJ1c2VySWQlMjIlM0ElMjI5MGE1ZTI5ZWRjMzBkMGEwZTQ5NGI1OGEyNTg2NTNiNDI3ZjkwODBlYWUzOGUzNmYyMjc3ZTY1YWM5ZDYzZTRlJTIyJTJDJTIyc2Vzc2lvbklkJTIyJTNBMTc2MDM5NjUzMDEzNCUyQyUyMm9wdE91dCUyMiUzQWZhbHNlJTJDJTIybGFzdEV2ZW50VGltZSUyMiUzQTE3NjAzOTczNTQxNjMlMkMlMjJsYXN0RXZlbnRJZCUyMiUzQTIzJTJDJTIycGFnZUNvdW50ZXIlMjIlM0EwJTdE; __cf_bm=P2JAShy.m0mu3Psv2GrHq0xiEyURWtdM.X2uuxhyWrw-1760397435-1.0.1.1-OXFRfICrieJNluFs3gGCydSzYfNRsMZzrDCxmnXgrYCjV.iD3PRH0CJLf7JHmctyWgmPxMCIVtEMLP3d53ptnaZXMLRaREkED3zSQCj43GE' \
+  -H 'origin: https://my.arlo.com' \
+  -H 'priority: u=1, i' \
+  -H 'referer: https://my.arlo.com/' \
+  -H 'sec-ch-ua: "Google Chrome";v="141", "Not?A_Brand";v="8", "Chromium";v="141"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "Windows"' \
+  -H 'sec-fetch-dest: empty' \
+  -H 'sec-fetch-mode: cors' \
+  -H 'sec-fetch-site: same-site' \
+  -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36' \
+  -H $'x-transaction-id: FE\u0021e774bf41-13d8-473c-a018-377060601c49' \
+  -H 'xcloudid: K5HYEUA3-2400-336-127845809'

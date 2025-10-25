@@ -3,13 +3,15 @@ main = "src/index.ts"
 compatibility_date = "2024-10-09"
 
 # KV Namespace Bindings
-# Replace these IDs with your own after running:
-# wrangler kv:namespace create "HOMEHUB_KV"
-# wrangler kv:namespace create "HOMEHUB_KV" --preview
+[[kv_namespaces]]
+binding = "HOMEHUB_KV"
+id = "13b0979fda8e4bd0a581f4b4ddd9b92f"
+preview_id = "9316570aa53747fcbae0f8f90d126408"
 
-kv_namespaces = [
-  { binding = "HOMEHUB_KV", id = "YOUR_NAMESPACE_ID", preview_id = "YOUR_PREVIEW_NAMESPACE_ID" }
-]
+[[kv_namespaces]]
+binding = "LOGS_KV"
+id = "a4a51b7c589046ea8c42f23711ab1582"
+preview_id = "6f723c57974d49fb980b1f57563e56a0"
 
 # Worker settings
 [build]
@@ -20,8 +22,3 @@ vars = { ENVIRONMENT = "production" }
 
 [env.staging]
 vars = { ENVIRONMENT = "staging" }
-
-# Optional: Custom domain
-# routes = [
-#   { pattern = "api.yourdomain.com/*", zone_name = "yourdomain.com" }
-# ]

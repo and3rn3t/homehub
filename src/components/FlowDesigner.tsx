@@ -2,27 +2,28 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { FlowDesignerSkeleton } from '@/components/ui/skeleton'
+import { useFlowInterpreter } from '@/hooks/use-flow-interpreter'
 import { useKV } from '@/hooks/use-kv'
-import type { Icon } from '@phosphor-icons/react'
 import {
-  ArrowRight,
-  Clock,
-  FloppyDisk,
-  Gear,
-  Lightbulb,
-  Lock,
-  MapPin,
-  Play,
-  Plus,
-  Power,
-  Stop,
-  Thermometer,
-  Trash,
-} from '@phosphor-icons/react'
+  type LucideIcon,
+  ArrowRightIcon,
+  ClockIcon,
+  LightbulbIcon,
+  LockIcon,
+  MapPinIcon,
+  PlayIcon,
+  PlusIcon,
+  PowerIcon,
+  SaveIcon,
+  SettingsIcon,
+  StopCircleIcon,
+  ThermometerIcon,
+  TrashIcon,
+} from '@/lib/icons'
 import { motion } from 'framer-motion'
 import { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { useFlowExecutor } from './FlowExecutor'
 import { FlowMiniMap } from './FlowMiniMap'
 import { FlowTutorial } from './FlowTutorial'
 import { NodeConfig } from './NodeConfig'
@@ -32,7 +33,7 @@ interface FlowNode {
   type: 'trigger' | 'condition' | 'action' | 'delay'
   subtype: string
   label: string
-  icon: Icon
+  icon: LucideIcon
   position: { x: number; y: number }
   data: Record<string, unknown>
   connections: string[]
@@ -50,32 +51,32 @@ interface Flow {
 interface NodeTypeDefinition {
   type: string
   label: string
-  icon: Icon
+  icon: LucideIcon
   color: string
 }
 
 const nodeTypes = {
   trigger: [
-    { type: 'time', label: 'Time Schedule', icon: Clock, color: 'bg-blue-500' },
-    { type: 'location', label: 'Location', icon: MapPin, color: 'bg-green-500' },
-    { type: 'device', label: 'Device State', icon: Power, color: 'bg-purple-500' },
+    { type: 'time', label: 'Time Schedule', icon: ClockIcon, color: 'bg-blue-500' },
+    { type: 'location', label: 'Location', icon: MapPinIcon, color: 'bg-green-500' },
+    { type: 'device', label: 'Device State', icon: PowerIcon, color: 'bg-purple-500' },
   ],
   condition: [
-    { type: 'time_range', label: 'Time Range', icon: Clock, color: 'bg-orange-500' },
-    { type: 'temperature', label: 'Temperature', icon: Thermometer, color: 'bg-red-500' },
-    { type: 'presence', label: 'Presence', icon: MapPin, color: 'bg-teal-500' },
+    { type: 'time_range', label: 'Time Range', icon: ClockIcon, color: 'bg-orange-500' },
+    { type: 'temperature', label: 'Temperature', icon: ThermometerIcon, color: 'bg-red-500' },
+    { type: 'presence', label: 'Presence', icon: MapPinIcon, color: 'bg-teal-500' },
   ],
   action: [
-    { type: 'light', label: 'Control Light', icon: Lightbulb, color: 'bg-yellow-500' },
-    { type: 'lock', label: 'Control Lock', icon: Lock, color: 'bg-gray-500' },
-    { type: 'thermostat', label: 'Set Temperature', icon: Thermometer, color: 'bg-red-500' },
-    { type: 'scene', label: 'Activate Scene', icon: Play, color: 'bg-indigo-500' },
+    { type: 'light', label: 'Control Light', icon: LightbulbIcon, color: 'bg-yellow-500' },
+    { type: 'lock', label: 'Control Lock', icon: LockIcon, color: 'bg-gray-500' },
+    { type: 'thermostat', label: 'Set Temperature', icon: ThermometerIcon, color: 'bg-red-500' },
+    { type: 'scene', label: 'Activate Scene', icon: PlayIcon, color: 'bg-indigo-500' },
   ],
-  delay: [{ type: 'wait', label: 'Wait/Delay', icon: Clock, color: 'bg-slate-500' }],
+  delay: [{ type: 'wait', label: 'Wait/Delay', icon: ClockIcon, color: 'bg-slate-500' }],
 } as const
 
 export function FlowDesigner() {
-  const [flows, setFlows] = useKV<Flow[]>('automation-flows', [])
+  const [flows, setFlows, { isLoading }] = useKV<Flow[]>('automation-flows', [], { withMeta: true })
   const [selectedFlow, setSelectedFlow] = useState<Flow | null>(null)
   const [draggedNode, setDraggedNode] = useState<NodeTypeDefinition | null>(null)
   const [showNodePalette, setShowNodePalette] = useState(false)
@@ -83,7 +84,10 @@ export function FlowDesigner() {
   const [selectedNode, setSelectedNode] = useState<FlowNode | null>(null)
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
-  const { testFlow } = useFlowExecutor()
+  const { executeFlow, validateFlow } = useFlowInterpreter()
+
+  // Smart loading state: Only show skeleton on initial load with no flows
+  const showSkeleton = isLoading && flows.length === 0
 
   const createNewFlow = () => {
     const newFlow: Flow = {
@@ -144,7 +148,14 @@ export function FlowDesigner() {
   const onDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault()
-      if (!draggedNode || !canvasRef.current) return
+      console.log('[FlowDesigner] onDrop triggered', { draggedNode })
+      if (!draggedNode || !canvasRef.current) {
+        console.warn('[FlowDesigner] onDrop aborted:', {
+          hasDraggedNode: !!draggedNode,
+          hasCanvasRef: !!canvasRef.current,
+        })
+        return
+      }
 
       const rect = canvasRef.current.getBoundingClientRect()
       const position = {
@@ -152,6 +163,7 @@ export function FlowDesigner() {
         y: e.clientY - rect.top - 50,
       }
 
+      console.log('[FlowDesigner] Adding node to canvas', { nodeType: draggedNode.type, position })
       addNodeToCanvas(draggedNode, position)
       setDraggedNode(null)
     },
@@ -220,13 +232,39 @@ export function FlowDesigner() {
   const testCurrentFlow = async () => {
     if (!selectedFlow) return
 
-    toast.info('Testing flow...')
-    const success = await testFlow(selectedFlow)
+    // Validate first
+    const validation = validateFlow(selectedFlow.id)
+    if (!validation.valid) {
+      toast.error('Flow validation failed', {
+        description: validation.errors[0] || 'Check console for details',
+      })
+      return
+    }
 
-    if (success) {
-      toast.success('Flow test completed successfully')
+    if (validation.warnings.length > 0) {
+      toast.warning('Flow has warnings', {
+        description: validation.warnings[0] || 'Check console',
+      })
+    }
+
+    // Execute the flow
+    toast.info('🧪 Testing flow...', {
+      description: 'Executing all nodes in sequence',
+    })
+
+    const result = await executeFlow(selectedFlow.id, {
+      testMode: true,
+      triggeredAt: new Date().toISOString(),
+    })
+
+    if (result?.success) {
+      toast.success(`✅ Flow test completed`, {
+        description: `${result.executedNodes.length} nodes executed in ${result.executionTime}ms`,
+      })
     } else {
-      toast.error('Flow test failed')
+      toast.error(`❌ Flow test failed`, {
+        description: result?.error || 'Unknown error',
+      })
     }
   }
 
@@ -280,7 +318,7 @@ export function FlowDesigner() {
             <p className="text-muted-foreground">Create visual automation workflows</p>
           </div>
           <Button onClick={createNewFlow} className="flex items-center gap-2">
-            <Plus size={16} />
+            <PlusIcon className="h-4 w-4" />
             New Flow
           </Button>
         </div>
@@ -289,14 +327,14 @@ export function FlowDesigner() {
           <Card className="border-border/30 flex flex-1 items-center justify-center border-2 border-dashed">
             <CardContent className="p-8 text-center">
               <div className="bg-muted mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-                <ArrowRight size={32} className="text-muted-foreground" />
+                <ArrowRightIcon className="text-muted-foreground h-8 w-8" />
               </div>
               <h3 className="mb-2 text-lg font-medium">Create Your First Flow</h3>
               <p className="text-muted-foreground mb-4 max-w-md">
                 Design complex automation workflows with our visual drag-and-drop interface
               </p>
               <Button onClick={createNewFlow} className="flex items-center gap-2">
-                <Plus size={16} />
+                <PlusIcon className="h-4 w-4" />
                 Get Started
               </Button>
             </CardContent>
@@ -329,7 +367,7 @@ export function FlowDesigner() {
                           deleteFlow(flow.id)
                         }}
                       >
-                        <Trash size={14} />
+                        <TrashIcon className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </CardHeader>
@@ -358,11 +396,16 @@ export function FlowDesigner() {
     )
   }
 
+  // Show skeleton on initial load
+  if (showSkeleton) {
+    return <FlowDesignerSkeleton />
+  }
+
   return (
     <div className="flex h-full">
       {/* Node Palette */}
       <div
-        className={`bg-card border-border w-80 border-r transition-transform ${showNodePalette ? 'translate-x-0' : '-translate-x-full'} absolute z-10 h-full overflow-y-auto`}
+        className={`bg-card border-border w-80 border-r transition-transform ${showNodePalette ? 'translate-x-0' : '-translate-x-full'} ${showNodePalette ? '' : 'pointer-events-none'} absolute z-10 h-full overflow-y-auto`}
       >
         <div className="p-4">
           <div className="mb-4 flex items-center justify-between">
@@ -392,22 +435,28 @@ export function FlowDesigner() {
           </div>
 
           <ul className="list-none space-y-2">
-            {nodeTypes[selectedNodeType].map(nodeType => (
-              <li
-                key={nodeType.type}
-                draggable
-                aria-roledescription="draggable node"
-                onDragStart={() => setDraggedNode(nodeType)}
-                className="border-border hover:bg-accent/5 flex cursor-grab items-center gap-3 rounded-lg border p-3 transition-colors active:cursor-grabbing"
-              >
-                <div
-                  className={`h-8 w-8 rounded-lg ${nodeType.color} flex items-center justify-center`}
+            {nodeTypes[selectedNodeType].map(nodeType => {
+              const IconComponent = nodeType.icon
+              return (
+                <li
+                  key={nodeType.type}
+                  draggable
+                  aria-roledescription="draggable node"
+                  onDragStart={() => {
+                    console.log('[FlowDesigner] Drag started', { nodeType: nodeType.type })
+                    setDraggedNode(nodeType)
+                  }}
+                  className="border-border hover:bg-accent/5 flex cursor-grab items-center gap-3 rounded-lg border p-3 transition-colors active:cursor-grabbing"
                 >
-                  <nodeType.icon size={16} className="text-white" />
-                </div>
-                <span className="text-sm font-medium">{nodeType.label}</span>
-              </li>
-            ))}
+                  <div
+                    className={`h-8 w-8 rounded-lg ${nodeType.color} flex items-center justify-center`}
+                  >
+                    <IconComponent className="h-4 w-4 text-white" />
+                  </div>
+                  <span className="text-sm font-medium">{nodeType.label}</span>
+                </li>
+              )
+            })}
           </ul>
         </div>
       </div>
@@ -453,7 +502,7 @@ export function FlowDesigner() {
                 onClick={() => setShowNodePalette(!showNodePalette)}
                 id="add-node-button"
               >
-                <Plus size={16} />
+                <PlusIcon className="h-4 w-4" />
                 Add Node
               </Button>
               <Button
@@ -462,11 +511,11 @@ export function FlowDesigner() {
                 onClick={testCurrentFlow}
                 disabled={selectedFlow.nodes.length === 0}
               >
-                <Play size={16} />
+                <PlayIcon className="h-4 w-4" />
                 Test
               </Button>
               <Button variant="outline" size="sm" onClick={saveFlow}>
-                <FloppyDisk size={16} />
+                <SaveIcon className="h-4 w-4" />
                 Save
               </Button>
               <Button
@@ -477,7 +526,11 @@ export function FlowDesigner() {
                   toast.success(updatedFlow.enabled ? 'Flow activated' : 'Flow deactivated')
                 }}
               >
-                {selectedFlow.enabled ? <Stop size={16} /> : <Play size={16} />}
+                {selectedFlow.enabled ? (
+                  <StopCircleIcon className="h-4 w-4" />
+                ) : (
+                  <PlayIcon className="h-4 w-4" />
+                )}
                 {selectedFlow.enabled ? 'Stop' : 'Start'}
               </Button>
             </div>
@@ -514,7 +567,7 @@ export function FlowDesigner() {
             <div className="absolute inset-0 z-20 flex items-center justify-center">
               <div className="text-center">
                 <div className="bg-muted mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-                  <ArrowRight size={32} className="text-muted-foreground" />
+                  <ArrowRightIcon className="text-muted-foreground h-8 w-8" />
                 </div>
                 <h3 className="mb-2 text-lg font-medium">Start Building Your Flow</h3>
                 <p className="text-muted-foreground mb-4">
@@ -551,7 +604,10 @@ export function FlowDesigner() {
                         <div
                           className={`h-6 w-6 rounded ${nodeTypes[node.type].find(t => t.type === node.subtype)?.color} flex items-center justify-center`}
                         >
-                          <node.icon size={12} className="text-white" />
+                          {(() => {
+                            const IconComponent = node.icon
+                            return <IconComponent className="h-3 w-3 text-white" />
+                          })()}
                         </div>
                         <Badge variant="outline" className="text-xs capitalize">
                           {node.type}
@@ -567,7 +623,7 @@ export function FlowDesigner() {
                             setSelectedNode(node)
                           }}
                         >
-                          <Gear size={10} />
+                          <SettingsIcon className="h-2.5 w-2.5" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -578,7 +634,7 @@ export function FlowDesigner() {
                             removeNode(node.id)
                           }}
                         >
-                          <Trash size={10} />
+                          <TrashIcon className="h-2.5 w-2.5" />
                         </Button>
                       </div>
                     </div>

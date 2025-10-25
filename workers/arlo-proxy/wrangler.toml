@@ -1,0 +1,18 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "homehub-arlo-proxy"
+main = "index.ts"
+compatibility_date = "2024-10-01"
+
+# Development configuration
+[env.development]
+name = "homehub-arlo-proxy-dev"
+
+# Production configuration
+[env.production]
+name = "homehub-arlo-proxy"
+routes = [
+  { pattern = "arlo-proxy.yourdomain.com/*", zone_name = "yourdomain.com" },
+]
+
+# For local development, the worker will be available at:
+# http://localhost:8788/

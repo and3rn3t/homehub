@@ -3,6 +3,13 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu'
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -19,30 +26,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { MOCK_USERS } from '@/constants'
+import { useHaptic } from '@/hooks/use-haptic'
 import { useKV } from '@/hooks/use-kv'
-import { Crown, Shield, Trash, User as UserIcon, UserPlus } from '@phosphor-icons/react'
+import {
+  EditIcon,
+  ShieldCheckIcon,
+  ShieldIcon,
+  TrashIcon,
+  UserIcon,
+  UserPlusIcon,
+} from '@/lib/icons'
+import type { User, UserPermissions } from '@/types'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-interface User {
-  id: string
-  name: string
-  email: string
-  role: 'owner' | 'admin' | 'member' | 'guest'
-  avatar?: string
-  createdAt: string
-  lastActive: string
-  permissions: string[]
-}
-
 export function UserManagement() {
-  const [users, setUsers] = useKV<User[]>('home-users', [])
+  const [users, setUsers] = useKV<User[]>('home-users', MOCK_USERS)
   const [isAddingUser, setIsAddingUser] = useState(false)
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
     role: 'member' as User['role'],
   })
+  const haptic = useHaptic()
 
   const handleAddUser = () => {
     if (!newUser.name || !newUser.email) {
@@ -55,9 +62,8 @@ export function UserManagement() {
       name: newUser.name,
       email: newUser.email,
       role: newUser.role,
-      createdAt: new Date().toISOString(),
-      lastActive: new Date().toISOString(),
       permissions: getDefaultPermissions(newUser.role),
+      lastActive: new Date(),
     }
 
     setUsers(currentUsers => [...currentUsers, user])
@@ -71,29 +77,68 @@ export function UserManagement() {
     toast.success('User removed from home')
   }
 
-  const getDefaultPermissions = (role: User['role']): string[] => {
+  // Context menu handlers
+  const handleEditUser = (user: User) => {
+    haptic.light()
+    toast.info(`Edit ${user.name}`, {
+      description: 'User editor coming soon',
+    })
+  }
+
+  const handleChangeRole = (user: User) => {
+    haptic.light()
+    toast.info(`Change role for ${user.name}`, {
+      description: 'Role selector coming soon',
+    })
+  }
+
+  const handleRemoveUserContext = (user: User) => {
+    haptic.heavy()
+    handleRemoveUser(user.id)
+  }
+
+  const getDefaultPermissions = (role: User['role']): UserPermissions => {
     switch (role) {
       case 'owner':
-        return ['all']
       case 'admin':
-        return ['devices', 'scenes', 'automation', 'settings', 'users']
+        return {
+          canEditDevices: true,
+          canCreateScenes: true,
+          canManageUsers: true,
+          canViewSecurity: true,
+        }
       case 'member':
-        return ['devices', 'scenes']
+        return {
+          canEditDevices: true,
+          canCreateScenes: true,
+          canManageUsers: false,
+          canViewSecurity: false,
+        }
       case 'guest':
-        return ['scenes']
+        return {
+          canEditDevices: false,
+          canCreateScenes: false,
+          canManageUsers: false,
+          canViewSecurity: false,
+        }
       default:
-        return []
+        return {
+          canEditDevices: false,
+          canCreateScenes: false,
+          canManageUsers: false,
+          canViewSecurity: false,
+        }
     }
   }
 
   const getRoleIcon = (role: User['role']) => {
     switch (role) {
       case 'owner':
-        return <Crown size={16} className="text-yellow-500" />
+        return <ShieldCheckIcon className="h-4 w-4 text-yellow-500" />
       case 'admin':
-        return <Shield size={16} className="text-blue-500" />
+        return <ShieldIcon className="h-4 w-4 text-blue-500" />
       default:
-        return <UserIcon size={16} className="text-muted-foreground" />
+        return <UserIcon className="text-muted-foreground h-4 w-4" />
     }
   }
 
@@ -123,7 +168,7 @@ export function UserManagement() {
         <Dialog open={isAddingUser} onOpenChange={setIsAddingUser}>
           <DialogTrigger asChild>
             <Button>
-              <UserPlus size={18} className="mr-2" />
+              <UserPlusIcon className="mr-2 h-[18px] w-[18px]" />
               Add User
             </Button>
           </DialogTrigger>
@@ -189,63 +234,92 @@ export function UserManagement() {
         {users.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <UserIcon size={48} className="text-muted-foreground mb-4" />
+              <UserIcon className="text-muted-foreground mb-4 h-12 w-12" />
               <h3 className="mb-2 text-lg font-medium">No Users Added</h3>
               <p className="text-muted-foreground mb-6 text-center">
                 Add family members and guests to share access to your smart home
               </p>
               <Button onClick={() => setIsAddingUser(true)}>
-                <UserPlus size={18} className="mr-2" />
+                <UserPlusIcon className="mr-2 h-[18px] w-[18px]" />
                 Add First User
               </Button>
             </CardContent>
           </Card>
         ) : (
           users.map(user => (
-            <Card key={user.id}>
-              <CardContent className="flex items-center justify-between p-6">
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={user.avatar} />
-                    <AvatarFallback>
-                      {user.name
-                        .split(' ')
-                        .map(n => n[0])
-                        .join('')
-                        .toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="mb-1 flex items-center gap-2">
-                      <h3 className="font-medium">{user.name}</h3>
-                      {getRoleIcon(user.role)}
+            <ContextMenu key={user.id}>
+              <ContextMenuTrigger asChild>
+                <Card>
+                  <CardContent className="flex items-center justify-between p-6">
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={user.avatar} />
+                        <AvatarFallback>
+                          {user.name
+                            .split(' ')
+                            .map(n => n[0])
+                            .join('')
+                            .toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="mb-1 flex items-center gap-2">
+                          <h3 className="font-medium">{user.name}</h3>
+                          {getRoleIcon(user.role)}
+                        </div>
+                        <p className="text-muted-foreground text-sm">{user.email}</p>
+                        <div className="mt-2 flex items-center gap-2">
+                          <Badge variant={getRoleBadgeVariant(user.role)} className="text-xs">
+                            {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                          </Badge>
+                          <span className="text-muted-foreground text-xs">
+                            Last active:{' '}
+                            {user.lastActive
+                              ? new Date(user.lastActive).toLocaleDateString()
+                              : 'Never'}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-muted-foreground text-sm">{user.email}</p>
-                    <div className="mt-2 flex items-center gap-2">
-                      <Badge variant={getRoleBadgeVariant(user.role)} className="text-xs">
-                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                      </Badge>
-                      <span className="text-muted-foreground text-xs">
-                        Last active: {new Date(user.lastActive).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-2">
-                  {user.role !== 'owner' && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveUser(user.id)}
-                      className="text-destructive hover:text-destructive"
+                    <div className="flex items-center gap-2">
+                      {user.role !== 'owner' && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveUser(user.id)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </ContextMenuTrigger>
+              <ContextMenuContent className="w-48">
+                <ContextMenuItem onClick={() => handleEditUser(user)} className="gap-2">
+                  <EditIcon className="h-4 w-4" />
+                  Edit User
+                </ContextMenuItem>
+                {user.role !== 'owner' && (
+                  <>
+                    <ContextMenuItem onClick={() => handleChangeRole(user)} className="gap-2">
+                      <ShieldIcon className="h-4 w-4" />
+                      Change Role
+                    </ContextMenuItem>
+                    <ContextMenuSeparator />
+                    <ContextMenuItem
+                      onClick={() => handleRemoveUserContext(user)}
+                      className="gap-2 text-red-600 dark:text-red-400"
                     >
-                      <Trash size={16} />
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                      <TrashIcon className="h-4 w-4" />
+                      Remove User
+                    </ContextMenuItem>
+                  </>
+                )}
+              </ContextMenuContent>
+            </ContextMenu>
           ))
         )}
       </div>
@@ -260,14 +334,14 @@ export function UserManagement() {
             <div className="grid gap-4">
               <div className="flex items-center justify-between border-b py-2">
                 <div className="flex items-center gap-2">
-                  <Crown size={16} className="text-yellow-500" />
+                  <ShieldCheckIcon className="h-4 w-4 text-yellow-500" />
                   <span className="font-medium">Owner</span>
                 </div>
                 <span className="text-muted-foreground text-sm">Full access to everything</span>
               </div>
               <div className="flex items-center justify-between border-b py-2">
                 <div className="flex items-center gap-2">
-                  <Shield size={16} className="text-blue-500" />
+                  <ShieldIcon className="h-4 w-4 text-blue-500" />
                   <span className="font-medium">Admin</span>
                 </div>
                 <span className="text-muted-foreground text-sm">
@@ -276,14 +350,14 @@ export function UserManagement() {
               </div>
               <div className="flex items-center justify-between border-b py-2">
                 <div className="flex items-center gap-2">
-                  <UserIcon size={16} className="text-muted-foreground" />
+                  <UserIcon className="text-muted-foreground h-4 w-4" />
                   <span className="font-medium">Member</span>
                 </div>
                 <span className="text-muted-foreground text-sm">Devices and scenes only</span>
               </div>
               <div className="flex items-center justify-between py-2">
                 <div className="flex items-center gap-2">
-                  <UserIcon size={16} className="text-muted-foreground" />
+                  <UserIcon className="text-muted-foreground h-4 w-4" />
                   <span className="font-medium">Guest</span>
                 </div>
                 <span className="text-muted-foreground text-sm">Scenes only</span>

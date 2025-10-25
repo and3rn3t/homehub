@@ -1,0 +1,30 @@
+# Ignore patterns for markdownlint
+
+# Dependencies
+
+node_modules/
+workers/node_modules/
+
+# Build outputs
+
+dist/
+build/
+.next/
+out/
+
+# Archived documentation (already validated)
+
+docs/archive/\*\*
+
+# Changelog (auto-generated)
+
+CHANGELOG.md
+
+# License files
+
+LICENSE
+LICENSE.md
+
+# Third-party documentation
+
+\*.min.md

@@ -1,5 +1,5 @@
 import { useKV } from '@/hooks/use-kv'
-import { toast } from "sonner"
+import { toast } from 'sonner'
 
 interface FlowNode {
   id: string
@@ -34,6 +34,18 @@ export class FlowExecutor {
   private flows: Flow[] = []
   private activeExecutions: Map<string, ExecutionContext> = new Map()
 
+  // Helper to format temperature based on user preferences
+  private formatTemperature(value: number): string {
+    const prefs = localStorage.getItem('unit-preferences')
+    const preferences = prefs ? JSON.parse(prefs) : { temperature: 'fahrenheit' }
+
+    if (preferences.temperature === 'celsius') {
+      const celsius = Math.round(((value - 32) * 5) / 9)
+      return `${celsius}°C`
+    }
+    return `${value}°F`
+  }
+
   static getInstance(): FlowExecutor {
     if (!FlowExecutor.instance) {
       FlowExecutor.instance = new FlowExecutor()
@@ -57,16 +69,15 @@ export class FlowExecutor {
       executionId,
       variables: triggerData || {},
       currentNodeId: '',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     }
 
     this.activeExecutions.set(executionId, context)
 
     try {
       // Find trigger nodes (nodes with no incoming connections)
-      const triggerNodes = flow.nodes.filter(node => 
-        node.type === 'trigger' && 
-        !flow.nodes.some(n => n.connections.includes(node.id))
+      const triggerNodes = flow.nodes.filter(
+        node => node.type === 'trigger' && !flow.nodes.some(n => n.connections.includes(node.id))
       )
 
       if (triggerNodes.length === 0) {
@@ -90,7 +101,11 @@ export class FlowExecutor {
     }
   }
 
-  private async executeNode(flow: Flow, node: FlowNode, context: ExecutionContext): Promise<boolean> {
+  private async executeNode(
+    flow: Flow,
+    node: FlowNode,
+    context: ExecutionContext
+  ): Promise<boolean> {
     context.currentNodeId = node.id
 
     try {
@@ -136,7 +151,7 @@ export class FlowExecutor {
     return true
   }
 
-  private async executeCondition(node: FlowNode, context: ExecutionContext): Promise<boolean> {
+  private async executeCondition(node: FlowNode, _context: ExecutionContext): Promise<boolean> {
     switch (node.subtype) {
       case 'time_range':
         return this.checkTimeRange(node.data)
@@ -149,7 +164,7 @@ export class FlowExecutor {
     }
   }
 
-  private async executeAction(node: FlowNode, context: ExecutionContext): Promise<boolean> {
+  private async executeAction(node: FlowNode, _context: ExecutionContext): Promise<boolean> {
     switch (node.subtype) {
       case 'light':
         return this.controlLight(node.data)
@@ -164,7 +179,7 @@ export class FlowExecutor {
     }
   }
 
-  private async executeDelay(node: FlowNode, context: ExecutionContext): Promise<boolean> {
+  private async executeDelay(node: FlowNode, _context: ExecutionContext): Promise<boolean> {
     const { hours = 0, minutes = 0, seconds = 0 } = node.data
     const delayMs = (hours * 3600 + minutes * 60 + seconds) * 1000
 
@@ -179,13 +194,13 @@ export class FlowExecutor {
   private checkTimeRange(data: any): boolean {
     const now = new Date()
     const currentTime = now.getHours() * 60 + now.getMinutes()
-    
+
     const [startHour, startMin] = (data.startTime || '00:00').split(':').map(Number)
     const [endHour, endMin] = (data.endTime || '23:59').split(':').map(Number)
-    
+
     const startTime = startHour * 60 + startMin
     const endTime = endHour * 60 + endMin
-    
+
     return currentTime >= startTime && currentTime <= endTime
   }
 
@@ -201,7 +216,7 @@ export class FlowExecutor {
       case 'less':
         return currentTemp < targetTemp
       case 'between':
-        return currentTemp >= (targetTemp - 2) && currentTemp <= (targetTemp + 2)
+        return currentTemp >= targetTemp - 2 && currentTemp <= targetTemp + 2
       default:
         return true
     }
@@ -227,10 +242,10 @@ export class FlowExecutor {
   // Action implementations
   private async controlLight(data: any): Promise<boolean> {
     const { deviceId, action, brightness } = data
-    
+
     // Simulate device control - in real implementation, this would control actual devices
     let message = `Light control: ${deviceId || 'unknown device'}`
-    
+
     switch (action) {
       case 'turn_on':
         message += ' turned on'
@@ -245,14 +260,14 @@ export class FlowExecutor {
         message += ` dimmed to ${brightness || 50}%`
         break
     }
-    
+
     toast.info(message)
     return true
   }
 
   private async controlLock(data: any): Promise<boolean> {
     const { deviceId, action } = data
-    
+
     const message = `Lock control: ${deviceId || 'unknown lock'} ${action === 'lock' ? 'locked' : 'unlocked'}`
     toast.info(message)
     return true
@@ -260,15 +275,16 @@ export class FlowExecutor {
 
   private async controlThermostat(data: any): Promise<boolean> {
     const { mode, targetTemp } = data
-    
-    const message = `Thermostat: Set to ${mode || 'auto'} mode at ${targetTemp || 72}°F`
+
+    const formattedTemp = this.formatTemperature(targetTemp || 72)
+    const message = `Thermostat: Set to ${mode || 'auto'} mode at ${formattedTemp}`
     toast.info(message)
     return true
   }
 
   private async activateScene(data: any): Promise<boolean> {
     const { sceneId } = data
-    
+
     const message = `Scene activated: ${sceneId || 'unknown scene'}`
     toast.info(message)
     return true
@@ -277,7 +293,7 @@ export class FlowExecutor {
 
 // Hook for using the flow executor in React components
 export function useFlowExecutor() {
-  const [flows] = useKV<Flow[]>("automation-flows", [])
+  const [flows] = useKV<Flow[]>('automation-flows', [])
   const executor = FlowExecutor.getInstance()
   executor.setFlows(flows)
 
@@ -293,6 +309,6 @@ export function useFlowExecutor() {
 
   return {
     executeFlow,
-    testFlow
+    testFlow,
   }
 }

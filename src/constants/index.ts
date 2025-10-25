@@ -1,6 +1,6 @@
 /**
  * Central Constants Export
- * 
+ *
  * Re-exports all constant definitions.
  */
 
@@ -16,5 +16,5 @@ export {
   MOCK_AUTOMATIONS,
   MOCK_USERS,
   MOCK_CAMERAS,
-  MOCK_SECURITY_EVENTS
+  MOCK_SECURITY_EVENTS,
 } from './mock-data'

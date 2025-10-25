@@ -7,15 +7,17 @@ import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { useKV } from '@/hooks/use-kv'
 import {
-  Bell,
-  ChartLineUp,
-  CheckCircle,
-  Clock,
-  Gear as SettingsIcon,
-  Shield,
-  Warning,
-  XCircle,
-} from '@phosphor-icons/react'
+  AlertTriangleIcon,
+  BatteryLowIcon,
+  BellIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  LineChartIcon,
+  SettingsIcon,
+  ShieldIcon,
+  WifiIcon,
+  XCircleIcon,
+} from '@/lib/icons'
 import { toast } from 'sonner'
 
 interface MonitoringSettings {
@@ -155,6 +157,17 @@ export function MonitoringSettings() {
     toast.success('Settings reset to defaults')
   }
 
+  // Safety check: ensure all settings are loaded before rendering
+  if (!settings || !networkSettings || !securitySettings) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground">Loading settings...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex h-full flex-col">
       <div className="p-6 pb-4">
@@ -175,7 +188,7 @@ export function MonitoringSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Bell size={20} className="text-primary" />
+                <BellIcon size={20} className="text-primary" />
                 Alert Configuration
               </CardTitle>
             </CardHeader>
@@ -195,7 +208,7 @@ export function MonitoringSettings() {
 
               <Separator />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Offline Threshold</Label>
                   <div className="flex items-center gap-2">
@@ -273,7 +286,7 @@ export function MonitoringSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Warning size={20} className="text-primary" />
+                <AlertTriangleIcon className="text-primary h-5 w-5" />
                 Notification Methods
               </CardTitle>
             </CardHeader>
@@ -337,45 +350,46 @@ export function MonitoringSettings() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {Object.entries(settings.alertCategories).map(([category, enabled]) => {
-                const icons = {
-                  offline: XCircle,
-                  battery: Battery,
-                  signal: Wifi,
-                  security: Shield,
-                  maintenance: Clock,
-                }
-                const IconComponent = icons[category as keyof typeof icons]
+              {settings.alertCategories &&
+                Object.entries(settings.alertCategories).map(([category, enabled]) => {
+                  const icons = {
+                    offline: XCircleIcon,
+                    battery: BatteryLowIcon,
+                    signal: WifiIcon,
+                    security: ShieldIcon,
+                    maintenance: ClockIcon,
+                  }
+                  const IconComponent = icons[category as keyof typeof icons]
 
-                return (
-                  <div key={category} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <IconComponent size={18} className="text-muted-foreground" />
-                      <div>
-                        <Label className="text-base font-medium capitalize">
-                          {category} Alerts
-                        </Label>
-                        <p className="text-muted-foreground text-sm">
-                          {category === 'offline' && 'Device connectivity issues'}
-                          {category === 'battery' && 'Low battery warnings'}
-                          {category === 'signal' && 'Weak signal strength alerts'}
-                          {category === 'security' && 'Security breach notifications'}
-                          {category === 'maintenance' && 'Scheduled maintenance reminders'}
-                        </p>
+                  return (
+                    <div key={category} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <IconComponent size={18} className="text-muted-foreground" />
+                        <div>
+                          <Label className="text-base font-medium capitalize">
+                            {category} Alerts
+                          </Label>
+                          <p className="text-muted-foreground text-sm">
+                            {category === 'offline' && 'Device connectivity issues'}
+                            {category === 'battery' && 'Low battery warnings'}
+                            {category === 'signal' && 'Weak signal strength alerts'}
+                            {category === 'security' && 'Security breach notifications'}
+                            {category === 'maintenance' && 'Scheduled maintenance reminders'}
+                          </p>
+                        </div>
                       </div>
+                      <Switch
+                        checked={enabled}
+                        onCheckedChange={checked =>
+                          updateAlertCategory(
+                            category as keyof MonitoringSettings['alertCategories'],
+                            checked
+                          )
+                        }
+                      />
                     </div>
-                    <Switch
-                      checked={enabled}
-                      onCheckedChange={checked =>
-                        updateAlertCategory(
-                          category as keyof MonitoringSettings['alertCategories'],
-                          checked
-                        )
-                      }
-                    />
-                  </div>
-                )
-              })}
+                  )
+                })}
             </CardContent>
           </Card>
 
@@ -383,12 +397,12 @@ export function MonitoringSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Wifi size={20} className="text-primary" />
+                <WifiIcon className="text-primary h-5 w-5" />
                 Network Monitoring
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Ping Interval</Label>
                   <div className="flex items-center gap-2">
@@ -458,33 +472,34 @@ export function MonitoringSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Shield size={20} className="text-primary" />
+                <ShieldIcon size={20} className="text-primary" />
                 Security Monitoring
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {Object.entries(securitySettings).map(([setting, enabled]) => (
-                <div key={setting} className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-base font-medium capitalize">
-                      {setting.replace(/([A-Z])/g, ' $1').trim()}
-                    </Label>
-                    <p className="text-muted-foreground text-sm">
-                      {setting === 'intrusion' && 'Detect unauthorized access attempts'}
-                      {setting === 'tampering' && 'Monitor device physical tampering'}
-                      {setting === 'unauthorizedAccess' && 'Track unauthorized login attempts'}
-                      {setting === 'deviceRemoval' && 'Alert when devices are removed'}
-                      {setting === 'encryptionChecks' && 'Verify encryption status'}
-                    </p>
+              {securitySettings &&
+                Object.entries(securitySettings).map(([setting, enabled]) => (
+                  <div key={setting} className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base font-medium capitalize">
+                        {setting.replace(/([A-Z])/g, ' $1').trim()}
+                      </Label>
+                      <p className="text-muted-foreground text-sm">
+                        {setting === 'intrusion' && 'Detect unauthorized access attempts'}
+                        {setting === 'tampering' && 'Monitor device physical tampering'}
+                        {setting === 'unauthorizedAccess' && 'Track unauthorized login attempts'}
+                        {setting === 'deviceRemoval' && 'Alert when devices are removed'}
+                        {setting === 'encryptionChecks' && 'Verify encryption status'}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={enabled}
+                      onCheckedChange={checked =>
+                        updateSecuritySetting(setting as keyof SecuritySettings, checked)
+                      }
+                    />
                   </div>
-                  <Switch
-                    checked={enabled}
-                    onCheckedChange={checked =>
-                      updateSecuritySetting(setting as keyof SecuritySettings, checked)
-                    }
-                  />
-                </div>
-              ))}
+                ))}
             </CardContent>
           </Card>
 
@@ -492,18 +507,18 @@ export function MonitoringSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ChartLineUp size={20} className="text-primary" />
+                <LineChartIcon size={20} className="text-primary" />
                 System Status
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="flex items-center gap-2">
-                  <CheckCircle size={16} className="text-green-500" />
+                  <CheckCircleIcon size={16} className="text-green-500" />
                   <span className="text-sm">Monitoring Active</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle size={16} className="text-green-500" />
+                  <CheckCircleIcon size={16} className="text-green-500" />
                   <span className="text-sm">Network Connected</span>
                 </div>
                 <div className="flex items-center gap-2">

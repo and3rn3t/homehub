@@ -1,6 +1,51 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
-  ]
+    "config:recommended",
+    ":maintainLockFilesWeekly",
+    ":prHourlyLimitNone",
+    ":prConcurrentLimitNone"
+  ],
+  "labels": ["dependencies"],
+  "schedule": ["before 3am on Monday"],
+  "timezone": "America/New_York",
+  "packageRules": [
+    {
+      "description": "Group all non-major updates into single PR",
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch"
+    },
+    {
+      "description": "Automerge patch updates for low-risk packages",
+      "matchUpdateTypes": ["patch"],
+      "matchPackageNames": ["lucide-react", "date-fns", "clsx", "tailwind-merge"],
+      "automerge": true
+    },
+    {
+      "description": "High priority security updates",
+      "matchDatasources": ["npm"],
+      "matchUpdateTypes": ["patch"],
+      "matchCurrentVersion": "!/^0/",
+      "commitMessageSuffix": " [security]",
+      "labels": ["security"],
+      "schedule": ["at any time"]
+    },
+    {
+      "description": "Separate React and framework updates",
+      "matchPackageNames": ["react", "react-dom", "vite"],
+      "groupName": "core framework",
+      "schedule": ["before 3am on the first day of the month"]
+    },
+    {
+      "description": "Test tooling updates",
+      "matchPackageNames": ["vitest", "@vitest/**", "@testing-library/**"],
+      "groupName": "test dependencies",
+      "automerge": true
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "labels": ["security", "priority"],
+    "schedule": ["at any time"]
+  }
 }

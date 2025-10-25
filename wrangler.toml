@@ -1,14 +1,8 @@
 # Cloudflare Pages configuration
 # https://developers.cloudflare.com/pages/
 
-# Build configuration
-[build]
-  command = "npm run build"
-  publish = "dist"
+# Project name
+name = "homehub"
 
-# Environment variables (set in Cloudflare Dashboard)
-# VITE_KV_API_URL = https://your-worker.your-subdomain.workers.dev
-# VITE_KV_AUTH_TOKEN = your-secret-token
-
-[build.environment]
-  NODE_VERSION = "20"
+# Pages build output directory
+pages_build_output_dir = "dist"

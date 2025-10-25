@@ -1,8 +1,10 @@
 /**
  * Cloudflare KV API Client
- * 
+ *
  * Client for communicating with Cloudflare Worker KV API.
  */
+
+import { logger } from './logger'
 
 export interface KVClientConfig {
   /** Base URL of Cloudflare Worker API */
@@ -20,7 +22,7 @@ export class KVClient {
     this.config = {
       baseUrl: config.baseUrl.replace(/\/$/, ''), // Remove trailing slash
       authToken: config.authToken || '',
-      timeout: config.timeout || 10000,
+      timeout: config.timeout || 3000, // Reduced to 3 seconds for faster fallback
     }
   }
 
@@ -28,10 +30,10 @@ export class KVClient {
    * Get value from KV store
    */
   async get<T = any>(key: string): Promise<T | null> {
-    try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), this.config.timeout)
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), this.config.timeout)
 
+    try {
       const response = await fetch(`${this.config.baseUrl}/kv/${key}`, {
         method: 'GET',
         headers: this.getHeaders(),
@@ -51,7 +53,15 @@ export class KVClient {
       const data = await response.json()
       return data.value as T
     } catch (error) {
-      console.error(`KV get error for key "${key}":`, error)
+      clearTimeout(timeoutId)
+
+      // Ignore abort errors - these are expected during component cleanup
+      if (error instanceof Error && error.name === 'AbortError') {
+        logger.debug(`KV get aborted for key "${key}" (component cleanup)`)
+        return null
+      }
+
+      logger.error(`KV get error for key "${key}"`, error as Error)
       throw error
     }
   }
@@ -77,7 +87,7 @@ export class KVClient {
         throw new Error(`KV SET failed: ${response.statusText}`)
       }
     } catch (error) {
-      console.error(`KV set error for key "${key}":`, error)
+      logger.warn(`KV set failed for "${key}"`, error as Error)
       throw error
     }
   }
@@ -102,7 +112,7 @@ export class KVClient {
         throw new Error(`KV DELETE failed: ${response.statusText}`)
       }
     } catch (error) {
-      console.error(`KV delete error for key "${key}":`, error)
+      logger.error(`KV delete error for key "${key}"`, error as Error)
       throw error
     }
   }
@@ -130,7 +140,7 @@ export class KVClient {
       const data = await response.json()
       return data.keys || []
     } catch (error) {
-      console.error('KV list keys error:', error)
+      logger.error('KV list keys error', error as Error)
       throw error
     }
   }

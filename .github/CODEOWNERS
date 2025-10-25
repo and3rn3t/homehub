@@ -1,0 +1,35 @@
+# CODEOWNERS - Auto-assign reviewers for pull requests
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything
+* @and3rn3t
+
+# Core configuration files
+package.json @and3rn3t
+package-lock.json @and3rn3t
+tsconfig*.json @and3rn3t
+vite.config.ts @and3rn3t
+vitest.config.ts @and3rn3t
+wrangler.toml @and3rn3t
+renovate.json @and3rn3t
+
+# GitHub workflows and configuration
+.github/ @and3rn3t
+
+# Documentation
+/docs/ @and3rn3t
+README.md @and3rn3t
+PRD.md @and3rn3t
+
+# Cloudflare Workers
+/workers/ @and3rn3t
+
+# Core infrastructure
+/src/hooks/use-kv.ts @and3rn3t
+/src/services/ @and3rn3t
+/src/lib/ @and3rn3t
+
+# Security-related files
+/src/components/Security.tsx @and3rn3t
+/workers/arlo-proxy/ @and3rn3t
+.env.* @and3rn3t

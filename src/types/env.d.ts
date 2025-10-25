@@ -44,6 +44,7 @@ export interface WorkerEnv {
  * Type-safe environment variable access for Vite
  */
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface ImportMetaEnv extends ViteEnv {}
 
   interface ImportMeta {

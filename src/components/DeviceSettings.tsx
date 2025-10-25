@@ -1,16 +1,40 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  COLORBLIND_MODE_INFO,
+  getStatusClasses,
+  type ColorblindMode,
+} from '@/constants/colorblind-palettes'
 import { useKV } from '@/hooks/use-kv'
-import { Bell, ChartLineUp, Check, Gear, Plus, Shield, WifiHigh } from '@phosphor-icons/react'
+import {
+  BellIcon,
+  CheckIcon,
+  CogIcon,
+  EyeIcon,
+  LineChartIcon,
+  PlusIcon,
+  SettingsIcon,
+  ShieldIcon,
+  WifiIcon,
+} from '@/lib/icons'
+import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { AdaptiveLighting } from './AdaptiveLighting'
 import { Intercom } from './Intercom'
 import { MonitoringSettings } from './MonitoringSettings'
+import { UnitSettings } from './UnitSettings'
 
 interface Integration {
   id: string
@@ -32,20 +56,20 @@ interface SystemSetting {
 }
 
 const integrationIcons = {
-  homekit: WifiHigh,
-  alexa: Bell,
-  google: WifiHigh,
-  matter: Check,
-  thread: ChartLineUp,
-  zigbee: ChartLineUp,
-  zwave: ChartLineUp,
+  homekit: WifiIcon,
+  alexa: BellIcon,
+  google: WifiIcon,
+  matter: CheckIcon,
+  thread: LineChartIcon,
+  zigbee: LineChartIcon,
+  zwave: LineChartIcon,
 }
 
 const categoryIcons = {
-  security: Shield,
-  notifications: Bell,
-  automation: Gear,
-  system: Gear,
+  security: ShieldIcon,
+  notifications: BellIcon,
+  automation: CogIcon,
+  system: CogIcon,
 }
 
 export function DeviceSettings() {
@@ -138,6 +162,8 @@ export function DeviceSettings() {
   const [notifications, setNotifications] = useKV('notifications-enabled', true)
   const [autoUpdates, setAutoUpdates] = useKV('auto-updates', true)
   const [geofencing, setGeofencing] = useKV('geofencing-enabled', false)
+  const [colorblindMode, setColorblindMode] = useKV<ColorblindMode>('colorblind-mode', 'default')
+  const [highContrastMode, setHighContrastMode] = useKV('high-contrast-mode', false)
 
   const toggleIntegration = (integrationId: string) => {
     setIntegrations(currentIntegrations =>
@@ -168,7 +194,7 @@ export function DeviceSettings() {
             <p className="text-muted-foreground">Manage your home automation</p>
           </div>
           <Button variant="outline" size="icon" className="rounded-full">
-            <Gear size={20} />
+            <SettingsIcon className="h-5 w-5" />
           </Button>
         </div>
       </div>
@@ -176,9 +202,11 @@ export function DeviceSettings() {
       <div className="flex-1 overflow-hidden">
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="flex h-full flex-col">
           <div className="px-6">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-7">
               <TabsTrigger value="integrations">Integrations</TabsTrigger>
+              <TabsTrigger value="units">Units</TabsTrigger>
               <TabsTrigger value="system">System</TabsTrigger>
+              <TabsTrigger value="accessibility">Accessibility</TabsTrigger>
               <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
               <TabsTrigger value="adaptive">Adaptive</TabsTrigger>
               <TabsTrigger value="intercom">Intercom</TabsTrigger>
@@ -194,7 +222,7 @@ export function DeviceSettings() {
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <Bell size={20} className="text-muted-foreground" />
+                      <BellIcon className="text-muted-foreground h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">Push Notifications</p>
                         <p className="text-muted-foreground text-xs">Device alerts and updates</p>
@@ -205,7 +233,7 @@ export function DeviceSettings() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <WifiHigh size={20} className="text-muted-foreground" />
+                      <WifiIcon className="text-muted-foreground h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">Automatic Updates</p>
                         <p className="text-muted-foreground text-xs">Keep devices up to date</p>
@@ -216,7 +244,7 @@ export function DeviceSettings() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <WifiHigh size={20} className="text-muted-foreground" />
+                      <WifiIcon className="text-muted-foreground h-5 w-5" />
                       <div>
                         <p className="text-sm font-medium">Geofencing</p>
                         <p className="text-muted-foreground text-xs">Location-based automation</p>
@@ -232,7 +260,7 @@ export function DeviceSettings() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">Platform Integrations</CardTitle>
                     <Button variant="outline" size="sm">
-                      <Plus size={16} className="mr-2" />
+                      <PlusIcon className="mr-2 h-4 w-4" />
                       Add
                     </Button>
                   </div>
@@ -241,7 +269,7 @@ export function DeviceSettings() {
                   {integrations.length === 0 ? (
                     <div className="py-8 text-center">
                       <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                        <WifiHigh size={24} className="text-muted-foreground" />
+                        <WifiIcon className="text-muted-foreground h-6 w-6" />
                       </div>
                       <p className="text-muted-foreground mb-2">No integrations</p>
                       <p className="text-muted-foreground mb-4 text-sm">
@@ -317,6 +345,10 @@ export function DeviceSettings() {
             </div>
           </TabsContent>
 
+          <TabsContent value="units" className="mt-6 flex-1 overflow-y-auto px-6 pb-6">
+            <UnitSettings />
+          </TabsContent>
+
           <TabsContent value="system" className="mt-6 flex-1 overflow-y-auto px-6 pb-6">
             <Card>
               <CardHeader className="pb-3">
@@ -326,7 +358,7 @@ export function DeviceSettings() {
                 {systemSettings.length === 0 ? (
                   <div className="py-8 text-center">
                     <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                      <Gear size={24} className="text-muted-foreground" />
+                      <SettingsIcon className="text-muted-foreground h-6 w-6" />
                     </div>
                     <p className="text-muted-foreground mb-2">No custom settings</p>
                     <p className="text-muted-foreground text-sm">
@@ -371,7 +403,7 @@ export function DeviceSettings() {
                 <div className="space-y-3">
                   <div className="bg-accent/10 border-accent/20 flex items-center justify-between rounded-lg border p-3">
                     <div className="flex items-center gap-3">
-                      <Check size={20} className="text-accent" />
+                      <CheckIcon size={20} className="text-accent" />
                       <div>
                         <p className="text-sm font-medium">System Health</p>
                         <p className="text-muted-foreground text-xs">All systems operational</p>
@@ -384,7 +416,7 @@ export function DeviceSettings() {
 
                   <div className="bg-secondary flex items-center justify-between rounded-lg border p-3">
                     <div className="flex items-center gap-3">
-                      <WifiHigh size={20} className="text-muted-foreground" />
+                      <WifiIcon size={20} className="text-muted-foreground" />
                       <div>
                         <p className="text-sm font-medium">Network Status</p>
                         <p className="text-muted-foreground text-xs">Connected to Wi-Fi</p>
@@ -395,7 +427,7 @@ export function DeviceSettings() {
 
                   <div className="bg-primary/10 border-primary/20 flex items-center justify-between rounded-lg border p-3">
                     <div className="flex items-center gap-3">
-                      <WifiHigh size={20} className="text-primary" />
+                      <WifiIcon size={20} className="text-primary" />
                       <div>
                         <p className="text-sm font-medium">Cloud Sync</p>
                         <p className="text-muted-foreground text-xs">Last sync: 2 minutes ago</p>
@@ -408,6 +440,199 @@ export function DeviceSettings() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="accessibility" className="mt-6 flex-1 overflow-y-auto px-6 pb-6">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <EyeIcon className="h-5 w-5" />
+                    <CardTitle className="text-lg">Visual Accessibility</CardTitle>
+                  </div>
+                  <p className="text-muted-foreground text-sm">
+                    Customize colors and contrast for better visibility
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Colorblind Mode */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium">Colorblind Mode</p>
+                        <p className="text-muted-foreground text-xs">
+                          Adjust color palette for different types of color vision deficiency
+                        </p>
+                      </div>
+                    </div>
+                    <Select
+                      value={colorblindMode}
+                      onValueChange={value => setColorblindMode(value as ColorblindMode)}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(COLORBLIND_MODE_INFO).map(([mode, info]) => (
+                          <SelectItem key={mode} value={mode}>
+                            <div className="flex flex-col">
+                              <span className="font-medium">{info.label}</span>
+                              <span className="text-muted-foreground text-xs">
+                                {info.description}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {/* Current mode info */}
+                    <motion.div
+                      key={colorblindMode}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                      className="bg-secondary/50 rounded-lg border p-3"
+                    >
+                      <div className="flex items-start gap-2">
+                        <CheckIcon className="text-accent mt-0.5 h-4 w-4 shrink-0" />
+                        <div>
+                          <p className="text-sm font-medium">
+                            {COLORBLIND_MODE_INFO[colorblindMode].label}
+                          </p>
+                          <p className="text-muted-foreground text-xs">
+                            {COLORBLIND_MODE_INFO[colorblindMode].description}
+                          </p>
+                          {colorblindMode !== 'default' && (
+                            <p className="text-muted-foreground mt-1 text-xs italic">
+                              Affects: {COLORBLIND_MODE_INFO[colorblindMode].affectedPopulation}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  </div>
+
+                  {/* High Contrast Mode */}
+                  <div className="border-t pt-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <EyeIcon className="text-muted-foreground h-5 w-5" />
+                        <div>
+                          <p className="text-sm font-medium">High Contrast Mode</p>
+                          <p className="text-muted-foreground text-xs">
+                            Increase contrast for better visibility in bright environments
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={highContrastMode}
+                        onCheckedChange={value => {
+                          setHighContrastMode(value)
+                          toast.success(
+                            value ? 'High contrast mode enabled' : 'High contrast mode disabled'
+                          )
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Preview Section */}
+                  <div className="border-t pt-6">
+                    <p className="mb-3 text-sm font-medium">Preview</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div
+                        className={cn(
+                          'rounded-lg border p-2 text-center',
+                          getStatusClasses(colorblindMode, 'success').bg,
+                          getStatusClasses(colorblindMode, 'success').border,
+                          getStatusClasses(colorblindMode, 'success').text
+                        )}
+                      >
+                        <p className="text-xs font-medium">Online</p>
+                      </div>
+                      <div
+                        className={cn(
+                          'rounded-lg border p-2 text-center',
+                          getStatusClasses(colorblindMode, 'error').bg,
+                          getStatusClasses(colorblindMode, 'error').border,
+                          getStatusClasses(colorblindMode, 'error').text
+                        )}
+                      >
+                        <p className="text-xs font-medium">Offline</p>
+                      </div>
+                      <div
+                        className={cn(
+                          'rounded-lg border p-2 text-center',
+                          getStatusClasses(colorblindMode, 'warning').bg,
+                          getStatusClasses(colorblindMode, 'warning').border,
+                          getStatusClasses(colorblindMode, 'warning').text
+                        )}
+                      >
+                        <p className="text-xs font-medium">Warning</p>
+                      </div>
+                    </div>
+                    <p className="text-muted-foreground mt-2 text-xs">
+                      These colors will update based on your accessibility settings
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Motion & Animation</CardTitle>
+                  <p className="text-muted-foreground text-sm">
+                    Reduce motion for users sensitive to animation
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-accent/10 border-accent/20 rounded-lg border p-4">
+                    <div className="flex items-start gap-3">
+                      <CheckIcon className="text-accent mt-0.5 h-5 w-5 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium">Reduced Motion Support Active</p>
+                        <p className="text-muted-foreground text-xs">
+                          This app respects your system's "Reduce Motion" preference. Animations
+                          will be minimized automatically.
+                        </p>
+                        <p className="text-muted-foreground mt-2 text-xs">
+                          To change: Go to your device's Accessibility Settings → Display & Text
+                          Size → Reduce Motion
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Screen Reader Support</CardTitle>
+                  <p className="text-muted-foreground text-sm">
+                    Enhanced accessibility for VoiceOver and other assistive technologies
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-accent/10 border-accent/20 rounded-lg border p-4">
+                    <div className="flex items-start gap-3">
+                      <CheckIcon className="text-accent mt-0.5 h-5 w-5 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium">Full ARIA Support Enabled</p>
+                        <p className="text-muted-foreground text-xs">
+                          All interactive elements include proper labels and roles for screen
+                          readers.
+                        </p>
+                        <p className="text-muted-foreground mt-2 text-xs">
+                          Status cards, device controls, and navigation elements are fully
+                          accessible with VoiceOver, NVDA, and JAWS.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="monitoring" className="m-0 flex-1 overflow-hidden p-0">

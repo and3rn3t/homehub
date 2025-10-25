@@ -25,6 +25,9 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": false,
+    "exactOptionalPropertyTypes": false, // Enable for stricter optional properties
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
 
     // Module Resolution
     "resolveJsonModule": true,
@@ -32,6 +35,10 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+
+    // Performance
+    "incremental": true,
+    "composite": false
   }
 }
