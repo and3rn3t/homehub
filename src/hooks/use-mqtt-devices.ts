@@ -127,18 +127,23 @@ export function useMQTTDevices(options: UseMQTTDevicesOptions = {}): UseMQTTDevi
         throw new Error('Device registry not initialized')
       }
 
+      // Store original state for potential rollback
+      const originalDevices = [...devices]
+
       try {
-        // Optimistic update: immediately update local state
-        setDevices(prev =>
-          prev.map(device => {
+        // Optimistic update - update UI immediately
+        setDevices(prevDevices =>
+          prevDevices.map(device => {
             if (device.id !== deviceId) return device
 
-            // Apply optimistic changes based on command
             const updatedDevice = { ...device }
+
+            // Handle different command types
             if (command.command === 'toggle') {
               updatedDevice.enabled = !device.enabled
             } else if (
               command.command === 'set_value' &&
+              'value' in command &&
               command.value !== undefined &&
               typeof command.value === 'number'
             ) {
@@ -153,11 +158,15 @@ export function useMQTTDevices(options: UseMQTTDevicesOptions = {}): UseMQTTDevi
         await deviceRegistryRef.current.sendCommand({ deviceId, ...command })
       } catch (err) {
         console.error(`Failed to send command to ${deviceId}:`, err)
-        // TODO: Rollback optimistic update on error
+
+        // Rollback optimistic update on error
+        setDevices(originalDevices)
+
+        // Re-throw error for caller to handle
         throw err
       }
     },
-    []
+    [devices]
   )
 
   /**

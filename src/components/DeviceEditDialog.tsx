@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { KV_KEYS, MOCK_ROOMS } from '@/constants'
+import { useKeyboardAvoidance } from '@/hooks/use-keyboard-avoidance'
 import { useKV } from '@/hooks/use-kv'
 import {
   AlertTriangleIcon,
@@ -65,6 +66,9 @@ export function DeviceEditDialog({
   const [rooms] = useKV<Room[]>(KV_KEYS.ROOMS, MOCK_ROOMS)
   const [scenes, setScenes] = useKV<Scene[]>(KV_KEYS.SCENES, [])
   const [automations, setAutomations] = useKV<Automation[]>(KV_KEYS.AUTOMATIONS, [])
+
+  // Keyboard avoidance for mobile
+  useKeyboardAvoidance()
 
   const [name, setName] = useState('')
   const [room, setRoom] = useState('')

@@ -2,13 +2,16 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ControlTile } from '@/components/ui/control-tile'
+import { Input } from '@/components/ui/input'
 import { IOS26EmptyState, IOS26Error } from '@/components/ui/ios26-error'
 import { IOS26Shimmer } from '@/components/ui/ios26-loading'
 import { IOS26StatusBadge } from '@/components/ui/ios26-status'
 import { PullToRefresh } from '@/components/ui/pull-to-refresh'
-import { KV_KEYS } from '@/constants'
+import { KV_KEYS, MOCK_DEVICES } from '@/constants'
+import { getStatusClasses, type ColorblindMode } from '@/constants/colorblind-palettes'
 import { useHaptic } from '@/hooks/use-haptic'
 import { useKV } from '@/hooks/use-kv'
+import { useMotionPreference } from '@/hooks/use-motion-preference'
 import { useMQTTConnection } from '@/hooks/use-mqtt-connection'
 import { useMQTTDevices } from '@/hooks/use-mqtt-devices'
 import {
@@ -24,6 +27,7 @@ import {
   PlayIcon,
   PlusIcon,
   RefreshIcon,
+  SearchIcon,
   ShieldIcon,
   SofaIcon,
   StarIcon,
@@ -33,6 +37,7 @@ import {
   UsersIcon,
   UtensilsIcon,
   WifiOffIcon,
+  XIcon,
 } from '@/lib/icons'
 import { logger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
@@ -49,6 +54,219 @@ import { DeviceEditDialog } from './DeviceEditDialog'
 import { NotificationBell } from './NotificationCenter'
 import { ThemeToggle } from './ThemeToggle'
 
+// ============================================================================
+// Helper Functions (Extracted to reduce cognitive complexity)
+// ============================================================================
+
+/**
+ * Renders connection status badge based on current connection state
+ */
+function ConnectionStatusBadge({
+  connectionState,
+  mqttConnected,
+  onReconnect,
+}: Readonly<{
+  connectionState: string
+  mqttConnected: boolean
+  onReconnect: () => Promise<void>
+}>) {
+  if (connectionState === 'offline') {
+    return null
+  }
+
+  if (mqttConnected) {
+    return <IOS26StatusBadge status="idle" label="MQTT" showPulse={true} />
+  }
+
+  if (connectionState === 'reconnecting') {
+    return <IOS26StatusBadge status="alert" label="Reconnecting" showPulse={true} />
+  }
+
+  if (connectionState === 'error') {
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        className="h-7 border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+        onClick={() => {
+          onReconnect().catch(err => {
+            toast.error('Failed to reconnect', {
+              description: err.message,
+            })
+          })
+        }}
+      >
+        <WifiOffIcon className="mr-1 h-4 w-4" />
+        Reconnect
+      </Button>
+    )
+  }
+
+  return null
+}
+
+/**
+ * Controls a Hue device via the Hue Bridge
+ */
+async function controlHueDevice(
+  device: Device,
+  setKvDevices: (updater: (devices: Device[]) => Device[]) => void
+): Promise<void> {
+  try {
+    const { HueBridgeAdapter } = await import('@/services/devices/HueBridgeAdapter')
+    const adapter = new HueBridgeAdapter({
+      ip: '192.168.1.6',
+      username: 'xddEM82d6i8rZDvEy0jAdXL3rA8vxmnxTSUBIhyA',
+      timeout: 5000,
+    })
+
+    // Optimistic update
+    setKvDevices(currentDevices =>
+      currentDevices.map(d => (d.id === device.id ? { ...d, enabled: !d.enabled } : d))
+    )
+
+    // Execute command
+    const result = device.enabled ? await adapter.turnOff(device) : await adapter.turnOn(device)
+
+    if (result.success) {
+      setKvDevices(currentDevices =>
+        currentDevices.map(d =>
+          d.id === device.id ? { ...d, ...result.newState, lastSeen: new Date() } : d
+        )
+      )
+      toast.success(`${device.name} turned ${result.newState?.enabled ? 'on' : 'off'}`, {
+        description: `Hue Bridge · ${result.duration}ms`,
+      })
+    } else {
+      // Rollback optimistic update
+      setKvDevices(currentDevices =>
+        currentDevices.map(d => (d.id === device.id ? { ...d, enabled: !d.enabled } : d))
+      )
+      toast.error(`Failed to control ${device.name}`, {
+        description: result.error || 'Hue Bridge error',
+      })
+    }
+  } catch (err) {
+    // Rollback on exception
+    setKvDevices(currentDevices =>
+      currentDevices.map(d => (d.id === device.id ? { ...d, enabled: !d.enabled } : d))
+    )
+    logger.error('Hue device control error', err as Error)
+    toast.error(`Error controlling ${device.name}`, {
+      description: err instanceof Error ? err.message : 'Hue Bridge error',
+    })
+  }
+}
+
+/**
+ * Controls an HTTP device via the Shelly adapter
+ */
+async function controlHTTPDevice(
+  device: Device,
+  setKvDevices: (updater: (devices: Device[]) => Device[]) => void
+): Promise<void> {
+  if (!device.ip) {
+    toast.error('Device IP address missing')
+    return
+  }
+
+  try {
+    const { ShellyAdapter } = await import('@/services/devices/ShellyAdapter')
+    const adapter = new ShellyAdapter(device.ip, device.port || 80, { debug: true })
+
+    // Optimistic update
+    setKvDevices(currentDevices =>
+      currentDevices.map(d => (d.id === device.id ? { ...d, enabled: !d.enabled } : d))
+    )
+
+    // Execute command
+    const result = device.enabled ? await adapter.turnOff(device) : await adapter.turnOn(device)
+
+    if (result.success) {
+      setKvDevices(currentDevices =>
+        currentDevices.map(d =>
+          d.id === device.id ? { ...d, ...result.newState, lastSeen: new Date() } : d
+        )
+      )
+      toast.success(`${device.name} turned ${result.newState?.enabled ? 'on' : 'off'}`, {
+        description: `Response time: ${result.duration}ms`,
+      })
+    } else {
+      // Rollback optimistic update
+      setKvDevices(currentDevices =>
+        currentDevices.map(d => (d.id === device.id ? { ...d, enabled: !d.enabled } : d))
+      )
+      toast.error(`Failed to control ${device.name}`, {
+        description: result.error || 'Unknown error',
+      })
+    }
+  } catch (err) {
+    // Rollback on exception
+    setKvDevices(currentDevices =>
+      currentDevices.map(d => (d.id === device.id ? { ...d, enabled: !d.enabled } : d))
+    )
+    logger.error('HTTP device control error', err as Error)
+    toast.error(`Error controlling ${device.name}`, {
+      description: err instanceof Error ? err.message : 'Unknown error',
+    })
+  }
+}
+
+/**
+ * Controls an MQTT device via the device registry
+ */
+async function controlMQTTDevice(
+  device: Device,
+  deviceRegistry: DeviceRegistry,
+  setKvDevices: (updater: (devices: Device[]) => Device[]) => void
+): Promise<void> {
+  const adapter = deviceRegistry.getAdapter(device.protocol)
+
+  if (!adapter) {
+    // Fallback to KV store if no adapter registered
+    setKvDevices(currentDevices =>
+      currentDevices.map(d => (d.id === device.id ? { ...d, enabled: !d.enabled } : d))
+    )
+    toast.success(`${device.name} turned ${!device.enabled ? 'on' : 'off'}`)
+    return
+  }
+
+  if (!adapter.isConnected()) {
+    toast.warning(`${device.protocol.toUpperCase()} adapter not connected`, {
+      description: 'Using fallback mode',
+    })
+    setKvDevices(currentDevices =>
+      currentDevices.map(d => (d.id === device.id ? { ...d, enabled: !d.enabled } : d))
+    )
+    return
+  }
+
+  try {
+    await adapter.sendCommand({
+      deviceId: device.id,
+      command: 'toggle',
+    })
+
+    // Optimistic update in KV store
+    setKvDevices(currentDevices =>
+      currentDevices.map(d => (d.id === device.id ? { ...d, enabled: !d.enabled } : d))
+    )
+
+    toast.success(`${device.name} turned ${!device.enabled ? 'on' : 'off'}`, {
+      description: `via ${device.protocol.toUpperCase()}`,
+    })
+  } catch (err) {
+    logger.error('Device control error', err as Error)
+    toast.error(`Failed to control ${device.name}`, {
+      description: err instanceof Error ? err.message : 'Unknown error',
+    })
+  }
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
 export function Dashboard() {
   // Initialize multi-protocol device registry (singleton)
   const deviceRegistry = useMemo(() => DeviceRegistry.getInstance(), [])
@@ -63,6 +281,9 @@ export function Dashboard() {
   // Device edit dialog state
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [editDevice, setEditDevice] = useState<Device | null>(null)
+
+  // Search query for favorite devices
+  const [searchQuery, setSearchQuery] = useState('')
 
   // Try MQTT connection first
   const {
@@ -79,10 +300,19 @@ export function Dashboard() {
 
   const { connect: reconnectMQTT } = useMQTTConnection()
 
+  // Accessibility: Respect reduced motion preference (WCAG 2.3.3)
+  const prefersReducedMotion = useMotionPreference()
+
+  // Accessibility: Colorblind mode support (WCAG 1.4.1)
+  const [colorblindMode] = useKV<ColorblindMode>('colorblind-mode', 'default')
+
+  // Accessibility: High contrast mode support (WCAG 1.4.6 Level AAA)
+  const [highContrastMode] = useKV('high-contrast-mode', false)
+
   // Fallback to KV store if MQTT not available
   const [kvDevices, setKvDevices, { isLoading: kvLoading, isError: kvError }] = useKV<Device[]>(
     KV_KEYS.DEVICES,
-    [], // Empty array as default - will use localStorage if available
+    MOCK_DEVICES, // Use mock devices as default fallback
     { withMeta: true }
   )
 
@@ -100,6 +330,31 @@ export function Dashboard() {
   const [scenes] = useKV<Scene[]>(KV_KEYS.SCENES, [])
   const [rooms] = useKV<Room[]>(KV_KEYS.ROOMS, [])
   const haptic = useHaptic()
+
+  // Animation helper - respects reduced motion preference
+  const getAnimationProps = useCallback(
+    (delay = 0) => {
+      if (prefersReducedMotion) {
+        return {
+          initial: {},
+          animate: {},
+          transition: { duration: 0 },
+        }
+      }
+      return {
+        initial: { opacity: 0, y: 10 },
+        animate: { opacity: 1, y: 0 },
+        transition: {
+          type: 'spring' as const,
+          stiffness: 400,
+          damping: 30,
+          mass: 0.8,
+          delay,
+        },
+      }
+    },
+    [prefersReducedMotion]
+  )
 
   // Pull-to-refresh handler
   const handleRefresh = useCallback(async () => {
@@ -201,167 +456,19 @@ export function Dashboard() {
         return
       }
 
-      // For Hue devices, use HueBridgeAdapter
+      // Route to appropriate protocol handler
       if (device.protocol === 'hue') {
-        try {
-          // Import adapter dynamically
-          const { HueBridgeAdapter } = await import('@/services/devices/HueBridgeAdapter')
-
-          // Create adapter instance with bridge configuration
-          const adapter = new HueBridgeAdapter({
-            ip: '192.168.1.6',
-            username: 'xddEM82d6i8rZDvEy0jAdXL3rA8vxmnxTSUBIhyA',
-            timeout: 5000,
-          })
-
-          // Optimistic update
-          setKvDevices(currentDevices =>
-            currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-          )
-
-          // Execute command
-          const result = device.enabled
-            ? await adapter.turnOff(device)
-            : await adapter.turnOn(device)
-
-          if (result.success) {
-            // Update with real state
-            setKvDevices(currentDevices =>
-              currentDevices.map(d =>
-                d.id === deviceId ? { ...d, ...result.newState, lastSeen: new Date() } : d
-              )
-            )
-            toast.success(`${device.name} turned ${result.newState?.enabled ? 'on' : 'off'}`, {
-              description: `Hue Bridge · ${result.duration}ms`,
-            })
-          } else {
-            // Rollback optimistic update
-            setKvDevices(currentDevices =>
-              currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-            )
-            toast.error(`Failed to control ${device.name}`, {
-              description: result.error || 'Hue Bridge error',
-            })
-          }
-          return
-        } catch (err) {
-          // Rollback on exception
-          setKvDevices(currentDevices =>
-            currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-          )
-          logger.error('Hue device control error', err as Error)
-          toast.error(`Error controlling ${device.name}`, {
-            description: err instanceof Error ? err.message : 'Hue Bridge error',
-          })
-          return
-        }
+        await controlHueDevice(device, setKvDevices)
+        return
       }
 
-      // For HTTP devices, use direct adapter control
       if (device.protocol === 'http' && device.ip) {
-        try {
-          // Import adapter dynamically
-          const { ShellyAdapter } = await import('@/services/devices/ShellyAdapter')
-
-          // Create adapter instance
-          const adapter = new ShellyAdapter(device.ip, device.port || 80, { debug: true })
-
-          // Optimistic update
-          setKvDevices(currentDevices =>
-            currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-          )
-
-          // Execute command
-          const result = device.enabled
-            ? await adapter.turnOff(device)
-            : await adapter.turnOn(device)
-
-          if (result.success) {
-            // Update with real state
-            setKvDevices(currentDevices =>
-              currentDevices.map(d =>
-                d.id === deviceId ? { ...d, ...result.newState, lastSeen: new Date() } : d
-              )
-            )
-            toast.success(`${device.name} turned ${result.newState?.enabled ? 'on' : 'off'}`, {
-              description: `Response time: ${result.duration}ms`,
-            })
-          } else {
-            // Rollback optimistic update
-            setKvDevices(currentDevices =>
-              currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-            )
-            toast.error(`Failed to control ${device.name}`, {
-              description: result.error || 'Unknown error',
-            })
-          }
-          return
-        } catch (err) {
-          // Rollback on exception
-          setKvDevices(currentDevices =>
-            currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-          )
-          logger.error('HTTP device control error', err as Error)
-          toast.error(`Error controlling ${device.name}`, {
-            description: err instanceof Error ? err.message : 'Unknown error',
-          })
-          return
-        }
+        await controlHTTPDevice(device, setKvDevices)
+        return
       }
 
-      // For MQTT devices, use existing device registry
-      try {
-        // Get appropriate adapter based on device protocol
-        const adapter = deviceRegistry.getAdapter(device.protocol)
-        console.log(`🔌 Adapter for ${device.protocol}:`, adapter ? 'Found' : 'Not found')
-
-        if (!adapter) {
-          console.log('⚠️ No adapter found, using KV fallback')
-          // Fallback to KV store if no adapter registered
-          setKvDevices(currentDevices =>
-            currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-          )
-          toast.success(`${device.name} turned ${!device.enabled ? 'on' : 'off'}`)
-          return
-        }
-
-        // Check if adapter is connected
-        const isConnected = adapter.isConnected()
-        console.log(`🔗 Adapter connected:`, isConnected)
-
-        if (!isConnected) {
-          toast.warning(`${device.protocol.toUpperCase()} adapter not connected`, {
-            description: 'Using fallback mode',
-          })
-          // Fallback to KV store
-          setKvDevices(currentDevices =>
-            currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-          )
-          return
-        }
-
-        // Send toggle command via adapter
-        console.log(`📤 Sending toggle command to device ${deviceId} via ${device.protocol}`)
-        await adapter.sendCommand({
-          deviceId,
-          command: 'toggle',
-        })
-        console.log(`✅ Toggle command sent successfully`)
-
-        // Optimistic update in KV store
-        setKvDevices(currentDevices =>
-          currentDevices.map(d => (d.id === deviceId ? { ...d, enabled: !d.enabled } : d))
-        )
-
-        toast.success(`${device.name} turned ${!device.enabled ? 'on' : 'off'}`, {
-          description: `via ${device.protocol.toUpperCase()}`,
-        })
-      } catch (err) {
-        logger.error('Device control error', err as Error)
-        toast.error(`Failed to control ${device.name}`, {
-          description: err instanceof Error ? err.message : 'Unknown error',
-        })
-      }
+      // Default to MQTT or generic device registry
+      await controlMQTTDevice(device, deviceRegistry, setKvDevices)
     },
     [devices, setKvDevices, deviceRegistry]
   )
@@ -399,6 +506,28 @@ export function Dashboard() {
     [devices, favoriteDevices]
   )
 
+  // Filtered favorites based on search query
+  const filteredFavorites = useMemo(() => {
+    if (!searchQuery.trim()) return favoriteDeviceList
+
+    const query = searchQuery.toLowerCase()
+    return favoriteDeviceList.filter(device => {
+      // Fuzzy match: check if all query characters appear in order in the searchable text
+      const searchableText = [device.name, device.type, device.room || '', device.status]
+        .join(' ')
+        .toLowerCase()
+
+      let queryIndex = 0
+      for (const char of searchableText) {
+        if (char === query[queryIndex]) {
+          queryIndex++
+          if (queryIndex === query.length) return true
+        }
+      }
+      return false
+    })
+  }, [favoriteDeviceList, searchQuery])
+
   // Auto-fix: If we have devices and favoriteDevices but no matches, fix it
   if (devices.length > 0 && favoriteDevices.length > 0 && favoriteDeviceList.length === 0) {
     console.warn("⚠️ MISMATCH DETECTED: Favorite IDs don't match device IDs!")
@@ -425,11 +554,11 @@ export function Dashboard() {
   if (showSkeleton) {
     return (
       <div className="flex h-full flex-col">
-        <div className="p-6 pb-4">
+        <div className="p-4 pb-3 sm:p-6 sm:pb-4">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h1 className="text-foreground text-2xl font-bold">Good Morning</h1>
-              <p className="text-muted-foreground">Welcome home</p>
+              <h1 className="text-h1 text-foreground">Good Morning</h1>
+              <p className="text-body text-muted-foreground">Welcome home</p>
             </div>
             <div className="flex items-center gap-3">
               <NotificationBell />
@@ -442,12 +571,12 @@ export function Dashboard() {
 
         <div className="flex-1 overflow-y-auto px-6 pb-6">
           <div className="mb-6 grid grid-cols-3 gap-3">
-            <IOS26Shimmer className="h-24 rounded-2xl" />
-            <IOS26Shimmer className="h-24 rounded-2xl" />
-            <IOS26Shimmer className="h-24 rounded-2xl" />
+            <IOS26Shimmer className="h-20 rounded-2xl" />
+            <IOS26Shimmer className="h-20 rounded-2xl" />
+            <IOS26Shimmer className="h-20 rounded-2xl" />
           </div>
 
-          <div className="mb-6 grid grid-cols-2 gap-3">
+          <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <IOS26Shimmer className="h-24 rounded-2xl" />
             <IOS26Shimmer className="h-24 rounded-2xl" />
             <IOS26Shimmer className="h-24 rounded-2xl" />
@@ -456,11 +585,11 @@ export function Dashboard() {
 
           <div className="mb-6">
             <h2 className="text-foreground mb-3 text-lg font-semibold">Favorite Devices</h2>
-            <div className="grid grid-cols-2 gap-3">
-              <IOS26Shimmer className="h-32 rounded-2xl" />
-              <IOS26Shimmer className="h-32 rounded-2xl" />
-              <IOS26Shimmer className="h-32 rounded-2xl" />
-              <IOS26Shimmer className="h-32 rounded-2xl" />
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+              <IOS26Shimmer className="h-36 rounded-2xl" />
+              <IOS26Shimmer className="h-36 rounded-2xl" />
+              <IOS26Shimmer className="h-36 rounded-2xl" />
+              <IOS26Shimmer className="h-36 rounded-2xl" />
             </div>
           </div>
         </div>
@@ -472,16 +601,16 @@ export function Dashboard() {
   if (isError) {
     return (
       <div className="flex h-full flex-col bg-black">
-        <div className="p-6 pb-4">
+        <div className="p-4 pb-3 sm:p-6 sm:pb-4">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-white">Good Morning</h1>
-              <p className="text-white/60">Welcome home</p>
+              <h1 className="text-h1 text-white">Good Morning</h1>
+              <p className="text-body text-white/60">Welcome home</p>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-1 items-center justify-center px-6 pb-6">
+        <div className="flex flex-1 items-center justify-center px-4 pb-6 sm:px-6">
           <IOS26Error
             variant="error"
             title="Unable to Load Devices"
@@ -501,45 +630,30 @@ export function Dashboard() {
   }
 
   return (
-    <div className="bg-background flex h-full flex-col">
+    <div
+      data-testid="dashboard"
+      className={cn('bg-background flex h-full flex-col', highContrastMode && 'high-contrast')}
+    >
       {/* Header */}
       <div className="p-4 pb-0 sm:p-6 sm:pb-0">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div>
-              <h1 className="text-foreground text-xl font-bold sm:text-2xl">Good Morning</h1>
-              <p className="text-muted-foreground text-sm sm:text-base">Welcome home</p>
+              <h1 className="text-h1 text-foreground">Good Morning</h1>
+              <p className="text-body text-muted-foreground">Welcome home</p>
             </div>
             {/* MQTT Connection Status */}
-            {connectionState !== 'offline' && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex items-center gap-2"
-              >
-                {mqttConnected ? (
-                  <IOS26StatusBadge status="idle" label="MQTT" showPulse={true} />
-                ) : connectionState === 'reconnecting' ? (
-                  <IOS26StatusBadge status="alert" label="Reconnecting" showPulse={true} />
-                ) : connectionState === 'error' ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
-                    onClick={() => {
-                      reconnectMQTT().catch(err => {
-                        toast.error('Failed to reconnect', {
-                          description: err.message,
-                        })
-                      })
-                    }}
-                  >
-                    <WifiOffIcon className="mr-1 h-3.5 w-3.5" />
-                    Reconnect
-                  </Button>
-                ) : null}
-              </motion.div>
-            )}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex items-center gap-2"
+            >
+              <ConnectionStatusBadge
+                connectionState={connectionState}
+                mqttConnected={mqttConnected}
+                onReconnect={reconnectMQTT}
+              />
+            </motion.div>
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
@@ -548,7 +662,7 @@ export function Dashboard() {
               <Button
                 variant="outline"
                 size="icon"
-                className="h-10 w-10 rounded-full"
+                className="rounded-full"
                 onClick={() => setDiscoveryOpen(true)}
               >
                 <PlusIcon className="h-5 w-5" />
@@ -613,66 +727,112 @@ export function Dashboard() {
       <PullToRefresh onRefresh={handleRefresh} className="flex-1 px-4 pb-6 sm:px-6">
         {/* Section 1: Status Summary */}
         <div className="mb-6">
-          <div className="grid grid-cols-3 gap-3">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                type: 'spring',
-                stiffness: 400,
-                damping: 30,
-                mass: 0.8,
-              }}
-            >
-              <Card variant="glass" className="border-green-200/50 bg-green-50/50">
-                <CardContent className="p-3 text-center">
-                  <CheckCircleIcon className="mx-auto mb-1 h-5 w-5 text-green-600" />
-                  <div className="text-lg font-semibold text-green-800 tabular-nums">
+          <div className="grid grid-cols-3 gap-2">
+            <motion.div {...getAnimationProps(0)}>
+              <Card
+                variant="glass"
+                className={cn(
+                  getStatusClasses(colorblindMode, 'success').bg,
+                  getStatusClasses(colorblindMode, 'success').border
+                )}
+                role="status"
+                aria-label={`${devices.filter(d => d.status === 'online').length} devices online`}
+              >
+                <CardContent className="p-4 text-center">
+                  <CheckCircleIcon
+                    className={cn(
+                      'mx-auto mb-2 h-6 w-6',
+                      getStatusClasses(colorblindMode, 'success').icon
+                    )}
+                  />
+                  <div
+                    className={cn(
+                      'text-xl font-semibold tabular-nums',
+                      getStatusClasses(colorblindMode, 'success').text
+                    )}
+                  >
                     {devices.filter(d => d.status === 'online').length}
                   </div>
-                  <div className="text-xs text-green-700">Online</div>
+                  <div
+                    className={cn(
+                      'text-xs font-medium',
+                      getStatusClasses(colorblindMode, 'success').text
+                    )}
+                  >
+                    Online
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                type: 'spring',
-                stiffness: 400,
-                damping: 30,
-                mass: 0.8,
-                delay: 0.05,
-              }}
-            >
-              <Card variant="glass" className="border-red-200/50 bg-red-50/50">
-                <CardContent className="p-3 text-center">
-                  <AlertTriangleIcon className="mx-auto mb-1 h-5 w-5 text-red-600" />
-                  <div className="text-lg font-semibold text-red-800 tabular-nums">
+            <motion.div {...getAnimationProps(0.05)}>
+              <Card
+                variant="glass"
+                className={cn(
+                  getStatusClasses(colorblindMode, 'error').bg,
+                  getStatusClasses(colorblindMode, 'error').border
+                )}
+                role="status"
+                aria-label={`${offlineDevices.length} devices offline`}
+              >
+                <CardContent className="p-4 text-center">
+                  <AlertTriangleIcon
+                    className={cn(
+                      'mx-auto mb-2 h-6 w-6',
+                      getStatusClasses(colorblindMode, 'error').icon
+                    )}
+                  />
+                  <div
+                    className={cn(
+                      'text-xl font-semibold tabular-nums',
+                      getStatusClasses(colorblindMode, 'error').text
+                    )}
+                  >
                     {offlineDevices.length}
                   </div>
-                  <div className="text-xs text-red-700">Offline</div>
+                  <div
+                    className={cn(
+                      'text-xs font-medium',
+                      getStatusClasses(colorblindMode, 'error').text
+                    )}
+                  >
+                    Offline
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                type: 'spring',
-                stiffness: 400,
-                damping: 30,
-                mass: 0.8,
-                delay: 0.1,
-              }}
-            >
-              <Card variant="glass" className="border-blue-200/50 bg-blue-50/50">
-                <CardContent className="p-3 text-center">
-                  <ActivityIcon className="mx-auto mb-1 h-5 w-5 text-blue-600" />
-                  <div className="text-lg font-semibold text-blue-800 tabular-nums">
+            <motion.div {...getAnimationProps(0.1)}>
+              <Card
+                variant="glass"
+                className={cn(
+                  getStatusClasses(colorblindMode, 'warning').bg,
+                  getStatusClasses(colorblindMode, 'warning').border
+                )}
+                role="status"
+                aria-label={`${activeAlerts.length} active alerts`}
+              >
+                <CardContent className="p-4 text-center">
+                  <ActivityIcon
+                    className={cn(
+                      'mx-auto mb-2 h-6 w-6',
+                      getStatusClasses(colorblindMode, 'warning').icon
+                    )}
+                  />
+                  <div
+                    className={cn(
+                      'text-xl font-semibold tabular-nums',
+                      getStatusClasses(colorblindMode, 'warning').text
+                    )}
+                  >
                     {activeAlerts.length}
                   </div>
-                  <div className="text-xs text-blue-700">Alerts</div>
+                  <div
+                    className={cn(
+                      'text-xs font-medium',
+                      getStatusClasses(colorblindMode, 'warning').text
+                    )}
+                  >
+                    Alerts
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
@@ -682,13 +842,17 @@ export function Dashboard() {
         {/* Section 2: Quick Controls (Control Tiles) */}
         <div className="mb-6">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-base font-semibold sm:text-lg">Quick Controls</h2>
-            <Button variant="ghost" size="sm" className="text-primary h-auto py-1 text-sm">
+            <h2 className="text-h2 text-foreground">Quick Controls</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-primary h-auto min-h-[44px] py-1 text-sm"
+            >
               <span>See All</span>
               <ChevronRightIcon className="ml-1 h-4 w-4" />
             </Button>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
             {favoriteDeviceList.slice(0, 4).map(device => (
               <ControlTile
                 key={device.id}
@@ -703,51 +867,63 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* Section 3: Scenes (Horizontal Scroll) */}
+        {/* Section 3: Scenes (Horizontal Scroll with Snap) */}
         {scenes.length > 0 && (
           <div className="mb-6">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-base font-semibold sm:text-lg">Scenes</h2>
-              <Button variant="ghost" size="sm" className="text-primary h-auto py-1 text-sm">
+              <h2 className="text-h2 text-foreground">Scenes</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-primary h-auto min-h-[44px] py-1 text-sm"
+              >
                 <span>See All</span>
                 <ChevronRightIcon className="ml-1 h-4 w-4" />
               </Button>
             </div>
-            <div className="scrollbar-hide flex gap-3 overflow-x-auto pb-2">
-              {scenes.slice(0, 6).map((scene, index) => {
-                const IconComponent = sceneIcons[scene.icon as keyof typeof sceneIcons] || HouseIcon
-                return (
-                  <motion.div
-                    key={scene.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 400,
-                      damping: 30,
-                      mass: 0.8,
-                      delay: index * 0.05,
-                    }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex-shrink-0"
-                  >
-                    <Card
-                      variant="glass"
-                      role="button"
-                      tabIndex={0}
-                      className="hover:bg-accent/5 w-[140px] cursor-pointer transition-all duration-200 hover:shadow-md"
-                      onClick={() => activateScene(scene.name)}
+            {/* Edge-to-edge scroll on mobile with snap points */}
+            <div className="-mx-6 sm:mx-0">
+              <div className="scrollbar-hide scroll-snap-x flex gap-4 overflow-x-auto px-6 pb-2 sm:px-0">
+                {scenes.slice(0, 6).map((scene, index) => {
+                  const IconComponent =
+                    sceneIcons[scene.icon as keyof typeof sceneIcons] || HouseIcon
+                  return (
+                    <motion.div
+                      key={scene.id}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 400,
+                        damping: 30,
+                        mass: 0.8,
+                        delay: index * 0.05,
+                      }}
+                      whileTap={{ scale: 0.95 }}
+                      className="scroll-snap-start flex-shrink-0"
                     >
-                      <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
-                        <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
-                          <IconComponent className="text-primary h-6 w-6" />
-                        </div>
-                        <span className="line-clamp-2 text-sm font-medium">{scene.name}</span>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                )
-              })}
+                      <button
+                        type="button"
+                        onClick={() => activateScene(scene.name)}
+                        className="w-full text-left"
+                        aria-label={`Activate ${scene.name} scene`}
+                      >
+                        <Card
+                          variant="glass"
+                          className="hover:bg-accent/5 w-36 cursor-pointer transition-all duration-200 hover:shadow-md"
+                        >
+                          <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
+                            <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
+                              <IconComponent className="text-primary h-6 w-6" />
+                            </div>
+                            <span className="line-clamp-2 text-sm font-medium">{scene.name}</span>
+                          </CardContent>
+                        </Card>
+                      </button>
+                    </motion.div>
+                  )
+                })}
+              </div>
             </div>
           </div>
         )}
@@ -755,7 +931,7 @@ export function Dashboard() {
         {/* Section 4: Favorite Devices (Full Cards) */}
         <div className="mb-6">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-base font-semibold sm:text-lg">Favorite Devices</h2>
+            <h2 className="text-h2 text-foreground">Favorite Devices</h2>
             <div className="flex items-center gap-2">
               {mqttConnected && (
                 <Button
@@ -777,7 +953,39 @@ export function Dashboard() {
             </div>
           </div>
 
-          {favoriteDeviceList.length === 0 ? (
+          {/* Search Input */}
+          {favoriteDeviceList.length > 0 && (
+            <div className="relative mb-4">
+              <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+              <Input
+                type="text"
+                placeholder="Search favorites by name, type, or room..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="bg-background pr-10 pl-10"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
+                >
+                  <XIcon className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          )}
+
+          {filteredFavorites.length === 0 && searchQuery ? (
+            <IOS26EmptyState
+              icon={<SearchIcon className="h-16 w-16" />}
+              title="No Matches Found"
+              message={`No favorite devices match "${searchQuery}". Try a different search term.`}
+              action={{
+                label: 'Clear Search',
+                onClick: () => setSearchQuery(''),
+              }}
+            />
+          ) : favoriteDeviceList.length === 0 ? (
             <IOS26EmptyState
               icon={<StarIcon className="h-16 w-16" />}
               title="No Favorites Yet"
@@ -792,7 +1000,7 @@ export function Dashboard() {
             />
           ) : (
             <div className="grid gap-3">
-              {favoriteDeviceList.map((device, index) => (
+              {filteredFavorites.map((device, index) => (
                 <DeviceCardEnhanced
                   key={device.id}
                   device={device}
@@ -818,13 +1026,17 @@ export function Dashboard() {
         {rooms.length > 0 && (
           <div className="mb-6">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-base font-semibold sm:text-lg">Rooms</h2>
-              <Button variant="ghost" size="sm" className="text-primary h-auto py-1 text-sm">
+              <h2 className="text-h2 text-foreground">Rooms</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-primary h-auto min-h-[44px] py-1 text-sm"
+              >
                 <span>See All</span>
                 <ChevronRightIcon className="ml-1 h-4 w-4" />
               </Button>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
               {rooms.slice(0, 6).map((room, index) => {
                 const roomDevices = devices.filter(d => room.deviceIds?.includes(d.id))
                 const activeCount = roomDevices.filter(
@@ -922,7 +1134,42 @@ export function Dashboard() {
           toast.success('Device updated')
         }}
         onDeviceRemoved={deviceId => {
+          // Store original state for undo
+          const deletedDevice = kvDevices.find(d => d.id === deviceId)
+          const originalDevices = [...kvDevices]
+
+          // Remove device (optimistic)
           setKvDevices(prev => prev.filter(d => d.id !== deviceId))
+
+          // Show toast with undo action
+          toast.success('Device removed', {
+            description: deletedDevice
+              ? `${deletedDevice.name} deleted successfully`
+              : 'Device deleted',
+            duration: 5000, // 5-second undo window
+            action: deletedDevice
+              ? {
+                  label: 'Undo',
+                  onClick: () => {
+                    // Restore the deleted device
+                    setKvDevices(originalDevices)
+                    haptic.medium()
+                    toast.success(`Restored ${deletedDevice.name}`, {
+                      description: 'Device has been restored',
+                    })
+                    logger.info('Device deletion undone', {
+                      deviceId: deletedDevice.id,
+                      deviceName: deletedDevice.name,
+                    })
+                  },
+                }
+              : undefined,
+          })
+
+          logger.info('Device deleted', {
+            deviceId,
+            deviceName: deletedDevice?.name,
+          })
         }}
       />
 

@@ -105,7 +105,7 @@ function IOS26TabButton({
       onClick={handleClick}
       onTouchStart={handleTouchStart}
       className={cn(
-        'relative flex flex-1 flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl px-3 py-2 transition-colors',
+        'touch-target relative flex flex-1 flex-col items-center justify-center gap-1 overflow-hidden rounded-2xl px-3 py-2 transition-colors',
         'min-h-[60px] min-w-[64px]',
         'focus-visible:ring-primary/50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
         isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-primary/5'
@@ -261,8 +261,9 @@ export function IOS26TabBar({ items, value, onValueChange, className }: iOS26Tab
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className={cn(
-        'fixed bottom-6 left-1/2 z-[100] -translate-x-1/2',
-        'w-[min(calc(100%-32px),480px)]',
+        'safe-bottom fixed left-1/2 z-[100] -translate-x-1/2',
+        'bottom-2 w-[min(calc(100%-16px),480px)] pb-2',
+        'sm:bottom-6 sm:w-[min(calc(100%-32px),480px)] sm:pb-4',
         className
       )}
       style={{
@@ -342,8 +343,9 @@ export function IOS26TabBarCompact({ items, value, onValueChange, className }: i
   return (
     <motion.div
       className={cn(
-        'fixed bottom-4 left-1/2 z-50 -translate-x-1/2',
-        'w-[min(calc(100%-16px),360px)]',
+        'safe-bottom fixed left-1/2 z-50 -translate-x-1/2',
+        'bottom-2 w-[min(calc(100%-16px),360px)] pb-2',
+        'sm:bottom-4 sm:pb-3',
         className
       )}
       initial={{ y: 100, opacity: 0 }}

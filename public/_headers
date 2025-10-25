@@ -1,0 +1,43 @@
+# Security Headers
+/*
+  # Security
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(self), payment=()
+
+  # Content Security Policy (adjust if needed for your APIs)
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.cloudflare.com https://*.workers.dev http://192.168.* http://10.* wss://; media-src 'self' https: blob:; worker-src 'self' blob:;
+
+  # Caching - default (short cache)
+  Cache-Control: public, max-age=300, s-maxage=600
+
+# Static Assets - aggressive caching with versioning
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Service Worker - no cache
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# Manifest - moderate cache
+/manifest.json
+  Cache-Control: public, max-age=3600
+
+# Images - moderate cache
+/*.png
+  Cache-Control: public, max-age=86400
+/*.jpg
+  Cache-Control: public, max-age=86400
+/*.svg
+  Cache-Control: public, max-age=86400
+/*.webp
+  Cache-Control: public, max-age=86400
+
+# Offline fallback
+/offline.html
+  Cache-Control: public, max-age=3600
+
+# HTML pages - no cache (always fresh)
+/*.html
+  Cache-Control: no-cache, must-revalidate

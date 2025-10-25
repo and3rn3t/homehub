@@ -146,9 +146,107 @@ function UserCardSkeleton() {
   )
 }
 
+/**
+ * Flow Designer Skeleton
+ * Mimics the layout of the flow designer canvas
+ */
+function FlowDesignerSkeleton() {
+  return (
+    <div className="flex h-full">
+      {/* Palette Skeleton */}
+      <div className="bg-card border-border w-80 border-r p-4">
+        <Skeleton className="mb-4 h-6 w-32" />
+        <div className="mb-4 grid grid-cols-4 gap-1">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={`tab-${i}`} className="h-8" />
+          ))}
+        </div>
+        <div className="space-y-2">
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={`node-${i}`} className="h-14" />
+          ))}
+        </div>
+      </div>
+
+      {/* Canvas Skeleton */}
+      <div className="bg-muted/20 flex flex-1 flex-col">
+        <div className="border-border flex items-center justify-between border-b p-4">
+          <Skeleton className="h-8 w-48" />
+          <div className="flex gap-2">
+            <Skeleton className="h-8 w-20" />
+            <Skeleton className="h-8 w-20" />
+          </div>
+        </div>
+        <div className="flex-1 p-8">
+          <div className="flex gap-8">
+            {[...Array(3)].map((_, i) => (
+              <div key={`flow-node-${i}`} className="space-y-4">
+                <Skeleton className="h-24 w-48 rounded-lg" />
+                {i < 2 && <Skeleton className="mx-auto h-8 w-8 rounded-full" />}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Energy Chart Skeleton
+ * Mimics the layout of energy consumption charts
+ */
+function EnergyChartSkeleton() {
+  return (
+    <div className="space-y-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-3 gap-3">
+        {[...Array(3)].map((_, i) => (
+          <div key={`stat-${i}`} className="bg-card rounded-lg border p-4">
+            <Skeleton className="mx-auto mb-2 h-5 w-5 rounded-full" />
+            <Skeleton className="mx-auto mb-1 h-6 w-16" />
+            <Skeleton className="mx-auto h-3 w-20" />
+          </div>
+        ))}
+      </div>
+
+      {/* Chart Area */}
+      <div className="bg-card rounded-lg border p-6">
+        <Skeleton className="mb-6 h-6 w-40" />
+        <div className="flex h-64 items-end justify-between gap-2">
+          {[...Array(7)].map((_, i) => (
+            <div key={`bar-${i}`} className="flex flex-1 flex-col items-center gap-2">
+              <Skeleton className="w-full" style={{ height: `${40 + Math.random() * 60}%` }} />
+              <Skeleton className="h-3 w-8" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Device Usage */}
+      <div className="bg-card rounded-lg border p-6">
+        <Skeleton className="mb-4 h-6 w-48" />
+        <div className="space-y-3">
+          {[...Array(5)].map((_, i) => (
+            <div key={`device-${i}`} className="space-y-2">
+              <div className="flex justify-between">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+              <Skeleton className="h-2 w-full rounded-full" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export {
   AutomationCardSkeleton,
   DeviceCardSkeleton,
+  EnergyChartSkeleton,
+  FlowDesignerSkeleton,
   RoomCardSkeleton,
   SceneCardSkeleton,
   Skeleton,

@@ -4,6 +4,9 @@
 
 This directory contains all project documentation organized into clear categories.
 
+**Last Updated**: October 15, 2025
+**Status**: Phase 6.1 Complete + Production Hardening ✅
+
 ---
 
 ## 🚀 Quick Start
@@ -13,6 +16,7 @@ This directory contains all project documentation organized into clear categorie
 1. Read [`guides/SETUP_QUICKSTART.md`](guides/SETUP_QUICKSTART.md) - Get running in 15 minutes
 2. Review [`guides/ARCHITECTURE.md`](guides/ARCHITECTURE.md) - Understand the system
 3. Follow [`guides/BEST_PRACTICES.md`](guides/BEST_PRACTICES.md) - Learn coding standards
+4. Check [`DEVELOPMENT_QUICKREF.md`](DEVELOPMENT_QUICKREF.md) - Common patterns & recent lessons ⭐ NEW
 
 ---
 
@@ -48,18 +52,18 @@ docs/
 │   └── MIGRATION_COMPLETE.md           # Migration summary (historical)
 │
 ├── development/                        # Active development
-│   ├── NEXT_STEPS_UPDATED.md           # Current roadmap (Phase 3 planning)
-│   ├── PHASE_2_POLISH_SESSION_3_DRAG_DROP.md  # Drag & drop complete guide
-│   ├── MILESTONE_2.2.3_DISCOVERY_COMPLETE.md  # Discovery milestone
-│   ├── DISCOVERY_TEST_PLAN.md          # Test plan (10 phases)
-│   ├── DISCOVERY_TEST_RESULTS.md       # Test results (82%)
-│   ├── ADVANCED_HUE_FEATURES.md        # Hue integration guide
-│   ├── DEVICE_ACCESSIBILITY_FIX.md     # Device UI improvements
-│   ├── ROOMS_DEVICE_CONTROL.md         # Enhanced controls
-│   ├── TESTING_HTTP_DEVICES.md         # HTTP device testing
-│   ├── VIRTUAL_HTTP_DEVICE_TEST_RESULTS.md  # Test results
-│   ├── NEXT_STEPS.md                   # Legacy roadmap (archived)
-│   └── REFACTOR_PLAN.md                # Code improvements
+│   ├── LESSONS_LEARNED_OCT14_2025.md   # **Master lessons doc** (Oct 12-15) ⭐
+│   ├── NEXT_STEPS.md                   # Current roadmap
+│   ├── DASHBOARD_REFACTORING_OCT15_2025.md  # 87% complexity reduction
+│   ├── LANDING_PAGE_OPTIMIZATION_COMPLETE_OCT15_2025.md  # 96% bundle reduction
+│   ├── ISSUE_RESOLUTION_SUMMARY_OCT15_2025.md  # Production fixes
+│   ├── MOBILE_OPTIMIZATION_COMPLETE.md # iOS enhancements
+│   ├── LIVE_STREAMING_COMPLETE.md      # DASH/HLS streaming
+│   ├── MILESTONE_6.1.3_COMPLETE.md     # Video optimization
+│   ├── milestones/                     # Phase milestone docs
+│   ├── features/                       # Feature implementations
+│   ├── sessions/                       # Development sessions
+│   └── fixes/                          # Bug fix documentation
 │
 ├── history/                            # Completed work
 │   ├── PHASE_1_COMPLETE.md             # Phase 1 summary

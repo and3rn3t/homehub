@@ -73,7 +73,7 @@ export async function authenticateWithPuppeteer(
 
     // Launch browser with custom settings
     browser = await puppeteer.launch({
-      headless: headless ? 'new' : false, // Use new headless mode
+      headless: headless ? 'shell' : false, // Use shell headless mode (compatible with Puppeteer types)
       slowMo,
       args: [
         '--no-sandbox',
@@ -108,7 +108,7 @@ export async function authenticateWithPuppeteer(
     })
 
     // Wait a moment for page to fully load
-    await page.waitForTimeout(2000)
+    await new Promise(resolve => setTimeout(resolve, 2000))
 
     console.log('✍️  Filling in credentials...')
 
@@ -163,7 +163,7 @@ export async function authenticateWithPuppeteer(
     console.log('✅ Login successful!')
 
     // Wait a moment for all cookies to be set
-    await page.waitForTimeout(2000)
+    await new Promise(resolve => setTimeout(resolve, 2000))
 
     console.log('🍪 Extracting auth tokens and cookies...')
 

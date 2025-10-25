@@ -13,6 +13,7 @@ import { IOS26EmptyState, IOS26Error } from '@/components/ui/ios26-error'
 import { IOS26Shimmer } from '@/components/ui/ios26-loading'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
+import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import {
   Select,
   SelectContent,
@@ -20,14 +21,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { SwipeableCard } from '@/components/ui/swipeable-card'
 import { KV_KEYS, MOCK_DEVICES, MOCK_ROOMS } from '@/constants'
+import { type ColorblindMode, getStatusClasses } from '@/constants/colorblind-palettes'
+import { useHaptic } from '@/hooks/use-haptic'
 import { useKV } from '@/hooks/use-kv'
 import {
+  BathIcon,
+  BedIcon,
+  BriefcaseIcon,
+  EditIcon,
+  HouseIcon,
   LightbulbIcon,
   MoreHorizontalIcon,
+  NavigationIcon,
   PlusIcon,
   ShieldIcon,
+  SofaIcon,
   ThermometerIcon,
+  TrashIcon,
+  TreeIcon,
+  UtensilsIcon,
+  WarehouseIcon,
   WifiIcon,
 } from '@/lib/icons'
 import { logger } from '@/lib/logger'
@@ -52,7 +67,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { motion } from 'framer-motion'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { DeviceCardEnhanced } from './DeviceCardEnhanced'
 import { DeviceControlPanel } from './DeviceControlPanel'
@@ -73,8 +88,10 @@ interface SortableRoomCardProps {
   roomDevices: Device[]
   activeDevices: number
   onEditClick: (room: Room) => void
+  onDeleteClick: (room: Room) => void
   onDeviceToggle: (deviceId: string) => void
   onDeviceContextMenu: (device: Device) => void
+  colorblindMode: ColorblindMode
 }
 
 function SortableRoomCard({
@@ -82,8 +99,10 @@ function SortableRoomCard({
   roomDevices,
   activeDevices,
   onEditClick,
+  onDeleteClick,
   onDeviceToggle,
   onDeviceContextMenu,
+  colorblindMode,
 }: SortableRoomCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: room.id,
@@ -98,129 +117,172 @@ function SortableRoomCard({
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      <SwipeableCard
+        actions={[
+          {
+            label: 'Edit',
+            icon: EditIcon,
+            color: 'blue',
+            onAction: () => onEditClick(room),
+          },
+          {
+            label: 'Delete',
+            icon: TrashIcon,
+            color: 'red',
+            onAction: () => onDeleteClick(room),
+          },
+        ]}
+        disabled={isDragging} // Disable swipe while dragging for reorder
       >
-        <Card className="hover:bg-accent/5 focus-within:ring-primary/50 transition-all duration-200 focus-within:ring-2 focus-within:ring-offset-2 focus-within:outline-none hover:shadow-md">
-          <div className="w-full text-left">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">{room.name}</CardTitle>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={e => {
-                    e.stopPropagation()
-                    onEditClick(room)
-                  }}
-                >
-                  <MoreHorizontalIcon className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-4">
-                  <span className="text-muted-foreground">
-                    {activeDevices} of {roomDevices.length} active
-                  </span>
-                  {room.temperature && (
-                    <span className="text-muted-foreground">{room.temperature}°C</span>
-                  )}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        >
+          <Card className="hover:bg-accent/5 focus-within:ring-primary/50 transition-all duration-200 focus-within:ring-2 focus-within:ring-offset-2 focus-within:outline-none hover:shadow-md">
+            <div className="w-full text-left">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">{room.name}</CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={e => {
+                      e.stopPropagation()
+                      onEditClick(room)
+                    }}
+                  >
+                    <MoreHorizontalIcon className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Badge variant="secondary" className="h-5">
-                  {roomDevices.length} devices
-                </Badge>
-              </div>
-            </CardHeader>
 
-            <CardContent className="pt-0">
-              {roomDevices.length > 0 && (
-                <div className="space-y-2">
-                  <div className="text-muted-foreground mb-1 flex justify-between text-xs">
-                    <span>Device Activity</span>
-                    <span>{Math.round((activeDevices / roomDevices.length) * 100)}%</span>
-                  </div>
-                  <Progress value={(activeDevices / roomDevices.length) * 100} className="h-1.5" />
-                </div>
-              )}
-
-              <div className="mt-4 grid grid-cols-4 gap-2">
-                {roomDevices.slice(0, 4).map(device => {
-                  const IconComponent = deviceIcons[device.type]
-                  return (
-                    <motion.div
-                      key={device.id}
-                      whileTap={{ scale: 0.9 }}
-                      whileHover={{ scale: 1.05 }}
-                      className={`group relative flex cursor-pointer flex-col items-center gap-1 rounded-lg border-2 p-2 transition-all ${
-                        device.enabled
-                          ? 'border-primary/30 bg-primary/10 hover:border-primary/50 hover:bg-primary/20'
-                          : 'border-border/50 bg-secondary/50 hover:border-border hover:bg-secondary'
-                      }`}
-                      onClick={e => {
-                        e.stopPropagation()
-                        onDeviceToggle(device.id)
-                      }}
-                      onContextMenu={e => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        onDeviceContextMenu(device)
-                      }}
-                      title={`Click to toggle • Right-click for advanced controls`}
-                    >
-                      <div
-                        className={`absolute top-1 right-1 h-1.5 w-1.5 rounded-full ${
-                          device.enabled ? 'bg-primary' : 'bg-muted-foreground/30'
-                        }`}
-                      />
-                      <div
-                        className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${
-                          device.enabled
-                            ? 'bg-primary/20 group-hover:bg-primary/30'
-                            : 'bg-muted group-hover:bg-muted-foreground/20'
-                        }`}
-                      >
-                        <IconComponent
-                          className={cn(
-                            'h-4 w-4',
-                            device.enabled
-                              ? 'text-primary group-hover:text-primary/90'
-                              : 'text-muted-foreground group-hover:text-foreground'
-                          )}
-                        />
-                      </div>
-                      <span
-                        className={`text-center text-xs leading-tight font-medium transition-colors ${device.enabled ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`}
-                      >
-                        {device.name.split(' ')[0]}
-                      </span>
-                      <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/0 opacity-0 transition-all group-hover:bg-black/5 group-hover:opacity-100">
-                        <span className="text-[10px] font-medium">
-                          {device.enabled ? 'Turn Off' : 'Turn On'}
-                        </span>
-                      </div>
-                    </motion.div>
-                  )
-                })}
-
-                {roomDevices.length > 4 && (
-                  <div className="bg-secondary/50 border-border/50 flex flex-col items-center gap-1 rounded-lg border-2 p-2">
-                    <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-full">
-                      <PlusIcon className="text-muted-foreground h-4 w-4" />
-                    </div>
-                    <span className="text-muted-foreground text-center text-xs leading-tight font-medium">
-                      +{roomDevices.length - 4}
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-4">
+                    <span className="text-muted-foreground">
+                      {activeDevices} of {roomDevices.length} active
                     </span>
+                    {room.temperature && (
+                      <span className="text-muted-foreground">{room.temperature}°C</span>
+                    )}
+                  </div>
+                  <Badge variant="secondary" className="h-5">
+                    {roomDevices.length} devices
+                  </Badge>
+                </div>
+              </CardHeader>
+
+              <CardContent className="pt-0">
+                {roomDevices.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="text-muted-foreground mb-1 flex justify-between text-xs">
+                      <span>Device Activity</span>
+                      <span>{Math.round((activeDevices / roomDevices.length) * 100)}%</span>
+                    </div>
+                    <Progress
+                      value={(activeDevices / roomDevices.length) * 100}
+                      className={cn(
+                        'h-1.5',
+                        '[&>div]:transition-colors',
+                        activeDevices / roomDevices.length >= 0.75
+                          ? `[&>div]:${getStatusClasses(colorblindMode, 'success').icon.replace('text-', 'bg-')}`
+                          : activeDevices / roomDevices.length >= 0.25
+                            ? `[&>div]:${getStatusClasses(colorblindMode, 'warning').icon.replace('text-', 'bg-')}`
+                            : `[&>div]:${getStatusClasses(colorblindMode, 'error').icon.replace('text-', 'bg-')}`
+                      )}
+                    />
                   </div>
                 )}
-              </div>
-            </CardContent>
-          </div>
-        </Card>
-      </motion.div>
+
+                <div className="mt-4 grid grid-cols-4 gap-2">
+                  {roomDevices.slice(0, 4).map(device => {
+                    const IconComponent = deviceIcons[device.type]
+                    return (
+                      <motion.div
+                        key={device.id}
+                        whileTap={{ scale: 0.9 }}
+                        whileHover={{ scale: 1.05 }}
+                        className={`group relative flex cursor-pointer flex-col items-center gap-1 rounded-lg border-2 p-2 transition-all ${
+                          device.enabled
+                            ? 'border-primary/30 bg-primary/10 hover:border-primary/50 hover:bg-primary/20'
+                            : 'border-border/50 bg-secondary/50 hover:border-border hover:bg-secondary'
+                        }`}
+                        onClick={e => {
+                          e.stopPropagation()
+                          onDeviceToggle(device.id)
+                        }}
+                        onContextMenu={e => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          onDeviceContextMenu(device)
+                        }}
+                        title={`Click to toggle • Right-click for advanced controls`}
+                      >
+                        {/* Status indicator dot - colorblind safe */}
+                        <div
+                          className={cn(
+                            'absolute top-1 right-1 h-1.5 w-1.5 rounded-full',
+                            device.enabled && device.status === 'online'
+                              ? getStatusClasses(colorblindMode, 'success').icon.replace(
+                                  'text-',
+                                  'bg-'
+                                )
+                              : device.status === 'offline'
+                                ? getStatusClasses(colorblindMode, 'error').icon.replace(
+                                    'text-',
+                                    'bg-'
+                                  )
+                                : getStatusClasses(colorblindMode, 'warning')
+                                    .icon.replace('text-', 'bg-')
+                                    .replace('600', '400/50')
+                          )}
+                        />
+                        <div
+                          className={`flex h-8 w-8 items-center justify-center rounded-full transition-all ${
+                            device.enabled
+                              ? 'bg-primary/20 group-hover:bg-primary/30'
+                              : 'bg-muted group-hover:bg-muted-foreground/20'
+                          }`}
+                        >
+                          <IconComponent
+                            className={cn(
+                              'h-4 w-4',
+                              device.enabled
+                                ? 'text-primary group-hover:text-primary/90'
+                                : 'text-muted-foreground group-hover:text-foreground'
+                            )}
+                          />
+                        </div>
+                        <span
+                          className={`text-center text-xs leading-tight font-medium transition-colors ${device.enabled ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`}
+                        >
+                          {device.name.split(' ')[0]}
+                        </span>
+                        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/0 opacity-0 transition-all group-hover:bg-black/5 group-hover:opacity-100">
+                          <span className="text-[10px] font-medium">
+                            {device.enabled ? 'Turn Off' : 'Turn On'}
+                          </span>
+                        </div>
+                      </motion.div>
+                    )
+                  })}
+
+                  {roomDevices.length > 4 && (
+                    <div className="bg-secondary/50 border-border/50 flex flex-col items-center gap-1 rounded-lg border-2 p-2">
+                      <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-full">
+                        <PlusIcon className="text-muted-foreground h-4 w-4" />
+                      </div>
+                      <span className="text-muted-foreground text-center text-xs leading-tight font-medium">
+                        +{roomDevices.length - 4}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </div>
+          </Card>
+        </motion.div>
+      </SwipeableCard>
     </div>
   )
 }
@@ -232,6 +294,7 @@ export function Rooms() {
     { withMeta: true }
   )
   const [devices, setDevices] = useKV<Device[]>(KV_KEYS.DEVICES, MOCK_DEVICES)
+  const haptic = useHaptic()
   const [hideUnreachable, setHideUnreachable] = useState(false)
   const [assignDialogOpen, setAssignDialogOpen] = useState(false)
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null)
@@ -244,6 +307,9 @@ export function Rooms() {
   const [newRoomName, setNewRoomName] = useState('')
   const [roomEditDialogOpen, setRoomEditDialogOpen] = useState(false)
   const [editRoom, setEditRoom] = useState<Room | null>(null)
+
+  // Colorblind mode for accessibility
+  const [colorblindMode] = useKV<ColorblindMode>('colorblind-mode', 'default')
 
   // Drag and drop state
   const [activeRoomId, setActiveRoomId] = useState<string | null>(null)
@@ -262,6 +328,22 @@ export function Rooms() {
       },
     })
   )
+
+  // Pull-to-refresh handler
+  const handleRefresh = useCallback(async () => {
+    haptic.medium() // Haptic feedback on refresh
+
+    try {
+      // Simulate data refresh by re-fetching from storage
+      // In a real app, this would fetch from the API
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      toast.success('Rooms refreshed')
+    } catch (error) {
+      logger.error('Failed to refresh rooms', { component: 'Rooms', error })
+      toast.error('Failed to refresh rooms')
+    }
+  }, [haptic])
 
   const getRoomDevices = (roomName: string) => {
     return devices.filter(device => device.room === roomName)
@@ -598,7 +680,7 @@ export function Rooms() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-6 sm:px-6">
+      <PullToRefresh onRefresh={handleRefresh} className="flex-1 px-4 pb-6 sm:px-6">
         <div className="space-y-6">
           {/* Room Statistics */}
           <RoomStatistics devices={devices} />
@@ -715,15 +797,88 @@ export function Rooms() {
 
           {/* Rooms Grid */}
           {rooms.length === 0 ? (
-            <IOS26EmptyState
-              icon={<PlusIcon className="h-16 w-16" />}
-              title="No Rooms Created"
-              message="Create rooms to organize your devices by location. Start with common areas like Living Room or Bedroom."
-              action={{
-                label: 'Create First Room',
-                onClick: () => setCreateRoomDialogOpen(true),
-              }}
-            />
+            <div className="space-y-6">
+              <IOS26EmptyState
+                icon={<HouseIcon className="h-16 w-16" />}
+                title="No Rooms Created"
+                message="Organize your smart home by creating rooms. Group devices by location for easier control and automation."
+                action={{
+                  label: 'Create First Room',
+                  onClick: () => setCreateRoomDialogOpen(true),
+                }}
+              />
+
+              {/* Quick Start Room Templates */}
+              <div>
+                <h3 className="mb-4 text-base font-semibold sm:text-lg">Common Rooms</h3>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {[
+                    { icon: SofaIcon, name: 'Living Room', color: 'oklch(0.6 0.15 250)' },
+                    { icon: BedIcon, name: 'Bedroom', color: 'oklch(0.65 0.15 290)' },
+                    { icon: UtensilsIcon, name: 'Kitchen', color: 'oklch(0.7 0.15 145)' },
+                    { icon: BathIcon, name: 'Bathroom', color: 'oklch(0.6 0.15 210)' },
+                    { icon: BriefcaseIcon, name: 'Office', color: 'oklch(0.65 0.15 30)' },
+                    { icon: WarehouseIcon, name: 'Garage', color: 'oklch(0.5 0.1 280)' },
+                    { icon: TreeIcon, name: 'Garden', color: 'oklch(0.7 0.18 145)' },
+                    { icon: NavigationIcon, name: 'Hallway', color: 'oklch(0.55 0.1 260)' },
+                  ].map((template, index) => (
+                    <motion.button
+                      key={template.name}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: index * 0.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ y: -2 }}
+                      onClick={() => {
+                        const newRoom = {
+                          id: `room-${Date.now()}`,
+                          name: template.name,
+                          icon: template.icon.name,
+                          color: template.color,
+                          deviceIds: [],
+                        }
+                        setRooms([...rooms, newRoom])
+                        toast.success(`${template.name} created!`, {
+                          description: 'Add devices to this room to get started',
+                        })
+                      }}
+                      onKeyDown={(e: React.KeyboardEvent) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          const newRoom = {
+                            id: `room-${Date.now()}`,
+                            name: template.name,
+                            icon: template.icon.name,
+                            color: template.color,
+                            deviceIds: [],
+                          }
+                          setRooms([...rooms, newRoom])
+                          toast.success(`${template.name} created!`, {
+                            description: 'Add devices to this room to get started',
+                          })
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Create ${template.name} room`}
+                      className="text-left"
+                    >
+                      <Card className="hover:bg-accent/5 border-border/50 hover:border-primary/30 transition-all duration-200 hover:shadow-md">
+                        <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
+                          <div
+                            className="flex h-12 w-12 items-center justify-center rounded-full"
+                            style={{ backgroundColor: `${template.color}15` }}
+                          >
+                            <template.icon className="h-6 w-6" style={{ color: template.color }} />
+                          </div>
+                          <span className="text-sm font-medium">{template.name}</span>
+                        </CardContent>
+                      </Card>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            </div>
           ) : (
             <div>
               <h2 className="text-foreground mb-3 text-lg font-semibold">All Rooms</h2>
@@ -748,9 +903,15 @@ export function Rooms() {
                           room={room}
                           roomDevices={roomDevices}
                           activeDevices={activeDevices}
+                          colorblindMode={colorblindMode}
                           onEditClick={room => {
                             setEditRoom(room)
                             setRoomEditDialogOpen(true)
+                          }}
+                          onDeleteClick={room => {
+                            setEditRoom(room)
+                            setRoomEditDialogOpen(true)
+                            // The RoomEditDialog handles deletion
                           }}
                           onDeviceToggle={toggleDevice}
                           onDeviceContextMenu={device => {
@@ -779,7 +940,7 @@ export function Rooms() {
             </div>
           )}
         </div>
-      </div>
+      </PullToRefresh>
 
       {/* Assign Room Dialog */}
       <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
@@ -896,8 +1057,40 @@ export function Rooms() {
           toast.success('Room updated')
         }}
         onRoomDeleted={roomId => {
+          // Store original state for undo
+          const deletedRoom = rooms.find(r => r.id === roomId)
+          const originalRooms = [...rooms]
+
+          // Remove room (optimistic)
           setRooms(prev => prev.filter(r => r.id !== roomId))
-          toast.success('Room deleted')
+
+          // Show toast with undo action
+          toast.success('Room deleted', {
+            description: deletedRoom ? `${deletedRoom.name} removed successfully` : 'Room removed',
+            duration: 5000, // 5-second undo window
+            action: deletedRoom
+              ? {
+                  label: 'Undo',
+                  onClick: () => {
+                    // Restore the deleted room
+                    setRooms(originalRooms)
+                    haptic.light()
+                    toast.success(`Restored ${deletedRoom.name}`, {
+                      description: 'Room has been restored',
+                    })
+                    logger.info('Room deletion undone', {
+                      roomId: deletedRoom.id,
+                      roomName: deletedRoom.name,
+                    })
+                  },
+                }
+              : undefined,
+          })
+
+          logger.info('Room deleted', {
+            roomId,
+            roomName: deletedRoom?.name,
+          })
         }}
       />
     </div>

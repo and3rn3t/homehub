@@ -1,6 +1,8 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { EnergyChartSkeleton } from '@/components/ui/skeleton'
+import { type ColorblindMode, getStatusClasses } from '@/constants/colorblind-palettes'
 import { useKV } from '@/hooks/use-kv'
 import { BoltIcon, CalendarIcon, ClockIcon, SparklesIcon, TrendingUpIcon } from '@/lib/icons'
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
@@ -20,25 +22,40 @@ interface DeviceUsage {
 }
 
 export function Energy() {
-  const [energyData] = useKV<EnergyData[]>('energy-data', [
-    { date: 'Mon', consumption: 45, cost: 12.5 },
-    { date: 'Tue', consumption: 38, cost: 10.25 },
-    { date: 'Wed', consumption: 52, cost: 14.3 },
-    { date: 'Thu', consumption: 41, cost: 11.75 },
-    { date: 'Fri', consumption: 48, cost: 13.2 },
-    { date: 'Sat', consumption: 55, cost: 15.1 },
-    { date: 'Sun', consumption: 43, cost: 11.9 },
-  ])
+  // Colorblind mode for accessibility
+  const [colorblindMode] = useKV<ColorblindMode>('colorblind-mode', 'default')
 
-  const [deviceUsage] = useKV<DeviceUsage[]>('device-usage', [
-    { deviceName: 'HVAC System', consumption: 85, cost: 23.5, percentage: 45 },
-    { deviceName: 'Water Heater', consumption: 32, cost: 8.8, percentage: 17 },
-    { deviceName: 'Lighting', consumption: 28, cost: 7.7, percentage: 15 },
-    { deviceName: 'Kitchen Appliances', consumption: 24, cost: 6.6, percentage: 13 },
-    { deviceName: 'Other', consumption: 19, cost: 5.2, percentage: 10 },
-  ])
+  const [energyData, , { isLoading: energyLoading }] = useKV<EnergyData[]>(
+    'energy-data',
+    [
+      { date: 'Mon', consumption: 45, cost: 12.5 },
+      { date: 'Tue', consumption: 38, cost: 10.25 },
+      { date: 'Wed', consumption: 52, cost: 14.3 },
+      { date: 'Thu', consumption: 41, cost: 11.75 },
+      { date: 'Fri', consumption: 48, cost: 13.2 },
+      { date: 'Sat', consumption: 55, cost: 15.1 },
+      { date: 'Sun', consumption: 43, cost: 11.9 },
+    ],
+    { withMeta: true }
+  )
+
+  const [deviceUsage, , { isLoading: devicesLoading }] = useKV<DeviceUsage[]>(
+    'device-usage',
+    [
+      { deviceName: 'HVAC System', consumption: 85, cost: 23.5, percentage: 45 },
+      { deviceName: 'Water Heater', consumption: 32, cost: 8.8, percentage: 17 },
+      { deviceName: 'Lighting', consumption: 28, cost: 7.7, percentage: 15 },
+      { deviceName: 'Kitchen Appliances', consumption: 24, cost: 6.6, percentage: 13 },
+      { deviceName: 'Other', consumption: 19, cost: 5.2, percentage: 10 },
+    ],
+    { withMeta: true }
+  )
 
   const [monthlyBudget] = useKV('monthly-budget', 150)
+
+  // Smart loading state: Show skeleton only on initial load with no data
+  const showSkeleton =
+    (energyLoading && energyData.length === 0) || (devicesLoading && deviceUsage.length === 0)
   const currentSpend = 89.45
   const budgetProgress = (currentSpend / monthlyBudget) * 100
 
@@ -50,6 +67,28 @@ export function Energy() {
     lastDay && firstDay
       ? ((lastDay.consumption - firstDay.consumption) / firstDay.consumption) * 100
       : 0
+
+  // Show skeleton on initial load
+  if (showSkeleton) {
+    return (
+      <div className="flex h-full flex-col">
+        <div className="p-6 pb-4">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h1 className="text-foreground text-2xl font-bold">Energy</h1>
+              <p className="text-muted-foreground">Monitor your power usage</p>
+            </div>
+            <Button variant="outline" size="icon" className="rounded-full">
+              <CalendarIcon className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto px-6 pb-6">
+          <EnergyChartSkeleton />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex h-full flex-col">
@@ -86,10 +125,18 @@ export function Energy() {
           <Card className="bg-secondary border-border/50">
             <CardContent className="p-4 text-center">
               <TrendingUpIcon
-                className={`mx-auto mb-2 h-5 w-5 ${weeklyTrend > 0 ? 'text-destructive' : 'text-accent'}`}
+                className={`mx-auto mb-2 h-5 w-5 ${
+                  weeklyTrend > 0
+                    ? getStatusClasses(colorblindMode, 'error').icon
+                    : getStatusClasses(colorblindMode, 'success').icon
+                }`}
               />
               <div
-                className={`mb-1 text-lg font-bold ${weeklyTrend > 0 ? 'text-destructive' : 'text-accent'}`}
+                className={`mb-1 text-lg font-bold ${
+                  weeklyTrend > 0
+                    ? getStatusClasses(colorblindMode, 'error').text
+                    : getStatusClasses(colorblindMode, 'success').text
+                }`}
               >
                 {weeklyTrend > 0 ? '+' : ''}
                 {weeklyTrend.toFixed(1)}%

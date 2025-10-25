@@ -8,6 +8,7 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
 import { ProtocolBadge } from '@/components/ui/protocol-badge'
+import { SwipeableCard } from '@/components/ui/swipeable-card'
 import { Switch } from '@/components/ui/switch'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useHaptic } from '@/hooks/use-haptic'
@@ -154,6 +155,17 @@ export const DeviceCardEnhanced = memo(
       onDelete?.(device.id)
     }, [device.id, onDelete, haptic])
 
+    // Keyboard navigation handler (WCAG 2.1.1)
+    const handleKeyDown = useCallback(
+      (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          handleClick()
+        }
+      },
+      [handleClick]
+    )
+
     // Long press detection
     const longPressHandlers = useLongPress({
       onLongPress: () => {
@@ -220,6 +232,10 @@ export const DeviceCardEnhanced = memo(
             <div
               className="cursor-pointer"
               onClick={handleClick}
+              onKeyDown={handleKeyDown}
+              role="button"
+              tabIndex={0}
+              aria-label={`${device.name} - ${device.status} - Click to open advanced controls`}
               title="Click to open advanced controls"
             >
               <div className="flex items-center justify-between">
@@ -237,6 +253,20 @@ export const DeviceCardEnhanced = memo(
                       ease: 'easeInOut',
                     }}
                   >
+                    {/* Power-on ripple effect */}
+                    {device.enabled && (
+                      <motion.div
+                        className="bg-primary/30 pointer-events-none absolute inset-0 rounded-full"
+                        initial={{ scale: 0, opacity: 0.8 }}
+                        animate={{ scale: 2.5, opacity: 0 }}
+                        transition={{
+                          duration: 0.6,
+                          ease: 'easeOut',
+                        }}
+                        key={`ripple-${device.id}-${device.enabled}`}
+                      />
+                    )}
+
                     <IconComponent
                       size={20}
                       className={device.enabled ? 'text-primary' : 'text-muted-foreground'}
@@ -360,13 +390,17 @@ export const DeviceCardEnhanced = memo(
                       size={18}
                     />
                   )}
-                  <div onClick={e => e.stopPropagation()}>
+                  <motion.div
+                    onClick={e => e.stopPropagation()}
+                    whileTap={{ scale: 0.9 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                  >
                     <Switch
                       checked={device.enabled}
                       onCheckedChange={handleToggle}
                       disabled={device.status === 'offline'}
                     />
-                  </div>
+                  </motion.div>
                 </div>
               </div>
             </div>
@@ -375,13 +409,49 @@ export const DeviceCardEnhanced = memo(
       </motion.div>
     )
 
+    // Wrap with swipeable gestures
+    const swipeableContent = (
+      <SwipeableCard
+        actions={[
+          ...(onEdit
+            ? [
+                {
+                  label: 'Edit',
+                  icon: EditIcon,
+                  color: 'blue' as const,
+                  onAction: handleEdit,
+                },
+              ]
+            : []),
+          {
+            label: isFavorite ? 'Unfav' : 'Favorite',
+            icon: StarIcon,
+            color: 'yellow' as const,
+            onAction: handleToggleFavorite,
+          },
+          ...(onDelete
+            ? [
+                {
+                  label: 'Delete',
+                  icon: TrashIcon,
+                  color: 'red' as const,
+                  onAction: handleDelete,
+                },
+              ]
+            : []),
+        ]}
+      >
+        {cardContent}
+      </SwipeableCard>
+    )
+
     if (!showContextMenu) {
-      return cardContent
+      return swipeableContent
     }
 
     return (
       <ContextMenu onOpenChange={setContextMenuOpen}>
-        <ContextMenuTrigger asChild>{cardContent}</ContextMenuTrigger>
+        <ContextMenuTrigger asChild>{swipeableContent}</ContextMenuTrigger>
         <ContextMenuContent className="w-56">
           {onEdit && (
             <ContextMenuItem onClick={handleEdit}>

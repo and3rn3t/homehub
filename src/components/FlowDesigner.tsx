@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { FlowDesignerSkeleton } from '@/components/ui/skeleton'
 import { useFlowInterpreter } from '@/hooks/use-flow-interpreter'
 import { useKV } from '@/hooks/use-kv'
 import {
@@ -75,7 +76,7 @@ const nodeTypes = {
 } as const
 
 export function FlowDesigner() {
-  const [flows, setFlows] = useKV<Flow[]>('automation-flows', [])
+  const [flows, setFlows, { isLoading }] = useKV<Flow[]>('automation-flows', [], { withMeta: true })
   const [selectedFlow, setSelectedFlow] = useState<Flow | null>(null)
   const [draggedNode, setDraggedNode] = useState<NodeTypeDefinition | null>(null)
   const [showNodePalette, setShowNodePalette] = useState(false)
@@ -84,6 +85,9 @@ export function FlowDesigner() {
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
   const { executeFlow, validateFlow } = useFlowInterpreter()
+
+  // Smart loading state: Only show skeleton on initial load with no flows
+  const showSkeleton = isLoading && flows.length === 0
 
   const createNewFlow = () => {
     const newFlow: Flow = {
@@ -390,6 +394,11 @@ export function FlowDesigner() {
         )}
       </div>
     )
+  }
+
+  // Show skeleton on initial load
+  if (showSkeleton) {
+    return <FlowDesignerSkeleton />
   }
 
   return (

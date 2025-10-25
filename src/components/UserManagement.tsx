@@ -3,6 +3,13 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu'
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -20,8 +27,16 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { MOCK_USERS } from '@/constants'
+import { useHaptic } from '@/hooks/use-haptic'
 import { useKV } from '@/hooks/use-kv'
-import { ShieldCheckIcon, ShieldIcon, TrashIcon, UserIcon, UserPlusIcon } from '@/lib/icons'
+import {
+  EditIcon,
+  ShieldCheckIcon,
+  ShieldIcon,
+  TrashIcon,
+  UserIcon,
+  UserPlusIcon,
+} from '@/lib/icons'
 import type { User, UserPermissions } from '@/types'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -34,6 +49,7 @@ export function UserManagement() {
     email: '',
     role: 'member' as User['role'],
   })
+  const haptic = useHaptic()
 
   const handleAddUser = () => {
     if (!newUser.name || !newUser.email) {
@@ -59,6 +75,26 @@ export function UserManagement() {
   const handleRemoveUser = (userId: string) => {
     setUsers(currentUsers => currentUsers.filter(user => user.id !== userId))
     toast.success('User removed from home')
+  }
+
+  // Context menu handlers
+  const handleEditUser = (user: User) => {
+    haptic.light()
+    toast.info(`Edit ${user.name}`, {
+      description: 'User editor coming soon',
+    })
+  }
+
+  const handleChangeRole = (user: User) => {
+    haptic.light()
+    toast.info(`Change role for ${user.name}`, {
+      description: 'Role selector coming soon',
+    })
+  }
+
+  const handleRemoveUserContext = (user: User) => {
+    haptic.heavy()
+    handleRemoveUser(user.id)
   }
 
   const getDefaultPermissions = (role: User['role']): UserPermissions => {
@@ -211,51 +247,79 @@ export function UserManagement() {
           </Card>
         ) : (
           users.map(user => (
-            <Card key={user.id}>
-              <CardContent className="flex items-center justify-between p-6">
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={user.avatar} />
-                    <AvatarFallback>
-                      {user.name
-                        .split(' ')
-                        .map(n => n[0])
-                        .join('')
-                        .toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="mb-1 flex items-center gap-2">
-                      <h3 className="font-medium">{user.name}</h3>
-                      {getRoleIcon(user.role)}
+            <ContextMenu key={user.id}>
+              <ContextMenuTrigger asChild>
+                <Card>
+                  <CardContent className="flex items-center justify-between p-6">
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={user.avatar} />
+                        <AvatarFallback>
+                          {user.name
+                            .split(' ')
+                            .map(n => n[0])
+                            .join('')
+                            .toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="mb-1 flex items-center gap-2">
+                          <h3 className="font-medium">{user.name}</h3>
+                          {getRoleIcon(user.role)}
+                        </div>
+                        <p className="text-muted-foreground text-sm">{user.email}</p>
+                        <div className="mt-2 flex items-center gap-2">
+                          <Badge variant={getRoleBadgeVariant(user.role)} className="text-xs">
+                            {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                          </Badge>
+                          <span className="text-muted-foreground text-xs">
+                            Last active:{' '}
+                            {user.lastActive
+                              ? new Date(user.lastActive).toLocaleDateString()
+                              : 'Never'}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-muted-foreground text-sm">{user.email}</p>
-                    <div className="mt-2 flex items-center gap-2">
-                      <Badge variant={getRoleBadgeVariant(user.role)} className="text-xs">
-                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                      </Badge>
-                      <span className="text-muted-foreground text-xs">
-                        Last active:{' '}
-                        {user.lastActive ? new Date(user.lastActive).toLocaleDateString() : 'Never'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-2">
-                  {user.role !== 'owner' && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveUser(user.id)}
-                      className="text-destructive hover:text-destructive"
+                    <div className="flex items-center gap-2">
+                      {user.role !== 'owner' && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveUser(user.id)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </ContextMenuTrigger>
+              <ContextMenuContent className="w-48">
+                <ContextMenuItem onClick={() => handleEditUser(user)} className="gap-2">
+                  <EditIcon className="h-4 w-4" />
+                  Edit User
+                </ContextMenuItem>
+                {user.role !== 'owner' && (
+                  <>
+                    <ContextMenuItem onClick={() => handleChangeRole(user)} className="gap-2">
+                      <ShieldIcon className="h-4 w-4" />
+                      Change Role
+                    </ContextMenuItem>
+                    <ContextMenuSeparator />
+                    <ContextMenuItem
+                      onClick={() => handleRemoveUserContext(user)}
+                      className="gap-2 text-red-600 dark:text-red-400"
                     >
                       <TrashIcon className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                      Remove User
+                    </ContextMenuItem>
+                  </>
+                )}
+              </ContextMenuContent>
+            </ContextMenu>
           ))
         )}
       </div>

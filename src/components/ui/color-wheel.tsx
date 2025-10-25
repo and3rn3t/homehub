@@ -137,6 +137,59 @@ export function ColorWheelPicker({
     setHsv(hexToHsv(value))
   }, [value])
 
+  // Keyboard navigation for accessibility (WCAG 2.1.1)
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (disabled) return
+
+    const newHsv = { ...hsv }
+    let changed = false
+
+    // Arrow keys adjust hue and saturation
+    switch (e.key) {
+      case 'ArrowRight':
+        e.preventDefault()
+        newHsv.h = (hsv.h + 5) % 360
+        changed = true
+        break
+      case 'ArrowLeft':
+        e.preventDefault()
+        newHsv.h = (hsv.h - 5 + 360) % 360
+        changed = true
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        newHsv.s = Math.min(100, hsv.s + 5)
+        changed = true
+        break
+      case 'ArrowDown':
+        e.preventDefault()
+        newHsv.s = Math.max(0, hsv.s - 5)
+        changed = true
+        break
+      case '+':
+      case '=':
+        e.preventDefault()
+        newHsv.v = Math.min(100, hsv.v + 5)
+        changed = true
+        break
+      case '-':
+      case '_':
+        e.preventDefault()
+        newHsv.v = Math.max(0, hsv.v - 5)
+        changed = true
+        break
+    }
+
+    if (changed) {
+      const { r, g, b } = hsvToRgb(newHsv.h, newHsv.s, newHsv.v)
+      const hex = rgbToHex(r, g, b)
+      onChange(hex)
+      if (onValueCommit) {
+        onValueCommit(hex)
+      }
+    }
+  }
+
   // Draw color wheel
   useEffect(() => {
     const canvas = canvasRef.current
@@ -237,7 +290,13 @@ export function ColorWheelPicker({
   return (
     <div className={cn('space-y-4', className)}>
       {/* Color Wheel Canvas */}
-      <div className="relative mx-auto h-[240px] w-[240px]">
+      <div
+        className="focus:ring-primary relative mx-auto h-[240px] w-[240px] rounded-full focus:ring-2 focus:ring-offset-2 focus:outline-none"
+        onKeyDown={handleKeyDown}
+        role="img"
+        aria-label={`Color picker showing ${value}. Use arrow keys to adjust hue and saturation, plus and minus keys to adjust brightness. Hue: ${hsv.h} degrees, Saturation: ${hsv.s}%, Brightness: ${hsv.v}%`}
+        tabIndex={disabled ? -1 : 0}
+      >
         <canvas
           ref={canvasRef}
           width={240}
