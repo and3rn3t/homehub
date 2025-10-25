@@ -148,11 +148,27 @@ export function ControlTile({
 
         {/* Active glow effect */}
         {isActive && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.1 }}
-            className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white to-transparent"
-          />
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.1 }}
+              className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white to-transparent"
+            />
+            {/* Power-on ripple effect */}
+            <motion.div
+              className="pointer-events-none absolute inset-0 rounded-lg"
+              initial={{ scale: 0, opacity: 0.6 }}
+              animate={{ scale: 2, opacity: 0 }}
+              transition={{
+                duration: 0.8,
+                ease: 'easeOut',
+              }}
+              key={`ripple-${device.id}-${isActive}`}
+              style={{
+                background: `radial-gradient(circle, ${tintColors[tint as keyof typeof tintColors]?.split(' ')[0]?.replace('bg-', 'rgba(var(--') || 'rgba(var(--primary-rgb)'}, 0.4) 0%, transparent 70%)`,
+              }}
+            />
+          </>
         )}
       </Card>
     </motion.div>

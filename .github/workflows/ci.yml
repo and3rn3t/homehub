@@ -5,19 +5,27 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  workflow_dispatch: # Allow manual triggering
+
+# Optimize concurrency - cancel in-progress runs for same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
     name: Test & Coverage
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     strategy:
       matrix:
         node-version: [18.x, 20.x]
+      fail-fast: false # Continue other matrix jobs even if one fails
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
@@ -27,12 +35,19 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        env:
+          # Speed up installation
+          HUSKY: 0
+          CI: true
 
+      # Run checks in parallel for faster feedback
       - name: Type check
         run: npm run type-check
+        if: always() # Run even if previous steps fail
 
       - name: Lint
         run: npm run lint
+        if: always()
 
       - name: Run tests with coverage
         run: npm run test:coverage
@@ -134,7 +149,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

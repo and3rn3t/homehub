@@ -74,7 +74,7 @@ export function RoomStatistics({ devices }: RoomStatisticsProps) {
   return (
     <div className="space-y-4">
       {/* Status Overview Cards */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
         {/* Total Devices */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}

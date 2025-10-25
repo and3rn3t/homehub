@@ -5,6 +5,7 @@
  */
 
 export type CameraStatus = 'recording' | 'idle' | 'offline' | 'online'
+export type CameraType = 'doorbell' | 'indoor' | 'outdoor' | 'spotlight' | 'floodlight' | 'generic'
 export type SecurityEventType =
   | 'motion'
   | 'door'
@@ -21,6 +22,9 @@ export interface Camera {
 
   /** Display name */
   name: string
+
+  /** Camera type */
+  type?: CameraType
 
   /** Physical location */
   location: string
@@ -45,6 +49,42 @@ export interface Camera {
 
   /** Battery level percentage (0-100) */
   batteryLevel?: number
+
+  /** Signal strength percentage (0-100) */
+  signalStrength?: number
+
+  /** Device manufacturer */
+  manufacturer?: string
+
+  /** Device model number */
+  model?: string
+
+  /** Firmware version */
+  firmwareVersion?: string
+
+  /** Device capabilities */
+  capabilities?: {
+    ptz?: boolean
+    nightVision?: boolean
+    twoWayAudio?: boolean
+    spotlight?: boolean
+    recording?: boolean
+    snapshot?: boolean
+    [key: string]: unknown
+  }
+
+  /** Camera settings */
+  settings?: {
+    motionSensitivity?: number
+    audioSensitivity?: number
+    recordingDuration?: number
+    nightVisionMode?: string
+    spotlightMode?: string
+    [key: string]: unknown
+  }
+
+  /** Thumbnail image URL */
+  thumbnailUrl?: string
 
   /** Live stream URL (future use) */
   streamUrl?: string

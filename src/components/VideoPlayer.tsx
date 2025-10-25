@@ -285,6 +285,7 @@ export const VideoPlayer = memo(function VideoPlayer({
           key={snapshotRefreshKey}
           src={camera.snapshotUrl}
           alt={camera.name}
+          loading="lazy"
           className="h-full w-full object-cover"
           onLoad={() => setIsLoading(false)}
           onError={() => {

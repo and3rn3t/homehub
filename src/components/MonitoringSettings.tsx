@@ -208,7 +208,7 @@ export function MonitoringSettings() {
 
               <Separator />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Offline Threshold</Label>
                   <div className="flex items-center gap-2">
@@ -402,7 +402,7 @@ export function MonitoringSettings() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Ping Interval</Label>
                   <div className="flex items-center gap-2">
@@ -512,7 +512,7 @@ export function MonitoringSettings() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="flex items-center gap-2">
                   <CheckCircleIcon size={16} className="text-green-500" />
                   <span className="text-sm">Monitoring Active</span>

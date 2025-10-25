@@ -121,7 +121,7 @@ export const DoorbellHistory = memo(function DoorbellHistory({
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="bg-card/50 p-4 backdrop-blur-xl">
             <div className="flex items-center gap-3">
@@ -258,6 +258,7 @@ export const DoorbellHistory = memo(function DoorbellHistory({
                           <img
                             src={event.snapshotUrl}
                             alt="Doorbell snapshot"
+                            loading="lazy"
                             className="h-full w-full object-cover"
                           />
                           {!event.viewed && (
@@ -368,6 +369,7 @@ export const DoorbellHistory = memo(function DoorbellHistory({
                     <img
                       src={selectedEvent.snapshotUrl}
                       alt="Doorbell snapshot"
+                      loading="lazy"
                       className="h-full w-full object-cover"
                     />
                   </div>

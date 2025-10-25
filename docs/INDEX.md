@@ -1,8 +1,8 @@
 # HomeHub Documentation Index
 
-**Last Updated**: October 13, 2025
+**Last Updated**: October 16, 2025
 **Total Documents**: 100+ files (organized into logical directories)
-**Status**: ✅ Phase 3 reorganization complete
+**Status**: ✅ Phase 1 Polish complete (UI/UX Enhancements) + Phase 6.1 + Mobile + Production hardening
 
 ---
 
@@ -10,11 +10,11 @@
 
 **New to HomeHub?** Start here:
 
-1. 📖 [Setup Quickstart](guides/setup/SETUP_QUICKSTART.md) - Get running in 15 minutes
+1. 📖 [Setup Quickstart](guides/SETUP_QUICKSTART.md) - Get running in 15 minutes
 2. 🏗️ [Architecture Overview](guides/ARCHITECTURE.md) - Understand the system
 3. 💻 [Best Practices](guides/BEST_PRACTICES.md) - Coding standards and patterns
-4. � [Current Roadmap](development/NEXT_STEPS.md) - Phase 3 validation status
-5. 🧪 [Test Suite Guide](development/TEST_SUITE_QUICKSTART.md) - Testing overview
+4. 🎯 [Current Roadmap](development/NEXT_STEPS.md) - Planning Phase 4/5
+5. 🎓 [Lessons Learned](development/LESSONS_LEARNED_OCT14_2025.md) - Oct 12-15 technical wins
 
 ---
 
@@ -110,10 +110,29 @@ docs/
 
 **Production deployment and CI/CD:**
 
-| Document                                                        | Description                    | Status     |
-| --------------------------------------------------------------- | ------------------------------ | ---------- |
-| [CLOUDFLARE_DEPLOYMENT.md](deployment/CLOUDFLARE_DEPLOYMENT.md) | Complete Cloudflare deployment | ✅ Current |
-| [SECURITY.md](deployment/SECURITY.md)                           | Security guidelines            | ✅ Current |
+| Document                                                                              | Description                    | Status      |
+| ------------------------------------------------------------------------------------- | ------------------------------ | ----------- |
+| [CLOUDFLARE_DEPLOYMENT.md](deployment/CLOUDFLARE_DEPLOYMENT.md)                       | Complete Cloudflare deployment | ✅ Current  |
+| [PRODUCTION_DEPLOYMENT_OCT14_2025.md](deployment/PRODUCTION_DEPLOYMENT_OCT14_2025.md) | Latest deployment log          | ✅ Current  |
+| [PRODUCTION_LOGGING_COMPLETE.md](deployment/PRODUCTION_LOGGING_COMPLETE.md)           | Logging setup                  | ✅ Complete |
+| [SECURITY.md](deployment/SECURITY.md)                                                 | Security guidelines            | ✅ Current  |
+
+---
+
+## 🔬 Current Development (Phase 6.1 + Production Hardening)
+
+**Active Phase 6.1, mobile optimization, and production fixes:**
+
+| Document                                                                                                         | Description                             | Status      |
+| ---------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ----------- |
+| [LESSONS_LEARNED_OCT14_2025.md](development/LESSONS_LEARNED_OCT14_2025.md)                                       | **Master lessons doc** (Oct 12-15 2025) | ✅ Current  |
+| [NEXT_STEPS.md](development/NEXT_STEPS.md)                                                                       | Current roadmap and priorities          | ✅ Current  |
+| [DASHBOARD_REFACTORING_OCT15_2025.md](development/DASHBOARD_REFACTORING_OCT15_2025.md)                           | 87% complexity reduction                | ✅ Complete |
+| [LANDING_PAGE_OPTIMIZATION_COMPLETE_OCT15_2025.md](development/LANDING_PAGE_OPTIMIZATION_COMPLETE_OCT15_2025.md) | 96% bundle size reduction               | ✅ Complete |
+| [ISSUE_RESOLUTION_SUMMARY_OCT15_2025.md](development/ISSUE_RESOLUTION_SUMMARY_OCT15_2025.md)                     | Production bug fixes                    | ✅ Complete |
+| [MOBILE_OPTIMIZATION_COMPLETE.md](development/MOBILE_OPTIMIZATION_COMPLETE.md)                                   | iOS-focused enhancements                | ✅ Complete |
+| [LIVE_STREAMING_COMPLETE.md](development/LIVE_STREAMING_COMPLETE.md)                                             | DASH/HLS streaming                      | ✅ Complete |
+| [MILESTONE_6.1.3_COMPLETE.md](development/MILESTONE_6.1.3_COMPLETE.md)                                           | Video optimization                      | ✅ Complete |
 
 ---
 
@@ -155,20 +174,23 @@ _See [development/milestones/](development/milestones/) for all milestone docume
 
 **Major feature implementations:**
 
-| Document                                                                                            | Feature             | Status      |
-| --------------------------------------------------------------------------------------------------- | ------------------- | ----------- |
-| [ARLO_INTEGRATION_SUMMARY.md](development/features/ARLO_INTEGRATION_SUMMARY.md)                     | Arlo Cloud API      | ⚠️ Blocked  |
-| [ARLO_CLOUDFLARE_BLOCKING.md](development/issues/ARLO_CLOUDFLARE_BLOCKING.md)                       | Arlo API blocker    | ✅ Updated  |
-| [ARLO_OPTION_C_DEVELOPER_API.md](development/issues/ARLO_OPTION_C_DEVELOPER_API.md)                 | Arlo OAuth2 (DEAD)  | ❌ Archived |
-| [DOORBELL_INTEGRATION.md](development/features/DOORBELL_INTEGRATION.md)                             | Doorbell system     | 🆕 NEW      |
-| [DOORBELL_QUICKREF.md](development/features/DOORBELL_QUICKREF.md)                                   | Doorbell quick ref  | 🆕 NEW      |
-| [DOORBELL_TEST_REPORT.md](development/features/DOORBELL_TEST_REPORT.md)                             | Doorbell testing    | 🆕 NEW      |
-| [ADVANCED_HUE_FEATURES.md](development/features/ADVANCED_HUE_FEATURES.md)                           | Hue integration     | ✅ Complete |
-| [COLOR_CONTROLS_COMPLETE.md](development/features/COLOR_CONTROLS_COMPLETE.md)                       | Color picker        | ✅ Complete |
-| [DARK_MODE_IMPLEMENTATION_OCT_2025.md](development/features/DARK_MODE_IMPLEMENTATION_OCT_2025.md)   | Dark mode           | ✅ Complete |
-| [LUCIDE_MIGRATION_COMPLETE.md](development/features/LUCIDE_MIGRATION_COMPLETE.md)                   | Icon system         | ✅ Complete |
-| [CI_CD_INTEGRATION_COMPLETE.md](development/features/CI_CD_INTEGRATION_COMPLETE.md)                 | CI/CD pipeline      | ✅ Complete |
-| [VALIDATION_INFRASTRUCTURE_COMPLETE.md](development/features/VALIDATION_INFRASTRUCTURE_COMPLETE.md) | Test infrastructure | ✅ Complete |
+| Document                                                                                            | Feature               | Status      |
+| --------------------------------------------------------------------------------------------------- | --------------------- | ----------- |
+| [PHASE_1_POLISH_UI_UX_ENHANCEMENTS.md](development/PHASE_1_POLISH_UI_UX_ENHANCEMENTS.md)            | UI/UX Polish (Oct 16) | 🆕 NEW      |
+| [ENHANCEMENT_2_EMPTY_STATES_COMPLETE.md](development/ENHANCEMENT_2_EMPTY_STATES_COMPLETE.md)        | Empty state templates | ✅ Complete |
+| [ENHANCEMENT_3_UNDO_REDO_COMPLETE.md](development/ENHANCEMENT_3_UNDO_REDO_COMPLETE.md)              | Undo/redo actions     | ✅ Complete |
+| [ARLO_INTEGRATION_SUMMARY.md](development/features/ARLO_INTEGRATION_SUMMARY.md)                     | Arlo Cloud API        | ⚠️ Blocked  |
+| [ARLO_CLOUDFLARE_BLOCKING.md](development/issues/ARLO_CLOUDFLARE_BLOCKING.md)                       | Arlo API blocker      | ✅ Updated  |
+| [ARLO_OPTION_C_DEVELOPER_API.md](development/issues/ARLO_OPTION_C_DEVELOPER_API.md)                 | Arlo OAuth2 (DEAD)    | ❌ Archived |
+| [DOORBELL_INTEGRATION.md](development/features/DOORBELL_INTEGRATION.md)                             | Doorbell system       | 🆕 NEW      |
+| [DOORBELL_QUICKREF.md](development/features/DOORBELL_QUICKREF.md)                                   | Doorbell quick ref    | 🆕 NEW      |
+| [DOORBELL_TEST_REPORT.md](development/features/DOORBELL_TEST_REPORT.md)                             | Doorbell testing      | 🆕 NEW      |
+| [ADVANCED_HUE_FEATURES.md](development/features/ADVANCED_HUE_FEATURES.md)                           | Hue integration       | ✅ Complete |
+| [COLOR_CONTROLS_COMPLETE.md](development/features/COLOR_CONTROLS_COMPLETE.md)                       | Color picker          | ✅ Complete |
+| [DARK_MODE_IMPLEMENTATION_OCT_2025.md](development/features/DARK_MODE_IMPLEMENTATION_OCT_2025.md)   | Dark mode             | ✅ Complete |
+| [LUCIDE_MIGRATION_COMPLETE.md](development/features/LUCIDE_MIGRATION_COMPLETE.md)                   | Icon system           | ✅ Complete |
+| [CI_CD_INTEGRATION_COMPLETE.md](development/features/CI_CD_INTEGRATION_COMPLETE.md)                 | CI/CD pipeline        | ✅ Complete |
+| [VALIDATION_INFRASTRUCTURE_COMPLETE.md](development/features/VALIDATION_INFRASTRUCTURE_COMPLETE.md) | Test infrastructure   | ✅ Complete |
 
 _See [development/features/](development/features/) for all feature documentation_
 

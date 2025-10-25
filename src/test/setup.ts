@@ -45,14 +45,5 @@ global.ResizeObserver = class ResizeObserver {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any
 
-// Mock Framer Motion for faster tests
-vi.mock('framer-motion', () => ({
-  motion: {
-    div: 'div',
-    button: 'button',
-    span: 'span',
-    section: 'section',
-    article: 'article',
-  },
-  AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
-}))
+// Framer Motion is mocked in src/__mocks__/framer-motion.ts
+// Vitest will automatically use that mock for all imports

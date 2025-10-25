@@ -2,7 +2,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { IOS26EmptyState } from '@/components/ui/ios26-error'
 import { IOS26StatusBadge } from '@/components/ui/ios26-status'
+import { PullToRefresh } from '@/components/ui/pull-to-refresh'
 import { Switch } from '@/components/ui/switch'
 import { KV_KEYS, MOCK_DEVICES } from '@/constants'
 import { useKV } from '@/hooks/use-kv'
@@ -16,15 +19,17 @@ import {
   ClockIcon,
   LightbulbIcon,
   LineChartIcon,
+  SearchIcon,
   ShieldIcon,
   SpeakerIcon,
   ThermometerIcon,
   WifiIcon,
   WifiOffIcon,
+  XIcon,
 } from '@/lib/icons'
 import type { Device } from '@/types'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 interface DeviceStatus {
@@ -128,6 +133,24 @@ export function DeviceMonitor() {
 
   const [activeAlerts, setActiveAlerts] = useState<DeviceAlert[]>([])
   const [filter, setFilter] = useState<'all' | 'online' | 'offline' | 'warning' | 'error'>('all')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // Pull-to-refresh handler
+  const handleRefresh = useCallback(async () => {
+    try {
+      // Simulate device status refresh
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      // Force a device status update
+      setDevices(kvDevices.map(convertToDeviceStatus))
+
+      toast.success('Device status refreshed', {
+        description: `Checked ${kvDevices.length} devices`,
+      })
+    } catch (_error) {
+      toast.error('Failed to refresh device status')
+    }
+  }, [kvDevices])
 
   // Simulate real-time updates
   useEffect(() => {
@@ -297,8 +320,29 @@ export function DeviceMonitor() {
   }
 
   const filteredDevices = devices.filter(device => {
-    if (filter === 'all') return true
-    return device.status === filter
+    // Filter by status
+    if (filter !== 'all' && device.status !== filter) return false
+
+    // Filter by search query (fuzzy match)
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      const searchableText = [device.name, device.type, device.room, device.status]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+
+      // Simple fuzzy match: check if all characters appear in order
+      let searchIndex = 0
+      for (const char of searchableText) {
+        if (char === query[searchIndex]) {
+          searchIndex++
+          if (searchIndex === query.length) return true
+        }
+      }
+      return false
+    }
+
+    return true
   })
 
   const getTimeAgo = (date: Date | string | undefined) => {
@@ -357,6 +401,26 @@ export function DeviceMonitor() {
           </Alert>
         )}
 
+        {/* Search Input */}
+        <div className="relative mb-4">
+          <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <Input
+            type="text"
+            placeholder="Search devices by name, type, room..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="pr-10 pl-10"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="hover:bg-accent absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1"
+            >
+              <XIcon className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+
         {/* Filter Buttons */}
         <div className="mb-6 flex gap-2 overflow-x-auto">
           {(['all', 'online', 'offline', 'warning', 'error'] as const).map(status => (
@@ -378,7 +442,7 @@ export function DeviceMonitor() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 pb-6">
+      <PullToRefresh onRefresh={handleRefresh} className="flex-1 px-6 pb-6">
         <div className="space-y-4">
           <AnimatePresence>
             {filteredDevices.map(device => {
@@ -524,22 +588,33 @@ export function DeviceMonitor() {
           </AnimatePresence>
 
           {filteredDevices.length === 0 && (
-            <Card className="border-border/30 border-2 border-dashed">
-              <CardContent className="p-8 text-center">
-                <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
-                  <LineChartIcon className="text-muted-foreground h-6 w-6" />
-                </div>
-                <p className="text-muted-foreground mb-2">No devices found</p>
-                <p className="text-muted-foreground text-sm">
-                  {filter === 'all'
-                    ? 'No devices are currently registered'
-                    : `No devices with status "${filter}"`}
-                </p>
-              </CardContent>
-            </Card>
+            <IOS26EmptyState
+              icon={<LineChartIcon className="h-16 w-16" />}
+              title={
+                filter === 'all'
+                  ? 'No Devices Monitored'
+                  : `No ${filter.charAt(0).toUpperCase() + filter.slice(1)} Devices`
+              }
+              message={
+                filter === 'all'
+                  ? 'Add devices to start monitoring their health, connectivity, and performance metrics in real-time.'
+                  : `No devices currently have "${filter}" status. This is good news!`
+              }
+              action={
+                filter === 'all'
+                  ? {
+                      label: 'Discover Devices',
+                      onClick: () => toast.info('Go to Dashboard to discover devices'),
+                    }
+                  : {
+                      label: 'View All Devices',
+                      onClick: () => setFilter('all'),
+                    }
+              }
+            />
           )}
         </div>
-      </div>
+      </PullToRefresh>
     </div>
   )
 }

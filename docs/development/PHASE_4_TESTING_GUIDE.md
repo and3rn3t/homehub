@@ -417,6 +417,7 @@ localStorage.setItem(
 ### Test 5A: Token Storage & Retrieval
 
 1. **Verify token was saved**:
+
    ```javascript
    const stored = localStorage.getItem('arlo-auth-token')
    console.log('Stored token exists:', stored !== null)
@@ -442,6 +443,7 @@ localStorage.setItem(
 ### Test 5C: Expiration Calculation
 
 1. **Check expiration time**:
+
    ```javascript
    const token = JSON.parse(localStorage.getItem('arlo-auth-token'))
    const now = new Date()

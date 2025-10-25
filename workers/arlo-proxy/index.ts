@@ -13,9 +13,12 @@
  * Created: October 13, 2025 - Phase 4: Auto Token Refresh
  */
 
-export interface Env {
+import { ExecutionContext } from '@cloudflare/workers-types'
+
+export type Env = {
   // Add environment variables here if needed
   // Example: ALLOWED_ORIGINS: string
+  [key: string]: unknown
 }
 
 /**
@@ -54,7 +57,7 @@ function addCORSHeaders(response: Response): Response {
 }
 
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  async fetch(request: Request, _env: Env, _ctx: ExecutionContext): Promise<Response> {
     try {
       // Handle CORS preflight
       const corsResponse = handleCORS(request)
@@ -65,21 +68,119 @@ export default {
       const url = new URL(request.url)
 
       // Extract the target path from the worker URL
-      // Expected format: https://arlo-proxy.your-worker.workers.dev/hmsweb/users/devices
-      // Maps to: https://myapi.arlo.com/hmsweb/users/devices
+      // Expected formats:
+      // 1. API: https://arlo-proxy.your-worker.workers.dev/hmsweb/users/devices
+      //    Maps to: https://myapi.arlo.com/hmsweb/users/devices
+      // 2. Proxy any Arlo URL: https://arlo-proxy.your-worker.workers.dev/proxy/<encoded-url>
+      //    Maps to: ANY *.arlo.com domain (images, streaming, API endpoints, etc.)
       const targetPath = url.pathname.replace(/^\//, '') // Remove leading slash
-      const targetUrl = `https://myapi.arlo.com/${targetPath}${url.search}`
 
-      console.log(`[Arlo Proxy] ${request.method} ${targetPath}`)
+      let targetUrl: string
 
-      // Forward the request to Arlo API
+      // Check if this is a wildcard proxy request
+      if (targetPath.startsWith('proxy/')) {
+        // Decode the full URL from the path
+        const encodedUrl = targetPath.replace('proxy/', '')
+        targetUrl = decodeURIComponent(encodedUrl)
+
+        console.log(`[Arlo Proxy] 🔄 Wildcard proxy request`)
+        console.log(`[Arlo Proxy] Encoded URL: ${encodedUrl.substring(0, 100)}...`)
+        console.log(`[Arlo Proxy] Decoded URL: ${targetUrl}`)
+
+        // Validate it's an Arlo domain for security
+        const parsedUrl = new URL(targetUrl)
+        const targetHost = parsedUrl.hostname
+
+        if (!targetHost.endsWith('.arlo.com') && targetHost !== 'arlo.com') {
+          console.error(`[Arlo Proxy] ⛔ Security: Rejected non-Arlo domain: ${targetHost}`)
+          return new Response(
+            JSON.stringify({
+              error: 'Invalid domain',
+              message: 'Only *.arlo.com domains are allowed through this proxy',
+            }),
+            {
+              status: 403,
+              headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+              },
+            }
+          )
+        }
+
+        console.log(`[Arlo Proxy] ✅ Validated: ${targetHost}${parsedUrl.pathname}`)
+      } else {
+        // Standard API request (default to myapi.arlo.com)
+        targetUrl = `https://myapi.arlo.com/${targetPath}${url.search}`
+        console.log(`[Arlo Proxy] ${request.method} ${targetPath}`)
+      }
+
+      // Forward the request to Arlo
+      // Strip problematic headers that might cause CORS or AWS S3 signed URL issues
+      const forwardHeaders = new Headers()
+
+      // For AWS S3 signed URLs (image CDN, video manifests, segments), customize headers based on content type
+      // AWS validates the signature against the original request, extra headers can break it
+      if (targetPath.startsWith('proxy/')) {
+        const userAgent = request.headers.get('user-agent')
+        if (userAgent) {
+          forwardHeaders.set('user-agent', userAgent)
+        }
+
+        // Determine content type from URL
+        const targetUrlLower = targetUrl.toLowerCase()
+        if (targetUrlLower.includes('.mpd')) {
+          // MPEG-DASH manifest - needs specific accept header
+          forwardHeaders.set('accept', 'application/dash+xml,*/*;q=0.8')
+          console.log('[Arlo Proxy] Proxying DASH manifest (.mpd)')
+        } else if (targetUrlLower.includes('.m3u8')) {
+          // HLS manifest - needs specific accept header
+          forwardHeaders.set('accept', 'application/vnd.apple.mpegurl,*/*;q=0.8')
+          console.log('[Arlo Proxy] Proxying HLS manifest (.m3u8)')
+        } else if (targetUrlLower.includes('.m4s') || targetUrlLower.includes('.ts')) {
+          // Video segments - needs video accept header
+          forwardHeaders.set('accept', 'video/*,*/*;q=0.8')
+          console.log('[Arlo Proxy] Proxying video segment')
+        } else {
+          // Images or other content - use image accept header
+          forwardHeaders.set('accept', 'image/*,*/*;q=0.8')
+        }
+      } else {
+        // For API requests, forward most headers except problematic ones
+        request.headers.forEach((value, key) => {
+          const lowerKey = key.toLowerCase()
+          if (
+            lowerKey !== 'host' &&
+            lowerKey !== 'origin' &&
+            lowerKey !== 'referer' &&
+            !lowerKey.startsWith('sec-')
+          ) {
+            forwardHeaders.set(key, value)
+          }
+        })
+      }
+
       const arloResponse = await fetch(targetUrl, {
         method: request.method,
-        headers: request.headers,
+        headers: forwardHeaders,
         body: request.method !== 'GET' && request.method !== 'HEAD' ? request.body : undefined,
       })
 
       console.log(`[Arlo Proxy] Response: ${arloResponse.status} ${arloResponse.statusText}`)
+
+      // Log response headers for debugging
+      if (!arloResponse.ok) {
+        console.error(
+          `[Arlo Proxy] Error response headers:`,
+          Object.fromEntries(arloResponse.headers)
+        )
+        try {
+          const errorBody = await arloResponse.clone().text()
+          console.error(`[Arlo Proxy] Error body:`, errorBody.substring(0, 500))
+        } catch (e) {
+          // Ignore if can't read body
+        }
+      }
 
       // Add CORS headers and return
       return addCORSHeaders(arloResponse)

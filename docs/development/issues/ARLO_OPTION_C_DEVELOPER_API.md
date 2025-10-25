@@ -30,7 +30,7 @@ This means **Option C (Official API) is no longer viable**. You cannot:
 
 ## 📋 What This Document Originally Described
 
-_(Preserved for historical reference)_
+*(Preserved for historical reference)*
 
 This document originally described how to integrate with Arlo using their official OAuth2-based developer API. The process would have involved:
 

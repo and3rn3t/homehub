@@ -68,17 +68,18 @@ export function AutomationMonitor() {
   // Collect metrics every 5 minutes
   useEffect(() => {
     // Initial collection
-    collectMetrics()
+    void collectMetrics()
 
     // Set up interval
     const interval = setInterval(
       () => {
-        collectMetrics()
+        void collectMetrics()
       },
       5 * 60 * 1000
     ) // 5 minutes
 
     return () => clearInterval(interval)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const collectMetrics = async () => {
@@ -336,35 +337,131 @@ function StatCard({ title, value, target, status, icon: Icon }: StatCardProps) {
 // ===================================================================
 
 async function collectCurrentMetrics(): Promise<MonitoringDataPoint> {
-  // TODO: Replace with actual data collection
-  // This is a mock implementation
+  // Collect real metrics from automation services and device state
+  const { KV_KEYS } = await import('@/constants')
 
-  const mockMetrics: AutomationMetrics = {
-    totalExecutions: Math.floor(Math.random() * 100),
-    successfulExecutions: Math.floor(Math.random() * 95),
-    failedExecutions: Math.floor(Math.random() * 5),
-    averageExecutionTime: Math.random() * 500,
-    errorRate: Math.random() * 0.05,
-    uptimePercentage: 99 + Math.random(),
-    lastExecutionTime: new Date(),
-    commonErrors: [
-      { error: 'Device offline', count: Math.floor(Math.random() * 5) },
-      { error: 'Timeout exceeded', count: Math.floor(Math.random() * 3) },
-    ],
-  }
+  try {
+    // Get current automations and devices from KV store
+    const automationsKey = KV_KEYS.AUTOMATIONS
+    const devicesKey = KV_KEYS.DEVICES
 
-  const mockDeviceHealth: DeviceHealth = {
-    online: Math.floor(Math.random() * 20) + 15,
-    offline: Math.floor(Math.random() * 3),
-    warning: Math.floor(Math.random() * 2),
-    total: 22,
-  }
+    // Note: We can't use hooks outside components, so we'll fetch from localStorage directly
+    const automationsData = localStorage.getItem(`homehub:${automationsKey}`)
+    const devicesData = localStorage.getItem(`homehub:${devicesKey}`)
 
-  return {
-    timestamp: new Date(),
-    metrics: mockMetrics,
-    activeAutomations: Math.floor(Math.random() * 15) + 5,
-    deviceHealth: mockDeviceHealth,
+    const automations = automationsData ? JSON.parse(automationsData) : []
+    const devices = devicesData ? JSON.parse(devicesData) : []
+
+    // Count active automations (enabled)
+    const activeAutomations = automations.filter((a: { enabled: boolean }) => a.enabled).length
+
+    // Calculate device health
+    const onlineDevices = devices.filter((d: { status: string }) => d.status === 'online').length
+    const offlineDevices = devices.filter((d: { status: string }) => d.status === 'offline').length
+    const warningDevices = devices.filter((d: { status: string }) => d.status === 'warning').length
+
+    const deviceHealth: DeviceHealth = {
+      online: onlineDevices,
+      offline: offlineDevices,
+      warning: warningDevices,
+      total: devices.length,
+    }
+
+    // Get execution history from localStorage (if available)
+    const executionHistoryData = localStorage.getItem('homehub:automation-execution-history')
+    const executionHistory = executionHistoryData ? JSON.parse(executionHistoryData) : []
+
+    // Calculate metrics from last 24 hours
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000
+    const recentExecutions = executionHistory.filter(
+      (ex: { timestamp: string }) => new Date(ex.timestamp).getTime() > oneDayAgo
+    )
+
+    const totalExecutions = recentExecutions.length
+    const successfulExecutions = recentExecutions.filter(
+      (ex: { success: boolean }) => ex.success
+    ).length
+    const failedExecutions = totalExecutions - successfulExecutions
+
+    // Calculate average execution time
+    const executionTimes = recentExecutions
+      .filter((ex: { duration?: number }) => ex.duration)
+      .map((ex: { duration: number }) => ex.duration)
+    const averageExecutionTime =
+      executionTimes.length > 0
+        ? executionTimes.reduce((a: number, b: number) => a + b, 0) / executionTimes.length
+        : 0
+
+    // Calculate error rate
+    const errorRate = totalExecutions > 0 ? failedExecutions / totalExecutions : 0
+
+    // Calculate uptime (based on successful executions)
+    const uptimePercentage =
+      totalExecutions > 0 ? (successfulExecutions / totalExecutions) * 100 : 100
+
+    // Get common errors
+    const errors = recentExecutions
+      .filter((ex: { success: boolean; error?: string }) => !ex.success && ex.error)
+      .map((ex: { error: string }) => ex.error)
+
+    const errorCounts = errors.reduce((acc: Record<string, number>, error: string) => {
+      acc[error] = (acc[error] || 0) + 1
+      return acc
+    }, {})
+
+    const commonErrors = Object.entries(errorCounts)
+      .map(([error, count]) => ({ error, count: count as number }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5) // Top 5 errors
+
+    // Get last execution time
+    const lastExecution =
+      recentExecutions.length > 0 ? recentExecutions[recentExecutions.length - 1] : null
+    const lastExecutionTime = lastExecution ? new Date(lastExecution.timestamp) : null
+
+    const metrics: AutomationMetrics = {
+      totalExecutions,
+      successfulExecutions,
+      failedExecutions,
+      averageExecutionTime,
+      errorRate,
+      uptimePercentage,
+      lastExecutionTime,
+      commonErrors,
+    }
+
+    return {
+      timestamp: new Date(),
+      metrics,
+      activeAutomations,
+      deviceHealth,
+    }
+  } catch (error) {
+    console.error('Failed to collect real metrics, using defaults:', error)
+
+    // Fallback to default values on error
+    const metrics: AutomationMetrics = {
+      totalExecutions: 0,
+      successfulExecutions: 0,
+      failedExecutions: 0,
+      averageExecutionTime: 0,
+      errorRate: 0,
+      uptimePercentage: 100,
+      lastExecutionTime: null,
+      commonErrors: [],
+    }
+
+    return {
+      timestamp: new Date(),
+      metrics,
+      activeAutomations: 0,
+      deviceHealth: {
+        online: 0,
+        offline: 0,
+        warning: 0,
+        total: 0,
+      },
+    }
   }
 }
 
