@@ -1,22 +1,17 @@
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useKV } from '@/hooks/use-kv'
+import type { LucideIcon } from '@/lib/icons'
+import { ArrowRightIcon, LightbulbIcon, NavigationIcon, PlayIcon, XIcon } from '@/lib/icons'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
-import { useKV } from '@github/spark/hooks'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { 
-  ArrowRight,
-  X,
-  Lightbulb,
-  MousePointer,
-  Play
-} from "@phosphor-icons/react"
-import { motion, AnimatePresence } from "framer-motion"
 
 interface TutorialStep {
   id: string
   title: string
   description: string
-  icon: any
+  icon: LucideIcon
   position: { x: number; y: number }
   highlight?: string
 }
@@ -25,46 +20,50 @@ const tutorialSteps: TutorialStep[] = [
   {
     id: 'welcome',
     title: 'Welcome to Flow Designer',
-    description: 'Create powerful automation workflows with our visual drag-and-drop interface. Let\'s get started!',
-    icon: Lightbulb,
-    position: { x: 50, y: 50 }
+    description:
+      "Create powerful automation workflows with our visual drag-and-drop interface. Let's get started!",
+    icon: LightbulbIcon,
+    position: { x: 50, y: 50 },
   },
   {
     id: 'palette',
     title: 'Open the Node Palette',
-    description: 'Click "Add Node" to open the palette and see all available automation building blocks.',
-    icon: MousePointer,
+    description:
+      'Click "Add Node" to open the palette and see all available automation building blocks.',
+    icon: NavigationIcon,
     position: { x: 20, y: 20 },
-    highlight: 'add-node-button'
+    highlight: 'add-node-button',
   },
   {
     id: 'drag',
     title: 'Drag to Create',
     description: 'Drag nodes from the palette onto the canvas to build your automation workflow.',
-    icon: ArrowRight,
-    position: { x: 30, y: 60 }
+    icon: ArrowRightIcon,
+    position: { x: 30, y: 60 },
   },
   {
     id: 'connect',
     title: 'Connect Nodes',
-    description: 'Click "Out" on one node and "In" on another to create logical connections between steps.',
-    icon: ArrowRight,
-    position: { x: 70, y: 40 }
+    description:
+      'Click "Out" on one node and "In" on another to create logical connections between steps.',
+    icon: ArrowRightIcon,
+    position: { x: 70, y: 40 },
   },
   {
     id: 'configure',
     title: 'Configure Settings',
-    description: 'Click any node to configure its specific settings like times, devices, or conditions.',
-    icon: MousePointer,
-    position: { x: 80, y: 70 }
+    description:
+      'Click any node to configure its specific settings like times, devices, or conditions.',
+    icon: NavigationIcon,
+    position: { x: 80, y: 70 },
   },
   {
     id: 'test',
     title: 'Test Your Flow',
     description: 'Use the "Test" button to run your automation and see if it works as expected.',
-    icon: Play,
-    position: { x: 50, y: 30 }
-  }
+    icon: PlayIcon,
+    position: { x: 50, y: 30 },
+  },
 ]
 
 interface FlowTutorialProps {
@@ -79,6 +78,11 @@ export function FlowTutorial({ onComplete }: FlowTutorialProps) {
   if (hasSeenTutorial || !isVisible) return null
 
   const currentStepData = tutorialSteps[currentStep]
+
+  if (!currentStepData) {
+    return null
+  }
+
   const isLastStep = currentStep === tutorialSteps.length - 1
 
   const nextStep = () => {
@@ -109,7 +113,7 @@ export function FlowTutorial({ onComplete }: FlowTutorialProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center"
+            className="absolute inset-0 z-50 flex items-center justify-center bg-black/50"
           />
 
           {/* Tutorial Card */}
@@ -121,64 +125,49 @@ export function FlowTutorial({ onComplete }: FlowTutorialProps) {
             style={{
               left: `${currentStepData.position.x}%`,
               top: `${currentStepData.position.y}%`,
-              transform: 'translate(-50%, -50%)'
+              transform: 'translate(-50%, -50%)',
             }}
           >
-            <Card className="w-80 shadow-xl border-2 border-primary">
+            <Card className="border-primary w-80 border-2 shadow-xl">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                    <div className="bg-primary flex h-10 w-10 items-center justify-center rounded-full">
                       <currentStepData.icon size={20} className="text-white" />
                     </div>
                     <div>
                       <CardTitle className="text-base">{currentStepData.title}</CardTitle>
-                      <Badge variant="outline" className="text-xs mt-1">
+                      <Badge variant="outline" className="mt-1 text-xs">
                         {currentStep + 1} of {tutorialSteps.length}
                       </Badge>
                     </div>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={skipTutorial}
-                    className="w-8 h-8"
-                  >
-                    <X size={16} />
+                  <Button variant="ghost" size="icon" onClick={skipTutorial} className="h-8 w-8">
+                    <XIcon className="h-4 w-4" />
                   </Button>
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <p className="text-sm text-muted-foreground mb-4">
-                  {currentStepData.description}
-                </p>
-                
+                <p className="text-muted-foreground mb-4 text-sm">{currentStepData.description}</p>
+
                 <div className="flex items-center justify-between">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={skipTutorial}
-                  >
+                  <Button variant="outline" size="sm" onClick={skipTutorial}>
                     Skip Tutorial
                   </Button>
-                  
+
                   <div className="flex items-center gap-2">
                     {currentStep > 0 && (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => setCurrentStep(currentStep - 1)}
                       >
                         Back
                       </Button>
                     )}
-                    <Button 
-                      size="sm" 
-                      onClick={nextStep}
-                      className="flex items-center gap-2"
-                    >
+                    <Button size="sm" onClick={nextStep} className="flex items-center gap-2">
                       {isLastStep ? 'Finish' : 'Next'}
-                      {!isLastStep && <ArrowRight size={14} />}
+                      {!isLastStep && <ArrowRightIcon className="h-3.5 w-3.5" />}
                     </Button>
                   </div>
                 </div>
@@ -191,15 +180,18 @@ export function FlowTutorial({ onComplete }: FlowTutorialProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-50"
+            className="absolute bottom-8 left-1/2 z-50 -translate-x-1/2 transform"
           >
-            <div className="flex items-center gap-2 bg-background/90 backdrop-blur-sm rounded-full px-4 py-2 border">
+            <div className="bg-background/90 flex items-center gap-2 rounded-full border px-4 py-2 backdrop-blur-sm">
               {tutorialSteps.map((_, index) => (
                 <div
                   key={index}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    index === currentStep ? 'bg-primary' : 
-                    index < currentStep ? 'bg-primary/50' : 'bg-muted'
+                  className={`h-2 w-2 rounded-full transition-colors ${
+                    index === currentStep
+                      ? 'bg-primary'
+                      : index < currentStep
+                        ? 'bg-primary/50'
+                        : 'bg-muted'
                   }`}
                 />
               ))}

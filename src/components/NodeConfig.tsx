@@ -1,22 +1,20 @@
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Slider } from '@/components/ui/slider'
+import { Textarea } from '@/components/ui/textarea'
+import { useUnits } from '@/hooks/use-units'
+import { XIcon } from '@/lib/icons'
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { Slider } from "@/components/ui/slider"
-import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
-import { 
-  Clock,
-  MapPin,
-  Lightbulb,
-  Thermometer,
-  Lock,
-  Power,
-  X
-} from "@phosphor-icons/react"
 
 interface FlowNode {
   id: string
@@ -37,6 +35,7 @@ interface NodeConfigProps {
 
 export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
   const [nodeData, setNodeData] = useState(node.data || {})
+  const { formatTemperature, preferences } = useUnits()
 
   const updateNodeData = (key: string, value: any) => {
     const newData = { ...nodeData, [key]: value }
@@ -55,12 +54,12 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
                 id="time"
                 type="time"
                 value={nodeData.time || '09:00'}
-                onChange={(e) => updateNodeData('time', e.target.value)}
+                onChange={e => updateNodeData('time', e.target.value)}
               />
             </div>
             <div>
               <Label htmlFor="days">Days of Week</Label>
-              <div className="flex gap-2 mt-2">
+              <div className="mt-2 flex gap-2">
                 {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => (
                   <Button
                     key={day}
@@ -68,12 +67,12 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
                     size="sm"
                     onClick={() => {
                       const days = nodeData.days || []
-                      const newDays = days.includes(index) 
+                      const newDays = days.includes(index)
                         ? days.filter((d: number) => d !== index)
                         : [...days, index]
                       updateNodeData('days', newDays)
                     }}
-                    className="w-12 h-8 text-xs"
+                    className="h-8 w-12 text-xs"
                   >
                     {day}
                   </Button>
@@ -82,13 +81,16 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
             </div>
           </div>
         )
-      
+
       case 'location':
         return (
           <div className="space-y-4">
             <div>
               <Label htmlFor="location-type">Location Event</Label>
-              <Select value={nodeData.event || 'enter'} onValueChange={(value) => updateNodeData('event', value)}>
+              <Select
+                value={nodeData.event || 'enter'}
+                onValueChange={value => updateNodeData('event', value)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -110,19 +112,20 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
                 step={10}
                 className="mt-2"
               />
-              <div className="text-sm text-muted-foreground mt-1">
-                {nodeData.radius || 100}m
-              </div>
+              <div className="text-muted-foreground mt-1 text-sm">{nodeData.radius || 100}m</div>
             </div>
           </div>
         )
-      
+
       case 'device':
         return (
           <div className="space-y-4">
             <div>
               <Label htmlFor="device">Device</Label>
-              <Select value={nodeData.deviceId || ''} onValueChange={(value) => updateNodeData('deviceId', value)}>
+              <Select
+                value={nodeData.deviceId || ''}
+                onValueChange={value => updateNodeData('deviceId', value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select device" />
                 </SelectTrigger>
@@ -136,7 +139,10 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
             </div>
             <div>
               <Label htmlFor="state">State Change</Label>
-              <Select value={nodeData.state || 'on'} onValueChange={(value) => updateNodeData('state', value)}>
+              <Select
+                value={nodeData.state || 'on'}
+                onValueChange={value => updateNodeData('state', value)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -150,9 +156,9 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
             </div>
           </div>
         )
-      
+
       default:
-        return <div className="text-sm text-muted-foreground">No configuration available</div>
+        return <div className="text-muted-foreground text-sm">No configuration available</div>
     }
   }
 
@@ -167,7 +173,7 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
                 id="start-time"
                 type="time"
                 value={nodeData.startTime || '08:00'}
-                onChange={(e) => updateNodeData('startTime', e.target.value)}
+                onChange={e => updateNodeData('startTime', e.target.value)}
               />
             </div>
             <div>
@@ -176,18 +182,21 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
                 id="end-time"
                 type="time"
                 value={nodeData.endTime || '22:00'}
-                onChange={(e) => updateNodeData('endTime', e.target.value)}
+                onChange={e => updateNodeData('endTime', e.target.value)}
               />
             </div>
           </div>
         )
-      
+
       case 'temperature':
         return (
           <div className="space-y-4">
             <div>
               <Label htmlFor="temp-condition">Condition</Label>
-              <Select value={nodeData.condition || 'greater'} onValueChange={(value) => updateNodeData('condition', value)}>
+              <Select
+                value={nodeData.condition || 'greater'}
+                onValueChange={value => updateNodeData('condition', value)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -199,7 +208,9 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
               </Select>
             </div>
             <div>
-              <Label htmlFor="temperature">Temperature (°F)</Label>
+              <Label htmlFor="temperature">
+                Temperature ({preferences.temperature === 'fahrenheit' ? '°F' : '°C'})
+              </Label>
               <Slider
                 value={[nodeData.temperature || 70]}
                 onValueChange={([value]) => updateNodeData('temperature', value)}
@@ -208,19 +219,22 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
                 step={1}
                 className="mt-2"
               />
-              <div className="text-sm text-muted-foreground mt-1">
-                {nodeData.temperature || 70}°F
+              <div className="text-muted-foreground mt-1 text-sm">
+                {formatTemperature(nodeData.temperature || 70)}
               </div>
             </div>
           </div>
         )
-      
+
       case 'presence':
         return (
           <div className="space-y-4">
             <div>
               <Label htmlFor="presence-type">Presence Check</Label>
-              <Select value={nodeData.presenceType || 'anyone'} onValueChange={(value) => updateNodeData('presenceType', value)}>
+              <Select
+                value={nodeData.presenceType || 'anyone'}
+                onValueChange={value => updateNodeData('presenceType', value)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -233,9 +247,9 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
             </div>
           </div>
         )
-      
+
       default:
-        return <div className="text-sm text-muted-foreground">No configuration available</div>
+        return <div className="text-muted-foreground text-sm">No configuration available</div>
     }
   }
 
@@ -246,7 +260,10 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
           <div className="space-y-4">
             <div>
               <Label htmlFor="light-device">Light</Label>
-              <Select value={nodeData.deviceId || ''} onValueChange={(value) => updateNodeData('deviceId', value)}>
+              <Select
+                value={nodeData.deviceId || ''}
+                onValueChange={value => updateNodeData('deviceId', value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select light" />
                 </SelectTrigger>
@@ -260,7 +277,10 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
             </div>
             <div>
               <Label htmlFor="light-action">Action</Label>
-              <Select value={nodeData.action || 'turn_on'} onValueChange={(value) => updateNodeData('action', value)}>
+              <Select
+                value={nodeData.action || 'turn_on'}
+                onValueChange={value => updateNodeData('action', value)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -283,20 +303,23 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
                   step={5}
                   className="mt-2"
                 />
-                <div className="text-sm text-muted-foreground mt-1">
+                <div className="text-muted-foreground mt-1 text-sm">
                   {nodeData.brightness || 50}%
                 </div>
               </div>
             )}
           </div>
         )
-      
+
       case 'lock':
         return (
           <div className="space-y-4">
             <div>
               <Label htmlFor="lock-device">Lock</Label>
-              <Select value={nodeData.deviceId || ''} onValueChange={(value) => updateNodeData('deviceId', value)}>
+              <Select
+                value={nodeData.deviceId || ''}
+                onValueChange={value => updateNodeData('deviceId', value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select lock" />
                 </SelectTrigger>
@@ -309,7 +332,10 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
             </div>
             <div>
               <Label htmlFor="lock-action">Action</Label>
-              <Select value={nodeData.action || 'lock'} onValueChange={(value) => updateNodeData('action', value)}>
+              <Select
+                value={nodeData.action || 'lock'}
+                onValueChange={value => updateNodeData('action', value)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -321,13 +347,16 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
             </div>
           </div>
         )
-      
+
       case 'thermostat':
         return (
           <div className="space-y-4">
             <div>
               <Label htmlFor="thermostat-mode">Mode</Label>
-              <Select value={nodeData.mode || 'heat'} onValueChange={(value) => updateNodeData('mode', value)}>
+              <Select
+                value={nodeData.mode || 'heat'}
+                onValueChange={value => updateNodeData('mode', value)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -340,7 +369,9 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
               </Select>
             </div>
             <div>
-              <Label htmlFor="target-temp">Target Temperature (°F)</Label>
+              <Label htmlFor="target-temp">
+                Target Temperature ({preferences.temperature === 'fahrenheit' ? '°F' : '°C'})
+              </Label>
               <Slider
                 value={[nodeData.targetTemp || 72]}
                 onValueChange={([value]) => updateNodeData('targetTemp', value)}
@@ -349,19 +380,22 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
                 step={1}
                 className="mt-2"
               />
-              <div className="text-sm text-muted-foreground mt-1">
-                {nodeData.targetTemp || 72}°F
+              <div className="text-muted-foreground mt-1 text-sm">
+                {formatTemperature(nodeData.targetTemp || 72)}
               </div>
             </div>
           </div>
         )
-      
+
       case 'scene':
         return (
           <div className="space-y-4">
             <div>
               <Label htmlFor="scene">Scene</Label>
-              <Select value={nodeData.sceneId || ''} onValueChange={(value) => updateNodeData('sceneId', value)}>
+              <Select
+                value={nodeData.sceneId || ''}
+                onValueChange={value => updateNodeData('sceneId', value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select scene" />
                 </SelectTrigger>
@@ -375,9 +409,9 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
             </div>
           </div>
         )
-      
+
       default:
-        return <div className="text-sm text-muted-foreground">No configuration available</div>
+        return <div className="text-muted-foreground text-sm">No configuration available</div>
     }
   }
 
@@ -386,25 +420,25 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
       <div className="space-y-4">
         <div>
           <Label htmlFor="delay-duration">Duration</Label>
-          <div className="flex gap-2 mt-2">
+          <div className="mt-2 flex gap-2">
             <Input
               type="number"
               value={nodeData.hours || 0}
-              onChange={(e) => updateNodeData('hours', parseInt(e.target.value) || 0)}
+              onChange={e => updateNodeData('hours', parseInt(e.target.value) || 0)}
               placeholder="Hours"
               className="flex-1"
             />
             <Input
               type="number"
               value={nodeData.minutes || 5}
-              onChange={(e) => updateNodeData('minutes', parseInt(e.target.value) || 0)}
+              onChange={e => updateNodeData('minutes', parseInt(e.target.value) || 0)}
               placeholder="Minutes"
               className="flex-1"
             />
             <Input
               type="number"
               value={nodeData.seconds || 0}
-              onChange={(e) => updateNodeData('seconds', parseInt(e.target.value) || 0)}
+              onChange={e => updateNodeData('seconds', parseInt(e.target.value) || 0)}
               placeholder="Seconds"
               className="flex-1"
             />
@@ -415,7 +449,7 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
           <Textarea
             id="delay-description"
             value={nodeData.description || ''}
-            onChange={(e) => updateNodeData('description', e.target.value)}
+            onChange={e => updateNodeData('description', e.target.value)}
             placeholder="Optional delay description..."
             className="mt-2"
           />
@@ -435,7 +469,7 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
       case 'delay':
         return renderDelayConfig()
       default:
-        return <div className="text-sm text-muted-foreground">Unknown node type</div>
+        return <div className="text-muted-foreground text-sm">Unknown node type</div>
     }
   }
 
@@ -444,24 +478,22 @@ export function NodeConfig({ node, onUpdate, onClose }: NodeConfigProps) {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+            <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-lg">
               <node.icon size={16} className="text-white" />
             </div>
             <div>
               <CardTitle className="text-sm">{node.label}</CardTitle>
-              <Badge variant="outline" className="text-xs capitalize mt-1">
+              <Badge variant="outline" className="mt-1 text-xs capitalize">
                 {node.type}
               </Badge>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="w-8 h-8">
-            <X size={16} />
+          <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
+            <XIcon size={16} />
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
-        {renderConfig()}
-      </CardContent>
+      <CardContent className="pt-0">{renderConfig()}</CardContent>
     </Card>
   )
 }

@@ -1,0 +1,23 @@
+# Lighthouse Performance Baselines - .gitignore
+
+# Ignore generated reports (can be large)
+reports/*.html
+reports/*.json
+
+# Keep baseline JSONs (these are small and important for tracking)
+# Comment out the line below if you want to version baselines
+# baselines/*.json
+
+# Keep latest baselines in git for CI/CD
+!baselines/baseline-desktop-latest.json
+!baselines/baseline-mobile-latest.json
+
+# Ignore timestamped backups (keep them local)
+baselines/baseline-*-[0-9]*.json
+
+# Ignore Chrome user data
+.chrome-user-data/
+
+# Ignore temporary files
+*.tmp
+*.log

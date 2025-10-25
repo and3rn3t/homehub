@@ -1,27 +1,24 @@
-import { useKV } from '@github/spark/hooks'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { 
-  Bell,
-  BellOff,
-  Shield,
-  Activity,
-  Clock,
-  Battery,
-  Wifi,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  Settings as SettingsIcon
-} from "@phosphor-icons/react"
-import { motion } from "framer-motion"
-import { toast } from "sonner"
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
+import { Switch } from '@/components/ui/switch'
+import { useKV } from '@/hooks/use-kv'
+import {
+  AlertTriangleIcon,
+  BatteryLowIcon,
+  BellIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  LineChartIcon,
+  SettingsIcon,
+  ShieldIcon,
+  WifiIcon,
+  XCircleIcon,
+} from '@/lib/icons'
+import { toast } from 'sonner'
 
 interface MonitoringSettings {
   alertsEnabled: boolean
@@ -61,7 +58,7 @@ interface SecuritySettings {
 }
 
 export function MonitoringSettings() {
-  const [settings, setSettings] = useKV<MonitoringSettings>("monitoring-settings", {
+  const [settings, setSettings] = useKV<MonitoringSettings>('monitoring-settings', {
     alertsEnabled: true,
     offlineThreshold: 10,
     batteryThreshold: 20,
@@ -78,48 +75,60 @@ export function MonitoringSettings() {
       battery: true,
       signal: true,
       security: true,
-      maintenance: true
-    }
+      maintenance: true,
+    },
   })
 
-  const [networkSettings, setNetworkSettings] = useKV<NetworkSettings>("network-settings", {
+  const [networkSettings, setNetworkSettings] = useKV<NetworkSettings>('network-settings', {
     pingInterval: 60,
     timeoutThreshold: 10,
     signalQualityChecks: true,
     bandwidthMonitoring: false,
-    latencyMonitoring: true
+    latencyMonitoring: true,
   })
 
-  const [securitySettings, setSecuritySettings] = useKV<SecuritySettings>("security-settings", {
+  const [securitySettings, setSecuritySettings] = useKV<SecuritySettings>('security-settings', {
     intrusion: true,
     tampering: true,
     unauthorizedAccess: true,
     deviceRemoval: true,
-    encryptionChecks: false
+    encryptionChecks: false,
   })
 
-  const updateSetting = <T extends keyof MonitoringSettings>(key: T, value: MonitoringSettings[T]) => {
+  const updateSetting = <T extends keyof MonitoringSettings>(
+    key: T,
+    value: MonitoringSettings[T]
+  ) => {
     setSettings(current => ({ ...current, [key]: value }))
-    toast.success("Settings updated")
+    toast.success('Settings updated')
   }
 
-  const updateNetworkSetting = <T extends keyof NetworkSettings>(key: T, value: NetworkSettings[T]) => {
+  const updateNetworkSetting = <T extends keyof NetworkSettings>(
+    key: T,
+    value: NetworkSettings[T]
+  ) => {
     setNetworkSettings(current => ({ ...current, [key]: value }))
-    toast.success("Network settings updated")
+    toast.success('Network settings updated')
   }
 
-  const updateSecuritySetting = <T extends keyof SecuritySettings>(key: T, value: SecuritySettings[T]) => {
+  const updateSecuritySetting = <T extends keyof SecuritySettings>(
+    key: T,
+    value: SecuritySettings[T]
+  ) => {
     setSecuritySettings(current => ({ ...current, [key]: value }))
-    toast.success("Security settings updated")
+    toast.success('Security settings updated')
   }
 
-  const updateAlertCategory = (category: keyof MonitoringSettings['alertCategories'], enabled: boolean) => {
+  const updateAlertCategory = (
+    category: keyof MonitoringSettings['alertCategories'],
+    enabled: boolean
+  ) => {
     setSettings(current => ({
       ...current,
       alertCategories: {
         ...current.alertCategories,
-        [category]: enabled
-      }
+        [category]: enabled,
+      },
     }))
     toast.success(`${category} alerts ${enabled ? 'enabled' : 'disabled'}`)
   }
@@ -142,18 +151,29 @@ export function MonitoringSettings() {
         battery: true,
         signal: true,
         security: true,
-        maintenance: true
-      }
+        maintenance: true,
+      },
     })
-    toast.success("Settings reset to defaults")
+    toast.success('Settings reset to defaults')
+  }
+
+  // Safety check: ensure all settings are loaded before rendering
+  if (!settings || !networkSettings || !securitySettings) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground">Loading settings...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       <div className="p-6 pb-4">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Monitoring Settings</h1>
+            <h1 className="text-foreground text-2xl font-bold">Monitoring Settings</h1>
             <p className="text-muted-foreground">Configure device monitoring and alerts</p>
           </div>
           <Button variant="outline" onClick={resetToDefaults}>
@@ -168,7 +188,7 @@ export function MonitoringSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Bell size={20} className="text-primary" />
+                <BellIcon size={20} className="text-primary" />
                 Alert Configuration
               </CardTitle>
             </CardHeader>
@@ -176,17 +196,19 @@ export function MonitoringSettings() {
               <div className="flex items-center justify-between">
                 <div>
                   <Label className="text-base font-medium">Enable Alerts</Label>
-                  <p className="text-sm text-muted-foreground">Master switch for all monitoring alerts</p>
+                  <p className="text-muted-foreground text-sm">
+                    Master switch for all monitoring alerts
+                  </p>
                 </div>
                 <Switch
                   checked={settings.alertsEnabled}
-                  onCheckedChange={(checked) => updateSetting('alertsEnabled', checked)}
+                  onCheckedChange={checked => updateSetting('alertsEnabled', checked)}
                 />
               </div>
 
               <Separator />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Offline Threshold</Label>
                   <div className="flex items-center gap-2">
@@ -195,12 +217,14 @@ export function MonitoringSettings() {
                       min="1"
                       max="60"
                       value={settings.offlineThreshold}
-                      onChange={(e) => updateSetting('offlineThreshold', parseInt(e.target.value))}
+                      onChange={e => updateSetting('offlineThreshold', parseInt(e.target.value))}
                       className="w-20"
                     />
-                    <span className="text-sm text-muted-foreground">minutes</span>
+                    <span className="text-muted-foreground text-sm">minutes</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">Alert when device is offline for this duration</p>
+                  <p className="text-muted-foreground text-xs">
+                    Alert when device is offline for this duration
+                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -211,12 +235,14 @@ export function MonitoringSettings() {
                       min="5"
                       max="50"
                       value={settings.batteryThreshold}
-                      onChange={(e) => updateSetting('batteryThreshold', parseInt(e.target.value))}
+                      onChange={e => updateSetting('batteryThreshold', parseInt(e.target.value))}
                       className="w-20"
                     />
-                    <span className="text-sm text-muted-foreground">%</span>
+                    <span className="text-muted-foreground text-sm">%</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">Alert when battery drops below this level</p>
+                  <p className="text-muted-foreground text-xs">
+                    Alert when battery drops below this level
+                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -227,12 +253,14 @@ export function MonitoringSettings() {
                       min="10"
                       max="80"
                       value={settings.signalThreshold}
-                      onChange={(e) => updateSetting('signalThreshold', parseInt(e.target.value))}
+                      onChange={e => updateSetting('signalThreshold', parseInt(e.target.value))}
                       className="w-20"
                     />
-                    <span className="text-sm text-muted-foreground">%</span>
+                    <span className="text-muted-foreground text-sm">%</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">Alert when signal strength drops below this level</p>
+                  <p className="text-muted-foreground text-xs">
+                    Alert when signal strength drops below this level
+                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -243,12 +271,12 @@ export function MonitoringSettings() {
                       min="10"
                       max="300"
                       value={settings.heartbeatInterval}
-                      onChange={(e) => updateSetting('heartbeatInterval', parseInt(e.target.value))}
+                      onChange={e => updateSetting('heartbeatInterval', parseInt(e.target.value))}
                       className="w-20"
                     />
-                    <span className="text-sm text-muted-foreground">seconds</span>
+                    <span className="text-muted-foreground text-sm">seconds</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">How often to check device status</p>
+                  <p className="text-muted-foreground text-xs">How often to check device status</p>
                 </div>
               </div>
             </CardContent>
@@ -258,7 +286,7 @@ export function MonitoringSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <AlertTriangle size={20} className="text-primary" />
+                <AlertTriangleIcon className="text-primary h-5 w-5" />
                 Notification Methods
               </CardTitle>
             </CardHeader>
@@ -266,44 +294,48 @@ export function MonitoringSettings() {
               <div className="flex items-center justify-between">
                 <div>
                   <Label className="text-base font-medium">Sound Alerts</Label>
-                  <p className="text-sm text-muted-foreground">Play notification sounds for alerts</p>
+                  <p className="text-muted-foreground text-sm">
+                    Play notification sounds for alerts
+                  </p>
                 </div>
                 <Switch
                   checked={settings.soundAlerts}
-                  onCheckedChange={(checked) => updateSetting('soundAlerts', checked)}
+                  onCheckedChange={checked => updateSetting('soundAlerts', checked)}
                 />
               </div>
 
               <div className="flex items-center justify-between">
                 <div>
                   <Label className="text-base font-medium">Push Notifications</Label>
-                  <p className="text-sm text-muted-foreground">Show browser notifications</p>
+                  <p className="text-muted-foreground text-sm">Show browser notifications</p>
                 </div>
                 <Switch
                   checked={settings.pushNotifications}
-                  onCheckedChange={(checked) => updateSetting('pushNotifications', checked)}
+                  onCheckedChange={checked => updateSetting('pushNotifications', checked)}
                 />
               </div>
 
               <div className="flex items-center justify-between">
                 <div>
                   <Label className="text-base font-medium">Email Notifications</Label>
-                  <p className="text-sm text-muted-foreground">Send alerts via email</p>
+                  <p className="text-muted-foreground text-sm">Send alerts via email</p>
                 </div>
                 <Switch
                   checked={settings.emailNotifications}
-                  onCheckedChange={(checked) => updateSetting('emailNotifications', checked)}
+                  onCheckedChange={checked => updateSetting('emailNotifications', checked)}
                 />
               </div>
 
               <div className="flex items-center justify-between">
                 <div>
                   <Label className="text-base font-medium">Auto Acknowledge</Label>
-                  <p className="text-sm text-muted-foreground">Automatically mark low priority alerts as read</p>
+                  <p className="text-muted-foreground text-sm">
+                    Automatically mark low priority alerts as read
+                  </p>
                 </div>
                 <Switch
                   checked={settings.autoAcknowledge}
-                  onCheckedChange={(checked) => updateSetting('autoAcknowledge', checked)}
+                  onCheckedChange={checked => updateSetting('autoAcknowledge', checked)}
                 />
               </div>
             </CardContent>
@@ -318,38 +350,46 @@ export function MonitoringSettings() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {Object.entries(settings.alertCategories).map(([category, enabled]) => {
-                const icons = {
-                  offline: XCircle,
-                  battery: Battery,
-                  signal: Wifi,
-                  security: Shield,
-                  maintenance: Clock
-                }
-                const IconComponent = icons[category as keyof typeof icons]
-                
-                return (
-                  <div key={category} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <IconComponent size={18} className="text-muted-foreground" />
-                      <div>
-                        <Label className="text-base font-medium capitalize">{category} Alerts</Label>
-                        <p className="text-sm text-muted-foreground">
-                          {category === 'offline' && 'Device connectivity issues'}
-                          {category === 'battery' && 'Low battery warnings'}
-                          {category === 'signal' && 'Weak signal strength alerts'}
-                          {category === 'security' && 'Security breach notifications'}
-                          {category === 'maintenance' && 'Scheduled maintenance reminders'}
-                        </p>
+              {settings.alertCategories &&
+                Object.entries(settings.alertCategories).map(([category, enabled]) => {
+                  const icons = {
+                    offline: XCircleIcon,
+                    battery: BatteryLowIcon,
+                    signal: WifiIcon,
+                    security: ShieldIcon,
+                    maintenance: ClockIcon,
+                  }
+                  const IconComponent = icons[category as keyof typeof icons]
+
+                  return (
+                    <div key={category} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <IconComponent size={18} className="text-muted-foreground" />
+                        <div>
+                          <Label className="text-base font-medium capitalize">
+                            {category} Alerts
+                          </Label>
+                          <p className="text-muted-foreground text-sm">
+                            {category === 'offline' && 'Device connectivity issues'}
+                            {category === 'battery' && 'Low battery warnings'}
+                            {category === 'signal' && 'Weak signal strength alerts'}
+                            {category === 'security' && 'Security breach notifications'}
+                            {category === 'maintenance' && 'Scheduled maintenance reminders'}
+                          </p>
+                        </div>
                       </div>
+                      <Switch
+                        checked={enabled}
+                        onCheckedChange={checked =>
+                          updateAlertCategory(
+                            category as keyof MonitoringSettings['alertCategories'],
+                            checked
+                          )
+                        }
+                      />
                     </div>
-                    <Switch
-                      checked={enabled}
-                      onCheckedChange={(checked) => updateAlertCategory(category as keyof MonitoringSettings['alertCategories'], checked)}
-                    />
-                  </div>
-                )
-              })}
+                  )
+                })}
             </CardContent>
           </Card>
 
@@ -357,12 +397,12 @@ export function MonitoringSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Wifi size={20} className="text-primary" />
+                <WifiIcon className="text-primary h-5 w-5" />
                 Network Monitoring
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Ping Interval</Label>
                   <div className="flex items-center gap-2">
@@ -371,10 +411,10 @@ export function MonitoringSettings() {
                       min="30"
                       max="300"
                       value={networkSettings.pingInterval}
-                      onChange={(e) => updateNetworkSetting('pingInterval', parseInt(e.target.value))}
+                      onChange={e => updateNetworkSetting('pingInterval', parseInt(e.target.value))}
                       className="w-20"
                     />
-                    <span className="text-sm text-muted-foreground">seconds</span>
+                    <span className="text-muted-foreground text-sm">seconds</span>
                   </div>
                 </div>
 
@@ -386,10 +426,12 @@ export function MonitoringSettings() {
                       min="5"
                       max="30"
                       value={networkSettings.timeoutThreshold}
-                      onChange={(e) => updateNetworkSetting('timeoutThreshold', parseInt(e.target.value))}
+                      onChange={e =>
+                        updateNetworkSetting('timeoutThreshold', parseInt(e.target.value))
+                      }
                       className="w-20"
                     />
-                    <span className="text-sm text-muted-foreground">seconds</span>
+                    <span className="text-muted-foreground text-sm">seconds</span>
                   </div>
                 </div>
               </div>
@@ -400,22 +442,26 @@ export function MonitoringSettings() {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label className="text-base font-medium">Signal Quality Checks</Label>
-                    <p className="text-sm text-muted-foreground">Monitor wireless signal strength</p>
+                    <p className="text-muted-foreground text-sm">
+                      Monitor wireless signal strength
+                    </p>
                   </div>
                   <Switch
                     checked={networkSettings.signalQualityChecks}
-                    onCheckedChange={(checked) => updateNetworkSetting('signalQualityChecks', checked)}
+                    onCheckedChange={checked =>
+                      updateNetworkSetting('signalQualityChecks', checked)
+                    }
                   />
                 </div>
 
                 <div className="flex items-center justify-between">
                   <div>
                     <Label className="text-base font-medium">Latency Monitoring</Label>
-                    <p className="text-sm text-muted-foreground">Track network response times</p>
+                    <p className="text-muted-foreground text-sm">Track network response times</p>
                   </div>
                   <Switch
                     checked={networkSettings.latencyMonitoring}
-                    onCheckedChange={(checked) => updateNetworkSetting('latencyMonitoring', checked)}
+                    onCheckedChange={checked => updateNetworkSetting('latencyMonitoring', checked)}
                   />
                 </div>
               </div>
@@ -426,31 +472,34 @@ export function MonitoringSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Shield size={20} className="text-primary" />
+                <ShieldIcon size={20} className="text-primary" />
                 Security Monitoring
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {Object.entries(securitySettings).map(([setting, enabled]) => (
-                <div key={setting} className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-base font-medium capitalize">
-                      {setting.replace(/([A-Z])/g, ' $1').trim()}
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      {setting === 'intrusion' && 'Detect unauthorized access attempts'}
-                      {setting === 'tampering' && 'Monitor device physical tampering'}
-                      {setting === 'unauthorizedAccess' && 'Track unauthorized login attempts'}
-                      {setting === 'deviceRemoval' && 'Alert when devices are removed'}
-                      {setting === 'encryptionChecks' && 'Verify encryption status'}
-                    </p>
+              {securitySettings &&
+                Object.entries(securitySettings).map(([setting, enabled]) => (
+                  <div key={setting} className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base font-medium capitalize">
+                        {setting.replace(/([A-Z])/g, ' $1').trim()}
+                      </Label>
+                      <p className="text-muted-foreground text-sm">
+                        {setting === 'intrusion' && 'Detect unauthorized access attempts'}
+                        {setting === 'tampering' && 'Monitor device physical tampering'}
+                        {setting === 'unauthorizedAccess' && 'Track unauthorized login attempts'}
+                        {setting === 'deviceRemoval' && 'Alert when devices are removed'}
+                        {setting === 'encryptionChecks' && 'Verify encryption status'}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={enabled}
+                      onCheckedChange={checked =>
+                        updateSecuritySetting(setting as keyof SecuritySettings, checked)
+                      }
+                    />
                   </div>
-                  <Switch
-                    checked={enabled}
-                    onCheckedChange={(checked) => updateSecuritySetting(setting as keyof SecuritySettings, checked)}
-                  />
-                </div>
-              ))}
+                ))}
             </CardContent>
           </Card>
 
@@ -458,23 +507,26 @@ export function MonitoringSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Activity size={20} className="text-primary" />
+                <LineChartIcon size={20} className="text-primary" />
                 System Status
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="flex items-center gap-2">
-                  <CheckCircle size={16} className="text-green-500" />
+                  <CheckCircleIcon size={16} className="text-green-500" />
                   <span className="text-sm">Monitoring Active</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle size={16} className="text-green-500" />
+                  <CheckCircleIcon size={16} className="text-green-500" />
                   <span className="text-sm">Network Connected</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant={settings.maintenanceMode ? "destructive" : "default"} className="h-5">
-                    {settings.maintenanceMode ? "Maintenance Mode" : "Normal Operation"}
+                  <Badge
+                    variant={settings.maintenanceMode ? 'destructive' : 'default'}
+                    className="h-5"
+                  >
+                    {settings.maintenanceMode ? 'Maintenance Mode' : 'Normal Operation'}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">

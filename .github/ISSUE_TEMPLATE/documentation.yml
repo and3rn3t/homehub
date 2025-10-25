@@ -1,0 +1,69 @@
+name: 📚 Documentation Issue
+description: Report missing, unclear, or incorrect documentation
+title: '[Docs]: '
+labels: ['documentation', 'needs-triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve our documentation!
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Documentation Type
+      description: What type of documentation issue is this?
+      options:
+        - Missing documentation
+        - Incorrect information
+        - Unclear/confusing
+        - Typo/formatting
+        - Broken link
+        - Outdated
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: Document Location
+      description: Which file or page has the issue?
+      placeholder: 'docs/guides/SETUP_QUICKSTART.md'
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue
+    attributes:
+      label: What's Wrong?
+      description: Describe the issue with the documentation
+      placeholder: Explain what's missing, incorrect, or unclear
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested Improvement
+      description: How should the documentation be improved?
+      placeholder: What would you like to see instead?
+    validations:
+      required: false
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Documentation Category
+      description: Which category does this documentation belong to?
+      options:
+        - Guides (Setup, Configuration)
+        - Development (Phase docs, milestones)
+        - Deployment (Cloudflare, production)
+        - API Reference
+        - Architecture
+        - History/Archive
+        - README
+        - Other
+    validations:
+      required: false

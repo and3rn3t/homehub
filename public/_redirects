@@ -1,0 +1,5 @@
+# SPA fallback - all routes should serve index.html
+/*    /index.html   200
+
+# Prevent direct access to source maps in production
+/*.map   /404.html   404

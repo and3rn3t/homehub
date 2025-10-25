@@ -1,0 +1,171 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch: # Allow manual triggering
+
+# Optimize concurrency - cancel in-progress runs for same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test & Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+      fail-fast: false # Continue other matrix jobs even if one fails
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          # Speed up installation
+          HUSKY: 0
+          CI: true
+
+      # Run checks in parallel for faster feedback
+      - name: Type check
+        run: npm run type-check
+        if: always() # Run even if previous steps fail
+
+      - name: Lint
+        run: npm run lint
+        if: always()
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      - name: Generate coverage summary
+        if: matrix.node-version == '20.x'
+        run: node scripts/get-coverage.cjs > coverage-summary.txt
+
+      - name: Upload coverage reports
+        if: matrix.node-version == '20.x'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            coverage/
+            coverage-summary.txt
+          retention-days: 30
+
+      - name: Check coverage thresholds
+        if: matrix.node-version == '20.x'
+        run: |
+          node -e "
+            const fs = require('fs');
+            const coverage = JSON.parse(fs.readFileSync('coverage/coverage-final.json', 'utf8'));
+
+            // Calculate Tier 1 coverage
+            const tier1Files = ['use-kv.ts', 'HTTPScanner.ts', 'HueBridgeAdapter.ts'];
+            let totalStatements = 0, totalBranches = 0, totalFunctions = 0, fileCount = 0;
+
+            Object.entries(coverage).forEach(([file, data]) => {
+              if (tier1Files.some(t1 => file.includes(t1))) {
+                const stmts = (data.s && Object.keys(data.s).length > 0)
+                  ? (Object.values(data.s).filter(v => v > 0).length / Object.keys(data.s).length) * 100
+                  : 0;
+                const branches = (data.b && Object.keys(data.b).length > 0)
+                  ? (Object.values(data.b).flat().filter(v => v > 0).length / Object.values(data.b).flat().length) * 100
+                  : 0;
+                const funcs = (data.f && Object.keys(data.f).length > 0)
+                  ? (Object.values(data.f).filter(v => v > 0).length / Object.keys(data.f).length) * 100
+                  : 0;
+                totalStatements += stmts;
+                totalBranches += branches;
+                totalFunctions += funcs;
+                fileCount++;
+              }
+            });
+
+            const avgStatements = totalStatements / fileCount;
+            const avgBranches = totalBranches / fileCount;
+            const avgFunctions = totalFunctions / fileCount;
+
+            console.log('Coverage Results:');
+            console.log('  Statements:', avgStatements.toFixed(2) + '%');
+            console.log('  Branches:', avgBranches.toFixed(2) + '%');
+            console.log('  Functions:', avgFunctions.toFixed(2) + '%');
+
+            // Quality gates
+            const STATEMENT_THRESHOLD = 90;
+            const BRANCH_THRESHOLD = 85;
+            const FUNCTION_THRESHOLD = 95;
+
+            if (avgStatements < STATEMENT_THRESHOLD) {
+              console.error('❌ Statement coverage below threshold:', avgStatements.toFixed(2) + '% < ' + STATEMENT_THRESHOLD + '%');
+              process.exit(1);
+            }
+            if (avgBranches < BRANCH_THRESHOLD) {
+              console.error('❌ Branch coverage below threshold:', avgBranches.toFixed(2) + '% < ' + BRANCH_THRESHOLD + '%');
+              process.exit(1);
+            }
+            if (avgFunctions < FUNCTION_THRESHOLD) {
+              console.error('❌ Function coverage below threshold:', avgFunctions.toFixed(2) + '% < ' + FUNCTION_THRESHOLD + '%');
+              process.exit(1);
+            }
+
+            console.log('✅ All coverage thresholds met!');
+          "
+
+      - name: Comment PR with coverage
+        if: github.event_name == 'pull_request' && matrix.node-version == '20.x'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('coverage-summary.txt', 'utf8');
+
+            const comment = `## 📊 Test Coverage Report\n\n\`\`\`\n${summary}\n\`\`\`\n\n✅ All tests passing!`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7

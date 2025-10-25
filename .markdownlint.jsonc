@@ -1,0 +1,73 @@
+{
+  // HomeHub Markdown Linting Configuration
+  // See: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+
+  // Files to ignore
+  "ignores": [
+    "node_modules/**",
+    "workers/node_modules/**",
+    "**/node_modules/**",
+    ".markdownlintignore",
+  ],
+
+  // Default: all rules enabled
+  "default": true,
+
+  // Line length - disable for code blocks and tables
+  "MD013": {
+    "line_length": 120,
+    "heading_line_length": 120,
+    "code_block_line_length": 150,
+    "code_blocks": false,
+    "tables": false,
+    "headings": false,
+  },
+
+  // Inline HTML - allow for complex layouts and badges
+  "MD033": false,
+
+  // Multiple headings with same content - allow (common in changelogs)
+  "MD024": {
+    "siblings_only": true,
+  },
+
+  // Bare URLs - allow (useful in documentation)
+  "MD034": false,
+
+  // First line in file should be top-level heading - allow exceptions
+  "MD041": false,
+
+  // Code block style - use fenced (```) consistently
+  "MD046": {
+    "style": "fenced",
+  },
+
+  // Emphasis style - use asterisks consistently
+  "MD049": {
+    "style": "asterisk",
+  },
+
+  // Strong style - use asterisks consistently
+  "MD050": {
+    "style": "asterisk",
+  },
+
+  // Link style - use inline consistently
+  "MD051": false,
+
+  // Trailing punctuation in headings - allow (useful for questions)
+  "MD026": {
+    "punctuation": ".,;:!",
+  },
+
+  // Ordered list item prefix - use ordered (1. 2. 3.)
+  "MD029": {
+    "style": "ordered",
+  },
+
+  // Blank lines around fences - require for readability
+  "MD031": true,
+
+  // Blanks around lists - require for readability
+  "MD032": true,
+}

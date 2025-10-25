@@ -1,30 +1,50 @@
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  COLORBLIND_MODE_INFO,
+  getStatusClasses,
+  type ColorblindMode,
+} from '@/constants/colorblind-palettes'
+import { useKV } from '@/hooks/use-kv'
+import {
+  BellIcon,
+  CheckIcon,
+  CogIcon,
+  EyeIcon,
+  LineChartIcon,
+  PlusIcon,
+  SettingsIcon,
+  ShieldIcon,
+  WifiIcon,
+} from '@/lib/icons'
+import { cn } from '@/lib/utils'
+import { motion } from 'framer-motion'
 import { useState } from 'react'
-import { useKV } from '@github/spark/hooks'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
-  Settings, 
-  Bell, 
-  Shield, 
-  Wifi, 
-  Plus,
-  Check,
-  Activity
-} from "@phosphor-icons/react"
-import { motion } from "framer-motion"
-import { toast } from "sonner"
+import { toast } from 'sonner'
+import { AdaptiveLighting } from './AdaptiveLighting'
+import { Intercom } from './Intercom'
 import { MonitoringSettings } from './MonitoringSettings'
+import { UnitSettings } from './UnitSettings'
 
 interface Integration {
   id: string
   name: string
-  type: 'homekit' | 'alexa' | 'google' | 'matter'
+  type: 'homekit' | 'alexa' | 'google' | 'matter' | 'thread' | 'zigbee' | 'zwave'
   status: 'connected' | 'disconnected' | 'error'
   enabled: boolean
   devices: number
+  protocol?: string
+  details?: string
 }
 
 interface SystemSetting {
@@ -36,114 +56,164 @@ interface SystemSetting {
 }
 
 const integrationIcons = {
-  homekit: Wifi,
-  alexa: Bell,
-  google: Wifi,
-  matter: Check
+  homekit: WifiIcon,
+  alexa: BellIcon,
+  google: WifiIcon,
+  matter: CheckIcon,
+  thread: LineChartIcon,
+  zigbee: LineChartIcon,
+  zwave: LineChartIcon,
 }
 
 const categoryIcons = {
-  security: Shield,
-  notifications: Bell,
-  automation: Settings,
-  system: Settings
+  security: ShieldIcon,
+  notifications: BellIcon,
+  automation: CogIcon,
+  system: CogIcon,
 }
 
 export function DeviceSettings() {
-  const [currentTab, setCurrentTab] = useState("integrations")
-  const [integrations, setIntegrations] = useKV<Integration[]>("integrations", [
+  const [currentTab, setCurrentTab] = useState('integrations')
+  const [integrations, setIntegrations] = useKV<Integration[]>('integrations', [
     {
-      id: "homekit",
-      name: "Apple HomeKit", 
-      type: "homekit",
-      status: "connected",
+      id: 'homekit',
+      name: 'Apple HomeKit',
+      type: 'homekit',
+      status: 'connected',
       enabled: true,
-      devices: 4
+      devices: 4,
+      protocol: 'Voice Assistant',
     },
     {
-      id: "alexa",
-      name: "Amazon Alexa",
-      type: "alexa", 
-      status: "disconnected",
+      id: 'alexa',
+      name: 'Amazon Alexa',
+      type: 'alexa',
+      status: 'disconnected',
       enabled: false,
-      devices: 0
+      devices: 0,
+      protocol: 'Voice Assistant',
     },
     {
-      id: "google",
-      name: "Google Assistant",
-      type: "google",
-      status: "connected", 
+      id: 'google',
+      name: 'Google Assistant',
+      type: 'google',
+      status: 'connected',
       enabled: true,
-      devices: 3
-    }
-  ])
-  const [systemSettings, setSystemSettings] = useKV<SystemSetting[]>("system-settings", [
-    {
-      id: "auto-discovery",
-      name: "Auto Device Discovery",
-      description: "Automatically detect new devices on your network",
-      enabled: true,
-      category: "system"
+      devices: 3,
+      protocol: 'Voice Assistant',
     },
     {
-      id: "offline-mode", 
-      name: "Offline Mode",
-      description: "Continue operating without internet connection",
+      id: 'thread',
+      name: 'Thread Network',
+      type: 'thread',
+      status: 'connected',
+      enabled: true,
+      devices: 8,
+      protocol: 'Low-Power Mesh',
+      details: 'Border Router Active',
+    },
+    {
+      id: 'zigbee',
+      name: 'Zigbee',
+      type: 'zigbee',
+      status: 'connected',
+      enabled: true,
+      devices: 12,
+      protocol: 'Mesh Network',
+      details: 'ConBee II Coordinator',
+    },
+    {
+      id: 'zwave',
+      name: 'Z-Wave',
+      type: 'zwave',
+      status: 'disconnected',
       enabled: false,
-      category: "system"
-    }
+      devices: 0,
+      protocol: 'Mesh Network',
+      details: 'No controller detected',
+    },
+    {
+      id: 'matter',
+      name: 'Matter',
+      type: 'matter',
+      status: 'connected',
+      enabled: true,
+      devices: 5,
+      protocol: 'Universal Standard',
+      details: 'Controller Active',
+    },
   ])
-  const [notifications, setNotifications] = useKV("notifications-enabled", true)
-  const [autoUpdates, setAutoUpdates] = useKV("auto-updates", true)
-  const [geofencing, setGeofencing] = useKV("geofencing-enabled", false)
+  const [systemSettings, setSystemSettings] = useKV<SystemSetting[]>('system-settings', [
+    {
+      id: 'auto-discovery',
+      name: 'Auto Device Discovery',
+      description: 'Automatically detect new devices on your network',
+      enabled: true,
+      category: 'system',
+    },
+    {
+      id: 'offline-mode',
+      name: 'Offline Mode',
+      description: 'Continue operating without internet connection',
+      enabled: false,
+      category: 'system',
+    },
+  ])
+  const [notifications, setNotifications] = useKV('notifications-enabled', true)
+  const [autoUpdates, setAutoUpdates] = useKV('auto-updates', true)
+  const [geofencing, setGeofencing] = useKV('geofencing-enabled', false)
+  const [colorblindMode, setColorblindMode] = useKV<ColorblindMode>('colorblind-mode', 'default')
+  const [highContrastMode, setHighContrastMode] = useKV('high-contrast-mode', false)
 
   const toggleIntegration = (integrationId: string) => {
-    setIntegrations(currentIntegrations => 
-      currentIntegrations.map(integration => 
-        integration.id === integrationId 
+    setIntegrations(currentIntegrations =>
+      currentIntegrations.map(integration =>
+        integration.id === integrationId
           ? { ...integration, enabled: !integration.enabled }
           : integration
       )
     )
-    toast.success("Integration updated")
+    toast.success('Integration updated')
   }
 
   const toggleSystemSetting = (settingId: string) => {
-    setSystemSettings(currentSettings => 
-      currentSettings.map(setting => 
-        setting.id === settingId 
-          ? { ...setting, enabled: !setting.enabled }
-          : setting
+    setSystemSettings(currentSettings =>
+      currentSettings.map(setting =>
+        setting.id === settingId ? { ...setting, enabled: !setting.enabled } : setting
       )
     )
-    toast.success("Setting updated")
+    toast.success('Setting updated')
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       <div className="p-6 pb-4">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+            <h1 className="text-foreground text-2xl font-bold">Settings</h1>
             <p className="text-muted-foreground">Manage your home automation</p>
           </div>
           <Button variant="outline" size="icon" className="rounded-full">
-            <Settings size={20} />
+            <SettingsIcon className="h-5 w-5" />
           </Button>
         </div>
       </div>
 
       <div className="flex-1 overflow-hidden">
-        <Tabs value={currentTab} onValueChange={setCurrentTab} className="h-full flex flex-col">
+        <Tabs value={currentTab} onValueChange={setCurrentTab} className="flex h-full flex-col">
           <div className="px-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-7">
               <TabsTrigger value="integrations">Integrations</TabsTrigger>
+              <TabsTrigger value="units">Units</TabsTrigger>
               <TabsTrigger value="system">System</TabsTrigger>
+              <TabsTrigger value="accessibility">Accessibility</TabsTrigger>
               <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
+              <TabsTrigger value="adaptive">Adaptive</TabsTrigger>
+              <TabsTrigger value="intercom">Intercom</TabsTrigger>
             </TabsList>
           </div>
 
-          <TabsContent value="integrations" className="flex-1 overflow-y-auto px-6 pb-6 mt-6">
+          <TabsContent value="integrations" className="mt-6 flex-1 overflow-y-auto px-6 pb-6">
             <div className="space-y-6">
               <Card>
                 <CardHeader className="pb-3">
@@ -152,44 +222,35 @@ export function DeviceSettings() {
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <Bell size={20} className="text-muted-foreground" />
+                      <BellIcon className="text-muted-foreground h-5 w-5" />
                       <div>
-                        <p className="font-medium text-sm">Push Notifications</p>
-                        <p className="text-xs text-muted-foreground">Device alerts and updates</p>
+                        <p className="text-sm font-medium">Push Notifications</p>
+                        <p className="text-muted-foreground text-xs">Device alerts and updates</p>
                       </div>
                     </div>
-                    <Switch
-                      checked={notifications}
-                      onCheckedChange={setNotifications}
-                    />
+                    <Switch checked={notifications} onCheckedChange={setNotifications} />
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <Wifi size={20} className="text-muted-foreground" />
+                      <WifiIcon className="text-muted-foreground h-5 w-5" />
                       <div>
-                        <p className="font-medium text-sm">Automatic Updates</p>
-                        <p className="text-xs text-muted-foreground">Keep devices up to date</p>
+                        <p className="text-sm font-medium">Automatic Updates</p>
+                        <p className="text-muted-foreground text-xs">Keep devices up to date</p>
                       </div>
                     </div>
-                    <Switch
-                      checked={autoUpdates}
-                      onCheckedChange={setAutoUpdates}
-                    />
+                    <Switch checked={autoUpdates} onCheckedChange={setAutoUpdates} />
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <Wifi size={20} className="text-muted-foreground" />
+                      <WifiIcon className="text-muted-foreground h-5 w-5" />
                       <div>
-                        <p className="font-medium text-sm">Geofencing</p>
-                        <p className="text-xs text-muted-foreground">Location-based automation</p>
+                        <p className="text-sm font-medium">Geofencing</p>
+                        <p className="text-muted-foreground text-xs">Location-based automation</p>
                       </div>
                     </div>
-                    <Switch
-                      checked={geofencing}
-                      onCheckedChange={setGeofencing}
-                    />
+                    <Switch checked={geofencing} onCheckedChange={setGeofencing} />
                   </div>
                 </CardContent>
               </Card>
@@ -199,19 +260,19 @@ export function DeviceSettings() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">Platform Integrations</CardTitle>
                     <Button variant="outline" size="sm">
-                      <Plus size={16} className="mr-2" />
+                      <PlusIcon className="mr-2 h-4 w-4" />
                       Add
                     </Button>
                   </div>
                 </CardHeader>
                 <CardContent>
                   {integrations.length === 0 ? (
-                    <div className="text-center py-8">
-                      <div className="w-12 h-12 rounded-full bg-muted mx-auto mb-3 flex items-center justify-center">
-                        <Wifi size={24} className="text-muted-foreground" />
+                    <div className="py-8 text-center">
+                      <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
+                        <WifiIcon className="text-muted-foreground h-6 w-6" />
                       </div>
                       <p className="text-muted-foreground mb-2">No integrations</p>
-                      <p className="text-sm text-muted-foreground mb-4">
+                      <p className="text-muted-foreground mb-4 text-sm">
                         Connect with HomeKit, Alexa, Google Home, and more
                       </p>
                       <Button variant="outline" size="sm">
@@ -220,40 +281,54 @@ export function DeviceSettings() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {integrations.map((integration) => {
+                      {integrations.map(integration => {
                         const IconComponent = integrationIcons[integration.type]
-                        
+
                         return (
                           <motion.div
                             key={integration.id}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                           >
-                            <div className="flex items-center justify-between p-3 rounded-lg border">
+                            <div className="flex items-center justify-between rounded-lg border p-3">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                                  <IconComponent 
-                                    size={20} 
-                                    className={integration.enabled ? "text-primary" : "text-muted-foreground"} 
+                                <div className="bg-secondary flex h-10 w-10 items-center justify-center rounded-full">
+                                  <IconComponent
+                                    size={20}
+                                    className={
+                                      integration.enabled ? 'text-primary' : 'text-muted-foreground'
+                                    }
                                   />
                                 </div>
                                 <div>
-                                  <h3 className="font-medium text-sm">{integration.name}</h3>
-                                  <div className="flex items-center gap-2">
-                                    <Badge 
-                                      variant={integration.status === 'connected' ? 'default' : 'secondary'}
+                                  <h3 className="text-sm font-medium">{integration.name}</h3>
+                                  {integration.protocol && (
+                                    <p className="text-muted-foreground mb-1 text-xs">
+                                      {integration.protocol}
+                                    </p>
+                                  )}
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <Badge
+                                      variant={
+                                        integration.status === 'connected' ? 'default' : 'secondary'
+                                      }
                                       className="h-4 text-xs"
                                     >
                                       {integration.status}
                                     </Badge>
-                                    <span className="text-xs text-muted-foreground">
+                                    <span className="text-muted-foreground text-xs">
                                       {integration.devices} devices
                                     </span>
+                                    {integration.details && (
+                                      <span className="text-muted-foreground text-xs">
+                                        • {integration.details}
+                                      </span>
+                                    )}
                                   </div>
                                 </div>
                               </div>
-                              
+
                               <Switch
                                 checked={integration.enabled}
                                 onCheckedChange={() => toggleIntegration(integration.id)}
@@ -270,106 +345,309 @@ export function DeviceSettings() {
             </div>
           </TabsContent>
 
-          <TabsContent value="system" className="flex-1 overflow-y-auto px-6 pb-6 mt-6">
+          <TabsContent value="units" className="mt-6 flex-1 overflow-y-auto px-6 pb-6">
+            <UnitSettings />
+          </TabsContent>
+
+          <TabsContent value="system" className="mt-6 flex-1 overflow-y-auto px-6 pb-6">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg">System Settings</CardTitle>
               </CardHeader>
               <CardContent>
-            {systemSettings.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="w-12 h-12 rounded-full bg-muted mx-auto mb-3 flex items-center justify-center">
-                  <Settings size={24} className="text-muted-foreground" />
+                {systemSettings.length === 0 ? (
+                  <div className="py-8 text-center">
+                    <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
+                      <SettingsIcon className="text-muted-foreground h-6 w-6" />
+                    </div>
+                    <p className="text-muted-foreground mb-2">No custom settings</p>
+                    <p className="text-muted-foreground text-sm">
+                      System is running with default configuration
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {systemSettings.map(setting => {
+                      const IconComponent = categoryIcons[setting.category]
+
+                      return (
+                        <div
+                          key={setting.id}
+                          className="flex items-center justify-between rounded-lg border p-3"
+                        >
+                          <div className="flex items-center gap-3">
+                            <IconComponent size={16} className="text-muted-foreground" />
+                            <div>
+                              <h3 className="text-sm font-medium">{setting.name}</h3>
+                              <p className="text-muted-foreground text-xs">{setting.description}</p>
+                            </div>
+                          </div>
+
+                          <Switch
+                            checked={setting.enabled}
+                            onCheckedChange={() => toggleSystemSetting(setting.id)}
+                          />
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">System Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="bg-accent/10 border-accent/20 flex items-center justify-between rounded-lg border p-3">
+                    <div className="flex items-center gap-3">
+                      <CheckIcon size={20} className="text-accent" />
+                      <div>
+                        <p className="text-sm font-medium">System Health</p>
+                        <p className="text-muted-foreground text-xs">All systems operational</p>
+                      </div>
+                    </div>
+                    <Badge variant="secondary" className="bg-accent/20 text-accent">
+                      Online
+                    </Badge>
+                  </div>
+
+                  <div className="bg-secondary flex items-center justify-between rounded-lg border p-3">
+                    <div className="flex items-center gap-3">
+                      <WifiIcon size={20} className="text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium">Network Status</p>
+                        <p className="text-muted-foreground text-xs">Connected to Wi-Fi</p>
+                      </div>
+                    </div>
+                    <Badge variant="secondary">Strong</Badge>
+                  </div>
+
+                  <div className="bg-primary/10 border-primary/20 flex items-center justify-between rounded-lg border p-3">
+                    <div className="flex items-center gap-3">
+                      <WifiIcon size={20} className="text-primary" />
+                      <div>
+                        <p className="text-sm font-medium">Cloud Sync</p>
+                        <p className="text-muted-foreground text-xs">Last sync: 2 minutes ago</p>
+                      </div>
+                    </div>
+                    <Badge variant="secondary" className="bg-primary/20 text-primary">
+                      Active
+                    </Badge>
+                  </div>
                 </div>
-                <p className="text-muted-foreground mb-2">No custom settings</p>
-                <p className="text-sm text-muted-foreground">
-                  System is running with default configuration
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {systemSettings.map((setting) => {
-                  const IconComponent = categoryIcons[setting.category]
-                  
-                  return (
-                    <div
-                      key={setting.id}
-                      className="flex items-center justify-between p-3 rounded-lg border"
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="accessibility" className="mt-6 flex-1 overflow-y-auto px-6 pb-6">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <EyeIcon className="h-5 w-5" />
+                    <CardTitle className="text-lg">Visual Accessibility</CardTitle>
+                  </div>
+                  <p className="text-muted-foreground text-sm">
+                    Customize colors and contrast for better visibility
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Colorblind Mode */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium">Colorblind Mode</p>
+                        <p className="text-muted-foreground text-xs">
+                          Adjust color palette for different types of color vision deficiency
+                        </p>
+                      </div>
+                    </div>
+                    <Select
+                      value={colorblindMode}
+                      onValueChange={value => setColorblindMode(value as ColorblindMode)}
                     >
-                      <div className="flex items-center gap-3">
-                        <IconComponent size={16} className="text-muted-foreground" />
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(COLORBLIND_MODE_INFO).map(([mode, info]) => (
+                          <SelectItem key={mode} value={mode}>
+                            <div className="flex flex-col">
+                              <span className="font-medium">{info.label}</span>
+                              <span className="text-muted-foreground text-xs">
+                                {info.description}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {/* Current mode info */}
+                    <motion.div
+                      key={colorblindMode}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                      className="bg-secondary/50 rounded-lg border p-3"
+                    >
+                      <div className="flex items-start gap-2">
+                        <CheckIcon className="text-accent mt-0.5 h-4 w-4 shrink-0" />
                         <div>
-                          <h3 className="font-medium text-sm">{setting.name}</h3>
-                          <p className="text-xs text-muted-foreground">{setting.description}</p>
+                          <p className="text-sm font-medium">
+                            {COLORBLIND_MODE_INFO[colorblindMode].label}
+                          </p>
+                          <p className="text-muted-foreground text-xs">
+                            {COLORBLIND_MODE_INFO[colorblindMode].description}
+                          </p>
+                          {colorblindMode !== 'default' && (
+                            <p className="text-muted-foreground mt-1 text-xs italic">
+                              Affects: {COLORBLIND_MODE_INFO[colorblindMode].affectedPopulation}
+                            </p>
+                          )}
                         </div>
                       </div>
-                      
+                    </motion.div>
+                  </div>
+
+                  {/* High Contrast Mode */}
+                  <div className="border-t pt-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <EyeIcon className="text-muted-foreground h-5 w-5" />
+                        <div>
+                          <p className="text-sm font-medium">High Contrast Mode</p>
+                          <p className="text-muted-foreground text-xs">
+                            Increase contrast for better visibility in bright environments
+                          </p>
+                        </div>
+                      </div>
                       <Switch
-                        checked={setting.enabled}
-                        onCheckedChange={() => toggleSystemSetting(setting.id)}
+                        checked={highContrastMode}
+                        onCheckedChange={value => {
+                          setHighContrastMode(value)
+                          toast.success(
+                            value ? 'High contrast mode enabled' : 'High contrast mode disabled'
+                          )
+                        }}
                       />
                     </div>
-                  )
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">System Status</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 rounded-lg bg-accent/10 border border-accent/20">
-                <div className="flex items-center gap-3">
-                  <Check size={20} className="text-accent" />
-                  <div>
-                    <p className="font-medium text-sm">System Health</p>
-                    <p className="text-xs text-muted-foreground">All systems operational</p>
                   </div>
-                </div>
-                <Badge variant="secondary" className="bg-accent/20 text-accent">
-                  Online
-                </Badge>
-              </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg bg-secondary border">
-                <div className="flex items-center gap-3">
-                  <Wifi size={20} className="text-muted-foreground" />
-                  <div>
-                    <p className="font-medium text-sm">Network Status</p>
-                    <p className="text-xs text-muted-foreground">Connected to Wi-Fi</p>
+                  {/* Preview Section */}
+                  <div className="border-t pt-6">
+                    <p className="mb-3 text-sm font-medium">Preview</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div
+                        className={cn(
+                          'rounded-lg border p-2 text-center',
+                          getStatusClasses(colorblindMode, 'success').bg,
+                          getStatusClasses(colorblindMode, 'success').border,
+                          getStatusClasses(colorblindMode, 'success').text
+                        )}
+                      >
+                        <p className="text-xs font-medium">Online</p>
+                      </div>
+                      <div
+                        className={cn(
+                          'rounded-lg border p-2 text-center',
+                          getStatusClasses(colorblindMode, 'error').bg,
+                          getStatusClasses(colorblindMode, 'error').border,
+                          getStatusClasses(colorblindMode, 'error').text
+                        )}
+                      >
+                        <p className="text-xs font-medium">Offline</p>
+                      </div>
+                      <div
+                        className={cn(
+                          'rounded-lg border p-2 text-center',
+                          getStatusClasses(colorblindMode, 'warning').bg,
+                          getStatusClasses(colorblindMode, 'warning').border,
+                          getStatusClasses(colorblindMode, 'warning').text
+                        )}
+                      >
+                        <p className="text-xs font-medium">Warning</p>
+                      </div>
+                    </div>
+                    <p className="text-muted-foreground mt-2 text-xs">
+                      These colors will update based on your accessibility settings
+                    </p>
                   </div>
-                </div>
-                <Badge variant="secondary">
-                  Strong
-                </Badge>
-              </div>
+                </CardContent>
+              </Card>
 
-              <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10 border border-primary/20">
-                <div className="flex items-center gap-3">
-                  <Wifi size={20} className="text-primary" />
-                  <div>
-                    <p className="font-medium text-sm">Cloud Sync</p>
-                    <p className="text-xs text-muted-foreground">Last sync: 2 minutes ago</p>
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Motion & Animation</CardTitle>
+                  <p className="text-muted-foreground text-sm">
+                    Reduce motion for users sensitive to animation
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-accent/10 border-accent/20 rounded-lg border p-4">
+                    <div className="flex items-start gap-3">
+                      <CheckIcon className="text-accent mt-0.5 h-5 w-5 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium">Reduced Motion Support Active</p>
+                        <p className="text-muted-foreground text-xs">
+                          This app respects your system's "Reduce Motion" preference. Animations
+                          will be minimized automatically.
+                        </p>
+                        <p className="text-muted-foreground mt-2 text-xs">
+                          To change: Go to your device's Accessibility Settings → Display & Text
+                          Size → Reduce Motion
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <Badge variant="secondary" className="bg-primary/20 text-primary">
-                  Active
-                </Badge>
-              </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Screen Reader Support</CardTitle>
+                  <p className="text-muted-foreground text-sm">
+                    Enhanced accessibility for VoiceOver and other assistive technologies
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-accent/10 border-accent/20 rounded-lg border p-4">
+                    <div className="flex items-start gap-3">
+                      <CheckIcon className="text-accent mt-0.5 h-5 w-5 shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium">Full ARIA Support Enabled</p>
+                        <p className="text-muted-foreground text-xs">
+                          All interactive elements include proper labels and roles for screen
+                          readers.
+                        </p>
+                        <p className="text-muted-foreground mt-2 text-xs">
+                          Status cards, device controls, and navigation elements are fully
+                          accessible with VoiceOver, NVDA, and JAWS.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
-      </TabsContent>
+          </TabsContent>
 
-      <TabsContent value="monitoring" className="flex-1 overflow-hidden m-0 p-0">
-        <MonitoringSettings />
-      </TabsContent>
-    </Tabs>
-  </div>
-</div>
+          <TabsContent value="monitoring" className="m-0 flex-1 overflow-hidden p-0">
+            <MonitoringSettings />
+          </TabsContent>
+
+          <TabsContent value="adaptive" className="m-0 flex-1 overflow-hidden p-0">
+            <AdaptiveLighting />
+          </TabsContent>
+
+          <TabsContent value="intercom" className="m-0 flex-1 overflow-hidden p-0">
+            <Intercom />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
   )
 }
