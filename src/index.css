@@ -314,45 +314,69 @@
 
   /* Typography Scale - iOS System (PRD-compliant) */
   .text-h1 {
-    @apply text-2xl font-bold tracking-tight sm:text-[28px];
+    font-size: 1.5rem; /* text-2xl */
+    font-weight: 700; /* font-bold */
+    letter-spacing: -0.025em; /* tracking-tight */
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  }
+  
+  @media (min-width: 640px) {
+    .text-h1 {
+      font-size: 28px; /* sm:text-[28px] */
+    }
   }
 
   .text-h2 {
-    @apply text-lg font-semibold tracking-normal sm:text-xl;
+    font-size: 1.125rem; /* text-lg */
+    font-weight: 600; /* font-semibold */
+    letter-spacing: 0; /* tracking-normal */
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  }
+  
+  @media (min-width: 640px) {
+    .text-h2 {
+      font-size: 1.25rem; /* sm:text-xl */
+    }
   }
 
   .text-h3 {
-    @apply text-base font-medium tracking-normal;
+    font-size: 1rem; /* text-base */
+    font-weight: 500; /* font-medium */
+    letter-spacing: 0; /* tracking-normal */
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
   }
 
   .text-body {
-    @apply text-sm font-normal tracking-normal;
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 400; /* font-normal */
     letter-spacing: 0.01em; /* Slightly relaxed for readability */
   }
 
   .text-caption {
-    @apply text-xs font-normal tracking-wide;
-    letter-spacing: 0.02em;
+    font-size: 0.75rem; /* text-xs */
+    font-weight: 400; /* font-normal */
+    letter-spacing: 0.02em; /* tracking-wide + custom */
   }
 
   /* Icon Sizing Scale - iOS-aligned (16/20/24/32px) */
   .icon-sm {
-    @apply h-4 w-4; /* 16px - Small icons (status indicators, inline icons) */
+    height: 1rem; /* 16px - h-4 */
+    width: 1rem; /* 16px - w-4 */
   }
 
   .icon-md {
-    @apply h-5 w-5; /* 20px - Medium icons (buttons, controls) */
+    height: 1.25rem; /* 20px - h-5 */
+    width: 1.25rem; /* 20px - w-5 */
   }
 
   .icon-lg {
-    @apply h-6 w-6; /* 24px - Large icons (cards, headers) */
+    height: 1.5rem; /* 24px - h-6 */
+    width: 1.5rem; /* 24px - w-6 */
   }
 
   .icon-xl {
-    @apply h-8 w-8; /* 32px - Extra large icons (feature cards, empty states) */
+    height: 2rem; /* 32px - h-8 */
+    width: 2rem; /* 32px - w-8 */
   }
 }
 
