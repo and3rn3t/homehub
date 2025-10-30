@@ -32,7 +32,7 @@ import {
 } from '@/lib/icons'
 import type { Device } from '@/types'
 import { motion } from 'framer-motion'
-import { memo, useCallback, useState } from 'react'
+import { memo, useCallback, useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { FavoriteButton } from './FavoriteButton'
 
@@ -112,10 +112,10 @@ export const DeviceCardEnhanced = memo(
     const { formatTemperature } = useUnits()
     const haptic = useHaptic()
 
-    const SignalIcon = getSignalIcon(device.signalStrength)
+    const SignalIcon = useMemo(() => getSignalIcon(device.signalStrength), [device.signalStrength])
     const signalColor = getSignalColor(device.signalStrength)
 
-    const BatteryIcon = getBatteryIcon(device.batteryLevel)
+    const BatteryIcon = useMemo(() => getBatteryIcon(device.batteryLevel), [device.batteryLevel])
     const batteryColor = getBatteryColor(device.batteryLevel)
 
     const isFavorite = favoriteDevices.includes(device.id)
