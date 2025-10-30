@@ -55,13 +55,13 @@ interface BackupSettings {
 }
 
 export function BackupRecovery() {
-  // Calculate initial dates once - not during each render
+  // Use static mock data with fixed dates for consistency
   const initialBackups = useMemo<Backup[]>(
     () => [
       {
         id: '1',
         name: 'Auto Backup - Dec 15',
-        createdAt: new Date(Date.now() - 86400000).toISOString(),
+        createdAt: '2024-12-15T10:30:00.000Z',
         size: '2.4 MB',
         type: 'auto',
         status: 'completed',
@@ -72,7 +72,7 @@ export function BackupRecovery() {
       {
         id: '2',
         name: 'Manual Backup - Dec 10',
-        createdAt: new Date(Date.now() - 432000000).toISOString(),
+        createdAt: '2024-12-10T14:20:00.000Z',
         size: '2.1 MB',
         type: 'manual',
         status: 'completed',
@@ -111,7 +111,7 @@ export function BackupRecovery() {
     await new Promise(resolve => setTimeout(resolve, 2000))
 
     const newBackup: Backup = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       name: backupName,
       createdAt: new Date().toISOString(),
       size: '2.6 MB',
