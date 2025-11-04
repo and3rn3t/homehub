@@ -95,6 +95,19 @@ const alertSeverityColors = {
   critical: 'text-red-600 bg-red-50 border-red-200',
 }
 
+// Helper function to calculate time ago
+const getTimeAgo = (date: Date | string | undefined) => {
+  if (!date) return 'Unknown'
+  const dateObj = typeof date === 'string' ? new Date(date) : date
+  const minutes = Math.floor((Date.now() - dateObj.getTime()) / 60000)
+  if (minutes < 1) return 'Just now'
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  return `${days}d ago`
+}
+
 export function DeviceMonitor() {
   // Read actual devices from KV store
   const [kvDevices] = useKV<Device[]>(KV_KEYS.DEVICES, MOCK_DEVICES)
@@ -344,18 +357,6 @@ export function DeviceMonitor() {
 
     return true
   })
-
-  const getTimeAgo = (date: Date | string | undefined) => {
-    if (!date) return 'Unknown'
-    const dateObj = typeof date === 'string' ? new Date(date) : date
-    const minutes = Math.floor((Date.now() - dateObj.getTime()) / 60000)
-    if (minutes < 1) return 'Just now'
-    if (minutes < 60) return `${minutes}m ago`
-    const hours = Math.floor(minutes / 60)
-    if (hours < 24) return `${hours}h ago`
-    const days = Math.floor(hours / 24)
-    return `${days}d ago`
-  }
 
   const criticalAlerts = activeAlerts.filter(alert => alert.severity === 'critical').length
   const highAlerts = activeAlerts.filter(alert => alert.severity === 'high').length

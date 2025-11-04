@@ -31,7 +31,7 @@ import {
   TrashIcon,
   UploadIcon,
 } from '@/lib/icons'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 
 interface Backup {
@@ -55,30 +55,36 @@ interface BackupSettings {
 }
 
 export function BackupRecovery() {
-  const [backups, setBackups] = useKV<Backup[]>('system-backups', [
-    {
-      id: '1',
-      name: 'Auto Backup - Dec 15',
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-      size: '2.4 MB',
-      type: 'auto',
-      status: 'completed',
-      devices: 12,
-      automations: 8,
-      scenes: 5,
-    },
-    {
-      id: '2',
-      name: 'Manual Backup - Dec 10',
-      createdAt: new Date(Date.now() - 432000000).toISOString(),
-      size: '2.1 MB',
-      type: 'manual',
-      status: 'completed',
-      devices: 10,
-      automations: 6,
-      scenes: 4,
-    },
-  ])
+  // Use static mock data with fixed dates for consistency
+  const initialBackups = useMemo<Backup[]>(
+    () => [
+      {
+        id: '1',
+        name: 'Auto Backup - Dec 15',
+        createdAt: '2024-12-15T10:30:00.000Z',
+        size: '2.4 MB',
+        type: 'auto',
+        status: 'completed',
+        devices: 12,
+        automations: 8,
+        scenes: 5,
+      },
+      {
+        id: '2',
+        name: 'Manual Backup - Dec 10',
+        createdAt: '2024-12-10T14:20:00.000Z',
+        size: '2.1 MB',
+        type: 'manual',
+        status: 'completed',
+        devices: 10,
+        automations: 6,
+        scenes: 4,
+      },
+    ],
+    []
+  )
+
+  const [backups, setBackups] = useKV<Backup[]>('system-backups', initialBackups)
 
   const [settings, setSettings] = useKV<BackupSettings>('backup-settings', {
     autoBackup: true,
@@ -105,7 +111,7 @@ export function BackupRecovery() {
     await new Promise(resolve => setTimeout(resolve, 2000))
 
     const newBackup: Backup = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       name: backupName,
       createdAt: new Date().toISOString(),
       size: '2.6 MB',
