@@ -120,7 +120,7 @@
     "eufy-security-client": "^3.4.0",
     "framer-motion": "^12.23.24",
     "hls-server": "^1.5.0",
-    "hls.js": "^1.6.13",
+    "hls.js": "^1.6.15",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.548.0",
     "marked": "^16.4.1",
