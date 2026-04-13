@@ -19,7 +19,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20251014.0",
+    "@cloudflare/workers-types": "^4.20260413.1",
     "esbuild": "^0.25.10",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.7.1",
