@@ -173,7 +173,7 @@
     "jest-axe": "^10.0.0",
     "jsdom": "^27.0.0",
     "lighthouse": "^12.8.2",
-    "markdownlint-cli2": "^0.18.1",
+    "markdownlint-cli2": "^0.22.1",
     "mermaid": "^11.12.0",
     "msw": "^2.11.5",
     "playwright": "^1.56.0",
