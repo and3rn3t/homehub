@@ -187,7 +187,7 @@
     "tailwindcss": "^4.1.11",
     "typescript": "~5.9.0",
     "typescript-eslint": "^8.38.0",
-    "vite": "^6.4.2",
+    "vite": "^8.0.14",
     "vite-plugin-pwa": "^1.1.0",
     "vitest": "^4.0.3",
     "workbox-window": "^7.3.0"
