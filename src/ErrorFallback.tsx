@@ -6,10 +6,12 @@ import { Alert, AlertDescription, AlertTitle } from './components/ui/alert'
 import { Button } from './components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
 
-export const ErrorFallback = ({ error, resetErrorBoundary }: FallbackProps) => {
+export const ErrorFallback = ({ error: _err, resetErrorBoundary }: FallbackProps) => {
   // When encountering an error in the development mode, rethrow it and don't display the boundary.
   // The parent UI will take care of showing a more helpful dialog.
-  if (import.meta.env.DEV) throw error
+  if (import.meta.env.DEV) throw _err
+  // react-error-boundary v6 types error as unknown; cast to Error (always an Error instance at runtime)
+  const error = _err as Error
 
   const [showDetails, setShowDetails] = useState(false)
   const [countdown, setCountdown] = useState<number | null>(null)
