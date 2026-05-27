@@ -23,12 +23,7 @@ export default defineConfig({
         'tests/e2e/',
       ],
     },
-    pool: 'forks', // Use forks instead of threads to avoid Node.js 18 compatibility issues
-    poolOptions: {
-      forks: {
-        singleFork: true, // Run tests in a single forked process
-      },
-    },
+    pool: 'forks', // Use forks instead of threads for stability
   },
   resolve: {
     alias: {
