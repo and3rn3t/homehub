@@ -24,13 +24,11 @@ export async function runValidationTests() {
   console.log('\n📦 Test 1: Service Availability')
   try {
     const { SchedulerService } = await import('@/services/automation/scheduler.service')
-    const { ConditionEvaluatorService } = await import(
-      '@/services/automation/condition-evaluator.service'
-    )
+    const { ConditionEvaluatorService } =
+      await import('@/services/automation/condition-evaluator.service')
     const { ActionExecutorService } = await import('@/services/automation/action-executor.service')
-    const { FlowInterpreterService } = await import(
-      '@/services/automation/flow-interpreter.service'
-    )
+    const { FlowInterpreterService } =
+      await import('@/services/automation/flow-interpreter.service')
     const { GeofenceService } = await import('@/services/automation/geofence.service')
 
     const services = [
