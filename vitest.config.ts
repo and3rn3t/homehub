@@ -23,7 +23,7 @@ export default defineConfig({
         'tests/e2e/',
       ],
     },
-    pool: 'forks', // Use forks instead of threads for stability
+    pool: 'vmForks', // vmForks avoids EPIPE in vitest 4 + Node 22 fork IPC
   },
   resolve: {
     alias: {
