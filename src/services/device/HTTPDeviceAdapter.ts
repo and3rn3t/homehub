@@ -408,7 +408,7 @@ export class HTTPDeviceAdapter implements DeviceAdapter {
       console.log('[HTTPAdapter] Connected to', this.config.baseUrl)
     } catch (error) {
       console.error('[HTTPAdapter] Connection failed:', error)
-      throw new Error(`Failed to connect to ${this.config.baseUrl}`)
+      throw new Error(`Failed to connect to ${this.config.baseUrl}`, { cause: error })
     }
   }
 

@@ -149,7 +149,8 @@ export class ArloAdapter extends EventEmitter {
     } catch (error) {
       console.error('[ArloAdapter] Initialization failed:', error)
       throw new Error(
-        `Arlo initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Arlo initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        { cause: error }
       )
     }
   }
@@ -207,7 +208,8 @@ export class ArloAdapter extends EventEmitter {
     } catch (error) {
       console.error('[ArloAdapter] Failed to configure authentication:', error)
       throw new Error(
-        `Failed to configure authentication: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Failed to configure authentication: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        { cause: error }
       )
     }
   }

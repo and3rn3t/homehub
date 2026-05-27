@@ -154,7 +154,8 @@ export async function authenticateWithPuppeteer(
       const currentUrl = page.url()
       if (currentUrl.includes('/login')) {
         throw new Error(
-          'Login failed - still on login page. Check credentials or 2FA requirements.'
+          'Login failed - still on login page. Check credentials or 2FA requirements.',
+          { cause: error }
         )
       }
       throw error

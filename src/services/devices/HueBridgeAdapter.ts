@@ -551,7 +551,8 @@ export async function discoverHueLights(
     return await response.json()
   } catch (error: unknown) {
     throw new Error(
-      `Failed to discover Hue lights: ${error instanceof Error ? error.message : String(error)}`
+      `Failed to discover Hue lights: ${error instanceof Error ? error.message : String(error)}`,
+      { cause: error }
     )
   }
 }

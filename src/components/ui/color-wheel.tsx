@@ -108,14 +108,14 @@ function hexToHsv(hex: string): HSV {
   const s = max === 0 ? 0 : (delta / max) * 100
   const v = max * 100
 
-  if (delta === 0) {
-    h = 0
-  } else if (max === r) {
-    h = ((g - b) / delta + (g < b ? 6 : 0)) * 60
-  } else if (max === g) {
+  if (delta !== 0) {
+    if (max === r) {
+      h = ((g - b) / delta + (g < b ? 6 : 0)) * 60
+    } else if (max === g) {
     h = ((b - r) / delta + 2) * 60
-  } else {
-    h = ((r - g) / delta + 4) * 60
+    } else {
+      h = ((r - g) / delta + 4) * 60
+    }
   }
 
   return { h: Math.round(h), s: Math.round(s), v: Math.round(v) }
