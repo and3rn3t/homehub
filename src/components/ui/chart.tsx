@@ -104,7 +104,10 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip
 
-function ChartTooltipContent<TValue extends ValueType = ValueType, TName extends NameType = NameType>({
+function ChartTooltipContent<
+  TValue extends ValueType = ValueType,
+  TName extends NameType = NameType,
+>({
   active,
   payload,
   className,
@@ -243,7 +246,10 @@ function ChartTooltipContent<TValue extends ValueType = ValueType, TName extends
 
 const ChartLegend = RechartsPrimitive.Legend
 
-function ChartLegendContent<TValue extends ValueType = ValueType, TName extends NameType = NameType>({
+function ChartLegendContent<
+  TValue extends ValueType = ValueType,
+  TName extends NameType = NameType,
+>({
   className,
   hideIcon = false,
   payload,

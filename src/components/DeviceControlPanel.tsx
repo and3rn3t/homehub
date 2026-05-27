@@ -396,7 +396,7 @@ export function DeviceControlPanel({
                           className="pr-12 font-mono"
                         />
                         <div
-                          className="border-border absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded border-2"
+                          className="border-border absolute top-1/2 right-2 h-8 w-8 -translate-y-1/2 rounded border-2"
                           style={{ backgroundColor: colorHex }}
                           aria-label="Current color preview"
                         />

@@ -6,9 +6,9 @@ interface FlowNode {
   type: 'trigger' | 'condition' | 'action' | 'delay'
   subtype: string
   label: string
-  icon: any
+  icon: unknown
   position: { x: number; y: number }
-  data: any
+  data: Record<string, unknown>
   connections: string[]
 }
 
@@ -24,7 +24,7 @@ interface Flow {
 interface ExecutionContext {
   flowId: string
   executionId: string
-  variables: Record<string, any>
+  variables: Record<string, unknown>
   currentNodeId: string
   timestamp: string
 }
@@ -57,7 +57,7 @@ export class FlowExecutor {
     this.flows = flows
   }
 
-  async executeFlow(flowId: string, triggerData?: any): Promise<boolean> {
+  async executeFlow(flowId: string, triggerData?: Record<string, unknown>): Promise<boolean> {
     const flow = this.flows.find(f => f.id === flowId)
     if (!flow || !flow.enabled) {
       return false
@@ -180,7 +180,8 @@ export class FlowExecutor {
   }
 
   private async executeDelay(node: FlowNode, _context: ExecutionContext): Promise<boolean> {
-    const { hours = 0, minutes = 0, seconds = 0 } = node.data
+    const delayData = node.data as { hours?: number; minutes?: number; seconds?: number }
+    const { hours = 0, minutes = 0, seconds = 0 } = delayData
     const delayMs = (hours * 3600 + minutes * 60 + seconds) * 1000
 
     if (delayMs > 0) {
@@ -191,24 +192,24 @@ export class FlowExecutor {
   }
 
   // Condition implementations
-  private checkTimeRange(data: any): boolean {
+  private checkTimeRange(data: Record<string, unknown>): boolean {
     const now = new Date()
     const currentTime = now.getHours() * 60 + now.getMinutes()
 
-    const [startHour, startMin] = (data.startTime || '00:00').split(':').map(Number)
-    const [endHour, endMin] = (data.endTime || '23:59').split(':').map(Number)
+    const startParts = ((data.startTime as string) || '00:00').split(':').map(Number)
+    const endParts = ((data.endTime as string) || '23:59').split(':').map(Number)
 
-    const startTime = startHour * 60 + startMin
-    const endTime = endHour * 60 + endMin
+    const startTime = (startParts[0] ?? 0) * 60 + (startParts[1] ?? 0)
+    const endTime = (endParts[0] ?? 23) * 60 + (endParts[1] ?? 59)
 
     return currentTime >= startTime && currentTime <= endTime
   }
 
-  private checkTemperature(data: any): boolean {
+  private checkTemperature(data: Record<string, unknown>): boolean {
     // Simulate temperature check - in real implementation, this would query sensors
     const currentTemp = 72 // Mock current temperature
-    const targetTemp = data.temperature || 70
-    const condition = data.condition || 'greater'
+    const targetTemp = (data.temperature as number) || 70
+    const condition = (data.condition as string) || 'greater'
 
     switch (condition) {
       case 'greater':
@@ -222,9 +223,9 @@ export class FlowExecutor {
     }
   }
 
-  private checkPresence(data: any): boolean {
+  private checkPresence(data: Record<string, unknown>): boolean {
     // Simulate presence check - in real implementation, this would query presence sensors
-    const presenceType = data.presenceType || 'anyone'
+    const presenceType = (data.presenceType as string) || 'anyone'
     const mockPresence = true // Mock presence state
 
     switch (presenceType) {
@@ -240,11 +241,13 @@ export class FlowExecutor {
   }
 
   // Action implementations
-  private async controlLight(data: any): Promise<boolean> {
-    const { deviceId, action, brightness } = data
+  private async controlLight(data: Record<string, unknown>): Promise<boolean> {
+    const deviceId = (data.deviceId as string) || 'unknown device'
+    const action = data.action as string
+    const brightness = (data.brightness as number) || 50
 
     // Simulate device control - in real implementation, this would control actual devices
-    let message = `Light control: ${deviceId || 'unknown device'}`
+    let message = `Light control: ${deviceId}`
 
     switch (action) {
       case 'turn_on':
@@ -257,7 +260,7 @@ export class FlowExecutor {
         message += ' toggled'
         break
       case 'dim':
-        message += ` dimmed to ${brightness || 50}%`
+        message += ` dimmed to ${brightness}%`
         break
     }
 
@@ -265,27 +268,29 @@ export class FlowExecutor {
     return true
   }
 
-  private async controlLock(data: any): Promise<boolean> {
-    const { deviceId, action } = data
+  private async controlLock(data: Record<string, unknown>): Promise<boolean> {
+    const deviceId = (data.deviceId as string) || 'unknown lock'
+    const action = data.action as string
 
-    const message = `Lock control: ${deviceId || 'unknown lock'} ${action === 'lock' ? 'locked' : 'unlocked'}`
+    const message = `Lock control: ${deviceId} ${action === 'lock' ? 'locked' : 'unlocked'}`
     toast.info(message)
     return true
   }
 
-  private async controlThermostat(data: any): Promise<boolean> {
-    const { mode, targetTemp } = data
+  private async controlThermostat(data: Record<string, unknown>): Promise<boolean> {
+    const mode = (data.mode as string) || 'auto'
+    const targetTemp = (data.targetTemp as number) || 72
 
-    const formattedTemp = this.formatTemperature(targetTemp || 72)
-    const message = `Thermostat: Set to ${mode || 'auto'} mode at ${formattedTemp}`
+    const formattedTemp = this.formatTemperature(targetTemp)
+    const message = `Thermostat: Set to ${mode} mode at ${formattedTemp}`
     toast.info(message)
     return true
   }
 
-  private async activateScene(data: any): Promise<boolean> {
-    const { sceneId } = data
+  private async activateScene(data: Record<string, unknown>): Promise<boolean> {
+    const sceneId = (data.sceneId as string) || 'unknown scene'
 
-    const message = `Scene activated: ${sceneId || 'unknown scene'}`
+    const message = `Scene activated: ${sceneId}`
     toast.info(message)
     return true
   }
@@ -297,7 +302,7 @@ export function useFlowExecutor() {
   const executor = FlowExecutor.getInstance()
   executor.setFlows(flows)
 
-  const executeFlow = async (flowId: string, triggerData?: any) => {
+  const executeFlow = async (flowId: string, triggerData?: Record<string, unknown>) => {
     return await executor.executeFlow(flowId, triggerData)
   }
 

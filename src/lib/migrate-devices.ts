@@ -30,9 +30,9 @@ function writeDevicesToStorage(devicesKey: string): boolean {
   try {
     const deviceJson = JSON.stringify(MOCK_DEVICES)
     logger.debug(`[Migration] Writing ${MOCK_DEVICES.length} devices (${deviceJson.length} chars)`)
-    
+
     localStorage.setItem(devicesKey, deviceJson)
-    
+
     // Verify write succeeded
     const verify = localStorage.getItem(devicesKey)
     if (verify) {
@@ -68,7 +68,10 @@ function handleExistingDevices(devicesKey: string, storedDevices: string): boole
     return writeDevicesToStorage(devicesKey)
   } catch (parseError) {
     // Parse error, restore from mock
-    logger.error('[Migration] Failed to parse devices, restoring from MOCK_DEVICES', parseError as Error)
+    logger.error(
+      '[Migration] Failed to parse devices, restoring from MOCK_DEVICES',
+      parseError as Error
+    )
     return writeDevicesToStorage(devicesKey)
   }
 }
@@ -78,7 +81,7 @@ function handleExistingDevices(devicesKey: string, storedDevices: string): boole
  */
 export function migrateDeviceStorage(): void {
   const devicesKey = `kv:${KV_KEYS.DEVICES}`
-  
+
   try {
     // Test localStorage availability first
     if (!testLocalStorageAvailability()) {
@@ -90,7 +93,7 @@ export function migrateDeviceStorage(): void {
     logger.debug(`[Migration] Current storage state: ${storedDevices ? 'EXISTS' : 'NULL'}`)
 
     // Handle existing devices or initialize new
-    const success = storedDevices 
+    const success = storedDevices
       ? handleExistingDevices(devicesKey, storedDevices)
       : (() => {
           logger.info('[Migration] No devices key found, initializing with MOCK_DEVICES')
@@ -103,7 +106,7 @@ export function migrateDeviceStorage(): void {
   } catch (error) {
     logger.error('[Migration] Device storage migration failed', error as Error)
     console.error('❌ Migration crashed:', error)
-    
+
     // Last resort - try emergency initialization
     try {
       console.log('🔄 Attempting emergency device initialization...')

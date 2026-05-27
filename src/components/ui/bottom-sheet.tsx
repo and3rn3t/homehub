@@ -104,7 +104,7 @@ function BottomSheetContent({
           'data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom-full',
           'data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom-full',
           // Desktop: Centered modal
-          'sm:inset-x-auto sm:bottom-auto sm:left-[50%] sm:top-[50%]',
+          'sm:inset-x-auto sm:top-[50%] sm:bottom-auto sm:left-[50%]',
           'sm:max-h-[85vh] sm:w-full sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2',
           'sm:rounded-lg sm:pb-6',
           'sm:data-[state=open]:slide-in-from-left-1/2 sm:data-[state=open]:slide-in-from-top-[48%]',
@@ -118,7 +118,7 @@ function BottomSheetContent({
         {/* Drag handle (mobile only) */}
         {showHandle && (
           <motion.div
-            className="bg-muted mx-auto mb-2 mt-3 h-1.5 w-12 cursor-grab rounded-full active:cursor-grabbing sm:hidden"
+            className="bg-muted mx-auto mt-3 mb-2 h-1.5 w-12 cursor-grab rounded-full active:cursor-grabbing sm:hidden"
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={0.2}
@@ -141,7 +141,7 @@ function BottomSheetContent({
         {/* Close button (desktop) */}
         <DialogPrimitive.Close
           data-slot="bottom-sheet-close"
-          className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground focus:outline-hidden absolute right-4 top-4 hidden rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none sm:inline-flex"
+          className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 hidden rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none sm:inline-flex"
         >
           <XIcon className="h-4 w-4" />
           <span className="sr-only">Close</span>
@@ -175,7 +175,7 @@ function BottomSheetTitle({ className, ...props }: React.HTMLAttributes<HTMLHead
   return (
     <DialogPrimitive.Title
       data-slot="bottom-sheet-title"
-      className={cn('text-foreground text-lg font-semibold leading-none tracking-tight', className)}
+      className={cn('text-foreground text-lg leading-none font-semibold tracking-tight', className)}
       {...props}
     />
   )

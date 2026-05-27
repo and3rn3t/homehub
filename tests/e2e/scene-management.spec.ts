@@ -12,8 +12,8 @@ import { expect, test } from '@playwright/test'
 
 test.describe('Scene Management', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate and wait for network to be idle (lazy-loaded components)
-    await page.goto('/', { waitUntil: 'networkidle' })
+    // Navigate and wait for load (networkidle is too fragile on CI with lazy-loaded components)
+    await page.goto('/', { waitUntil: 'load' })
 
     // Wait for React hydration and dashboard to render
     await page.waitForLoadState('domcontentloaded')
@@ -21,11 +21,13 @@ test.describe('Scene Management', () => {
   })
 
   test('User can navigate to Scenes tab', async ({ page }) => {
+    await page.waitForSelector('button:has-text("Scenes")', { timeout: 10000 })
     await page.click('button:has-text("Scenes")')
     await expect(page.locator('text=Scenes').first()).toBeVisible()
   })
 
   test('User can view existing scenes', async ({ page }) => {
+    await page.waitForSelector('button:has-text("Scenes")', { timeout: 10000 })
     await page.click('button:has-text("Scenes")')
 
     // Should show either scenes or empty state
@@ -38,6 +40,7 @@ test.describe('Scene Management', () => {
   })
 
   test('User can activate a scene', async ({ page }) => {
+    await page.waitForSelector('button:has-text("Scenes")', { timeout: 10000 })
     await page.click('button:has-text("Scenes")')
 
     // Find first scene card
@@ -65,6 +68,7 @@ test.describe('Scene Management', () => {
   })
 
   test('Scenes persist across refresh', async ({ page }) => {
+    await page.waitForSelector('button:has-text("Scenes")', { timeout: 10000 })
     await page.click('button:has-text("Scenes")')
 
     const initialCount = await page.locator('[data-testid*="scene-card"]').count()

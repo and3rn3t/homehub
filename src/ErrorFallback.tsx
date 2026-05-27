@@ -1,16 +1,12 @@
 import { AlertCircleIcon, AlertTriangleIcon, HouseIcon, RefreshIcon } from '@/lib/icons'
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
+import type { FallbackProps } from 'react-error-boundary'
 import { Alert, AlertDescription, AlertTitle } from './components/ui/alert'
 import { Button } from './components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
 
-interface ErrorFallbackProps {
-  error: Error
-  resetErrorBoundary: () => void
-}
-
-export const ErrorFallback = ({ error, resetErrorBoundary }: ErrorFallbackProps) => {
+export const ErrorFallback = ({ error, resetErrorBoundary }: FallbackProps) => {
   // When encountering an error in the development mode, rethrow it and don't display the boundary.
   // The parent UI will take care of showing a more helpful dialog.
   if (import.meta.env.DEV) throw error

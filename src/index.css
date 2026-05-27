@@ -319,7 +319,7 @@
     letter-spacing: -0.025em; /* tracking-tight */
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
   }
-  
+
   @media (min-width: 640px) {
     .text-h1 {
       font-size: 28px; /* sm:text-[28px] */
@@ -332,7 +332,7 @@
     letter-spacing: 0; /* tracking-normal */
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
   }
-  
+
   @media (min-width: 640px) {
     .text-h2 {
       font-size: 1.25rem; /* sm:text-xl */

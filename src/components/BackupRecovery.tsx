@@ -178,7 +178,10 @@ export function BackupRecovery() {
     }
   }
 
-  const updateSettings = (key: keyof BackupSettings, value: any) => {
+  const updateSettings = (
+    key: keyof BackupSettings,
+    value: BackupSettings[keyof BackupSettings]
+  ) => {
     setSettings(current => ({ ...current, [key]: value }))
   }
 
