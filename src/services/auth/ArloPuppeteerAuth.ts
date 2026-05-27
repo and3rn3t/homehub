@@ -73,7 +73,7 @@ export async function authenticateWithPuppeteer(
 
     // Launch browser with custom settings
     browser = await puppeteer.launch({
-      headless: headless ? 'shell' : false, // Use shell headless mode (compatible with Puppeteer types)
+      headless: headless, // true = headless, false = visible browser
       slowMo,
       args: [
         '--no-sandbox',
