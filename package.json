@@ -179,7 +179,7 @@
     "playwright": "^1.56.0",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.8.0",
-    "puppeteer": "^24.27.0",
+    "puppeteer": "^25.0.0",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "rollup-plugin-visualizer": "^6.0.4",
