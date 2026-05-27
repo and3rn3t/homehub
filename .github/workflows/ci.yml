@@ -23,7 +23,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x, 22.x]
+        node-version: [22.x, 24.x]
       fail-fast: false # Continue other matrix jobs even if one fails
 
     steps:
@@ -56,11 +56,11 @@ jobs:
         run: npm run test:coverage
 
       - name: Generate coverage summary
-        if: matrix.node-version == '20.x'
+        if: matrix.node-version == '22.x'
         run: node scripts/get-coverage.cjs > coverage-summary.txt
 
       - name: Upload coverage reports
-        if: matrix.node-version == '20.x'
+        if: matrix.node-version == '22.x'
         uses: actions/upload-artifact@v7
         with:
           name: coverage-report
@@ -70,7 +70,7 @@ jobs:
           retention-days: 30
 
       - name: Check coverage thresholds
-        if: matrix.node-version == '20.x'
+        if: matrix.node-version == '22.x'
         run: |
           node -e "
             const fs = require('fs');
@@ -129,7 +129,7 @@ jobs:
           "
 
       - name: Comment PR with coverage
-        if: github.event_name == 'pull_request' && matrix.node-version == '20.x'
+        if: github.event_name == 'pull_request' && matrix.node-version == '22.x'
         uses: actions/github-script@v9
         with:
           script: |
@@ -157,7 +157,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "20.x"
+          node-version: "24.x"
           cache: "npm"
 
       - name: Install dependencies
