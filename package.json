@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "engines": {
-    "node": ">=18.0.0 <25.0.0",
+    "node": ">=20.0.0 <25.0.0",
     "npm": ">=9.0.0"
   },
   "scripts": {
@@ -50,7 +50,6 @@
     "http-device": "node scripts/http-virtual-device.js",
     "http-devices": "node scripts/launch-http-devices.js --preset full-house",
     "test:multi-protocol": "node scripts/test-multi-protocol.js",
-    "test:arlo": "node scripts/test-arlo-adapter.js",
     "test:arlo:puppeteer": "node scripts/test-arlo-puppeteer.js",
     "test:arlo:visible": "node scripts/test-arlo-puppeteer.js --headless=false",
     "test:arlo:real": "node scripts/arlo-real-browser-auth.js",
