@@ -1,6 +1,6 @@
 /**
  * Process polyfill for browser environment
- * Required by @koush/arlo and other Node.js libraries
+ * Required by Node.js libraries that reference `process` when bundled for the browser
  */
 
 declare global {

@@ -146,7 +146,6 @@
   "devDependencies": {
     "@axe-core/react": "^4.10.2",
     "@eslint/js": "^10.0.1",
-    "@koush/arlo": "^1.2.4",
     "@playwright/test": "^1.56.0",
     "@tailwindcss/postcss": "^4.1.8",
     "@testing-library/jest-dom": "^6.9.1",
@@ -191,6 +190,9 @@
     "vite-plugin-pwa": "^1.1.0",
     "vitest": "^4.0.3",
     "workbox-window": "^7.3.0"
+  },
+  "overrides": {
+    "image-type": "^6.1.0"
   },
   "workspaces": {
     "packages": [
