@@ -2,7 +2,7 @@
 import 'react'
 import 'react-dom'
 
-// Polyfill process for Node.js libraries in browser (e.g., @koush/arlo)
+// Polyfill process for Node.js libraries bundled for the browser
 import './lib/process-polyfill'
 
 import { createRoot } from 'react-dom/client'

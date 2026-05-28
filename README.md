@@ -42,7 +42,7 @@ HomeHub is a **production-ready home automation dashboard** with real device int
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+
 - npm or yarn
 - Cloudflare account (free tier works!)
 
