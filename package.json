@@ -160,7 +160,7 @@
     "@vitest/coverage-v8": "^4.1.7",
     "@vitest/ui": "^4.0.3",
     "chrome-launcher": "^1.2.1",
-    "concurrently": "^9.2.1",
+    "concurrently": "^10.0.0",
     "cors": "^2.8.5",
     "eslint": "^10.4.0",
     "eslint-plugin-react-hooks": "^7.1.1",
