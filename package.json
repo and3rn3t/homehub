@@ -4,10 +4,11 @@
   "version": "1.0.0",
   "type": "module",
   "engines": {
-    "node": ">=20.0.0 <25.0.0",
+    "node": ">=24.0.0 <25.0.0",
     "npm": ">=9.0.0"
   },
   "scripts": {
+    "prepare": "husky",
     "dev": "vite",
     "build": "tsc -b --noCheck && vite build",
     "lint": "eslint .",
@@ -143,6 +144,8 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.0.0",
+    "@commitlint/config-conventional": "^21.0.0",
     "@axe-core/react": "^4.10.2",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.56.0",

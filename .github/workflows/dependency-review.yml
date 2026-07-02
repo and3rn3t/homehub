@@ -6,28 +6,7 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   dependency-review:
-    name: Review Dependencies
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Dependency Review
-        uses: actions/dependency-review-action@v5.0.0
-        with:
-          # Fail the build on critical vulnerabilities
-          fail-on-severity: critical
-          # Allow common permissive open-source licenses
-          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, BlueOak-1.0.0, Unlicense, 0BSD, CC0-1.0, CC-BY-3.0, CC-BY-4.0, Python-2.0, LGPL-2.1-only, LGPL-2.1-or-later, LGPL-3.0-only, LGPL-3.0-or-later, MPL-2.0
-          # Comment on PR with summary
-          comment-summary-in-pr: always
-          # Deny packages from these registries (if needed)
-          # deny-packages: malicious-package
+    uses: and3rn3t/.github/.github/workflows/reusable-dependency-review.yml@main
