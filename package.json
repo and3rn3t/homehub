@@ -1,5 +1,7 @@
 {
   "name": "homehub",
+  "repository": { "type": "git", "url": "https://github.com/and3rn3t/homehub.git" },
+  "license": "MIT",
   "description": "My attempt to build an inclusive homehub / automation project.",
   "private": true,
   "version": "1.0.0",
