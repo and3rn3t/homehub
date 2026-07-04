@@ -1,5 +1,6 @@
 {
   "name": "homehub",
+  "description": "My attempt to build an inclusive homehub / automation project.",
   "private": true,
   "version": "1.0.0",
   "type": "module",
