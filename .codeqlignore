@@ -1,0 +1,9 @@
+# Generated test artifacts — not source code
+playwright-report/
+test-results/
+
+# Coverage reports
+coverage/
+
+# Lighthouse reports
+lighthouse/reports/

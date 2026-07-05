@@ -48,6 +48,8 @@ wrangler.toml.local
 
 # Testing
 coverage
+playwright-report
+test-results
 
 # Spark-specific
 **/agent-eval-report*
