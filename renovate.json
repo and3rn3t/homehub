@@ -1,9 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    "helpers:pinGitHubActionDigests"
-  ],
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
   "timezone": "America/New_York",
   "semanticCommits": "enabled",
   "semanticCommitType": "chore",
@@ -33,12 +30,19 @@
       "description": "Group all non-major dev dependency patches/minors into one weekly PR",
       "matchDepTypes": ["devDependencies"],
       "matchUpdateTypes": ["minor", "patch"],
-      "excludePackagePatterns": ["^cloudflare", "^@cloudflare", "^react", "^react-dom", "^vite", "^@vitejs"],
       "groupName": "dev dependency updates",
       "schedule": ["before 6am on Monday"],
       "automerge": true,
       "automergeType": "pr",
-      "minimumReleaseAge": "3 days"
+      "minimumReleaseAge": "3 days",
+      "matchPackageNames": [
+        "!/^cloudflare/",
+        "!/^@cloudflare/",
+        "!/^react/",
+        "!/^react-dom/",
+        "!/^vite/",
+        "!/^@vitejs/"
+      ]
     },
     {
       "description": "Automerge security patches immediately regardless of scope",
@@ -49,39 +53,44 @@
     },
     {
       "description": "Group Cloudflare packages — review manually",
-      "matchPackagePatterns": ["^cloudflare", "^@cloudflare", "^wrangler"],
       "groupName": "Cloudflare",
-      "automerge": false
+      "automerge": false,
+      "matchPackageNames": ["/^cloudflare/", "/^@cloudflare/", "/^wrangler/"]
     },
     {
       "description": "Group React packages — review manually",
-      "matchPackageNames": ["react", "react-dom", "@types/react", "@types/react-dom"],
+      "matchPackageNames": [
+        "react",
+        "react-dom",
+        "@types/react",
+        "@types/react-dom"
+      ],
       "groupName": "React",
       "automerge": false
     },
     {
       "description": "Group Vite/Vitest packages — review manually",
-      "matchPackagePatterns": ["^vite", "^@vitejs", "^vitest", "^@vitest"],
       "groupName": "Vite & Vitest",
-      "automerge": false
+      "automerge": false,
+      "matchPackageNames": ["/^vite/", "/^@vitejs/", "/^vitest/", "/^@vitest/"]
     },
     {
       "description": "Group typescript-eslint — review manually alongside lint changes",
-      "matchPackagePatterns": ["^typescript-eslint", "^@typescript-eslint"],
       "groupName": "typescript-eslint",
-      "automerge": false
+      "automerge": false,
+      "matchPackageNames": ["/^typescript-eslint/", "/^@typescript-eslint/"]
     },
     {
       "description": "Group Playwright packages — review manually",
-      "matchPackagePatterns": ["^playwright", "^@playwright"],
       "groupName": "Playwright",
-      "automerge": false
+      "automerge": false,
+      "matchPackageNames": ["/^playwright/", "/^@playwright/"]
     },
     {
       "description": "Group Tailwind packages — review manually",
-      "matchPackagePatterns": ["^tailwindcss", "^@tailwindcss"],
       "groupName": "Tailwind CSS",
-      "automerge": false
+      "automerge": false,
+      "matchPackageNames": ["/^tailwindcss/", "/^@tailwindcss/"]
     },
     {
       "description": "Never automerge major version bumps; require manual review",
