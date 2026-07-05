@@ -25,12 +25,19 @@ test.describe('Scene Management', () => {
   // outcomes instead.
   // Matches Scenes.tsx's actual empty-state copy ("No Scenes Created" / "Create Scene").
   const EMPTY_STATE_TEXT = /No Scenes Created|Create Scene/i
-  const SCENES_RESOLVED = `[data-testid*="scene-card"], text=${EMPTY_STATE_TEXT}`
 
   async function goToScenes(page: import('@playwright/test').Page) {
     await page.waitForSelector('button:has-text("Control")', { timeout: 10000 })
     await page.click('button:has-text("Control")')
-    await page.locator(SCENES_RESOLVED).first().waitFor({ timeout: 10000 })
+    // Race two independent locators instead of combining CSS + text engines into
+    // one comma-separated selector string — Playwright's selector parser treats
+    // a "css, text=..." string as pure CSS and throws a parse error on the
+    // interpolated regex ("Unexpected token "=" while parsing css selector"),
+    // which is why every test failed instantly (~3-4s) rather than timing out.
+    await Promise.race([
+      page.locator('[data-testid*="scene-card"]').first().waitFor({ timeout: 10000 }),
+      page.getByText(EMPTY_STATE_TEXT).first().waitFor({ timeout: 10000 }),
+    ])
   }
 
   test.beforeEach(async ({ page }) => {
@@ -53,7 +60,7 @@ test.describe('Scene Management', () => {
     // goToScenes() already waited for one of these two outcomes, so this is
     // just an explicit assertion of what it found.
     const hasScenes = (await page.locator('[data-testid*="scene-card"]').count()) > 0
-    const hasEmptyState = await page.locator(`text=${EMPTY_STATE_TEXT}`).isVisible()
+    const hasEmptyState = await page.getByText(EMPTY_STATE_TEXT).first().isVisible()
 
     expect(hasScenes || hasEmptyState).toBeTruthy()
   })
