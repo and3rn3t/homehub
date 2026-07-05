@@ -1,6 +1,9 @@
 {
   "name": "homehub",
-  "repository": { "type": "git", "url": "https://github.com/and3rn3t/homehub.git" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/and3rn3t/homehub.git"
+  },
   "license": "MIT",
   "description": "My attempt to build an inclusive homehub / automation project.",
   "private": true,
@@ -147,9 +150,9 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@axe-core/react": "^4.10.2",
     "@commitlint/cli": "^21.0.0",
     "@commitlint/config-conventional": "^21.0.0",
-    "@axe-core/react": "^4.10.2",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.56.0",
     "@tailwindcss/postcss": "^4.1.8",
@@ -174,6 +177,7 @@
     "express": "^5.1.0",
     "globals": "^17.7.0",
     "happy-dom": "^20.0.0",
+    "husky": "^9.1.7",
     "jest-axe": "^10.0.0",
     "jsdom": "^29.0.0",
     "lighthouse": "^13.0.0",
