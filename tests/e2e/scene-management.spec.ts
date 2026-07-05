@@ -16,10 +16,21 @@ test.describe('Scene Management', () => {
   // from the default "Home" tab. Every test here needs to land on Control
   // first; controlSubTab defaults to 'scenes' (useKV('control-subtab',
   // 'scenes')) so Control alone is enough, no extra sub-tab click needed.
+  //
+  // Scenes.tsx's data comes from an async useKV() fetch — it renders a
+  // "Scenes" h1 immediately in ALL states (loading skeleton, error, empty,
+  // loaded), so waiting on that title alone races ahead of the fetch and
+  // catches the loading skeleton (neither scene cards nor empty-state text
+  // exist yet). Wait for the fetch to actually resolve to one of those two
+  // outcomes instead.
+  // Matches Scenes.tsx's actual empty-state copy ("No Scenes Created" / "Create Scene").
+  const EMPTY_STATE_TEXT = /No Scenes Created|Create Scene/i
+  const SCENES_RESOLVED = `[data-testid*="scene-card"], text=${EMPTY_STATE_TEXT}`
+
   async function goToScenes(page: import('@playwright/test').Page) {
     await page.waitForSelector('button:has-text("Control")', { timeout: 10000 })
     await page.click('button:has-text("Control")')
-    await page.waitForSelector('[role="tabpanel"] :text("Scenes")', { timeout: 10000 })
+    await page.locator(SCENES_RESOLVED).first().waitFor({ timeout: 10000 })
   }
 
   test.beforeEach(async ({ page }) => {
@@ -39,11 +50,10 @@ test.describe('Scene Management', () => {
   test('User can view existing scenes', async ({ page }) => {
     await goToScenes(page)
 
-    // Should show either scenes or empty state
+    // goToScenes() already waited for one of these two outcomes, so this is
+    // just an explicit assertion of what it found.
     const hasScenes = (await page.locator('[data-testid*="scene-card"]').count()) > 0
-    const hasEmptyState = await page
-      .locator('text=/No scenes|Create your first scene/i')
-      .isVisible()
+    const hasEmptyState = await page.locator(`text=${EMPTY_STATE_TEXT}`).isVisible()
 
     expect(hasScenes || hasEmptyState).toBeTruthy()
   })
