@@ -410,6 +410,7 @@ export function Scenes() {
                     <Card
                       role="button"
                       tabIndex={0}
+                      data-testid={`scene-card-${scene.id}`}
                       className={`group relative cursor-pointer overflow-hidden transition-all duration-300 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none ${
                         scene.id === activeScene
                           ? 'ring-primary shadow-primary/20 shadow-2xl ring-2'
