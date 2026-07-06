@@ -198,6 +198,17 @@ export function Scenes() {
   // Smart loading state: Only show skeletons on initial load with no data
   const showSkeleton = isLoading && scenes.length === 0
 
+  // Only show the blocking error screen when a KV fetch failure leaves us with
+  // nothing to display. `scenes` is offline-first (seeded synchronously from
+  // MOCK_SCENES/localStorage before any network call — see useKV's
+  // getCachedValue), so a failed background refresh should never blank out a
+  // screen that already has valid cached/default data to show. Previously
+  // isError alone replaced the whole view even when scenes was populated,
+  // which made this component permanently unusable in any environment where
+  // the KV worker isn't reachable (e.g. CI running only the frontend dev
+  // server, or a real transient backend outage) despite having good data.
+  const showError = isError && scenes.length === 0
+
   // Show loading state (initial load only)
   if (showSkeleton) {
     return (
@@ -229,7 +240,7 @@ export function Scenes() {
   }
 
   // Show error state
-  if (isError) {
+  if (showError) {
     return (
       <div className="flex h-full flex-col">
         <div className="p-6 pb-4">
