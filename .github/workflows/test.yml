@@ -41,6 +41,6 @@ jobs:
 
   e2e:
     name: E2E Tests (Playwright)
-    uses: and3rn3t/.github/.github/workflows/reusable-playwright-e2e.yml@main
+    uses: and3rn3t/.github/.github/workflows/reusable-playwright-e2e.yml@v1
     with:
       command: npm run test:e2e
