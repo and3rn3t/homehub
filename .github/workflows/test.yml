@@ -17,10 +17,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "24"
           cache: "npm"
@@ -33,7 +33,7 @@ jobs:
 
       - name: Upload a11y results
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: a11y-results
           path: test-results/
@@ -41,6 +41,6 @@ jobs:
 
   e2e:
     name: E2E Tests (Playwright)
-    uses: and3rn3t/.github/.github/workflows/reusable-playwright-e2e.yml@v1
+    uses: and3rn3t/.github/.github/workflows/reusable-playwright-e2e.yml@bac71674cf57c550774f71a70e32a5bb7bec48ad # v1
     with:
       command: npm run test:e2e
