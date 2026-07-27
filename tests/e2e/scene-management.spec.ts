@@ -76,9 +76,9 @@ test.describe('Scene Management', () => {
       return
     }
 
-    // Click activate button
-    const activateButton = sceneCard.locator('button:has-text("Activate")').first()
-    await activateButton.click()
+    // The card itself is the activatable element (role="button", onClick → activateScene)
+    // There is no separate "Activate" button — clicking the card triggers the scene.
+    await sceneCard.click()
 
     // Wait for activation (should be quick)
     await page.waitForTimeout(500)
