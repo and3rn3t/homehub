@@ -129,6 +129,7 @@ jobs:
           "
 
       - name: Comment PR with coverage
+        continue-on-error: true
         if: github.event_name == 'pull_request' && matrix.node-version == '22.x'
         uses: actions/github-script@v9
         with:
