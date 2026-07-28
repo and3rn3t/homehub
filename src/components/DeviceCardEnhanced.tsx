@@ -31,7 +31,7 @@ import {
   WifiOffIcon,
 } from '@/lib/icons'
 import type { Device } from '@/types'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { memo, useCallback, useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { FavoriteButton } from './FavoriteButton'

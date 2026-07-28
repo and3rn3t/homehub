@@ -24,7 +24,7 @@ import {
 } from '@/lib/icons'
 import { logger } from '@/lib/logger'
 import type { Scene } from '@/types'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
 

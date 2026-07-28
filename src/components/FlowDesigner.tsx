@@ -21,7 +21,7 @@ import {
   ThermometerIcon,
   TrashIcon,
 } from '@/lib/icons'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { FlowMiniMap } from './FlowMiniMap'

@@ -18,7 +18,7 @@ import { IOS26Spinner } from '@/components/ui/ios26-loading'
 import type { Camera } from '@/constants/mock-cameras'
 import { MaximizeIcon, PauseIcon, PlayIcon, RefreshCwIcon } from '@/lib/icons'
 import { cn } from '@/lib/utils'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { memo, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 

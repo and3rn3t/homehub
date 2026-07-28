@@ -3,7 +3,7 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useUnits, type UnitSystem } from '@/hooks/use-units'
 import { CompassIcon, ThermometerIcon } from '@/lib/icons'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { toast } from 'sonner'
 
 export function UnitSettings() {

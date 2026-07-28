@@ -26,7 +26,7 @@
 
 import { useHaptic } from '@/hooks/use-haptic'
 import { cn } from '@/lib/utils'
-import { motion, PanInfo, useMotionValue, useTransform } from 'framer-motion'
+import { motion, PanInfo, useMotionValue, useTransform } from 'motion/react'
 import { LucideIcon } from 'lucide-react'
 import { ReactNode, useCallback, useRef, useState } from 'react'
 

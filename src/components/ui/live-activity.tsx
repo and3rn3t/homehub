@@ -2,7 +2,7 @@ import { Progress } from '@/components/ui/progress'
 import type { LucideIcon } from '@/lib/icons'
 import { XIcon } from '@/lib/icons'
 import { cn } from '@/lib/utils'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 
 interface LiveActivityProps {
   icon: LucideIcon

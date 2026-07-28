@@ -14,7 +14,7 @@ import {
   VideoIcon,
 } from '@/lib/icons'
 import { logger } from '@/lib/logger'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 

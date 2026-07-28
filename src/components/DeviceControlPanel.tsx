@@ -26,7 +26,7 @@ import {
 } from '@/lib/icons'
 import { logger } from '@/lib/logger'
 import type { Device } from '@/types'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Palette } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'

@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { SunRoomIcon } from '@/lib/icons'
 import { cn } from '@/lib/utils'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 
 interface BrightnessSliderProps {
   /** Current brightness value (0-100) */

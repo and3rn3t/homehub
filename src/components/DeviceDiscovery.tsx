@@ -15,7 +15,7 @@ import { CheckCircleIcon, SearchIcon, WifiIcon, XCircleIcon } from '@/lib/icons'
 import type { DiscoveredDevice } from '@/services/discovery'
 import { discoveryManager } from '@/services/discovery'
 import type { Device } from '@/types'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 

@@ -1,5 +1,5 @@
 import { AlertCircleIcon, AlertTriangleIcon, HouseIcon, RefreshIcon } from '@/lib/icons'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import type { FallbackProps } from 'react-error-boundary'
 import { Alert, AlertDescription, AlertTitle } from './components/ui/alert'

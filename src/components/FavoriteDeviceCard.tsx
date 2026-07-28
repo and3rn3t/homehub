@@ -5,7 +5,7 @@ import { Switch } from '@/components/ui/switch'
 import { useKV } from '@/hooks/use-kv'
 import { ClockIcon, LightbulbIcon, ShieldIcon, ThermometerIcon, WifiIcon } from '@/lib/icons'
 import type { Device } from '@/types'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { memo, useCallback } from 'react'
 import { FavoriteButton } from './FavoriteButton'
 

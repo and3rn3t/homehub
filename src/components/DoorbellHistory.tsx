@@ -29,7 +29,7 @@ import {
 import { cn } from '@/lib/utils'
 import type { DoorbellEvent } from '@/types/security.types'
 import { format, formatDistanceToNow, isToday, isYesterday } from 'date-fns'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { memo, useState } from 'react'
 
 interface DoorbellHistoryProps {

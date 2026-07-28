@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { HomeRoomIcon, LightbulbIcon, PlayIcon, PlusIcon, StarIcon } from '@/lib/icons'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 
 interface EmptyStateProps {
   type: 'devices' | 'scenes' | 'rooms' | 'favorites'

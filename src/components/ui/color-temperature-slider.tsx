@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { ThermometerIcon } from '@/lib/icons'
 import { cn } from '@/lib/utils'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 
 interface ColorTemperatureSliderProps {
   /** Current color temperature in Kelvin (2000-6500) */

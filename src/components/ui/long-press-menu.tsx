@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import type { LucideIcon } from '@/lib/icons'
 import { cn } from '@/lib/utils'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 
 export interface LongPressMenuItem {

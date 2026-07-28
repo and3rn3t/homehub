@@ -12,7 +12,7 @@
 import { useHaptic } from '@/hooks/use-haptic'
 import { useNetworkStatus } from '@/hooks/use-network-status'
 import { WifiOffIcon } from '@/lib/icons'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { useEffect } from 'react'
 
 export function OfflineBanner() {

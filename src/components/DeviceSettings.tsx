@@ -28,7 +28,7 @@ import {
   WifiIcon,
 } from '@/lib/icons'
 import { cn } from '@/lib/utils'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { AdaptiveLighting } from './AdaptiveLighting'

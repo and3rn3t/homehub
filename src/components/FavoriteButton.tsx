@@ -1,7 +1,7 @@
 import { useHaptic } from '@/hooks/use-haptic'
 import { useKV } from '@/hooks/use-kv'
 import { StarIcon } from '@/lib/icons'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
 

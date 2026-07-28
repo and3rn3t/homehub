@@ -27,7 +27,7 @@ import {
   TrashIcon,
 } from '@/lib/icons'
 import type { Geofence } from '@/services/automation/types'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useState } from 'react'
 import { GeofenceDialog } from './GeofenceDialog'
 

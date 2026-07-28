@@ -11,7 +11,7 @@
 
 import { AlertCircleIcon, RefreshCwIcon, WifiOffIcon, XCircleIcon } from '@/lib/icons'
 import { cn } from '@/lib/utils'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { ReactNode } from 'react'
 
 interface iOS26ErrorProps {
