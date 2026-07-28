@@ -14,7 +14,7 @@
 import { XIcon } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
-import { motion, PanInfo } from 'framer-motion'
+import { motion, PanInfo } from 'motion/react'
 import { ComponentProps, useRef, useState } from 'react'
 
 function BottomSheet({ ...props }: ComponentProps<typeof DialogPrimitive.Root>) {

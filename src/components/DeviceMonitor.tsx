@@ -28,7 +28,7 @@ import {
   XIcon,
 } from '@/lib/icons'
 import type { Device } from '@/types'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 

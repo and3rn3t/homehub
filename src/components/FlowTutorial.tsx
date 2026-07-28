@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useKV } from '@/hooks/use-kv'
 import type { LucideIcon } from '@/lib/icons'
 import { ArrowRightIcon, LightbulbIcon, NavigationIcon, PlayIcon, XIcon } from '@/lib/icons'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 
 interface TutorialStep {

@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useTheme, type Theme } from '@/hooks/use-theme'
 import { CheckIcon, MoonIcon, SettingsIcon, SunRoomIcon } from '@/lib/icons'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 
 export function ThemeToggle() {
   const { theme, setTheme, resolvedTheme } = useTheme()

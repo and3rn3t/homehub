@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { BellIcon, MessageIcon, PackageIcon, PhoneIcon, UserIcon, XIcon } from '@/lib/icons'
 import type { DoorbellEvent } from '@/types/security.types'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { memo, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 

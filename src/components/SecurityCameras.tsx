@@ -28,7 +28,7 @@ import { BellIcon, ClockIcon, VideoIcon, WifiOffIcon } from '@/lib/icons'
 import { arloTokenManager } from '@/services/auth/ArloTokenManager'
 import { ArloAdapter } from '@/services/devices/ArloAdapter'
 import type { DoorbellEvent } from '@/types/security.types'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { lazy, memo, Suspense, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 

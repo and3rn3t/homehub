@@ -17,7 +17,7 @@ import {
   PulseSpinner,
   Spinner,
 } from '@/components/ui/spinner'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useState } from 'react'
 
 /**

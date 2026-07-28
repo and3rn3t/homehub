@@ -4,7 +4,7 @@ import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { useKV } from '@/hooks/use-kv'
 import { ClockIcon, InfoIcon, LightbulbIcon, MoonIcon, SunRoomIcon } from '@/lib/icons'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 

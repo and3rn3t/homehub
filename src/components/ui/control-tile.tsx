@@ -2,7 +2,7 @@ import { Card } from '@/components/ui/card'
 import type { LucideIcon } from '@/lib/icons'
 import { cn } from '@/lib/utils'
 import type { Device } from '@/types'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 
 interface ControlTileProps {
   device: Device

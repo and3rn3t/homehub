@@ -13,7 +13,7 @@ import {
   XIcon,
   XCircleIcon,
 } from '@/lib/icons'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 

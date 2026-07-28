@@ -29,7 +29,7 @@ import { Button } from '@/components/ui/button'
 import { useServiceWorkerUpdate } from '@/hooks/use-service-worker-update'
 import { RefreshCwIcon, XIcon } from '@/lib/icons'
 import { cn } from '@/lib/utils'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 
 export function UpdateBanner() {
