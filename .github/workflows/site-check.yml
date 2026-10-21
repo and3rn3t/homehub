@@ -1,0 +1,17 @@
+# Daily uptime + broken-link check for the live site. See
+# reusable-site-check.yml in and3rn3t/.github for the shared jobs.
+name: Site Check
+
+on:
+  schedule:
+    - cron: "20 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  site-check:
+    uses: and3rn3t/.github/.github/workflows/reusable-site-check.yml@v1
+    with:
+      url: https://homehub.andernet.dev
