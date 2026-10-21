@@ -78,8 +78,8 @@ export default defineConfig({
     sourcemap: true,
     // Increase chunk size warning limit for production bundles
     chunkSizeWarningLimit: 1000,
-    // Enable minification
-    minify: 'esbuild',
+    // Enable minification (Vite 8 uses Oxc; 'esbuild' would need esbuild installed)
+    minify: true,
     target: 'es2020',
     // Optimize chunk splitting for better caching and parallel loading
     rollupOptions: {
