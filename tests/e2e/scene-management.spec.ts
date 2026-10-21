@@ -97,8 +97,9 @@ test.describe('Scene Management', () => {
 
     const initialCount = await page.locator('[data-testid*="scene-card"]').count()
 
+    // The active tab survives a reload, so don't wait for the dashboard here —
+    // goToScenes() waits for the nav and the scene list itself.
     await page.reload()
-    await page.waitForSelector('[data-testid="dashboard"]')
     await goToScenes(page)
 
     const newCount = await page.locator('[data-testid*="scene-card"]').count()
