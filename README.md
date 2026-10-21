@@ -1,18 +1,16 @@
 # 🏠 HomeHub - Smart Home Automation Dashboard
 
-**iOS-inspired home automation control center** built with React 19 and Cloudflare infrastructure. Production-ready with live camera streaming, smart device control, and mobile optimization.
+**iOS-inspired home automation control center** built with React 19 and Cloudflare infrastructure — live camera streaming, smart device control, and mobile optimization.
+
+[![CI](https://github.com/and3rn3t/homehub/actions/workflows/ci.yml/badge.svg)](https://github.com/and3rn3t/homehub/actions/workflows/ci.yml)
+[![Tests](https://github.com/and3rn3t/homehub/actions/workflows/test.yml/badge.svg)](https://github.com/and3rn3t/homehub/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Live site](https://img.shields.io/badge/live-homehub.andernet.dev-brightgreen)](https://homehub.andernet.dev)
+[![Version](https://img.shields.io/github/v/release/and3rn3t/homehub?label=version)](https://github.com/and3rn3t/homehub/releases)
+
+![HomeHub devices view](docs/screenshot.png)
 
 🚀 **Live Production App**: [homehub.andernet.dev](https://homehub.andernet.dev)
-
-![Version](https://img.shields.io/github/v/release/and3rn3t/homehub?label=version)
-![Status](https://img.shields.io/badge/status-production-brightgreen)
-![Platform](https://img.shields.io/badge/platform-Cloudflare-orange)
-![License](https://img.shields.io/badge/license-MIT-blue)
-![Tests](https://github.com/and3rn3t/homehub/actions/workflows/test.yml/badge.svg)
-![Coverage: Statements](https://img.shields.io/badge/coverage-94.1%25-green)
-![Coverage: Branches](https://img.shields.io/badge/branches-89.1%25-yellowgreen)
-![Coverage: Functions](https://img.shields.io/badge/functions-100.0%25-brightgreen)
-![Lighthouse](https://img.shields.io/badge/lighthouse-90+-brightgreen)
 
 ---
 
@@ -27,7 +25,7 @@ HomeHub is a **production-ready home automation dashboard** with real device int
 - ✅ **Visual Flow Designer**: Drag-and-drop automation builder
 - ✅ **Production Hardened**: 87% complexity reduction, 96% bundle optimization
 
-### ✨ Key Features
+## ✨ Features
 
 - **iOS-Inspired UI**: OKLCH color system, spring animations, native-feeling interactions
 - **11 Feature Sections**: Dashboard, Rooms, Scenes, Automations, Energy, Security, Users, Insights, Backup, Settings
@@ -359,7 +357,7 @@ This is a personal project, but suggestions and feedback are welcome!
 
 ## 📄 License
 
-MIT License - Copyright (c) 2025
+[MIT](LICENSE) - Copyright (c) 2025
 
 ---
 
