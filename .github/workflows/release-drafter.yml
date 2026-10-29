@@ -15,4 +15,4 @@ permissions:
 
 jobs:
   update-release-draft:
-    uses: and3rn3t/.github/.github/workflows/reusable-release-drafter.yml@0415d76d5dfdf1dec81d4756d411850057f38618 # v1
+    uses: and3rn3t/.github/.github/workflows/reusable-release-drafter.yml@99fae926f05867cc98ec7007b9fce8c1fd125b53 # v1
