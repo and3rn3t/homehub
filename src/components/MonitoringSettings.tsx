@@ -477,29 +477,28 @@ export function MonitoringSettings() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {securitySettings &&
-                Object.entries(securitySettings).map(([setting, enabled]) => (
-                  <div key={setting} className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-base font-medium capitalize">
-                        {setting.replace(/([A-Z])/g, ' $1').trim()}
-                      </Label>
-                      <p className="text-muted-foreground text-sm">
-                        {setting === 'intrusion' && 'Detect unauthorized access attempts'}
-                        {setting === 'tampering' && 'Monitor device physical tampering'}
-                        {setting === 'unauthorizedAccess' && 'Track unauthorized login attempts'}
-                        {setting === 'deviceRemoval' && 'Alert when devices are removed'}
-                        {setting === 'encryptionChecks' && 'Verify encryption status'}
-                      </p>
-                    </div>
-                    <Switch
-                      checked={enabled}
-                      onCheckedChange={checked =>
-                        updateSecuritySetting(setting as keyof SecuritySettings, checked)
-                      }
-                    />
+              {Object.entries(securitySettings).map(([setting, enabled]) => (
+                <div key={setting} className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base font-medium capitalize">
+                      {setting.replace(/([A-Z])/g, ' $1').trim()}
+                    </Label>
+                    <p className="text-muted-foreground text-sm">
+                      {setting === 'intrusion' && 'Detect unauthorized access attempts'}
+                      {setting === 'tampering' && 'Monitor device physical tampering'}
+                      {setting === 'unauthorizedAccess' && 'Track unauthorized login attempts'}
+                      {setting === 'deviceRemoval' && 'Alert when devices are removed'}
+                      {setting === 'encryptionChecks' && 'Verify encryption status'}
+                    </p>
                   </div>
-                ))}
+                  <Switch
+                    checked={enabled}
+                    onCheckedChange={checked =>
+                      updateSecuritySetting(setting as keyof SecuritySettings, checked)
+                    }
+                  />
+                </div>
+              ))}
             </CardContent>
           </Card>
 
