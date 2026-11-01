@@ -115,7 +115,7 @@ registerRoute(
 
 // Cloudflare Worker API - NetworkFirst with longer timeout
 registerRoute(
-  /^https:\/\/.*\.cloudflareaccess\.com\/.*/i,
+  /^https:\/\/[^/@?#]+\.cloudflareaccess\.com\//i,
   new NetworkFirst({
     cacheName: 'cloudflare-api-cache',
     plugins: [
@@ -351,6 +351,8 @@ self.addEventListener('sync', (event: SyncEvent) => {
  * Handle skip waiting message from client
  */
 self.addEventListener('message', event => {
+  if (event.origin !== self.location.origin) return
+
   if (event.data && event.data.type === 'SKIP_WAITING') {
     console.log('[SW] Skip waiting requested')
     self.skipWaiting()

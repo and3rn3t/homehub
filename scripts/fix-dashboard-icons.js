@@ -46,14 +46,12 @@ const iconMappingFixes = [
 
 // Apply size replacements
 for (const [old, newVal] of sizeReplacements) {
-  const regex = new RegExp(old.replace(/[{}]/g, '\\$&'), 'g')
-  content = content.replace(regex, newVal)
+  content = content.split(old).join(newVal)
 }
 
 // Apply room icon mapping fixes
 for (const [old, newVal] of iconMappingFixes) {
-  const regex = new RegExp(old.replace(/[{}]/g, '\\$&'), 'g')
-  content = content.replace(regex, newVal)
+  content = content.split(old).join(newVal)
 }
 
 // Fix room icon map
