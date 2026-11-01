@@ -14,6 +14,10 @@
 import cors from 'cors'
 import express from 'express'
 
+function sanitizeForLog(value) {
+  return String(value).replace(/[\r\n]/g, '')
+}
+
 /**
  * Virtual HTTP Device
  */
@@ -136,7 +140,9 @@ class VirtualHTTPDevice {
       this.state.enabled = on
       this.state.lastUpdated = new Date()
 
-      console.log(`[${this.config.name}] State changed: ${was_on} → ${on}`)
+      console.log(
+        `[${this.config.name}] State changed: ${sanitizeForLog(was_on)} → ${sanitizeForLog(on)}`
+      )
 
       res.json({
         was_on,
@@ -287,7 +293,11 @@ class VirtualHTTPDevice {
 
       this.state.lastUpdated = new Date()
 
-      console.log(`[${this.config.name}] Command executed:`, command, value)
+      console.log(
+        `[${this.config.name}] Command executed:`,
+        sanitizeForLog(command),
+        sanitizeForLog(value)
+      )
 
       res.json({
         success: true,

@@ -106,99 +106,97 @@ export function FlowTutorial({ onComplete }: FlowTutorialProps) {
 
   return (
     <AnimatePresence>
-      {isVisible && (
-        <>
-          {/* Overlay */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 flex items-center justify-center bg-black/50"
-          />
+      <>
+        {/* Overlay */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="absolute inset-0 z-50 flex items-center justify-center bg-black/50"
+        />
 
-          {/* Tutorial Card */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="absolute z-50"
-            style={{
-              left: `${currentStepData.position.x}%`,
-              top: `${currentStepData.position.y}%`,
-              transform: 'translate(-50%, -50%)',
-            }}
-          >
-            <Card className="border-primary w-80 border-2 shadow-xl">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-primary flex h-10 w-10 items-center justify-center rounded-full">
-                      <currentStepData.icon size={20} className="text-white" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-base">{currentStepData.title}</CardTitle>
-                      <Badge variant="outline" className="mt-1 text-xs">
-                        {currentStep + 1} of {tutorialSteps.length}
-                      </Badge>
-                    </div>
+        {/* Tutorial Card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: 20 }}
+          className="absolute z-50"
+          style={{
+            left: `${currentStepData.position.x}%`,
+            top: `${currentStepData.position.y}%`,
+            transform: 'translate(-50%, -50%)',
+          }}
+        >
+          <Card className="border-primary w-80 border-2 shadow-xl">
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary flex h-10 w-10 items-center justify-center rounded-full">
+                    <currentStepData.icon size={20} className="text-white" />
                   </div>
-                  <Button variant="ghost" size="icon" onClick={skipTutorial} className="h-8 w-8">
-                    <XIcon className="h-4 w-4" />
-                  </Button>
+                  <div>
+                    <CardTitle className="text-base">{currentStepData.title}</CardTitle>
+                    <Badge variant="outline" className="mt-1 text-xs">
+                      {currentStep + 1} of {tutorialSteps.length}
+                    </Badge>
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-muted-foreground mb-4 text-sm">{currentStepData.description}</p>
+                <Button variant="ghost" size="icon" onClick={skipTutorial} className="h-8 w-8">
+                  <XIcon className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <p className="text-muted-foreground mb-4 text-sm">{currentStepData.description}</p>
 
-                <div className="flex items-center justify-between">
-                  <Button variant="outline" size="sm" onClick={skipTutorial}>
-                    Skip Tutorial
-                  </Button>
+              <div className="flex items-center justify-between">
+                <Button variant="outline" size="sm" onClick={skipTutorial}>
+                  Skip Tutorial
+                </Button>
 
-                  <div className="flex items-center gap-2">
-                    {currentStep > 0 && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentStep(currentStep - 1)}
-                      >
-                        Back
-                      </Button>
-                    )}
-                    <Button size="sm" onClick={nextStep} className="flex items-center gap-2">
-                      {isLastStep ? 'Finish' : 'Next'}
-                      {!isLastStep && <ArrowRightIcon className="h-3.5 w-3.5" />}
+                <div className="flex items-center gap-2">
+                  {currentStep > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentStep(currentStep - 1)}
+                    >
+                      Back
                     </Button>
-                  </div>
+                  )}
+                  <Button size="sm" onClick={nextStep} className="flex items-center gap-2">
+                    {isLastStep ? 'Finish' : 'Next'}
+                    {!isLastStep && <ArrowRightIcon className="h-3.5 w-3.5" />}
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-          {/* Progress Dots */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="absolute bottom-8 left-1/2 z-50 -translate-x-1/2 transform"
-          >
-            <div className="bg-background/90 flex items-center gap-2 rounded-full border px-4 py-2 backdrop-blur-sm">
-              {tutorialSteps.map((_, index) => (
-                <div
-                  key={index}
-                  className={`h-2 w-2 rounded-full transition-colors ${
-                    index === currentStep
-                      ? 'bg-primary'
-                      : index < currentStep
-                        ? 'bg-primary/50'
-                        : 'bg-muted'
-                  }`}
-                />
-              ))}
-            </div>
-          </motion.div>
-        </>
-      )}
+        {/* Progress Dots */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          className="absolute bottom-8 left-1/2 z-50 -translate-x-1/2 transform"
+        >
+          <div className="bg-background/90 flex items-center gap-2 rounded-full border px-4 py-2 backdrop-blur-sm">
+            {tutorialSteps.map((_, index) => (
+              <div
+                key={index}
+                className={`h-2 w-2 rounded-full transition-colors ${
+                  index === currentStep
+                    ? 'bg-primary'
+                    : index < currentStep
+                      ? 'bg-primary/50'
+                      : 'bg-muted'
+                }`}
+              />
+            ))}
+          </div>
+        </motion.div>
+      </>
     </AnimatePresence>
   )
 }

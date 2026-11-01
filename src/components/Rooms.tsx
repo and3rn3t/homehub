@@ -596,34 +596,6 @@ export function Rooms() {
     )
   }
 
-  // Show error state
-  if (roomsError) {
-    return (
-      <div className="flex h-full flex-col">
-        <div className="p-6 pb-4">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h1 className="text-foreground text-2xl font-bold">Rooms</h1>
-              <p className="text-muted-foreground">Manage devices by location</p>
-            </div>
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full"
-              onClick={() => setCreateRoomDialogOpen(true)}
-            >
-              <PlusIcon className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-6 pb-6">
-          <IOS26Shimmer className="h-48 rounded-2xl" />
-        </div>
-      </div>
-    )
-  }
-
   if (roomsError) {
     return (
       <div className="flex h-full flex-col">

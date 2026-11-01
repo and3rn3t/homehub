@@ -19,6 +19,11 @@ import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import { fileURLToPath } from 'url'
 
+function isArloDomain(domain) {
+  const host = domain.replace(/^\./, '')
+  return host === 'arlo.com' || host.endsWith('.arlo.com')
+}
+
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -143,7 +148,7 @@ async function extractArloAuthFromRealBrowser(options = {}) {
     // Filter for Arlo-specific cookies
     const arloCookies = cookies.filter(
       c =>
-        c.domain.includes('arlo.com') ||
+        isArloDomain(c.domain) ||
         c.name.includes('token') ||
         c.name.includes('auth') ||
         c.name.includes('session')
