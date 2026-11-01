@@ -29,7 +29,7 @@ body:
     attributes:
       label: Document Location
       description: Which file or page has the issue?
-      placeholder: 'docs/guides/SETUP_QUICKSTART.md'
+      placeholder: 'docs/guides/setup/SETUP_QUICKSTART.md'
     validations:
       required: true
 

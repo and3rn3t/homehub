@@ -519,4 +519,4 @@ After setting up CI/CD:
 
 ---
 
-**Questions?** Check the [Testing Guide](../guides/TESTING.md) or open an issue on GitHub.
+**Questions?** Check the [Testing Guide](../TESTING_GUIDE.md) or open an issue on GitHub.

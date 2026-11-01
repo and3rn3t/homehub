@@ -7,7 +7,6 @@
     "node_modules/**",
     "workers/node_modules/**",
     "**/node_modules/**",
-    ".markdownlintignore",
   ],
 
   // Default: all rules enabled

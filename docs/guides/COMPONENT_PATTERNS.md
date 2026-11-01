@@ -627,4 +627,4 @@ function StatCard({
 
 ---
 
-**Note**: For mobile-specific patterns (safe-area, gestures, PWA), see `docs/development/MOBILE_OPTIMIZATION_COMPLETE.md`.
+**Note**: For mobile-specific patterns (safe-area, gestures, PWA), see `docs/guides/PWA_SETUP_GUIDE.md`.

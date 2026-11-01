@@ -98,4 +98,4 @@ mosquitto/
 
 ---
 
-**Need help?** See `docs/PHASE_2.1_MQTT_SETUP.md` for full guide
+**Need help?** See `mosquitto/README.md` for broker setup

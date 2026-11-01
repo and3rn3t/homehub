@@ -72,3 +72,6 @@ mosquitto/log/*.log
 debug-tools/
 data/
 *.debug.html
+
+# Eufy client session cache (contains credentials)
+persistent.json

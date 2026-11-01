@@ -439,10 +439,10 @@ Your HomeHub is now live on Cloudflare's global edge network!
 - Cloudflare Dashboard: <https://dash.cloudflare.com>
 - Worker Logs: `cd workers && wrangler tail`
 - Pages Logs: Cloudflare Dashboard → Pages → Project → Deployments
-- Documentation: `docs/CLOUDFLARE_DEPLOYMENT.md`
+- Documentation: `docs/deployment/CLOUDFLARE_DEPLOYMENT.md`
 
 ---
 
-**Questions?** See `docs/CLOUDFLARE_DEPLOYMENT.md` for detailed guide.  
+**Questions?** See `docs/deployment/CLOUDFLARE_DEPLOYMENT.md` for detailed guide.  
 **Issues?** Check troubleshooting section above.  
 **Success?** Celebrate! 🎊 You just deployed a full-stack app to Cloudflare's edge network!

@@ -592,4 +592,3 @@ it('should apply scene to all devices', async () => {
 
 ---
 
-**Note**: For automation engine test examples, see `docs/development/AUTOMATION_ENGINE_COMPLETE.md`.
