@@ -313,22 +313,17 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 
 ### Quick Links
 
-- **🚀 [Getting Started](docs/guides/SETUP_QUICKSTART.md)** - Get running in 15 minutes
+- **🚀 [Getting Started](docs/guides/setup/SETUP_QUICKSTART.md)** - Get running in 15 minutes
 - **🏗️ [Architecture](docs/guides/ARCHITECTURE.md)** - System design and data flow
 - **💻 [Best Practices](docs/guides/BEST_PRACTICES.md)** - Coding standards
-- **🎓 [Lessons Learned](docs/development/LESSONS_LEARNED_OCT14_2025.md)** - Oct 12-15 technical wins
 - **🚀 [Deployment](docs/deployment/CLOUDFLARE_DEPLOYMENT.md)** - Deploy to production
-- **📖 [Full Documentation Index](docs/INDEX.md)** - Complete catalog
 
 ### Documentation Structure
 
 ```
 docs/
-├── guides/         # User guides & references
-├── deployment/     # Production deployment
-├── development/    # Active work & lessons learned
-├── history/        # Completed phase documentation
-└── archive/        # Historical documents
+├── guides/         # Architecture, patterns, setup, integration
+└── deployment/     # Production deployment & security
 ```
 
 **See [`docs/README.md`](docs/README.md) for the complete documentation overview.**

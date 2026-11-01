@@ -753,4 +753,3 @@ describe('MyDeviceAdapter', () => {
 
 ---
 
-**Note**: For complete automation engine documentation, see `docs/development/AUTOMATION_ENGINE_COMPLETE.md`.

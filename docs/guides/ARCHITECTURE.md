@@ -505,10 +505,8 @@ graph TB
 For more details, see:
 
 - **[README.md](../README.md)** - Project overview
-- **[CLOUDFLARE_DEPLOYMENT.md](CLOUDFLARE_DEPLOYMENT.md)** - Deployment guide
-- **[CLOUDFLARE_MIGRATION.md](CLOUDFLARE_MIGRATION.md)** - Migration details
-- **[MIGRATION_SUMMARY.md](MIGRATION_SUMMARY.md)** - Complete migration summary
-- **[Copilot Instructions](../.github/copilot-instructions.md)** - Development guidelines
+- **[CLOUDFLARE_DEPLOYMENT.md](../deployment/CLOUDFLARE_DEPLOYMENT.md)** - Deployment guide
+- **[Copilot Instructions](../../.github/instructions/copilot-instructions.md)** - Development guidelines
 
 ---
 

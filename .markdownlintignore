@@ -12,9 +12,6 @@ build/
 .next/
 out/
 
-# Archived documentation (already validated)
-
-docs/archive/\*\*
 
 # Changelog (auto-generated)
 

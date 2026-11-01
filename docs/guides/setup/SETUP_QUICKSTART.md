@@ -132,7 +132,7 @@ Before you start coding:
 
 ## 📚 Full Documentation
 
-See [docs/SETUP_CHECKLIST.md](./docs/SETUP_CHECKLIST.md) for complete details.
+See [Deployment checklist](../../deployment/DEPLOYMENT_CHECKLIST.md) for complete details.
 
 ---
 
@@ -152,4 +152,4 @@ See [docs/SETUP_CHECKLIST.md](./docs/SETUP_CHECKLIST.md) for complete details.
 
 **Ready to code!** 🚀
 
-See [docs/](./docs/) for architecture, best practices, and deployment guides.
+See [docs/](../../README.md) for architecture, best practices, and deployment guides.

@@ -183,13 +183,13 @@ export function Dashboard() {
   - `graph TD` - Top-down flowcharts
   - `graph LR` - Left-right flow diagrams
   - `sequenceDiagram` - Interaction sequences
-- **Styling**: Use consistent color scheme (see `docs/ARCHITECTURE.md`)
+- **Styling**: Use consistent color scheme (see `docs/guides/ARCHITECTURE.md`)
   - React: `#4a9eff` (blue)
   - Hooks/State: `#10b981` (green)
   - Worker: `#f59e0b` (orange)
   - KV Storage: `#8b5cf6` (purple)
 - **No ASCII Art**: Replace all text-based diagrams with Mermaid
-- **Reference**: See `docs/ARCHITECTURE.md` for comprehensive examples
+- **Reference**: See `docs/guides/ARCHITECTURE.md` for comprehensive examples
 
 ## Design System Patterns
 
@@ -1409,51 +1409,8 @@ import { motion } from 'framer-motion'
 
 ### Documentation (Essential)
 
-- **Documentation Index**: `docs/INDEX.md` (Complete catalog with navigation)
-- **Documentation README**: `docs/README.md` (Documentation overview)
 - **Architecture**: `docs/guides/ARCHITECTURE.md` (Visual system diagrams with Mermaid)
-- **Setup**: `docs/guides/SETUP_QUICKSTART.md` (Getting started guide)
+- **Setup**: `docs/guides/setup/SETUP_QUICKSTART.md` (Getting started guide)
 - **Best Practices**: `docs/guides/BEST_PRACTICES.md` (Coding standards)
 - **Deployment**: `docs/deployment/CLOUDFLARE_DEPLOYMENT.md` (Complete deployment guide)
 - **Security**: `docs/deployment/SECURITY.md` (Security guidelines)
-
-### Documentation (Current Milestone - Phase 2 Polish)
-
-- **Drag & Drop Implementation**: `docs/development/PHASE_2_POLISH_SESSION_3_DRAG_DROP.md` (Complete @dnd-kit guide)
-- **Advanced Hue Features**: `docs/development/ADVANCED_HUE_FEATURES.md` (Complete implementation guide)
-- **Lessons Learned**: Key technical wins and patterns from Phase 2
-  - Canvas positioning with fixed containers (pixel-perfect indicator)
-  - onChange/onValueCommit pattern (no API spam)
-  - Framer Motion with canvas (wrapper pattern)
-  - Touch support best practices
-  - HSV vs RGB color spaces
-  - @dnd-kit integration with KV store persistence
-  - Sensor tuning for optimal UX (8px mouse, 200ms touch)
-  - Drag overlay portal pattern for smooth previews
-- **Icon Migration Complete**: `docs/development/LUCIDE_MIGRATION_COMPLETE.md` (Oct 2025)
-- **Discovery Complete**: `docs/development/MILESTONE_2.2.3_DISCOVERY_COMPLETE.md` (Device discovery)
-- **Test Plan**: `docs/development/DISCOVERY_TEST_PLAN.md` (Comprehensive testing guide)
-- **Test Results**: `docs/development/DISCOVERY_TEST_RESULTS.md` (82% pass rate, 36/44 tests)
-- **Device Controls**: `docs/development/ROOMS_DEVICE_CONTROL.md` (Enhanced UI patterns)
-- **Accessibility Fix**: `docs/development/DEVICE_ACCESSIBILITY_FIX.md` (UI improvements)
-
-### Documentation (Phase 1 - Foundation)
-
-- **Phase 1 Complete**: `docs/history/PHASE_1_COMPLETE.md` (Foundation summary)
-- **Animations**: `docs/history/PHASE_1.3_ANIMATIONS.md` (Spring animation patterns)
-- **Loading States**: `docs/history/PHASE_1.3_LOADING_STATES.md` (Skeleton & spinner guide)
-- **Error Boundaries**: `docs/history/PHASE_1.3.4_ERROR_BOUNDARIES.md` (Error handling)
-- **Responsive**: `docs/history/PHASE_1.3.5_RESPONSIVE.md` (Mobile-first design)
-
-### Documentation (Quick Reference)
-
-- **Configuration**: `docs/guides/CONFIGURATION_QUICKREF.md` (Config lookup)
-- **Virtual Devices**: `docs/guides/VIRTUAL_DEVICES_QUICKREF.md` (Testing helpers)
-- **HTTP Adapter**: `docs/guides/HTTP_ADAPTER_QUICKSTART.md` (HTTP integration)
-- **Extensions**: `docs/guides/EXTENSIONS_QUICKREF.md` (VS Code extensions)
-
-### Documentation (Planning)
-
-- **Next Steps**: `docs/development/NEXT_STEPS.md` (Roadmap and priorities)
-
-**Note**: Documentation has been reorganized into clear categories (guides/, deployment/, development/, history/, archive/). See `docs/README.md` for complete structure and `docs/INDEX.md` for full catalog.
