@@ -1,26 +1,27 @@
 # Applied by .github/workflows/labeler.yml on every PR.
-# TODO: adjust globs to your project layout.
+# Globs match the and3rn3t web layout; adjust per repo as needed.
 
 documentation:
   - changed-files:
-    - any-glob-to-any-file: ['**/*.md', 'docs/**']
+      - any-glob-to-any-file: ['**/*.md', 'docs/**']
 
 ci:
   - changed-files:
-    - any-glob-to-any-file: ['.github/**']
+      - any-glob-to-any-file: ['.github/**']
 
 dependencies:
   - changed-files:
-    - any-glob-to-any-file: ['package.json', 'pnpm-lock.yaml', 'package-lock.json', 'pyproject.toml', 'renovate.json']
+      - any-glob-to-any-file:
+          ['package.json', 'pnpm-lock.yaml', 'package-lock.json', 'pyproject.toml', 'renovate.json']
 
 frontend:
   - changed-files:
-    - any-glob-to-any-file: ['src/components/**', 'src/hooks/**', '*.css']
+      - any-glob-to-any-file: ['src/components/**', 'src/hooks/**', '*.css']
 
 backend:
   - changed-files:
-    - any-glob-to-any-file: ['worker/**', 'workers/**', 'functions/**', 'src/api/**']
+      - any-glob-to-any-file: ['worker/**', 'workers/**', 'functions/**', 'src/api/**']
 
 tests:
   - changed-files:
-    - any-glob-to-any-file: ['tests/**', 'src/test/**', '**/*.test.*', '**/*.spec.*', 'e2e/**']
+      - any-glob-to-any-file: ['tests/**', 'src/test/**', '**/*.test.*', '**/*.spec.*', 'e2e/**']
