@@ -17,7 +17,7 @@
 
 - [Cloudflare deployment](deployment/CLOUDFLARE_DEPLOYMENT.md)
 - [Deployment checklist](deployment/DEPLOYMENT_CHECKLIST.md)
-- [Security](deployment/SECURITY.md)
+- [Security policy](../SECURITY.md)
 
 ## Product
 
