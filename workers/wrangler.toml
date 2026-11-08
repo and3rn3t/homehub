@@ -13,6 +13,23 @@ binding = "LOGS_KV"
 id = "a4a51b7c589046ea8c42f23711ab1582"
 preview_id = "6f723c57974d49fb980b1f57563e56a0"
 
+# Only reachable through the Pages Function service binding (see docs/deployment/SECURITY.md).
+# Do not deploy this until the Pages Function + Access app are in place, or the app loses its backend.
+workers_dev = false
+
+# Non-secret auth config. Set ACCESS_TEAM_DOMAIN and ACCESS_AUD from Zero Trust > Access > Applications.
+# Requests are rejected (401) unless they carry a valid Access JWT or the AUTH_TOKEN service token.
+[vars]
+# ACCESS_TEAM_DOMAIN = "your-team.cloudflareaccess.com"
+# ACCESS_AUD = "<application AUD tag>"
+ALLOWED_ORIGINS = "http://localhost:5173"
+
+# Rate limit for POST/DELETE (per client IP)
+[[ratelimits]]
+name = "WRITE_LIMITER"
+namespace_id = "1001"
+simple = { limit = 60, period = 60 }
+
 # Worker settings
 [build]
 command = "npm run build"
