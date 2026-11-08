@@ -29,11 +29,17 @@ interface AccessClaims {
 }
 
 const JWKS_TTL_MS = 10 * 60 * 1000
+/** Minimum gap between JWKS fetches, so unknown key IDs cannot force one per request. */
+const JWKS_REFRESH_COOLDOWN_MS = 60 * 1000
 let jwksCache: { teamDomain: string; keys: Jwk[]; fetchedAt: number } | null = null
+let inflightJwks: Promise<Jwk[]> | null = null
+let lastFetchAttemptAt = 0
 
 /** Reset module-level JWKS cache (tests). */
 export function resetAuthCache(): void {
   jwksCache = null
+  inflightJwks = null
+  lastFetchAttemptAt = 0
 }
 
 function base64UrlToBytes(input: string): Uint8Array {
@@ -70,18 +76,31 @@ export async function timingSafeEqualStrings(a: string, b: string): Promise<bool
 
 async function getJwks(teamDomain: string, forceRefresh = false): Promise<Jwk[]> {
   const now = Date.now()
-  if (
-    !forceRefresh &&
-    jwksCache &&
-    jwksCache.teamDomain === teamDomain &&
-    now - jwksCache.fetchedAt < JWKS_TTL_MS
-  ) {
-    return jwksCache.keys
+  const cached = jwksCache?.teamDomain === teamDomain ? jwksCache : null
+
+  if (cached && now - cached.fetchedAt < JWKS_TTL_MS) {
+    // Fresh cache. A forced refresh (unknown kid, i.e. possible key rotation) is only
+    // honoured after a cooldown so unauthenticated requests cannot trigger a fetch each.
+    if (!forceRefresh || now - cached.fetchedAt < JWKS_REFRESH_COOLDOWN_MS) return cached.keys
   }
+  if (!cached && now - lastFetchAttemptAt < JWKS_REFRESH_COOLDOWN_MS && !inflightJwks) {
+    // Recent fetch failed and nothing is cached: back off instead of hammering the endpoint.
+    throw new Error('JWKS fetch recently failed')
+  }
+
+  // Coalesce concurrent refreshes into a single request.
+  inflightJwks ??= fetchJwks(teamDomain).finally(() => {
+    inflightJwks = null
+  })
+  return inflightJwks
+}
+
+async function fetchJwks(teamDomain: string): Promise<Jwk[]> {
+  lastFetchAttemptAt = Date.now()
   const response = await fetch(`https://${teamDomain}/cdn-cgi/access/certs`)
   if (!response.ok) throw new Error(`JWKS fetch failed: ${response.status}`)
   const body = (await response.json()) as { keys: Jwk[] }
-  jwksCache = { teamDomain, keys: body.keys, fetchedAt: now }
+  jwksCache = { teamDomain, keys: body.keys, fetchedAt: Date.now() }
   return body.keys
 }
 

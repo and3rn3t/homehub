@@ -34,3 +34,16 @@ Anything prefixed `VITE_` is inlined into the public JS bundle. Do not store tok
 5. Rotate/remove any previously used `AUTH_TOKEN`.
 
 Deploying step 4 before step 3 cuts the app off from its backend.
+
+## Deployment environment
+
+Deploy the **default** environment only (`npm run deploy` in `workers/`). Wrangler does not
+inherit `vars` or bindings (KV, rate limit) into `[env.*]` sections, so `deploy:production` and
+`deploy:staging` produce a worker without the Access config. It fails closed (401 on everything
+except `/health`) rather than exposing data, but it is not a working deployment.
+
+## Key rotation
+
+Access signing keys are cached for 10 minutes. A token with an unknown key ID triggers at most one
+refetch per minute, shared across concurrent requests, so unauthenticated traffic cannot drive
+unbounded certificate fetches.

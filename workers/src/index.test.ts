@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { resetAuthCache } from './auth'
 import worker, { type Env } from './index'
 
@@ -178,6 +178,97 @@ function requestWithOrigin(url: string, origin: string): Request {
   Object.defineProperty(request, 'headers', { value: new Headers({ Origin: origin }) })
   return request
 }
+
+describe('JWKS fetch throttling', () => {
+  async function tokenWithKid(kid: string): Promise<string> {
+    const header = base64Url(JSON.stringify({ alg: 'RS256', kid, typ: 'JWT' }))
+    const payload = base64Url(JSON.stringify(validClaims()))
+    return `${header}.${payload}.${base64Url('sig')}`
+  }
+
+  function jwksFetchCount(): number {
+    return vi.mocked(fetch).mock.calls.length
+  }
+
+  it('does not refetch JWKS for every request with an unknown kid', async () => {
+    const env = makeEnv()
+    const unknown = await tokenWithKid('rotated-key')
+
+    for (let i = 0; i < 5; i++) {
+      const response = await worker.fetch(
+        new Request('https://w/kv', { headers: { 'Cf-Access-Jwt-Assertion': unknown } }),
+        env
+      )
+      expect(response.status).toBe(401)
+    }
+
+    // One initial fetch; the forced refresh for the unknown kid is inside the cooldown.
+    expect(jwksFetchCount()).toBe(1)
+  })
+
+  it('coalesces concurrent cold-cache requests into one fetch', async () => {
+    const env = makeEnv()
+    const token = await signJwt(validClaims())
+
+    const responses = await Promise.all(
+      Array.from({ length: 5 }, () =>
+        worker.fetch(
+          new Request('https://w/kv', { headers: { 'Cf-Access-Jwt-Assertion': token } }),
+          env
+        )
+      )
+    )
+
+    expect(responses.every(response => response.status === 200)).toBe(true)
+    expect(jwksFetchCount()).toBe(1)
+  })
+
+  it('backs off after a failed JWKS fetch instead of retrying every request', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('down', { status: 503 }))
+    )
+    const env = makeEnv()
+    const token = await signJwt(validClaims())
+
+    for (let i = 0; i < 4; i++) {
+      const response = await worker.fetch(
+        new Request('https://w/kv', { headers: { 'Cf-Access-Jwt-Assertion': token } }),
+        env
+      )
+      expect(response.status).toBe(401)
+    }
+
+    expect(jwksFetchCount()).toBe(1)
+  })
+})
+
+describe('JWKS key rotation', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('picks up a rotated key once the refresh cooldown has passed', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    let rotated = false
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        Response.json({ keys: [{ ...publicJwk, kid: rotated ? KID : 'old-key', alg: 'RS256' }] })
+      )
+    )
+    const env = makeEnv()
+    const token = await signJwt(validClaims({ exp: Math.floor(Date.now() / 1000) + 3600 }))
+    const request = () =>
+      new Request('https://w/kv', { headers: { 'Cf-Access-Jwt-Assertion': token } })
+
+    expect((await worker.fetch(request(), env)).status).toBe(401) // key not published yet
+
+    rotated = true
+    vi.setSystemTime(Date.now() + 61_000)
+    expect((await worker.fetch(request(), env)).status).toBe(200)
+  })
+})
 
 describe('KV worker CORS allowlist', () => {
   const env = makeEnv({ ALLOWED_ORIGINS: 'http://localhost:5173, https://home.example.com' })
