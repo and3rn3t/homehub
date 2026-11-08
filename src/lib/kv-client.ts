@@ -7,6 +7,10 @@
 import { getKVBaseUrl } from './api-base-url'
 import { logger } from './logger'
 
+/** Query parameter the service worker treats as a network-only navigation. Keep in sync with sw.ts. */
+export const REAUTH_PARAM = 'access-reauth'
+const REAUTH_MARKER_KEY = 'homehub:kv-reauth-attempted'
+
 export interface KVClientConfig {
   /** Base URL of Cloudflare Worker API */
   baseUrl: string
@@ -16,7 +20,6 @@ export interface KVClientConfig {
 
 export class KVClient {
   private config: Required<KVClientConfig>
-  private reloadingForAuth = false
 
   constructor(config: KVClientConfig) {
     this.config = {
@@ -39,7 +42,7 @@ export class KVClient {
         credentials: 'same-origin',
         signal: controller.signal,
       })
-      this.handleAuthFailure(response)
+      this.trackAuthState(response)
 
       clearTimeout(timeoutId)
 
@@ -82,7 +85,7 @@ export class KVClient {
         credentials: 'same-origin',
         signal: controller.signal,
       })
-      this.handleAuthFailure(response)
+      this.trackAuthState(response)
 
       clearTimeout(timeoutId)
 
@@ -109,7 +112,7 @@ export class KVClient {
         credentials: 'same-origin',
         signal: controller.signal,
       })
-      this.handleAuthFailure(response)
+      this.trackAuthState(response)
 
       clearTimeout(timeoutId)
 
@@ -136,7 +139,7 @@ export class KVClient {
         credentials: 'same-origin',
         signal: controller.signal,
       })
-      this.handleAuthFailure(response)
+      this.trackAuthState(response)
 
       clearTimeout(timeoutId)
 
@@ -153,14 +156,58 @@ export class KVClient {
   }
 
   /**
-   * Cloudflare Access sessions expire. A 401 means the session cookie is gone,
-   * so reload once to let Access send the user through login again.
+   * Cloudflare Access sessions expire; a 401 means the session cookie is gone. Navigate once
+   * (network-only, see sw.ts) so Access can send the user through login again. The attempt is
+   * remembered in sessionStorage so a persistent 401 (misconfiguration) cannot reload forever;
+   * any non-401 response proves authentication works and re-arms recovery.
    */
-  private handleAuthFailure(response: Response): void {
-    if (response.status !== 401 || this.reloadingForAuth) return
-    this.reloadingForAuth = true
-    logger.warn('KV request unauthorized; reloading to re-authenticate')
-    if (typeof window !== 'undefined') window.location.reload()
+  private trackAuthState(response: Response): void {
+    if (typeof window === 'undefined') return
+
+    if (response.status !== 401) {
+      this.clearReauthMarker()
+      return
+    }
+    if (this.readReauthMarker()) {
+      logger.error('KV request still unauthorized after re-authentication attempt')
+      return
+    }
+
+    this.writeReauthMarker()
+    logger.warn('KV request unauthorized; re-authenticating via Cloudflare Access')
+    const url = new URL(window.location.href)
+    url.searchParams.set(REAUTH_PARAM, String(Date.now()))
+    window.location.assign(url.toString())
+  }
+
+  private readReauthMarker(): boolean {
+    try {
+      return sessionStorage.getItem(REAUTH_MARKER_KEY) !== null
+    } catch {
+      return false
+    }
+  }
+
+  private writeReauthMarker(): void {
+    try {
+      sessionStorage.setItem(REAUTH_MARKER_KEY, String(Date.now()))
+    } catch {
+      // Storage unavailable: recovery is still attempted, just not loop-guarded.
+    }
+  }
+
+  private clearReauthMarker(): void {
+    try {
+      sessionStorage.removeItem(REAUTH_MARKER_KEY)
+    } catch {
+      // ignore
+    }
+    // Drop the cache-busting parameter left in the URL by a completed re-authentication.
+    const url = new URL(window.location.href)
+    if (url.searchParams.has(REAUTH_PARAM)) {
+      url.searchParams.delete(REAUTH_PARAM)
+      window.history.replaceState(null, '', url.toString())
+    }
   }
 
   /**

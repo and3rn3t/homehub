@@ -90,10 +90,7 @@ cp .env.example .env
 
 Edit `.env` with your Worker URL:
 
-```env
-VITE_KV_API_URL=https://homehub-kv-worker.your-subdomain.workers.dev
-# Production needs no VITE_KV_API_URL: the app calls /kv and /api/logs on its own origin.
-```
+Production needs no KV URL variable: the app calls `/kv` and `/api/logs` on its own origin and Pages Functions forward them to the worker. For local development, leave `VITE_KV_API_URL` unset too; the Vite dev server proxies to `http://localhost:8787` (see `docs/deployment/SECURITY.md`, *Local development*).
 
 ### 2.3 Test locally
 
@@ -147,8 +144,7 @@ In Cloudflare Pages dashboard:
 
 1. Go to your project → **Settings** → **Environment variables**
 2. Add:
-   - **VITE_KV_API_URL**: `https://your-worker-url.workers.dev`
-   - Do **not** set `VITE_KV_API_URL` in production; the Pages Functions forward `/kv/*` and `/api/logs` to the worker via the `KV_API` service binding.
+   - Do **not** set `VITE_KV_API_URL`. If it exists from an earlier setup, **delete it** for Production and Preview: it is honoured in production builds and would bypass the same-origin routes (Pages Functions forward `/kv/*` and `/api/logs` to the worker via the `KV_API` service binding).
 
 ### 3.5 Redeploy
 
@@ -261,7 +257,7 @@ wrangler tail  # Watch live logs
 ### CORS errors
 
 - Ensure Worker is deployed (not just local dev)
-- Check `VITE_KV_API_URL` is correct in Pages environment variables
+- Check `VITE_KV_API_URL` is **not** set in Pages environment variables, and that the `KV_API` service binding exists
 
 ### Build failures
 

@@ -122,10 +122,7 @@ curl https://your-worker-url.workers.dev/kv/test
 
 Edit `.env` in project root:
 
-```env
-VITE_KV_API_URL=https://your-worker-url.workers.dev
-# Production needs no VITE_KV_API_URL (same-origin via Pages Functions + Access)
-```
+No `VITE_KV_API_URL` is needed: the app calls `/kv` and `/api/logs` on its own origin (Pages Functions + Access). For local development see `docs/deployment/SECURITY.md`, *Local development*.
 
 ### 2. Test Local Development
 
@@ -187,8 +184,8 @@ npm run build
 
 3. **Set Environment Variables**
    - In Pages project settings → **Environment variables**
-   - Add: `VITE_KV_API_URL` = `https://your-worker-url.workers.dev`
-   - Apply to: **Production** and **Preview**
+   - Do **not** set `VITE_KV_API_URL`; delete it from **Production** and **Preview** if present (it would bypass the same-origin routes)
+   - Confirm the `KV_API` service binding points at `homehub-kv-worker`
 
 4. **Deploy**
    - Click **Save and Deploy**
@@ -349,7 +346,7 @@ git push
 
 **Fix**:
 
-1. Verify `.env` has correct `VITE_KV_API_URL`
+1. Verify `VITE_KV_API_URL` is unset (production) and the `KV_API` service binding exists
 2. Check Worker is deployed: `wrangler deployments list`
 3. Test Worker health endpoint: `curl https://your-worker-url.workers.dev/health`
 
