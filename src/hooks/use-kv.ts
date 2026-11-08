@@ -31,8 +31,9 @@ if (import.meta.hot) {
   localCache.clear()
 }
 
-// Track pending sync operations
+// Track active writes and writes still waiting for their debounce timer.
 const pendingSyncs = new Map<string, Promise<void>>()
+const scheduledSyncs = new Map<ReturnType<typeof setTimeout>, () => Promise<void>>()
 
 // Track loading states (reserved for future use)
 // const loadingStates = new Map<string, boolean>()
@@ -213,6 +214,7 @@ export function useKV<T>(
       isMounted.current = false
       if (syncTimeoutRef.current) {
         clearTimeout(syncTimeoutRef.current)
+        scheduledSyncs.delete(syncTimeoutRef.current)
       }
     }
   }, [key, defaultValue, skipInitialLoad])
@@ -243,12 +245,16 @@ export function useKV<T>(
         // Debounce sync to Cloudflare KV (500ms)
         if (syncTimeoutRef.current) {
           clearTimeout(syncTimeoutRef.current)
+          scheduledSyncs.delete(syncTimeoutRef.current)
         }
 
         setIsSyncing(true)
-        syncTimeoutRef.current = setTimeout(() => {
-          handleDebouncedSync(key, nextValue)
+        const timeout = setTimeout(() => {
+          scheduledSyncs.delete(timeout)
+          void handleDebouncedSync(key, nextValue)
         }, 500)
+        syncTimeoutRef.current = timeout
+        scheduledSyncs.set(timeout, () => handleDebouncedSync(key, nextValue))
 
         return nextValue
       })
@@ -296,11 +302,17 @@ async function syncToKV(key: string, value: unknown): Promise<void> {
 }
 
 /**
- * Force sync all pending changes (useful before navigation/close)
+ * Run queued debounce callbacks now and wait for those and active KV writes.
+ * A flush must not resolve while the latest update is still waiting on a timer.
  */
 export async function flushKVChanges(): Promise<void> {
-  const syncs = Array.from(pendingSyncs.values())
-  await Promise.all(syncs)
+  const scheduled = Array.from(scheduledSyncs.entries())
+  const started = scheduled.map(([timeout, sync]) => {
+    clearTimeout(timeout)
+    scheduledSyncs.delete(timeout)
+    return sync()
+  })
+  await Promise.all([...pendingSyncs.values(), ...started])
 }
 
 /**
