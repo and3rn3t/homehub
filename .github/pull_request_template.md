@@ -106,7 +106,7 @@ Related to #
 - [ ] Updated README.md
 - [ ] Updated inline code documentation
 - [ ] Updated docs/ folder
-- [ ] Updated PRD.md (if feature adds new requirements)
+- [ ] Updated docs/PRD.md (if feature adds new requirements)
 - [ ] No documentation updates needed
 
 ## 🔍 Reviewer Notes

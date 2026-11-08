@@ -29,6 +29,6 @@ npm run deploy       # only when asked
 
 - Some helper scripts are PowerShell (`scripts/*.ps1`) — Windows-oriented; prefer the node/npm equivalents on macOS/Linux.
 - Camera/Arlo test scripts (`test:arlo:*`) hit real services; don't run them unprompted.
-- `src/prd.md` documents product intent.
+- `docs/PRD.md` documents product intent.
 - Conventional commits: `type(scope): description`.
 - Don't commit or deploy unless explicitly asked.
