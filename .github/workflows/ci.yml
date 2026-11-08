@@ -48,6 +48,11 @@ jobs:
         run: npm run type-check
         if: always() # Run even if previous steps fail
 
+      - name: Type check workers
+        working-directory: workers
+        run: npm ci && npx tsc --noEmit
+        if: always()
+
       - name: Lint
         run: npm run lint
         if: always()
