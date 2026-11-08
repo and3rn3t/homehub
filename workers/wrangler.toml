@@ -20,8 +20,9 @@ preview_id = "6f723c57974d49fb980b1f57563e56a0"
 # Non-secret auth config. Set ACCESS_TEAM_DOMAIN and ACCESS_AUD from Zero Trust > Access > Applications.
 # Requests are rejected (401) unless they carry a valid Access JWT or the AUTH_TOKEN service token.
 [vars]
-# ACCESS_TEAM_DOMAIN = "your-team.cloudflareaccess.com"
-# ACCESS_AUD = "<application AUD tag>"
+ACCESS_TEAM_DOMAIN = "and3rn3t.cloudflareaccess.com"
+# The AUD tag is a public audience identifier (it appears in every Access login URL and JWT), not a secret.
+ACCESS_AUD = "44d635e32405bd0f93ecb0c5d248ccf09ae509afaa0151a13ab82165e8e7671e" # gitleaks:allow
 ALLOWED_ORIGINS = "http://localhost:5173"
 
 # Rate limit for POST/DELETE (per client IP)
