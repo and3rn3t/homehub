@@ -13,7 +13,7 @@ workers_dev = false
 # then paste the returned id below.
 [[kv_namespaces]]
 binding = "ARLO_KV"
-id = "REPLACE_WITH_ARLO_SESSION_NAMESPACE_ID"
+id = "9ede137f23004174ba02115169b1f852"
 
 # Non-secret auth config (same Access application as the KV worker).
 # Requests are rejected (401) unless they carry a valid Access JWT or the AUTH_TOKEN service token.
