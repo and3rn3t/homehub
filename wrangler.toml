@@ -6,3 +6,9 @@ name = "homehub"
 
 # Pages build output directory
 pages_build_output_dir = "dist"
+
+# KV worker reached over a service binding by functions/kv/* and functions/api/logs.ts.
+# The worker has no public URL; Cloudflare Access protects this Pages site.
+[[services]]
+binding = "KV_API"
+service = "homehub-kv-worker"

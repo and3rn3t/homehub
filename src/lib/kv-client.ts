@@ -4,24 +4,23 @@
  * Client for communicating with Cloudflare Worker KV API.
  */
 
+import { getKVBaseUrl } from './api-base-url'
 import { logger } from './logger'
 
 export interface KVClientConfig {
   /** Base URL of Cloudflare Worker API */
   baseUrl: string
-  /** Optional authentication token */
-  authToken?: string
   /** Request timeout in milliseconds */
   timeout?: number
 }
 
 export class KVClient {
   private config: Required<KVClientConfig>
+  private reloadingForAuth = false
 
   constructor(config: KVClientConfig) {
     this.config = {
       baseUrl: config.baseUrl.replace(/\/$/, ''), // Remove trailing slash
-      authToken: config.authToken || '',
       timeout: config.timeout || 3000, // Reduced to 3 seconds for faster fallback
     }
   }
@@ -37,8 +36,10 @@ export class KVClient {
       const response = await fetch(`${this.config.baseUrl}/kv/${key}`, {
         method: 'GET',
         headers: this.getHeaders(),
+        credentials: 'same-origin',
         signal: controller.signal,
       })
+      this.handleAuthFailure(response)
 
       clearTimeout(timeoutId)
 
@@ -78,8 +79,10 @@ export class KVClient {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify({ value }),
+        credentials: 'same-origin',
         signal: controller.signal,
       })
+      this.handleAuthFailure(response)
 
       clearTimeout(timeoutId)
 
@@ -103,8 +106,10 @@ export class KVClient {
       const response = await fetch(`${this.config.baseUrl}/kv/${key}`, {
         method: 'DELETE',
         headers: this.getHeaders(),
+        credentials: 'same-origin',
         signal: controller.signal,
       })
+      this.handleAuthFailure(response)
 
       clearTimeout(timeoutId)
 
@@ -128,8 +133,10 @@ export class KVClient {
       const response = await fetch(`${this.config.baseUrl}/kv`, {
         method: 'GET',
         headers: this.getHeaders(),
+        credentials: 'same-origin',
         signal: controller.signal,
       })
+      this.handleAuthFailure(response)
 
       clearTimeout(timeoutId)
 
@@ -146,18 +153,22 @@ export class KVClient {
   }
 
   /**
-   * Get request headers
+   * Cloudflare Access sessions expire. A 401 means the session cookie is gone,
+   * so reload once to let Access send the user through login again.
+   */
+  private handleAuthFailure(response: Response): void {
+    if (response.status !== 401 || this.reloadingForAuth) return
+    this.reloadingForAuth = true
+    logger.warn('KV request unauthorized; reloading to re-authenticate')
+    if (typeof window !== 'undefined') window.location.reload()
+  }
+
+  /**
+   * Get request headers. Auth is carried by the Cloudflare Access session
+   * cookie (same-origin); never put secrets in client-side config.
    */
   private getHeaders(): HeadersInit {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    }
-
-    if (this.config.authToken) {
-      headers['Authorization'] = `Bearer ${this.config.authToken}`
-    }
-
-    return headers
+    return { 'Content-Type': 'application/json' }
   }
 }
 
@@ -168,12 +179,8 @@ let kvClientInstance: KVClient | null = null
 
 export function getKVClient(): KVClient {
   if (!kvClientInstance) {
-    const baseUrl = import.meta.env.VITE_KV_API_URL || 'http://localhost:8787'
-    const authToken = import.meta.env.VITE_KV_AUTH_TOKEN
-
     kvClientInstance = new KVClient({
-      baseUrl,
-      authToken,
+      baseUrl: getKVBaseUrl(),
       timeout: 10000,
     })
   }

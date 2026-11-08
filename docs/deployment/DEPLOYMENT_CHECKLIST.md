@@ -124,7 +124,7 @@ Edit `.env` in project root:
 
 ```env
 VITE_KV_API_URL=https://your-worker-url.workers.dev
-# VITE_KV_AUTH_TOKEN=optional-secret-token
+# Production needs no VITE_KV_API_URL (same-origin via Pages Functions + Access)
 ```
 
 ### 2. Test Local Development
@@ -291,11 +291,7 @@ if (!checkAuth(request, env)) {
 
 ### Update Frontend .env
 
-Add auth token:
-
-```env
-VITE_KV_AUTH_TOKEN=your-secure-token
-```
+Auth is handled by Cloudflare Access (same-origin); never put tokens in `VITE_*` variables. See `docs/deployment/SECURITY.md`.
 
 ### Redeploy Both
 
