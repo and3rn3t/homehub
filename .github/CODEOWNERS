@@ -19,7 +19,6 @@ renovate.json @and3rn3t
 # Documentation
 /docs/ @and3rn3t
 README.md @and3rn3t
-PRD.md @and3rn3t
 
 # Cloudflare Workers
 /workers/ @and3rn3t
@@ -30,6 +29,7 @@ PRD.md @and3rn3t
 /src/lib/ @and3rn3t
 
 # Security-related files
-/src/components/Security.tsx @and3rn3t
+/src/components/Security*.tsx @and3rn3t
+/src/services/auth/ @and3rn3t
 /workers/arlo-proxy/ @and3rn3t
 .env.* @and3rn3t

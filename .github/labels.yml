@@ -109,3 +109,38 @@
 - name: 'size: xl'
   color: 'f9d0c4'
   description: 'Very large change (a week+)'
+
+# Area
+- name: frontend
+  color: '1d76db'
+  description: 'React UI, components, hooks'
+
+- name: backend
+  color: '5319e7'
+  description: 'Cloudflare Workers, services, adapters'
+
+- name: ci
+  color: '6f42c1'
+  description: 'GitHub Actions and CI configuration'
+
+# Community
+- name: good first issue
+  color: '7057ff'
+  description: 'Good for newcomers'
+
+- name: help wanted
+  color: '008672'
+  description: 'Extra attention is needed'
+
+- name: invalid
+  color: 'e4e669'
+  description: "This doesn't seem right"
+
+# Roadmap
+- name: roadmap
+  color: '0052cc'
+  description: 'Roadmap tracking issue'
+
+- name: moonshot
+  color: '5319e7'
+  description: 'Ambitious, exploratory idea with no timeline'
