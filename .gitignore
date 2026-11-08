@@ -8,7 +8,6 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Dependencies
-node_modules
 **/node_modules
 
 # Build outputs
@@ -51,18 +50,11 @@ coverage
 playwright-report
 test-results
 
-# Spark-specific
+# Spark template leftovers
 **/agent-eval-report*
-packages
-pids
-.file-manifest
-.devcontainer/
 .spark-workbench-id
-
-# Lock files (optional - uncomment if you want to ignore)
-# package-lock.json
-# yarn.lock
-# pnpm-lock.yaml
+.devcontainer/
+pids
 
 # MQTT/Mosquitto
 mosquitto/data/
