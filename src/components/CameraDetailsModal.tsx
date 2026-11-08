@@ -95,8 +95,8 @@ export function CameraDetailsModal({
       const { arloTokenManager } = await import('@/services/auth/ArloTokenManager')
 
       // Check if we have a valid token
-      const token = arloTokenManager.getToken()
-      if (!token) {
+      await arloTokenManager.refresh()
+      if (!arloTokenManager.isTokenValid()) {
         console.error('[CameraDetailsModal] No authentication token available')
         alert('Authentication required. Please refresh your Arlo token in the Security tab.')
         return
@@ -200,8 +200,8 @@ export function CameraDetailsModal({
       const { arloTokenManager } = await import('@/services/auth/ArloTokenManager')
 
       // Check if authenticated
-      const token = arloTokenManager.getToken()
-      if (!token) {
+      await arloTokenManager.refresh()
+      if (!arloTokenManager.isTokenValid()) {
         toast.error('Not authenticated', {
           description: 'Please authenticate with Arlo first',
         })

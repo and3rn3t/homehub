@@ -59,3 +59,20 @@ secret enters the browser bundle:
 3. `npm run dev:all`
 
 Leave `VITE_KV_API_URL` unset; the app then calls the dev server's own origin.
+
+## Arlo proxy and token custody
+
+The Arlo session token is held by the Arlo proxy worker (`workers/arlo-proxy`), never by the
+browser. It has the same fail-closed Access check as the KV worker, no public URL, and is reached
+through the `ARLO_PROXY` service binding at `/api/arlo/*`. Details: `workers/arlo-proxy/README.md`.
+
+Rollout, in order:
+
+1. `npx wrangler kv namespace create ARLO_SESSION`; paste the id into `workers/arlo-proxy/wrangler.toml`
+2. Merge, so Pages deploys the Function and the `ARLO_PROXY` binding
+3. `npm run proxy:deploy` (replaces the old open proxy and removes its public URL)
+4. Open the Security tab once; a token left in `localStorage` by an older version is uploaded to the
+   proxy and deleted from the browser automatically. Otherwise paste a fresh token.
+
+Local development additionally needs `AUTH_TOKEN` in `workers/arlo-proxy/.dev.vars` (same value as
+`KV_DEV_AUTH_TOKEN`) and `npm run proxy:dev`.

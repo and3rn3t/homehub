@@ -8,15 +8,17 @@ import { VitePWA } from 'vite-plugin-pwa'
 const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname
 
 const LOCAL_KV_WORKER = 'http://localhost:8787'
+const LOCAL_ARLO_PROXY = 'http://localhost:8788'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   // Not VITE_-prefixed on purpose: this token stays in the dev server and never reaches the bundle.
   const kvDevToken = loadEnv(mode, process.cwd(), '').KV_DEV_AUTH_TOKEN
 
-  const proxyToLocalWorker = {
-    target: LOCAL_KV_WORKER,
+  const proxyTo = (target: string, rewrite?: (path: string) => string) => ({
+    target,
     changeOrigin: true,
+    ...(rewrite ? { rewrite } : {}),
     configure: (proxy: {
       on: (
         event: 'proxyReq',
@@ -26,13 +28,20 @@ export default defineConfig(({ mode }) => {
       if (!kvDevToken) return
       proxy.on('proxyReq', request => request.setHeader('Authorization', `Bearer ${kvDevToken}`))
     },
-  }
+  })
+  const proxyToLocalWorker = proxyTo(LOCAL_KV_WORKER)
+  // Mirrors functions/api/arlo/[[path]].ts: /api/arlo/* -> Arlo proxy worker with the prefix removed
+  const proxyToArloProxy = proxyTo(
+    LOCAL_ARLO_PROXY,
+    path => path.replace(/^\/api\/arlo/, '') || '/'
+  )
 
   return {
     server: {
       proxy: {
         '^/kv(/|$)': proxyToLocalWorker,
         '^/api/logs$': proxyToLocalWorker,
+        '^/api/arlo(/|$)': proxyToArloProxy,
       },
     },
     plugins: [

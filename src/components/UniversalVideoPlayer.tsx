@@ -2,6 +2,7 @@ import { MaximizeIcon, PauseIcon, PlayIcon, VolumeIcon, VolumeOffIcon } from '@/
 import * as dashjs from 'dashjs'
 import Hls from 'hls.js'
 import { useEffect, useRef, useState } from 'react'
+import { ARLO_PROXY_BASE_URL } from '@/services/arlo-proxy-url'
 
 /**
  * Proxy Arlo URLs through our worker to bypass CORS
@@ -10,13 +11,12 @@ function getProxiedUrl(arloUrl: string | undefined): string {
   if (!arloUrl) return ''
 
   // If already proxied, return as-is
-  if (arloUrl.includes('localhost:8787') || arloUrl.includes('arlo-proxy')) {
+  if (arloUrl.startsWith(`${ARLO_PROXY_BASE_URL}/`)) {
     return arloUrl
   }
 
   // Build proxy URL with wildcard pattern: /proxy/{encodedFullUrl}
-  const proxyBaseUrl = import.meta.env.VITE_ARLO_PROXY_URL || 'http://localhost:8787'
-  return `${proxyBaseUrl}/proxy/${encodeURIComponent(arloUrl)}`
+  return `${ARLO_PROXY_BASE_URL}/proxy/${encodeURIComponent(arloUrl)}`
 }
 
 interface UniversalVideoPlayerProps {

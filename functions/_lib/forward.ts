@@ -14,6 +14,7 @@ export interface ServiceBinding {
 
 export interface ForwardEnv {
   KV_API?: ServiceBinding
+  ARLO_PROXY?: ServiceBinding
 }
 
 export async function forwardToKvWorker(request: Request, env: ForwardEnv): Promise<Response> {
@@ -21,4 +22,27 @@ export async function forwardToKvWorker(request: Request, env: ForwardEnv): Prom
     return Response.json({ error: 'KV_API service binding is not configured' }, { status: 500 })
   }
   return env.KV_API.fetch(request)
+}
+
+/**
+ * Forward to a service binding after removing a path prefix, e.g. `/api/arlo/session` becomes
+ * `/session` for the Arlo proxy worker. Credentials in the request are passed through untouched.
+ */
+export async function forwardWithoutPrefix(
+  binding: ServiceBinding | undefined,
+  bindingName: string,
+  request: Request,
+  prefix: string
+): Promise<Response> {
+  if (!binding) {
+    return Response.json(
+      { error: `${bindingName} service binding is not configured` },
+      { status: 500 }
+    )
+  }
+  const url = new URL(request.url)
+  url.pathname = url.pathname.startsWith(prefix)
+    ? url.pathname.slice(prefix.length) || '/'
+    : url.pathname
+  return binding.fetch(new Request(url.toString(), request))
 }

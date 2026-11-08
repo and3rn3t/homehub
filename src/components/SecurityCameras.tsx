@@ -151,8 +151,10 @@ export const SecurityCameras = memo(function SecurityCameras() {
   // Monitor token expiration and show proactive warnings
   useEffect(() => {
     const checkInterval = setInterval(
-      () => {
+      async () => {
         if (!useRealData) return // Only check when using real data
+
+        await arloTokenManager.refresh() // token metadata lives on the server
 
         const tokenMeta = arloTokenManager.getTokenMetadata()
 

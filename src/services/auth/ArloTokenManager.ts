@@ -1,49 +1,59 @@
 /**
  * Arlo Token Manager
- * Handles token storage, expiration tracking, and refresh lifecycle
  *
- * Token Lifespan: 24-48 hours (default: 36 hours)
- * Storage: localStorage for persistence across sessions
+ * The Arlo session token is held server-side by the Arlo proxy worker (see
+ * workers/arlo-proxy/index.ts). The browser uploads it once, then only ever sees metadata
+ * (when it was captured and when it expires). It is never stored in localStorage or exposed to
+ * page scripts, so an XSS bug cannot read it.
  *
- * Created: October 13, 2025
+ * Token lifespan: 36 hours (enforced by the proxy).
  */
 
-export interface ArloToken {
-  /** Bearer token (starts with "2_") */
-  authorization: string
+import { ARLO_PROXY_BASE_URL } from '../arlo-proxy-url'
 
-  /** Auth version (always "2") */
-  authVersion: string
-
-  /** X-Cloud-ID for user session */
-  xcloudid: string
-
-  /** Timestamp when token was captured (ISO string) */
-  capturedAt: string
-
-  /** Timestamp when token expires (ISO string) */
-  expiresAt: string
-
-  /** Optional user note about token source */
-  source?: string
+/** What the browser is allowed to know about the stored token. No secret material. */
+export interface ArloSessionState {
+  exists: boolean
+  capturedAt: string | null
+  expiresAt: string | null
+  source: string | null
 }
 
-/**
- * Token Manager Class
- * Singleton pattern for managing Arlo authentication tokens
- */
+export interface ArloTokenMetadata {
+  exists: boolean
+  isValid: boolean
+  isExpiringSoon: boolean
+  capturedAt: string | null
+  expiresAt: string | null
+  timeUntilExpiration: string | null
+}
+
+const EMPTY_STATE: ArloSessionState = {
+  exists: false,
+  capturedAt: null,
+  expiresAt: null,
+  source: null,
+}
+
+/** Pre-migration location of the plaintext token. Read once, uploaded, then deleted. */
+const LEGACY_STORAGE_KEY = 'arlo-auth-token'
+
+interface LegacyToken {
+  authorization: string
+  authVersion?: string
+  xcloudid: string
+  expiresAt: string
+}
+
 export class ArloTokenManager {
   private static instance: ArloTokenManager
-  private readonly storageKey = 'arlo-auth-token'
-  private readonly defaultTokenLifespan = 36 * 60 * 60 * 1000 // 36 hours in ms
+  private state: ArloSessionState = EMPTY_STATE
+  private inflightRefresh: Promise<void> | null = null
 
   private constructor() {
     // Private constructor for singleton
   }
 
-  /**
-   * Get singleton instance
-   */
   static getInstance(): ArloTokenManager {
     if (!ArloTokenManager.instance) {
       ArloTokenManager.instance = new ArloTokenManager()
@@ -51,157 +61,134 @@ export class ArloTokenManager {
     return ArloTokenManager.instance
   }
 
+  private async sessionRequest(
+    method: 'GET' | 'PUT' | 'DELETE',
+    body?: unknown
+  ): Promise<Response> {
+    return fetch(`${ARLO_PROXY_BASE_URL}/session`, {
+      method,
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    })
+  }
+
   /**
-   * Get current token from storage
-   * Returns null if no token exists or token is expired
+   * Sync local state with the server (and migrate any legacy localStorage token).
+   * Call before checking validity; concurrent calls share one request.
    */
-  getToken(): ArloToken | null {
+  refresh(): Promise<void> {
+    this.inflightRefresh ??= this.doRefresh().finally(() => {
+      this.inflightRefresh = null
+    })
+    return this.inflightRefresh
+  }
+
+  private async doRefresh(): Promise<void> {
     try {
-      const stored = localStorage.getItem(this.storageKey)
-      if (!stored) return null
-
-      const token: ArloToken = JSON.parse(stored)
-
-      // Check if token is expired
-      const now = Date.now()
-      const expiresAt = new Date(token.expiresAt).getTime()
-
-      if (now >= expiresAt) {
-        console.warn('[ArloTokenManager] Token expired:', new Date(token.expiresAt))
-        this.clearToken()
-        return null
-      }
-
-      return token
+      await this.migrateLegacyToken()
+      const response = await this.sessionRequest('GET')
+      if (!response.ok) throw new Error(`session status ${response.status}`)
+      this.state = (await response.json()) as ArloSessionState
     } catch (error) {
-      console.error('[ArloTokenManager] Failed to get token:', error)
-      return null
+      // Keep the last known state: a transient failure should not look like a logout.
+      console.warn('[ArloTokenManager] Could not refresh session state:', error)
+    }
+  }
+
+  /** Upload a token left in localStorage by an older version, then delete it. */
+  private async migrateLegacyToken(): Promise<void> {
+    let legacy: LegacyToken
+    try {
+      const stored = localStorage.getItem(LEGACY_STORAGE_KEY)
+      if (!stored) return
+      legacy = JSON.parse(stored) as LegacyToken
+    } catch {
+      this.removeLegacyToken() // unreadable: nothing to salvage
+      return
+    }
+
+    const stillValid = new Date(legacy.expiresAt).getTime() > Date.now()
+    if (!stillValid || !legacy.authorization || !legacy.xcloudid) {
+      this.removeLegacyToken()
+      return
+    }
+
+    const response = await this.sessionRequest('PUT', {
+      authorization: legacy.authorization,
+      xcloudid: legacy.xcloudid,
+      authVersion: legacy.authVersion ?? '2',
+      expiresAt: legacy.expiresAt, // keep the real expiry, not a fresh 36h
+      source: 'migrated',
+    })
+    // Delete only after the server accepted it; on failure retry on the next refresh.
+    if (response.ok) {
+      this.removeLegacyToken()
+      console.info('[ArloTokenManager] Migrated legacy token to server-side storage')
+    }
+  }
+
+  private removeLegacyToken(): void {
+    try {
+      localStorage.removeItem(LEGACY_STORAGE_KEY)
+    } catch {
+      // ignore
     }
   }
 
   /**
-   * Save new token to storage
-   * Automatically calculates expiration time
-   *
-   * @param authorization - Bearer token from Arlo API
-   * @param xcloudid - X-Cloud-ID from Arlo API
-   * @param authVersion - Auth version (default: "2")
-   * @param customLifespan - Custom token lifespan in milliseconds (optional)
+   * Upload a token to the proxy. `xcloudid` may be omitted on a refresh to reuse the stored one.
+   * Throws with the server's reason when the token is rejected.
    */
-  saveToken(
+  async saveToken(
     authorization: string,
-    xcloudid: string,
-    authVersion: string = '2',
-    customLifespan?: number
-  ): ArloToken {
-    const now = new Date()
-    const lifespan = customLifespan || this.defaultTokenLifespan
-    const expiresAt = new Date(now.getTime() + lifespan)
-
-    const token: ArloToken = {
+    xcloudid?: string,
+    authVersion: string = '2'
+  ): Promise<ArloTokenMetadata> {
+    const response = await this.sessionRequest('PUT', {
       authorization,
+      xcloudid: xcloudid || undefined,
       authVersion,
-      xcloudid,
-      capturedAt: now.toISOString(),
-      expiresAt: expiresAt.toISOString(),
-      source: 'manual', // Default source
+      source: 'manual',
+    })
+    if (!response.ok) {
+      const reason = await response
+        .json()
+        .then((body: { error?: string }) => body.error)
+        .catch(() => undefined)
+      throw new Error(reason ?? `Failed to save token (${response.status})`)
     }
+    this.state = (await response.json()) as ArloSessionState
+    return this.getTokenMetadata()
+  }
 
+  /** Remove the stored token on the server and forget it locally. */
+  async clearToken(): Promise<void> {
+    this.state = EMPTY_STATE
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify(token))
-      console.log('[ArloTokenManager] Token saved, expires at:', expiresAt)
-      return token
+      await this.sessionRequest('DELETE')
     } catch (error) {
-      console.error('[ArloTokenManager] Failed to save token:', error)
-      throw error
+      console.warn('[ArloTokenManager] Failed to clear server-side token:', error)
     }
   }
 
-  /**
-   * Update existing token with new values
-   * Preserves capturedAt but updates expiresAt
-   */
-  updateToken(updates: Partial<ArloToken>): ArloToken | null {
-    const currentToken = this.getToken()
-    if (!currentToken) {
-      console.warn('[ArloTokenManager] No token to update')
-      return null
-    }
-
-    const updatedToken: ArloToken = {
-      ...currentToken,
-      ...updates,
-    }
-
-    // Recalculate expiration if authorization changed
-    if (updates.authorization && updates.authorization !== currentToken.authorization) {
-      const now = new Date()
-      updatedToken.capturedAt = now.toISOString()
-      updatedToken.expiresAt = new Date(now.getTime() + this.defaultTokenLifespan).toISOString()
-    }
-
-    try {
-      localStorage.setItem(this.storageKey, JSON.stringify(updatedToken))
-      console.log('[ArloTokenManager] Token updated')
-      return updatedToken
-    } catch (error) {
-      console.error('[ArloTokenManager] Failed to update token:', error)
-      return null
-    }
-  }
-
-  /**
-   * Clear token from storage
-   */
-  clearToken(): void {
-    localStorage.removeItem(this.storageKey)
-    console.log('[ArloTokenManager] Token cleared')
-  }
-
-  /**
-   * Check if token is valid (exists and not expired)
-   */
   isTokenValid(): boolean {
-    const token = this.getToken()
-    return token !== null
+    return this.state.exists && this.getTimeUntilExpiration() !== 0
   }
 
-  /**
-   * Check if token is expiring soon
-   * Returns true if token expires within the given threshold
-   *
-   * @param thresholdMs - Milliseconds before expiration (default: 2 hours)
-   */
+  /** True if the token expires within the threshold (default 2 hours). */
   isTokenExpiringSoon(thresholdMs: number = 2 * 60 * 60 * 1000): boolean {
-    const token = this.getToken()
-    if (!token) return false
-
-    const now = Date.now()
-    const expiresAt = new Date(token.expiresAt).getTime()
-    const timeUntilExpiry = expiresAt - now
-
-    return timeUntilExpiry > 0 && timeUntilExpiry <= thresholdMs
+    const remaining = this.getTimeUntilExpiration()
+    return remaining !== null && remaining > 0 && remaining <= thresholdMs
   }
 
-  /**
-   * Get time until token expiration
-   * Returns milliseconds until expiration, or null if no token
-   */
+  /** Milliseconds until expiration, 0 if expired, null if there is no token. */
   getTimeUntilExpiration(): number | null {
-    const token = this.getToken()
-    if (!token) return null
-
-    const now = Date.now()
-    const expiresAt = new Date(token.expiresAt).getTime()
-    const timeUntilExpiry = expiresAt - now
-
-    return timeUntilExpiry > 0 ? timeUntilExpiry : 0
+    if (!this.state.exists || !this.state.expiresAt) return null
+    return Math.max(0, new Date(this.state.expiresAt).getTime() - Date.now())
   }
 
-  /**
-   * Get human-readable time until expiration
-   * Example: "2 hours 15 minutes"
-   */
+  /** Human-readable time until expiration, e.g. "2 hours 15 minutes". */
   getFormattedTimeUntilExpiration(): string | null {
     const ms = this.getTimeUntilExpiration()
     if (ms === null) return null
@@ -212,98 +199,63 @@ export class ArloTokenManager {
 
     if (hours > 0 && minutes > 0) {
       return `${hours} hour${hours > 1 ? 's' : ''} ${minutes} minute${minutes > 1 ? 's' : ''}`
-    } else if (hours > 0) {
-      return `${hours} hour${hours > 1 ? 's' : ''}`
-    } else if (minutes > 0) {
-      return `${minutes} minute${minutes > 1 ? 's' : ''}`
-    } else {
-      return 'Less than 1 minute'
     }
+    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''}`
+    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''}`
+    return 'Less than 1 minute'
   }
 
-  /**
-   * Validate token format
-   * Checks if authorization token starts with "2_" and has minimum length
-   */
+  /** Checks the authorization token starts with "2_" and has the minimum length. */
+  validateAuthorizationFormat(authorization: string): boolean {
+    return authorization.startsWith('2_') && authorization.length > 100
+  }
+
   validateTokenFormat(authorization: string, xcloudid: string): boolean {
-    const isAuthValid = authorization.startsWith('2_') && authorization.length > 100
-    const isCloudIdValid = xcloudid.length > 10
-
-    return isAuthValid && isCloudIdValid
+    return this.validateAuthorizationFormat(authorization) && xcloudid.length > 10
   }
 
-  /**
-   * Import token from extracted headers object
-   * Useful when pasting from Chrome DevTools
-   */
-  importFromHeaders(headers: {
+  /** Import a token from headers pasted out of Chrome DevTools. */
+  async importFromHeaders(headers: {
     authorization?: string
     'auth-version'?: string
     xcloudid?: string
-  }): ArloToken | null {
+  }): Promise<ArloTokenMetadata | null> {
     const { authorization, 'auth-version': authVersion, xcloudid } = headers
 
     if (!authorization || !xcloudid) {
       console.error('[ArloTokenManager] Missing required headers')
       return null
     }
-
     if (!this.validateTokenFormat(authorization, xcloudid)) {
       console.error('[ArloTokenManager] Invalid token format')
       return null
     }
-
     return this.saveToken(authorization, xcloudid, authVersion || '2')
   }
 
   /**
-   * Export token as headers object
-   * Useful for API requests
+   * Non-secret request headers for calls through the proxy. The proxy adds the Arlo
+   * credentials itself, so none are (or can be) included here. Null when not connected.
    */
   exportAsHeaders(): Record<string, string> | null {
-    const token = this.getToken()
-    if (!token) return null
-
+    if (!this.isTokenValid()) return null
     return {
       accept: 'application/json',
-      'accept-language': 'en-US,en;q=0.9',
-      'auth-version': token.authVersion,
-      authorization: token.authorization,
       'content-type': 'application/json; charset=utf-8',
-      origin: 'https://my.arlo.com',
-      referer: 'https://my.arlo.com/',
-      'user-agent':
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
-      xcloudid: token.xcloudid,
     }
   }
 
-  /**
-   * Get token metadata
-   * Returns info about token without exposing the actual token
-   */
-  getTokenMetadata(): {
-    exists: boolean
-    isValid: boolean
-    isExpiringSoon: boolean
-    capturedAt: string | null
-    expiresAt: string | null
-    timeUntilExpiration: string | null
-  } {
-    const token = this.getToken()
-
+  /** Token metadata for the UI. Never includes the token itself. */
+  getTokenMetadata(): ArloTokenMetadata {
     return {
-      exists: token !== null,
+      exists: this.state.exists,
       isValid: this.isTokenValid(),
       isExpiringSoon: this.isTokenExpiringSoon(),
-      capturedAt: token?.capturedAt || null,
-      expiresAt: token?.expiresAt || null,
+      capturedAt: this.state.capturedAt,
+      expiresAt: this.state.expiresAt,
       timeUntilExpiration: this.getFormattedTimeUntilExpiration(),
     }
   }
 }
 
-/**
- * Singleton instance export for convenience
- */
 export const arloTokenManager = ArloTokenManager.getInstance()
