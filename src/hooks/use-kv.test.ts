@@ -27,9 +27,14 @@ describe('useKV Hook', () => {
 
     // Clear any pending timers
     vi.clearAllTimers()
+
+    // Never touch the network: the KV worker is unreachable, so every remote call fails the
+    // same way on every machine. Real fetches made coverage depend on runner timing.
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')))
   })
 
   afterEach(() => {
+    vi.unstubAllGlobals()
     vi.restoreAllMocks()
     vi.clearAllTimers()
   })
@@ -554,6 +559,24 @@ describe('useKV Hook', () => {
   })
 
   describe('Remote KV Fetch', () => {
+    it('keeps the value in localStorage when the KV worker is unreachable', async () => {
+      const { result } = renderHook(() => useKV('offline-key', 'initial'))
+
+      act(() => {
+        result.current[1]('updated')
+      })
+
+      await waitFor(() => {
+        expect(fetch).toHaveBeenCalledWith(
+          expect.stringContaining('/kv/offline-key'),
+          expect.objectContaining({ method: 'POST' })
+        )
+      })
+
+      expect(result.current[0]).toBe('updated')
+      expect(localStorage.getItem('kv:offline-key')).toBe('"updated"')
+    })
+
     it('should fetch from KV when localStorage is empty', async () => {
       // Mock KV client to return a value
       const mockGet = vi.fn().mockResolvedValue('remote-value')
