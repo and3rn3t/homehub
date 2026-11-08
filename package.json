@@ -28,7 +28,7 @@
     "deploy": "npm run build && wrangler pages deploy dist",
     "worker:dev": "cd workers && npm run dev",
     "worker:deploy": "cd workers && npm run deploy",
-    "proxy:dev": "wrangler dev workers/arlo-proxy/index.ts --port 8788",
+    "proxy:dev": "wrangler dev --config workers/arlo-proxy/wrangler.toml --port 8788",
     "proxy:deploy": "wrangler deploy workers/arlo-proxy/index.ts --config workers/arlo-proxy/wrangler.toml",
     "dev:full": "concurrently \"npm run dev\" \"npm run proxy:dev\"",
     "dev:all": "concurrently \"npm run dev\" \"npm run worker:dev\" \"npm run proxy:dev\"",

@@ -3,16 +3,25 @@ name = "homehub-arlo-proxy"
 main = "index.ts"
 compatibility_date = "2024-10-01"
 
-# Development configuration
-[env.development]
-name = "homehub-arlo-proxy-dev"
+# Only reachable through the Pages Function service binding (functions/api/arlo/*).
+# Do not deploy until the Pages Function and Access app are in place.
+workers_dev = false
 
-# Production configuration
-[env.production]
-name = "homehub-arlo-proxy"
-routes = [
-  { pattern = "arlo-proxy.yourdomain.com/*", zone_name = "yourdomain.com" },
-]
+# Holds the Arlo session token. Deliberately a SEPARATE namespace from HOMEHUB_KV: the KV worker
+# lets any authenticated browser read app-state keys, which must never include this secret.
+# Create it once with:  npx wrangler kv namespace create ARLO_SESSION
+# then paste the returned id below.
+[[kv_namespaces]]
+binding = "ARLO_KV"
+id = "9ede137f23004174ba02115169b1f852"
 
-# For local development, the worker will be available at:
-# http://localhost:8788/
+# Non-secret auth config (same Access application as the KV worker).
+# Requests are rejected (401) unless they carry a valid Access JWT or the AUTH_TOKEN service token.
+[vars]
+ACCESS_TEAM_DOMAIN = "and3rn3t.cloudflareaccess.com"
+# The AUD tag is a public audience identifier (it appears in every Access login URL and JWT), not a secret.
+ACCESS_AUD = "44d635e32405bd0f93ecb0c5d248ccf09ae509afaa0151a13ab82165e8e7671e" # gitleaks:allow
+ALLOWED_ORIGINS = "http://localhost:5173"
+
+# Local development: `npm run proxy:dev` serves http://localhost:8788
+# (set AUTH_TOKEN in workers/arlo-proxy/.dev.vars; see docs/deployment/SECURITY.md)

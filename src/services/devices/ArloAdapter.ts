@@ -16,20 +16,17 @@
 
 import type { Camera } from '@/constants/mock-cameras'
 import { arloTokenManager } from '@/services/auth/ArloTokenManager'
+import { ARLO_PROXY_BASE_URL } from '@/services/arlo-proxy-url'
 import type { DoorbellEvent } from '@/types/security.types'
 import { EventEmitter } from 'events'
 
 /**
- * Arlo API Base URL
+ * Arlo API base URL: the same-origin Arlo proxy (see src/services/arlo-proxy-url.ts).
  *
- * For development: Uses Cloudflare Worker proxy running locally
- * For production: Uses deployed Cloudflare Worker
- *
- * The proxy worker forwards requests to https://myapi.arlo.com with CORS headers
+ * The proxy worker holds the Arlo token and forwards requests to https://myapi.arlo.com, so the
+ * browser never sends or stores Arlo credentials.
  */
-const ARLO_API_BASE_URL = import.meta.env.DEV
-  ? 'http://localhost:8788' // Local worker dev server
-  : 'https://homehub-arlo-proxy.andernet.workers.dev' // Deployed Cloudflare Worker
+const ARLO_API_BASE_URL = ARLO_PROXY_BASE_URL
 
 /**
  * Arlo event types (from direct API responses)
@@ -163,10 +160,10 @@ export class ArloAdapter extends EventEmitter {
     try {
       console.log('[ArloAdapter] Using token manager for authentication...')
 
-      // Try to get existing token from storage
-      const token = arloTokenManager.getToken()
+      // The token lives on the proxy; sync our view of it (also migrates a legacy local token)
+      await arloTokenManager.refresh()
 
-      if (!token) {
+      if (!arloTokenManager.isTokenValid()) {
         console.error('[ArloAdapter] ❌ No authentication token available')
 
         // Emit event for UI to handle token setup
@@ -193,15 +190,11 @@ export class ArloAdapter extends EventEmitter {
         )
       }
 
-      // Store in cookieAuth for compatibility with existing code
+      // Marker that authentication is configured. Holds no credentials: the proxy injects them.
       this.cookieAuth = {
-        cookies: [], // Not using cookies anymore
-        localStorage: {
-          'auth-version': token.authVersion,
-          authorization: token.authorization,
-          xcloudid: token.xcloudid,
-        },
-        extractedAt: token.capturedAt,
+        cookies: [],
+        localStorage: {},
+        extractedAt: arloTokenManager.getTokenMetadata().capturedAt ?? new Date().toISOString(),
       }
 
       console.log('[ArloAdapter] ✅ Token manager authentication configured')
@@ -281,6 +274,16 @@ export class ArloAdapter extends EventEmitter {
     }
   }
 
+  /** True when the proxy answered 401 because no Arlo session is stored. */
+  private async isMissingSessionResponse(response: Response): Promise<boolean> {
+    try {
+      const body = (await response.clone().json()) as { error?: string }
+      return body.error === 'arlo_session_missing'
+    } catch {
+      return false
+    }
+  }
+
   /**
    * Make an API request with automatic token refresh on 401
    *
@@ -310,12 +313,20 @@ export class ArloAdapter extends EventEmitter {
 
     const response = await fetch(url, {
       ...options,
+      credentials: 'same-origin',
       headers: finalHeaders,
     })
 
-    // Handle 401 Unauthorized
-    if (response.status === 401 && retryCount === 0) {
-      console.warn('[ArloAdapter] 401 Unauthorized - Token expired or invalid')
+    // The proxy marks a 401 that came from Arlo itself. A plain 401 is the Cloudflare Access
+    // session, which is recovered by re-login, not by a token refresh.
+    const arloRejectedToken = response.headers.get('x-homehub-arlo') === 'token-rejected'
+    // No session stored (as far as the proxy can see). KV is eventually consistent, so this can
+    // be stale right after an upload: prompt for a token but never delete anything because of it.
+    const sessionMissing =
+      response.status === 401 && (await this.isMissingSessionResponse(response))
+
+    if ((arloRejectedToken || sessionMissing) && retryCount === 0) {
+      console.warn('[ArloAdapter] 401 Unauthorized - Token expired, rejected or missing')
 
       // Emit event for UI to handle token refresh
       this.emit('token-expired', {
@@ -323,8 +334,13 @@ export class ArloAdapter extends EventEmitter {
         timestamp: new Date().toISOString(),
       })
 
-      // Clear expired token
-      arloTokenManager.clearToken()
+      if (arloRejectedToken) {
+        // Arlo refused the stored token: drop it. Best effort, so a failed delete cannot mask
+        // the real problem (the token needs refreshing).
+        await arloTokenManager.clearToken().catch(error => {
+          console.warn('[ArloAdapter] Could not clear rejected token:', error)
+        })
+      }
 
       throw new Error('Authentication token expired. Please refresh your Arlo authentication.')
     }

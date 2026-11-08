@@ -105,19 +105,21 @@ export function TokenRefreshModal({ isOpen, onClose, onTokenRefreshed }: TokenRe
       // Try to parse input as cURL command first
       const parsed = parseCurlCommand(authorizationInput)
       const finalAuthorization = parsed?.authorization || authorizationInput.trim()
-      let finalXcloudid = parsed?.xcloudid || xcloudidInput.trim()
+      const finalXcloudid = parsed?.xcloudid || xcloudidInput.trim()
 
-      // If no xcloudid provided and not found in cURL, use existing one
+      // No xcloudid provided and none in the cURL: the server reuses the one it already holds
+      // (the browser never sees it), so only the authorization needs validating here.
+      let reuseStoredCloudId = false
       if (!finalXcloudid) {
-        const existingToken = arloTokenManager.getToken()
-        if (existingToken) {
-          finalXcloudid = existingToken.xcloudid
-          console.log('[TokenRefreshModal] Using existing xcloudid')
-        }
+        await arloTokenManager.refresh()
+        reuseStoredCloudId = arloTokenManager.isTokenValid()
       }
 
       // Validate format
-      if (!arloTokenManager.validateTokenFormat(finalAuthorization, finalXcloudid)) {
+      const formatIsValid = reuseStoredCloudId
+        ? arloTokenManager.validateAuthorizationFormat(finalAuthorization)
+        : arloTokenManager.validateTokenFormat(finalAuthorization, finalXcloudid)
+      if (!formatIsValid) {
         setValidationError(
           'Invalid token format. Authorization should start with "2_" and be at least 100 characters.'
         )
@@ -126,7 +128,11 @@ export function TokenRefreshModal({ isOpen, onClose, onTokenRefreshed }: TokenRe
       }
 
       // Save token
-      arloTokenManager.saveToken(finalAuthorization, finalXcloudid, '2')
+      await arloTokenManager.saveToken(
+        finalAuthorization,
+        reuseStoredCloudId ? undefined : finalXcloudid,
+        '2'
+      )
 
       toast.success('Token saved successfully!', {
         description: `Valid for ${arloTokenManager.getFormattedTimeUntilExpiration()}`,

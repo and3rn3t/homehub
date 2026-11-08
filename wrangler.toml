@@ -12,3 +12,9 @@ pages_build_output_dir = "dist"
 [[services]]
 binding = "KV_API"
 service = "homehub-kv-worker"
+
+# Arlo proxy worker reached over a service binding by functions/api/arlo/*.
+# It holds the Arlo session token server-side; the browser never receives it.
+[[services]]
+binding = "ARLO_PROXY"
+service = "homehub-arlo-proxy"
