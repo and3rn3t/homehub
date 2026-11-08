@@ -70,7 +70,7 @@ export async function timingSafeEqualStrings(a: string, b: string): Promise<bool
   const viewA = new Uint8Array(hashA)
   const viewB = new Uint8Array(hashB)
   let diff = 0
-  for (let i = 0; i < viewA.length; i++) diff |= viewA[i] ^ viewB[i]
+  for (let i = 0; i < viewA.length; i++) diff |= (viewA[i] ?? 0) ^ (viewB[i] ?? 0)
   return diff === 0
 }
 
@@ -111,8 +111,8 @@ export async function verifyAccessJwt(token: string, env: AuthEnv): Promise<bool
 
   try {
     const parts = token.split('.')
-    if (parts.length !== 3) return false
     const [headerB64, payloadB64, signatureB64] = parts
+    if (parts.length !== 3 || !headerB64 || !payloadB64 || !signatureB64) return false
 
     const header = decodeJson<{ alg?: string; kid?: string }>(headerB64)
     if (header.alg !== 'RS256' || !header.kid) return false

@@ -58,7 +58,7 @@ function makeEnv(overrides: Partial<Env> = {}): Env {
 }
 
 beforeAll(async () => {
-  const keyPair = await crypto.subtle.generateKey(
+  const keyPair = (await crypto.subtle.generateKey(
     {
       name: 'RSASSA-PKCS1-v1_5',
       modulusLength: 2048,
@@ -67,9 +67,9 @@ beforeAll(async () => {
     },
     true,
     ['sign', 'verify']
-  )
+  )) as CryptoKeyPair
   privateKey = keyPair.privateKey
-  publicJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey)
+  publicJwk = (await crypto.subtle.exportKey('jwk', keyPair.publicKey)) as JsonWebKey
 })
 
 beforeEach(() => {
