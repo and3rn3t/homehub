@@ -277,7 +277,7 @@ const toggleDevice = (id: string) => {
 - Smart locks integration
 - Event notifications
 
-Full roadmap: [Copilot Instructions](.github/instructions/copilot-instructions.md#product-roadmap)
+Full roadmap: [pinned Roadmap issue](https://github.com/and3rn3t/homehub/issues/361)
 
 ---
 
