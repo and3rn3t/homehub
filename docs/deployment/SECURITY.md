@@ -47,3 +47,15 @@ except `/health`) rather than exposing data, but it is not a working deployment.
 Access signing keys are cached for 10 minutes. A token with an unknown key ID triggers at most one
 refetch per minute, shared across concurrent requests, so unauthenticated traffic cannot drive
 unbounded certificate fetches.
+
+## Local development
+
+The worker rejects unauthenticated requests locally too. The Vite dev server proxies `/kv` and
+`/api/logs` to `http://localhost:8787` and adds the service token **server-side**, so nothing
+secret enters the browser bundle:
+
+1. `workers/.dev.vars` (gitignored): `AUTH_TOKEN=<random string>`
+2. `.env.local` (gitignored): `KV_DEV_AUTH_TOKEN=<same string>` (deliberately not `VITE_`-prefixed)
+3. `npm run dev:all`
+
+Leave `VITE_KV_API_URL` unset; the app then calls the dev server's own origin.

@@ -13,6 +13,8 @@
  *   logger.error('Failed to save data', error)                     // Always logged + sent to monitoring
  */
 
+import { getKVBaseUrl } from './api-base-url'
+
 type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 
 interface LogContext {
@@ -102,11 +104,7 @@ class Logger {
 
     try {
       // Get worker URL from environment
-      const workerUrl = import.meta.env.VITE_KV_API_URL
-      if (!workerUrl) {
-        console.warn('[Logger] VITE_KV_API_URL not configured, skipping monitoring')
-        return
-      }
+      const workerUrl = getKVBaseUrl()
 
       // Extract error details if context is an Error
       const errorDetails =

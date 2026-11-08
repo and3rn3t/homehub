@@ -13,9 +13,6 @@ export interface ViteEnv {
   /** Cloudflare Worker API URL for KV operations */
   VITE_KV_API_URL: string
 
-  /** Optional authentication token for Worker API */
-  VITE_KV_AUTH_TOKEN?: string
-
   /** Environment mode (development, staging, production) */
   MODE: 'development' | 'staging' | 'production'
 

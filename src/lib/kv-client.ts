@@ -4,13 +4,16 @@
  * Client for communicating with Cloudflare Worker KV API.
  */
 
+import { getKVBaseUrl } from './api-base-url'
 import { logger } from './logger'
+
+/** Query parameter the service worker treats as a network-only navigation. Keep in sync with sw.ts. */
+export const REAUTH_PARAM = 'access-reauth'
+const REAUTH_MARKER_KEY = 'homehub:kv-reauth-attempted'
 
 export interface KVClientConfig {
   /** Base URL of Cloudflare Worker API */
   baseUrl: string
-  /** Optional authentication token */
-  authToken?: string
   /** Request timeout in milliseconds */
   timeout?: number
 }
@@ -21,7 +24,6 @@ export class KVClient {
   constructor(config: KVClientConfig) {
     this.config = {
       baseUrl: config.baseUrl.replace(/\/$/, ''), // Remove trailing slash
-      authToken: config.authToken || '',
       timeout: config.timeout || 3000, // Reduced to 3 seconds for faster fallback
     }
   }
@@ -37,8 +39,10 @@ export class KVClient {
       const response = await fetch(`${this.config.baseUrl}/kv/${key}`, {
         method: 'GET',
         headers: this.getHeaders(),
+        credentials: 'same-origin',
         signal: controller.signal,
       })
+      this.trackAuthState(response)
 
       clearTimeout(timeoutId)
 
@@ -78,8 +82,10 @@ export class KVClient {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify({ value }),
+        credentials: 'same-origin',
         signal: controller.signal,
       })
+      this.trackAuthState(response)
 
       clearTimeout(timeoutId)
 
@@ -103,8 +109,10 @@ export class KVClient {
       const response = await fetch(`${this.config.baseUrl}/kv/${key}`, {
         method: 'DELETE',
         headers: this.getHeaders(),
+        credentials: 'same-origin',
         signal: controller.signal,
       })
+      this.trackAuthState(response)
 
       clearTimeout(timeoutId)
 
@@ -128,8 +136,10 @@ export class KVClient {
       const response = await fetch(`${this.config.baseUrl}/kv`, {
         method: 'GET',
         headers: this.getHeaders(),
+        credentials: 'same-origin',
         signal: controller.signal,
       })
+      this.trackAuthState(response)
 
       clearTimeout(timeoutId)
 
@@ -146,18 +156,66 @@ export class KVClient {
   }
 
   /**
-   * Get request headers
+   * Cloudflare Access sessions expire; a 401 means the session cookie is gone. Navigate once
+   * (network-only, see sw.ts) so Access can send the user through login again. The attempt is
+   * remembered in sessionStorage so a persistent 401 (misconfiguration) cannot reload forever;
+   * any non-401 response proves authentication works and re-arms recovery.
+   */
+  private trackAuthState(response: Response): void {
+    if (typeof window === 'undefined') return
+
+    if (response.status !== 401) {
+      this.clearReauthMarker()
+      return
+    }
+    if (this.readReauthMarker()) {
+      logger.error('KV request still unauthorized after re-authentication attempt')
+      return
+    }
+
+    this.writeReauthMarker()
+    logger.warn('KV request unauthorized; re-authenticating via Cloudflare Access')
+    const url = new URL(window.location.href)
+    url.searchParams.set(REAUTH_PARAM, String(Date.now()))
+    window.location.assign(url.toString())
+  }
+
+  private readReauthMarker(): boolean {
+    try {
+      return sessionStorage.getItem(REAUTH_MARKER_KEY) !== null
+    } catch {
+      return false
+    }
+  }
+
+  private writeReauthMarker(): void {
+    try {
+      sessionStorage.setItem(REAUTH_MARKER_KEY, String(Date.now()))
+    } catch {
+      // Storage unavailable: recovery is still attempted, just not loop-guarded.
+    }
+  }
+
+  private clearReauthMarker(): void {
+    try {
+      sessionStorage.removeItem(REAUTH_MARKER_KEY)
+    } catch {
+      // ignore
+    }
+    // Drop the cache-busting parameter left in the URL by a completed re-authentication.
+    const url = new URL(window.location.href)
+    if (url.searchParams.has(REAUTH_PARAM)) {
+      url.searchParams.delete(REAUTH_PARAM)
+      window.history.replaceState(null, '', url.toString())
+    }
+  }
+
+  /**
+   * Get request headers. Auth is carried by the Cloudflare Access session
+   * cookie (same-origin); never put secrets in client-side config.
    */
   private getHeaders(): HeadersInit {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    }
-
-    if (this.config.authToken) {
-      headers['Authorization'] = `Bearer ${this.config.authToken}`
-    }
-
-    return headers
+    return { 'Content-Type': 'application/json' }
   }
 }
 
@@ -168,12 +226,8 @@ let kvClientInstance: KVClient | null = null
 
 export function getKVClient(): KVClient {
   if (!kvClientInstance) {
-    const baseUrl = import.meta.env.VITE_KV_API_URL || 'http://localhost:8787'
-    const authToken = import.meta.env.VITE_KV_AUTH_TOKEN
-
     kvClientInstance = new KVClient({
-      baseUrl,
-      authToken,
+      baseUrl: getKVBaseUrl(),
       timeout: 10000,
     })
   }

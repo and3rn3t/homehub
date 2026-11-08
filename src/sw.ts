@@ -27,7 +27,8 @@ cleanupOutdatedCaches()
 // Navigation fallback to offline.html
 const handler = createHandlerBoundToURL('/offline.html')
 const navigationRoute = new NavigationRoute(handler, {
-  denylist: [/^\/api/, /\.(png|jpg|jpeg|svg|gif|webp|ico)$/],
+  // access-reauth: Cloudflare Access re-login must reach the network, not the offline fallback
+  denylist: [/^\/api/, /\.(png|jpg|jpeg|svg|gif|webp|ico)$/, /[?&]access-reauth=/],
 })
 registerRoute(navigationRoute)
 
