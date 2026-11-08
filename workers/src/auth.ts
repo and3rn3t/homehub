@@ -162,6 +162,19 @@ export async function isAuthorized(request: Request, env: AuthEnv): Promise<bool
   return false
 }
 
+/**
+ * Whether a request's Origin is acceptable. Requests without an Origin header (service
+ * tokens, curl, same-origin GETs) pass, as do same-origin requests (Origin equals the request
+ * URL's origin, e.g. via the Pages Function) and origins in ALLOWED_ORIGINS. Anything else is
+ * rejected so a disallowed site cannot cause side effects, not merely read the response.
+ */
+export function isOriginAllowed(request: Request, env: AuthEnv): boolean {
+  const origin = request.headers.get('Origin')
+  if (!origin) return true
+  if (origin === new URL(request.url).origin) return true
+  return getAllowedOrigin(request, env) !== null
+}
+
 /** Returns the request origin only if it is in the ALLOWED_ORIGINS allowlist. */
 export function getAllowedOrigin(request: Request, env: AuthEnv): string | null {
   const origin = request.headers.get('Origin')

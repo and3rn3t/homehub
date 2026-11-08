@@ -133,6 +133,28 @@ describe('session custody', () => {
     expect(lifespanMs).toBeLessThanOrEqual(36 * 60 * 60 * 1000)
   })
 
+  it('rejects an expired or malformed expiresAt instead of renewing it', async () => {
+    const expired = await worker.fetch(
+      putSession({
+        authorization: ARLO_AUTH,
+        xcloudid: ARLO_CLOUD_ID,
+        expiresAt: new Date(Date.now() - 1000).toISOString(),
+      }),
+      env
+    )
+    const malformed = await worker.fetch(
+      putSession({ authorization: ARLO_AUTH, xcloudid: ARLO_CLOUD_ID, expiresAt: 'not-a-date' }),
+      env
+    )
+    const wrongType = await worker.fetch(
+      putSession({ authorization: ARLO_AUTH, xcloudid: ARLO_CLOUD_ID, expiresAt: 12345 }),
+      env
+    )
+
+    expect([expired.status, malformed.status, wrongType.status]).toEqual([400, 400, 400])
+    expect((env.ARLO_KV as ReturnType<typeof makeStore>).dump().size).toBe(0)
+  })
+
   it('deletes the session', async () => {
     await worker.fetch(putSession({ authorization: ARLO_AUTH, xcloudid: ARLO_CLOUD_ID }), env)
     await worker.fetch(authed('/session', { method: 'DELETE' }), env)
@@ -252,6 +274,62 @@ describe('upstream proxying', () => {
   it('rejects a malformed proxy URL', async () => {
     const response = await worker.fetch(authed('/proxy/not-a-url'), env)
     expect(response.status).toBe(400)
+  })
+})
+
+describe('origin enforcement', () => {
+  function withOrigin(path: string, origin: string, init: RequestInit = {}): Request {
+    const request = authed(path, init)
+    Object.defineProperty(request, 'headers', {
+      value: new Headers({ Authorization: `Bearer ${SERVICE_TOKEN}`, Origin: origin }),
+    })
+    return request
+  }
+
+  it('rejects an unexpected origin before any side effect', async () => {
+    const env = makeEnv({ ALLOWED_ORIGINS: 'http://localhost:5173' })
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+
+    const put = await worker.fetch(
+      withOrigin('/session', 'https://evil.example', {
+        method: 'PUT',
+        body: JSON.stringify({ authorization: ARLO_AUTH, xcloudid: ARLO_CLOUD_ID }),
+      }),
+      env
+    )
+    const proxied = await worker.fetch(
+      withOrigin('/hmsweb/users/devices', 'https://evil.example'),
+      env
+    )
+
+    expect([put.status, proxied.status]).toEqual([403, 403])
+    expect((env.ARLO_KV as ReturnType<typeof makeStore>).dump().size).toBe(0)
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('rejects a disallowed origin on preflight too', async () => {
+    const response = await worker.fetch(
+      withOrigin('/session', 'https://evil.example', { method: 'OPTIONS' }),
+      makeEnv()
+    )
+    expect(response.status).toBe(403)
+  })
+
+  it('allows same-origin requests (the Pages Function path)', async () => {
+    const response = await worker.fetch(withOrigin('/session', 'https://proxy'), makeEnv())
+    expect(response.status).toBe(200)
+  })
+
+  it('allows a configured origin', async () => {
+    const env = makeEnv({ ALLOWED_ORIGINS: 'http://localhost:5173' })
+    const response = await worker.fetch(withOrigin('/session', 'http://localhost:5173'), env)
+    expect(response.status).toBe(200)
+  })
+
+  it('allows authenticated requests that carry no Origin header', async () => {
+    const response = await worker.fetch(authed('/session'), makeEnv())
+    expect(response.status).toBe(200)
   })
 })
 

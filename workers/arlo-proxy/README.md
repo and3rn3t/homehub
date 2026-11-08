@@ -9,14 +9,14 @@ Cloudflare Worker that sits between the browser and the Arlo cloud API. It exist
 
 ## Routes
 
-| Route                  | Purpose                                                                                                                                                       |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET /health`          | Public liveness check                                                                                                                                         |
-| `GET /session`         | Token metadata `{ exists, capturedAt, expiresAt, source }`, never the secret                                                                                  |
-| `PUT /session`         | Store a token: `{ authorization, xcloudid?, authVersion?, expiresAt? }`. Omit `xcloudid` on a refresh to reuse the stored one. Lifetime is capped at 36 hours |
-| `DELETE /session`      | Forget the token                                                                                                                                              |
-| `/proxy/<encoded-url>` | Media/CDN passthrough, restricted to `https://*.arlo.com`, sent **without** credentials                                                                       |
-| anything else          | Forwarded to `https://myapi.arlo.com/<path>` with the stored `authorization`, `auth-version` and `xcloudid` injected                                          |
+| Route                  | Purpose                                                                                                                                                                                                                                                                    |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /health`          | Public liveness check                                                                                                                                                                                                                                                      |
+| `GET /session`         | Token metadata `{ exists, capturedAt, expiresAt, source }`, never the secret                                                                                                                                                                                               |
+| `PUT /session`         | Store a token: `{ authorization, xcloudid?, authVersion?, expiresAt? }`. Omit `xcloudid` on a refresh to reuse the stored one. `expiresAt` is optional (default 36 hours, never longer); if supplied it must be a future ISO timestamp or the request is rejected with 400 |
+| `DELETE /session`      | Forget the token                                                                                                                                                                                                                                                           |
+| `/proxy/<encoded-url>` | Media/CDN passthrough, restricted to `https://*.arlo.com`, sent **without** credentials                                                                                                                                                                                    |
+| anything else          | Forwarded to `https://myapi.arlo.com/<path>` with the stored `authorization`, `auth-version` and `xcloudid` injected                                                                                                                                                       |
 
 Client-supplied `authorization`, `xcloudid`, `auth-version`, `cookie` and `Cf-*` headers are never
 forwarded upstream. If Arlo rejects the stored token (401/403) the response carries
@@ -27,12 +27,18 @@ forwarded upstream. If Arlo rejects the stored token (401/403) the response carr
 
 - **Fail closed**: every route except `/health` needs a valid Cloudflare Access JWT (or the
   optional `AUTH_TOKEN` service token). Verification is shared with the KV worker (`../src/auth.ts`).
-- **CORS** headers only for origins in `ALLOWED_ORIGINS`; never `*`. Same-origin traffic through the
-  Pages Function needs none.
+- **Origin check**: a request whose `Origin` is neither same-origin (the Pages Function path) nor in
+  `ALLOWED_ORIGINS` is rejected with 403 **before** anything runs, so a disallowed site cannot cause
+  side effects. Requests with no `Origin` header (service token, curl) are allowed once authenticated.
+- **CORS** headers only for origins in `ALLOWED_ORIGINS`; never `*`.
 - **No public URL** (`workers_dev = false`). The app reaches it through the `ARLO_PROXY` service
   binding via `functions/api/arlo/[[path]].ts`, which serves `/api/arlo/*`.
 - The token is stored in its own KV namespace (`ARLO_KV`), separate from the app-state KV that the
   browser can read through the KV worker.
+- **Consistency**: Workers KV is eventually consistent (up to ~60s to reach every location), which is
+  fine for one household. A "no session" answer is therefore never treated as authoritative: the app
+  prompts for a token but does not delete anything because of it. Use a Durable Object if instant,
+  global revocation is ever needed.
 - Logs contain method, upstream host and status only. Paths and queries can carry signed credentials.
 
 ## Setup

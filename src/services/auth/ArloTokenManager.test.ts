@@ -159,6 +159,55 @@ describe('ArloTokenManager (server-side custody)', () => {
     expect(manager.isTokenValid()).toBe(false)
   })
 
+  it('reports a failed delete instead of claiming the token is gone', async () => {
+    fetchMock.mockResolvedValueOnce(sessionResponse())
+    const manager = await loadManager()
+    await manager.refresh()
+
+    fetchMock.mockResolvedValueOnce(new Response('boom', { status: 500 }))
+    await expect(manager.clearToken()).rejects.toThrow('Failed to clear token (500)')
+
+    expect(manager.isTokenValid()).toBe(true) // still believed present: the server did not confirm
+  })
+
+  it('propagates a network failure while clearing', async () => {
+    fetchMock.mockResolvedValueOnce(sessionResponse())
+    const manager = await loadManager()
+    await manager.refresh()
+
+    fetchMock.mockRejectedValueOnce(new TypeError('network down'))
+
+    await expect(manager.clearToken()).rejects.toThrow('network down')
+    expect(manager.isTokenValid()).toBe(true)
+  })
+
+  it('never lets a late refresh overwrite a newer save', async () => {
+    const order: string[] = []
+    let releaseGet: (response: Response) => void = () => {}
+    fetchMock.mockImplementation((_url: string, init: RequestInit) => {
+      order.push(init.method as string)
+      if (init.method === 'GET') {
+        return new Promise<Response>(resolve => {
+          releaseGet = resolve
+        })
+      }
+      return Promise.resolve(sessionResponse())
+    })
+    const manager = await loadManager()
+
+    const refreshing = manager.refresh() // GET starts first and is still in flight...
+    const saving = manager.saveToken(AUTHORIZATION, CLOUD_ID) // ...so the save must wait for it
+    await vi.waitFor(() => expect(order).toEqual(['GET']))
+    await new Promise(resolve => setTimeout(resolve, 20)) // give a (buggy) overlapping PUT time to fire
+    expect(order).toEqual(['GET']) // the save is still queued behind the in-flight refresh
+
+    releaseGet(Response.json(NO_SESSION)) // the older, "no session" answer arrives
+    await Promise.all([refreshing, saving])
+
+    expect(order).toEqual(['GET', 'PUT'])
+    expect(manager.isTokenValid()).toBe(true) // the save won; the stale answer did not
+  })
+
   describe('legacy localStorage migration', () => {
     function storeLegacy(expiresAt: string): void {
       localStorage.setItem(
@@ -204,6 +253,44 @@ describe('ArloTokenManager (server-side custody)', () => {
       await manager.refresh()
 
       expect(localStorage.getItem(LEGACY_KEY)).not.toBeNull()
+    })
+
+    it('removes a retained legacy token once a manual save succeeds', async () => {
+      storeLegacy(new Date(Date.now() + 60 * 60 * 1000).toISOString())
+      fetchMock.mockResolvedValueOnce(new Response('boom', { status: 500 })) // migration upload fails
+      fetchMock.mockResolvedValueOnce(new Response('boom', { status: 500 })) // ...then GET fails
+      const manager = await loadManager()
+      await manager.refresh()
+      expect(localStorage.getItem(LEGACY_KEY)).not.toBeNull()
+
+      fetchMock.mockResolvedValueOnce(sessionResponse())
+      await manager.saveToken(AUTHORIZATION, CLOUD_ID)
+
+      expect(localStorage.getItem(LEGACY_KEY)).toBeNull()
+    })
+
+    it('does not resurrect a cleared session from a legacy token', async () => {
+      storeLegacy(new Date(Date.now() + 60 * 60 * 1000).toISOString())
+      fetchMock.mockResolvedValue(Response.json(NO_SESSION))
+      const manager = await loadManager()
+
+      await manager.clearToken()
+      fetchMock.mockClear()
+      await manager.refresh()
+
+      expect(localStorage.getItem(LEGACY_KEY)).toBeNull()
+      const methods = fetchMock.mock.calls.map(([, init]) => (init as RequestInit).method)
+      expect(methods).not.toContain('PUT')
+    })
+
+    it('removes the legacy token even when the delete request fails', async () => {
+      storeLegacy(new Date(Date.now() + 60 * 60 * 1000).toISOString())
+      fetchMock.mockRejectedValue(new TypeError('network down'))
+      const manager = await loadManager()
+
+      await expect(manager.clearToken()).rejects.toThrow()
+
+      expect(localStorage.getItem(LEGACY_KEY)).toBeNull()
     })
 
     it('deletes an expired legacy token without uploading it', async () => {

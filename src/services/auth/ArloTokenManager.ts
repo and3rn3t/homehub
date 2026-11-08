@@ -49,6 +49,8 @@ export class ArloTokenManager {
   private static instance: ArloTokenManager
   private state: ArloSessionState = EMPTY_STATE
   private inflightRefresh: Promise<void> | null = null
+  /** Tail of the operation queue: refresh, save and clear never overlap (see serialize). */
+  private tail: Promise<unknown> = Promise.resolve()
 
   private constructor() {
     // Private constructor for singleton
@@ -78,10 +80,20 @@ export class ArloTokenManager {
    * Call before checking validity; concurrent calls share one request.
    */
   refresh(): Promise<void> {
-    this.inflightRefresh ??= this.doRefresh().finally(() => {
+    this.inflightRefresh ??= this.serialize(() => this.doRefresh()).finally(() => {
       this.inflightRefresh = null
     })
     return this.inflightRefresh
+  }
+
+  /**
+   * Run operations one at a time, in call order. Without this a slow refresh (or a legacy-token
+   * migration upload) could finish after a newer save or clear and overwrite it with older data.
+   */
+  private serialize<T>(operation: () => Promise<T>): Promise<T> {
+    const run = this.tail.then(operation)
+    this.tail = run.catch(() => undefined)
+    return run
   }
 
   private async doRefresh(): Promise<void> {
@@ -140,10 +152,18 @@ export class ArloTokenManager {
    * Upload a token to the proxy. `xcloudid` may be omitted on a refresh to reuse the stored one.
    * Throws with the server's reason when the token is rejected.
    */
-  async saveToken(
+  saveToken(
     authorization: string,
     xcloudid?: string,
     authVersion: string = '2'
+  ): Promise<ArloTokenMetadata> {
+    return this.serialize(() => this.doSaveToken(authorization, xcloudid, authVersion))
+  }
+
+  private async doSaveToken(
+    authorization: string,
+    xcloudid: string | undefined,
+    authVersion: string
   ): Promise<ArloTokenMetadata> {
     const response = await this.sessionRequest('PUT', {
       authorization,
@@ -159,17 +179,25 @@ export class ArloTokenManager {
       throw new Error(reason ?? `Failed to save token (${response.status})`)
     }
     this.state = (await response.json()) as ArloSessionState
+    // The fresh token supersedes any legacy copy kept for a migration retry; leaving it would let
+    // the next refresh upload the stale one over this session and keep a plaintext credential.
+    this.removeLegacyToken()
     return this.getTokenMetadata()
   }
 
-  /** Remove the stored token on the server and forget it locally. */
-  async clearToken(): Promise<void> {
-    this.state = EMPTY_STATE
-    try {
-      await this.sessionRequest('DELETE')
-    } catch (error) {
-      console.warn('[ArloTokenManager] Failed to clear server-side token:', error)
-    }
+  /**
+   * Remove the stored token on the server. Throws if the server cannot confirm deletion, and only
+   * then forgets it locally, so the UI never claims a logout that did not happen. The legacy
+   * localStorage copy is removed first and unconditionally: otherwise the next refresh would
+   * upload it and resurrect the session.
+   */
+  clearToken(): Promise<void> {
+    return this.serialize(async () => {
+      this.removeLegacyToken()
+      const response = await this.sessionRequest('DELETE')
+      if (!response.ok) throw new Error(`Failed to clear token (${response.status})`)
+      this.state = EMPTY_STATE
+    })
   }
 
   isTokenValid(): boolean {

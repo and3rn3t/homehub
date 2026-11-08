@@ -12,9 +12,15 @@
  * - Media proxying is restricted to https://*.arlo.com
  * - The token lives in its own KV namespace (ARLO_KV), separate from the app-state KV
  *   the browser can read through the KV worker
+ *
+ * Consistency: Workers KV is eventually consistent (changes can take up to ~60s to reach every
+ * location), so a PUT may not be visible everywhere at once and a DELETE may not revoke at once.
+ * That is acceptable for one household using one location, but it means a "missing session"
+ * answer must never be treated as authoritative: the client does not delete on it. A Durable
+ * Object would give strong consistency if multi-region use or instant revocation is ever needed.
  */
 
-import { getAllowedOrigin, isAuthorized, type AuthEnv } from '../src/auth'
+import { getAllowedOrigin, isAuthorized, isOriginAllowed, type AuthEnv } from '../src/auth'
 
 /** Minimal KV surface used here (avoids a workers-types dependency in this package). */
 export interface SessionStore {
@@ -151,15 +157,17 @@ async function handlePutSession(request: Request, env: Env): Promise<Response> {
   }
 
   const now = Date.now()
-  // A migrated token keeps its real expiry. Clamped so a caller can never extend the lifetime
-  // beyond the normal window.
-  const requestedExpiry = typeof body.expiresAt === 'string' ? Date.parse(body.expiresAt) : NaN
-  const expiresAtMs =
-    Number.isFinite(requestedExpiry) &&
-    requestedExpiry > now &&
-    requestedExpiry <= now + SESSION_LIFESPAN_MS
-      ? requestedExpiry
-      : now + SESSION_LIFESPAN_MS
+  // Omitted: the normal lifetime. A migrated token supplies its real expiry, which must be in the
+  // future (an expired or malformed value is rejected, never silently renewed) and is clamped so a
+  // caller cannot extend the lifetime beyond the normal window.
+  let expiresAtMs = now + SESSION_LIFESPAN_MS
+  if (body.expiresAt !== undefined) {
+    const requested = typeof body.expiresAt === 'string' ? Date.parse(body.expiresAt) : NaN
+    if (!Number.isFinite(requested) || requested <= now) {
+      return json({ error: 'expiresAt must be a future ISO timestamp' }, 400)
+    }
+    expiresAtMs = Math.min(requested, now + SESSION_LIFESPAN_MS)
+  }
   const session: ArloSession = {
     authorization,
     authVersion: typeof body.authVersion === 'string' ? body.authVersion : '2',
@@ -259,6 +267,10 @@ async function handleProxy(request: Request, env: Env, url: URL): Promise<Respon
 
 async function route(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url)
+
+  // Reject unexpected origins before anything runs, so a disallowed site cannot trigger side
+  // effects (withholding CORS headers only hides the response, it does not stop the request).
+  if (!isOriginAllowed(request, env)) return json({ error: 'Origin not allowed' }, 403)
 
   if (request.method === 'OPTIONS') return new Response(null, { status: 204 })
 

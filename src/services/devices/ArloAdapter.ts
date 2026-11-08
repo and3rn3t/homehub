@@ -317,15 +317,16 @@ export class ArloAdapter extends EventEmitter {
       headers: finalHeaders,
     })
 
-    // The proxy marks a 401 that came from Arlo (stored token rejected or missing). A plain 401
-    // is the Cloudflare Access session, which is recovered by re-login, not a token refresh.
-    const arloRejectedToken =
-      response.headers.get('x-homehub-arlo') === 'token-rejected' ||
-      (response.status === 401 && (await this.isMissingSessionResponse(response)))
+    // The proxy marks a 401 that came from Arlo itself. A plain 401 is the Cloudflare Access
+    // session, which is recovered by re-login, not by a token refresh.
+    const arloRejectedToken = response.headers.get('x-homehub-arlo') === 'token-rejected'
+    // No session stored (as far as the proxy can see). KV is eventually consistent, so this can
+    // be stale right after an upload: prompt for a token but never delete anything because of it.
+    const sessionMissing =
+      response.status === 401 && (await this.isMissingSessionResponse(response))
 
-    // Handle expired or missing Arlo token
-    if (arloRejectedToken && retryCount === 0) {
-      console.warn('[ArloAdapter] 401 Unauthorized - Token expired or invalid')
+    if ((arloRejectedToken || sessionMissing) && retryCount === 0) {
+      console.warn('[ArloAdapter] 401 Unauthorized - Token expired, rejected or missing')
 
       // Emit event for UI to handle token refresh
       this.emit('token-expired', {
@@ -333,8 +334,13 @@ export class ArloAdapter extends EventEmitter {
         timestamp: new Date().toISOString(),
       })
 
-      // Clear expired token (server-side and local state)
-      await arloTokenManager.clearToken()
+      if (arloRejectedToken) {
+        // Arlo refused the stored token: drop it. Best effort, so a failed delete cannot mask
+        // the real problem (the token needs refreshing).
+        await arloTokenManager.clearToken().catch(error => {
+          console.warn('[ArloAdapter] Could not clear rejected token:', error)
+        })
+      }
 
       throw new Error('Authentication token expired. Please refresh your Arlo authentication.')
     }
