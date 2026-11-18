@@ -726,6 +726,61 @@ describe('useKV Hook', () => {
       expect(localStorage.getItem('kv:flush-test')).toBe('"value3"')
     })
 
+    it('flushes the latest debounced value before unmount without waiting 500 ms', async () => {
+      const { flushKVChanges } = await import('./use-kv')
+      let finishRequest: ((response: Response) => void) | undefined
+      const response = new Promise<Response>(resolve => {
+        finishRequest = resolve
+      })
+      const fetchMock = vi.fn().mockReturnValue(response)
+
+      vi.useFakeTimers()
+      try {
+        vi.stubGlobal('fetch', fetchMock)
+        // Avoid an initial GET: this test concerns writes queued by the setter.
+        localStorage.setItem('kv:flush-before-debounce', '"initial"')
+        const { result, unmount } = renderHook(() =>
+          useKV('flush-before-debounce', 'initial')
+        )
+
+        act(() => {
+          result.current[1]('first')
+          result.current[1]('latest')
+        })
+
+        expect(fetchMock).not.toHaveBeenCalled()
+
+        let flushed = false
+        const flush = flushKVChanges().then(() => {
+          flushed = true
+        })
+
+        await Promise.resolve()
+        expect(fetchMock).toHaveBeenCalledTimes(1)
+        expect(fetchMock).toHaveBeenCalledWith(
+          expect.stringContaining('/kv/flush-before-debounce'),
+          expect.objectContaining({
+            method: 'POST',
+            body: JSON.stringify({ value: 'latest' }),
+          })
+        )
+        expect(flushed).toBe(false)
+
+        await act(async () => {
+          finishRequest!({ ok: true, status: 200 } as Response)
+          await flush
+        })
+        expect(flushed).toBe(true)
+
+        unmount()
+        await vi.advanceTimersByTimeAsync(600)
+        // Flush cancelled the scheduled timeout: there must be no second POST.
+        expect(fetchMock).toHaveBeenCalledTimes(1)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
     it('should clear KV cache', async () => {
       const { clearKVCache } = await import('./use-kv')
 
